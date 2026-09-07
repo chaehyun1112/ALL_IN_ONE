@@ -1,44 +1,281 @@
 @charset "UTF-8";
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 
-:root { color-scheme: light; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #1f2933; background: #f5f7f5; font-synthesis: none; }
-* { box-sizing: border-box; }
-body { margin: 0; }
-button, input { font: inherit; }
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap");
+
+.signup-body {
+  margin: 0;
+  color: #1f2933;
+  font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  background-color: #f5f7f5;
+}
+
+.signup-page,
+.signup-page * {
+  box-sizing: border-box;
+}
+
 .signup-page {
   min-height: 100vh;
   min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 20px;
-  background: url('./signup-background.png') center 36% / cover no-repeat;
-  background-image: url('./login.png');
+  padding: 94px 20px 24px;
+
+  /* Figma 기준: 1536×826 화면에서 배경 상단 -71px */
+  background-image: url("../image/login.png");
+  background-repeat: no-repeat;
+  background-position: center 35.8586%;
+  background-size: cover;
 }
-.signup-card { width: 533px; max-width: 100%; min-height: 573px; padding: 42px 47px 38px; border: 1px solid #bfbfbf; border-radius: 16px; background: #fff; transform: translateY(-3.5px); }
-h1 { margin: 0; font-size: 19px; font-weight: 700; line-height: 28px; }
-.description { margin: 1px 0 0; font-size: 12px; line-height: 18px; color: #8a9490; }
-form { margin-top: 26px; }
-.field label { display: block; color: #33413a; font-size: 12px; font-weight: 700; line-height: 18px; }
-.field input { display: block; width: 100%; height: 42px; padding: 0 13px; border: 1px solid #d4ddd8; border-radius: 9px; background: #fbfcfb; color: #1f2933; font-size: 12px; }
-.field input::placeholder { color: #98a29d; opacity: 1; }
-.name-field input { margin-top: 2px; }
-.username-field { margin-top: 12px; }
-.username-field input { margin-top: 7px; }
-.password-field { margin-top: 12px; }
-.password-field input { margin-top: 5px; }
-.confirm-field { margin-top: 11px; }
-.confirm-field input { margin-top: 7px; }
-.field input:focus { outline: 2px solid #35624d; outline-offset: 2px; }
-button { display: block; width: 100%; height: 48px; margin-top: 35px; border: 0; border-radius: 10px; background: #35624d; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
-button:hover { background: #294f3d; }
-button:active { background: #224333; }
-.login-link { margin: 21px 0 0; color: #527361; font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
-a { color: #527361; text-decoration: none; margin-left: 4px; }
-a:hover { text-decoration: underline; }
-a:focus-visible, button:focus-visible { outline: 3px solid #719f89; outline-offset: 4px; }
+
+.signup-page .signup-card {
+  width: 533px;
+  max-width: 100%;
+  min-height: 650px;
+  padding: 43px 47px 18px;
+  border: 1px solid #bfbfbf;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: left;
+}
+
+/* 제목 */
+.signup-page .signup-header {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.signup-page .signup-header h1 {
+  margin: 0;
+  color: #1f2933;
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 23px;
+  letter-spacing: normal;
+  text-align: left;
+}
+
+/* 제목 아래 설명 */
+.signup-page .signup-header p {
+  margin: 6px 0 0;
+  color: #8a9490;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: normal;
+  text-align: left;
+}
+
+.signup-page .signup-form {
+  margin: 26px 0 0;
+  padding: 0;
+}
+
+/* 입력 항목 이름 */
+.signup-page .signup-field {
+  margin: 0;
+  padding: 0;
+}
+
+.signup-page .signup-field label {
+  display: block;
+  margin: 0;
+  color: #33413a;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 14px;
+  letter-spacing: normal;
+  text-align: left;
+}
+
+/* 입력창과 병동 선택창 */
+.signup-page .signup-field input,
+.signup-page .signup-field select {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin: 0;
+  padding: 0 13px;
+  border: 1px solid #d4ddd8;
+  border-radius: 9px;
+
+  background-color: #fbfcfb;
+  color: #1f2933;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: normal;
+  text-align: left;
+
+  box-shadow: none;
+}
+
+.signup-page .signup-field input::placeholder {
+  color: #98a29d;
+  opacity: 1;
+}
+
+/* Figma의 각 입력 항목 간격 */
+.signup-page .name-field input {
+  margin-top: 6px;
+}
+
+.signup-page .username-field {
+  margin-top: 12px;
+}
+
+.signup-page .username-field input {
+  margin-top: 11px;
+}
+
+.signup-page .ward-field {
+  margin-top: 12px;
+}
+
+.signup-page .ward-field select {
+  margin-top: 9px;
+}
+
+.signup-page .password-field {
+  margin-top: 12px;
+}
+
+.signup-page .password-field input {
+  margin-top: 9px;
+}
+
+.signup-page .confirm-field {
+  margin-top: 11px;
+}
+
+.signup-page .confirm-field input {
+  margin-top: 11px;
+}
+
+/* 병동 선택 화살표 */
+.signup-page .signup-field select {
+  appearance: none;
+  padding-right: 42px;
+  background-image: url("../image/chevron-down.svg");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px 14px;
+  cursor: pointer;
+}
+
+.signup-page .signup-field select:invalid {
+  color: #98a29d;
+}
+
+.signup-page .signup-field select option {
+  color: #1f2933;
+}
+
+/* 가입하기 버튼 */
+.signup-page .signup-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 48px;
+  margin: 35px 0 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+
+  background: #35624d;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: normal;
+  text-align: center;
+
+  cursor: pointer;
+}
+
+.signup-page .signup-submit:hover {
+  background: #294f3d;
+}
+
+/* 하단 로그인 안내 */
+.signup-page .signup-login {
+  margin: 21px 0 0;
+  padding: 0;
+  color: #527361;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 17px;
+  letter-spacing: normal;
+  text-align: center;
+}
+
+.signup-page .signup-login a {
+  display: inline;
+  margin-left: 4px;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+}
+
+.signup-page .signup-login a:hover {
+  text-decoration: underline;
+}
+
+/* 키보드 포커스 */
+.signup-page input:focus-visible,
+.signup-page select:focus-visible,
+.signup-page button:focus-visible,
+.signup-page a:focus-visible {
+  outline: 2px solid #35624d;
+  outline-offset: 3px;
+}
+
+/* 이름 ~ 비밀번호 확인: 항목 간격 통일 */
+.signup-page .signup-form .signup-field {
+  margin: 0;
+}
+
+.signup-page .signup-form .signup-field + .signup-field {
+  margin-top: 16px;
+}
+
+/* 라벨과 입력칸 사이 간격 통일 */
+.signup-page .signup-form .signup-field input,
+.signup-page .signup-form .signup-field select {
+  width: 100%;
+  height: 42px;
+  margin-top: 8px;
+}
+
+/* 작은 화면 */
 @media (max-width: 600px) {
-  .signup-card { padding: 32px 24px; min-height: auto; transform: none; }
-  .field input { font-size: 16px; }
+  .signup-page {
+    padding: 24px 16px;
+  }
+
+  .signup-page .signup-card {
+    min-height: auto;
+    padding: 32px 24px;
+  }
 }
-@media (max-height: 650px) { .signup-card { transform: none; } }
+
+@media (max-height: 740px) {
+  .signup-page {
+    align-items: flex-start;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}

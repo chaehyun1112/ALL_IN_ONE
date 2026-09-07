@@ -4,46 +4,96 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>회원가입 | 늘푸른요양병원</title>
-  <link rel="stylesheet" href="../static/signup.css" th:href="@{/signup.css}">
+
+  <link rel="stylesheet"
+        href="../../static/css/signup.css"
+        th:href="@{/css/signup.css}">
 </head>
-<body>
+<body class="signup-body">
   <main class="signup-page">
     <section class="signup-card" aria-labelledby="signup-title">
-      <header>
+
+      <header class="signup-header">
         <h1 id="signup-title">회원가입</h1>
-        <p class="description">직원 정보를 입력해 계정을 생성해 주세요.</p>
+        <p>직원 정보를 입력해 계정을 생성해 주세요.</p>
       </header>
-      <form action="/signup" th:action="@{/signup}" method="post">
-        <div class="field name-field">
+
+      <form class="signup-form"
+            action="/signup"
+            th:action="@{/signup}"
+            method="post">
+
+        <div class="signup-field name-field">
           <label for="name">이름</label>
-          <input id="name" name="name" type="text" placeholder="이름을 입력해 주세요." autocomplete="name" required>
+          <input id="name"
+                 name="name"
+                 type="text"
+                 autocomplete="name"
+                 placeholder="이름을 입력해 주세요."
+                 required>
         </div>
-        <div class="field username-field">
+
+        <div class="signup-field username-field">
           <label for="username">아이디</label>
-          <input id="username" name="username" type="text" placeholder="아이디를 입력하세요." autocomplete="username" required>
+          <input id="username"
+                 name="username"
+                 type="text"
+                 autocomplete="username"
+                 autocapitalize="none"
+                 spellcheck="false"
+                 placeholder="아이디를 입력하세요."
+                 required>
         </div>
-        <div class="field password-field">
+
+        <div class="signup-field ward-field">
+          <label for="wardId">담당 병동</label>
+
+          <select id="wardId" name="wardId" required>
+            <option value="" disabled selected>병동을 선택해 주세요.</option>
+            <option value="A">A병동</option>
+            <option value="B">B병동</option>
+            <option value="C">C병동</option>
+            <option value="D">D병동</option>
+            <option value="E">E병동</option>
+            <option value="F">F병동</option>
+          </select>
+        </div>
+
+        <div class="signup-field password-field">
           <label for="password">비밀번호</label>
-          <input id="password" name="password" type="password" placeholder="영문, 숫자 포함 8자 이상" autocomplete="new-password" minlength="8" pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}" title="영문과 숫자를 포함하여 8자 이상 입력해 주세요." required>
+          <input id="password"
+                 name="password"
+                 type="password"
+                 autocomplete="new-password"
+                 minlength="8"
+                 pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
+                 title="영문과 숫자를 포함해 8자 이상 입력해 주세요."
+                 placeholder="영문, 숫자 포함 8자 이상"
+                 required>
         </div>
-        <div class="field confirm-field">
-          <label for="password-confirm">비밀번호 확인</label>
-          <input id="password-confirm" name="passwordConfirm" type="password" placeholder="비밀번호를 한 번 더 입력해 주세요." autocomplete="new-password" required>
+
+        <div class="signup-field confirm-field">
+          <label for="passwordConfirm">비밀번호 확인</label>
+          <input id="passwordConfirm"
+                 name="passwordConfirm"
+                 type="password"
+                 autocomplete="new-password"
+                 minlength="8"
+                 placeholder="비밀번호를 한 번 더 입력해 주세요."
+                 required>
         </div>
-        <button type="submit">가입하기</button>
-        <p class="login-link">이미 계정이 있으신가요? <a href="login.html" th:href="@{/login}">로그인</a></p>
+
+        <button class="signup-submit" type="submit">
+          가입하기
+        </button>
+
+        <p class="signup-login">
+          이미 계정이 있으신가요?
+          <a href="login.html" th:href="@{/login}">로그인</a>
+        </p>
       </form>
+
     </section>
   </main>
-  <script>
-    const password = document.getElementById('password');
-    const confirmation = document.getElementById('password-confirm');
-    function validateConfirmation() {
-      confirmation.setCustomValidity(confirmation.value && confirmation.value !== password.value
-        ? '비밀번호가 일치하지 않습니다.' : '');
-    }
-    password.addEventListener('input', validateConfirmation);
-    confirmation.addEventListener('input', validateConfirmation);
-  </script>
 </body>
 </html>

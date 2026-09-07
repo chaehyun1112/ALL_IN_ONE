@@ -6,9 +6,9 @@
     <title>로그인 | 늘푸른요양병원</title>
 
     <!-- 직접 열기: href / Spring Boot + Thymeleaf: th:href -->
-    <link rel="stylesheet"
-          href="../static/login.css"
-          th:href="@{/css/login.css}">
+<link rel="stylesheet"
+      href="../../static/css/login.css"
+      th:href="@{/css/login.css}">
   </head>
   <body>
     <main class="login-page">
@@ -48,7 +48,7 @@
           </div>
 
           <div class="recovery-row">
-            <a href="/password/reset" th:href="@{/password/reset}">
+            <a href="password-reset.html" th:href="@{/password-reset}">
               비밀번호 찾기
             </a>
           </div>
@@ -57,7 +57,7 @@
 
           <p class="signup-row">
             계정이 없으신가요?
-            <a href="/signup" th:href="@{/signup}">회원가입</a>
+            <a href="signup.html" th:href="@{/signup}">회원가입</a>
           </p>
         </form>
       </section>
