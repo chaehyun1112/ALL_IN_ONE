@@ -1,0 +1,66 @@
+  <!DOCTYPE html>
+  <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>로그인 | 늘푸른요양병원</title>
+
+    <!-- 직접 열기: href / Spring Boot + Thymeleaf: th:href -->
+    <link rel="stylesheet"
+          href="../static/login.css"
+          th:href="@{/css/login.css}">
+  </head>
+  <body>
+    <main class="login-page">
+      <section class="login-content" aria-labelledby="hospital-name">
+        <header class="service-intro">
+          <p class="service-eyebrow">AI 영상 기반</p>
+          <h1 id="hospital-name">늘푸른요양병원</h1>
+          <p class="service-description">
+            등록된 아이디로 로그인해 주세요.
+          </p>
+        </header>
+
+        <form class="login-card"
+              action="/login"
+              th:action="@{/login}"
+              method="post">
+          <div class="field">
+            <label for="username">아이디</label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              placeholder="아이디를 입력해 주세요."
+              autocomplete="username"
+              required>
+          </div>
+
+          <div class="field password-field">
+            <label for="password">비밀번호</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="비밀번호를 입력해 주세요."
+              autocomplete="current-password"
+              required>
+          </div>
+
+          <div class="recovery-row">
+            <a href="/password/reset" th:href="@{/password/reset}">
+              비밀번호 찾기
+            </a>
+          </div>
+
+          <button class="login-button" type="submit">로그인</button>
+
+          <p class="signup-row">
+            계정이 없으신가요?
+            <a href="/signup" th:href="@{/signup}">회원가입</a>
+          </p>
+        </form>
+      </section>
+    </main>
+  </body>
+  </html>
