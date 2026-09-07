@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요양병원 안전 모니터링</title>
+    <link rel="stylesheet" th:href="@{/css/domain.css}" href="/css/domain.css">
+</head>
+<body>
+    <main class="domain-page">
+        <section class="domain-content" aria-labelledby="domain-title">
+            <header class="domain-heading">
+                <p class="domain-eyebrow">AI 영상 기반</p>
+                <h1 id="domain-title">요양병원 안전 모니터링</h1>
+                <p class="domain-description">이용 하실 요양병원의 도메인을 입력해주세요.</p>
+            </header>
+
+            <form class="domain-card">
+                <label for="hospital-domain">병원 도메인</label>
+                <input
+                    id="hospital-domain"
+                    name="hospital-domain"
+                    type="text"
+                    placeholder="도메인을 입력해주세요."
+                    autocomplete="off"
+                >
+                <button type="button">
+                    <span>접속하기</span>
+                    <span class="button-arrow" aria-hidden="true">→</span>
+                </button>
+                <p class="domain-help">도메인을 모르는 경우 관리자에게 문의해 주세요.</p>
+            </form>
+        </section>
+
+    </main>
+
+    <script th:src="@{/js/domain.js}" src="/js/domain.js" defer></script>
+</body>
+</html>
