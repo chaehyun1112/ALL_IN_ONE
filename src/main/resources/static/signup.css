@@ -1,0 +1,44 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+:root { color-scheme: light; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #1f2933; background: #f5f7f5; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+.signup-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background: url('./signup-background.png') center 36% / cover no-repeat;
+  background-image: url('./login.png');
+}
+.signup-card { width: 533px; max-width: 100%; min-height: 573px; padding: 42px 47px 38px; border: 1px solid #bfbfbf; border-radius: 16px; background: #fff; transform: translateY(-3.5px); }
+h1 { margin: 0; font-size: 19px; font-weight: 700; line-height: 28px; }
+.description { margin: 1px 0 0; font-size: 12px; line-height: 18px; color: #8a9490; }
+form { margin-top: 26px; }
+.field label { display: block; color: #33413a; font-size: 12px; font-weight: 700; line-height: 18px; }
+.field input { display: block; width: 100%; height: 42px; padding: 0 13px; border: 1px solid #d4ddd8; border-radius: 9px; background: #fbfcfb; color: #1f2933; font-size: 12px; }
+.field input::placeholder { color: #98a29d; opacity: 1; }
+.name-field input { margin-top: 2px; }
+.username-field { margin-top: 12px; }
+.username-field input { margin-top: 7px; }
+.password-field { margin-top: 12px; }
+.password-field input { margin-top: 5px; }
+.confirm-field { margin-top: 11px; }
+.confirm-field input { margin-top: 7px; }
+.field input:focus { outline: 2px solid #35624d; outline-offset: 2px; }
+button { display: block; width: 100%; height: 48px; margin-top: 35px; border: 0; border-radius: 10px; background: #35624d; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+button:hover { background: #294f3d; }
+button:active { background: #224333; }
+.login-link { margin: 21px 0 0; color: #527361; font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
+a { color: #527361; text-decoration: none; margin-left: 4px; }
+a:hover { text-decoration: underline; }
+a:focus-visible, button:focus-visible { outline: 3px solid #719f89; outline-offset: 4px; }
+@media (max-width: 600px) {
+  .signup-card { padding: 32px 24px; min-height: auto; transform: none; }
+  .field input { font-size: 16px; }
+}
+@media (max-height: 650px) { .signup-card { transform: none; } }
