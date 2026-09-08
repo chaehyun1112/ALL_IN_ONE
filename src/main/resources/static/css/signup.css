@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 94px 20px 24px;
+  padding: 24px 20px;
 
   /* Figma 기준: 1536×826 화면에서 배경 상단 -71px */
   background-image: url("../image/login.png");
@@ -31,11 +31,12 @@
   background-size: cover;
 }
 
+/* signup-card 규칙 */
 .signup-page .signup-card {
-  width: 533px;
+  width: 780px;
   max-width: 100%;
-  min-height: 650px;
-  padding: 43px 47px 18px;
+  min-height: auto;
+  padding: 36px 50px 24px;
   border: 1px solid #bfbfbf;
   border-radius: 16px;
   background: #ffffff;
@@ -74,7 +75,17 @@
 .signup-page .signup-form {
   margin: 26px 0 0;
   padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 16px;
 }
+
+/* 전체 너비로 펼칠 항목 */
+.signup-page .full-width{
+  grid-column: 1 /-1;
+}
+
 
 /* 입력 항목 이름 */
 .signup-page .signup-field {
@@ -122,42 +133,6 @@
   opacity: 1;
 }
 
-/* Figma의 각 입력 항목 간격 */
-.signup-page .name-field input {
-  margin-top: 6px;
-}
-
-.signup-page .username-field {
-  margin-top: 12px;
-}
-
-.signup-page .username-field input {
-  margin-top: 11px;
-}
-
-.signup-page .ward-field {
-  margin-top: 12px;
-}
-
-.signup-page .ward-field select {
-  margin-top: 9px;
-}
-
-.signup-page .password-field {
-  margin-top: 12px;
-}
-
-.signup-page .password-field input {
-  margin-top: 9px;
-}
-
-.signup-page .confirm-field {
-  margin-top: 11px;
-}
-
-.signup-page .confirm-field input {
-  margin-top: 11px;
-}
 
 /* 병동 선택 화살표 */
 .signup-page .signup-field select {
@@ -186,7 +161,7 @@
 
   width: 100%;
   height: 48px;
-  margin: 35px 0 0;
+  margin: 10px 0 0;
   padding: 0 16px;
   border: 0;
   border-radius: 10px;
@@ -210,7 +185,7 @@
 
 /* 하단 로그인 안내 */
 .signup-page .signup-login {
-  margin: 21px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   color: #527361;
 
@@ -248,9 +223,6 @@
   margin: 0;
 }
 
-.signup-page .signup-form .signup-field + .signup-field {
-  margin-top: 16px;
-}
 
 /* 라벨과 입력칸 사이 간격 통일 */
 .signup-page .signup-form .signup-field input,
@@ -260,6 +232,165 @@
   margin-top: 8px;
 }
 
+/* 아이디 입력 + 중복확인 버튼 */
+.signup-page .username-check-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.signup-page .username-check-row input {
+  margin-top: 0; /* 부모 .username-field 쪽 margin으로 이미 처리되므로 초기화 */
+  flex: 1;
+}
+
+/* 중복 확인 버튼 */
+.signup-page .username-check-btn {
+  flex-shrink: 0;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #35624d;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #35624d;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.signup-page .username-check-btn:hover {
+  background: #f0f5f2;
+}
+
+.signup-page .username-check-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 중복확인 결과 메시지 */
+.signup-page .username-message {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 14px;
+  min-height: 14px;
+}
+
+.signup-page .username-message.is-available {
+  color: #35624d; /* 사용 가능 - 브랜드 그린 */
+}
+
+.signup-page .username-message.is-taken {
+  color: #c0392b; /* 중복 - 빨강 */
+}
+
+/* 비밀번호 입력란과 눈 버튼 */
+.signup-page .password-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.signup-page .password-input-wrap input {
+  box-sizing: border-box;
+  width: 100%;
+  padding-right: 48px;
+}
+
+.signup-page .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8a9490;
+  cursor: pointer;
+}
+
+.signup-page .password-toggle:hover {
+  background: #e0ede5;
+  color: #35624d;
+}
+
+.signup-page .password-toggle:focus-visible {
+  outline: 2px solid #35624d;
+  outline-offset: -2px;
+}
+
+.signup-page .password-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.signup-page .password-toggle .eye-slash {
+  display: none;
+}
+
+.signup-page .password-toggle[aria-pressed="true"] {
+  color: #35624d;
+
+}
+
+.signup-page .password-toggle[aria-pressed="true"] .eye-slash {
+  display: block;
+}
+
+/* 비밀번호 조건 및 일치 여부 안내 */
+.signup-page .password-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 8px;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.signup-page .validation-item {
+  color: #8a9490;
+  transition: color 150ms ease-out;
+}
+
+.signup-page .validation-item::before {
+  content: "○";
+  margin-right: 4px;
+}
+
+.signup-page .validation-item.is-valid {
+  color: #35624d;
+  font-weight: 700;
+}
+
+.signup-page .validation-item.is-valid::before {
+  content: "✓";
+}
+
+.signup-page .validation-item.is-invalid {
+  color: #c0392b;
+}
+
+.signup-page .validation-item.is-invalid::before {
+  content: "×";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signup-page .validation-item {
+    transition: none;
+  }
+}
+
 /* 작은 화면 */
 @media (max-width: 600px) {
   .signup-page {
@@ -267,6 +398,7 @@
   }
 
   .signup-page .signup-card {
+    width: 100%;
     min-height: auto;
     padding: 32px 24px;
   }
@@ -274,7 +406,7 @@
 
 @media (max-height: 740px) {
   .signup-page {
-    align-items: flex-start;
+    align-items: center;
     padding-top: 24px;
     padding-bottom: 24px;
   }
