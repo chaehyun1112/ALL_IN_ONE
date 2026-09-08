@@ -1,4 +1,8 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
 :root {
+    font-synthesis: none;
     --green: #356e55;
     --green-dark: #2e604b;
     --ink: #252d31;
@@ -22,7 +26,7 @@ body {
 body {
     color: var(--ink);
     background: #fbfcfb;
-    font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 
 button,
@@ -68,7 +72,7 @@ input {
 .domain-heading h1 {
     margin: 0;
     font-size: clamp(28px, 2.25vw, 36px);
-    font-weight: 750;
+    font-weight: 700;
     letter-spacing: -0.045em;
     line-height: 1.25;
 }
