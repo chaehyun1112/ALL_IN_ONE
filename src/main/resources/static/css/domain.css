@@ -35,10 +35,11 @@ input {
     isolation: isolate;
     display: grid;
     min-height: 100vh;
+    min-height: 100svh;
     overflow: hidden;
-    background-color: #fbfcfb;
+    background-color: #f5f7f5;
     background-image: url('../image/login.png');
-    background-position: center;
+    background-position: center 34.85%;
     background-repeat: no-repeat;
     background-size: cover;
 }

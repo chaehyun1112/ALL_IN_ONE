@@ -11,7 +11,6 @@ roleCards.forEach((card) => {
         roleCards.forEach((item) => {
             const isSelected = item === card;
             item.classList.toggle('is-selected', isSelected);
-            item.setAttribute('aria-pressed', String(isSelected));
         });
 
         selectionMessage.textContent = `${roleLabels[card.dataset.role]} 접속 유형을 선택했습니다.`;
