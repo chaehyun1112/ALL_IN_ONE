@@ -49,12 +49,12 @@ button {
 }
 
 .access-content {
-    width: clamp(560px, 49.8vw, 760px);
+    width: 680px;
     max-width: 100%;
 }
 
 .access-heading {
-    margin-bottom: clamp(20px, 3.6svh, 30px);
+    margin-bottom: 30px;
     text-align: center;
 }
 
@@ -70,10 +70,10 @@ button {
 .access-heading h1 {
     margin: 8px 0 0;
     color: #1f2933;
-    font-size: clamp(28px, 2.64vw, 36px);
+    font-size: 36px;
     font-weight: 700;
     letter-spacing: normal;
-    line-height: 1.333333;
+    line-height: 48px;
 }
 
 .access-description {
@@ -86,7 +86,7 @@ button {
 
 .access-panel {
     width: 100%;
-    padding: clamp(24px, 4.3svh, 35px) clamp(24px, 3vw, 41px) clamp(28px, 4.7svh, 39px);
+    padding: 35px 41px 39px;
     border: 1px solid #c6cec9;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.94);
@@ -116,8 +116,8 @@ button {
 .role-card {
     position: relative;
     display: flex;
-    min-height: clamp(200px, 27.2svh, 224px);
-    padding: clamp(20px, 3.8svh, 31px) 22px clamp(20px, 3svh, 25px);
+    min-height: 224px;
+    padding: 31px 22px 25px;
     border: 1px solid var(--line);
     border-radius: 13px;
     outline: none;
@@ -230,6 +230,10 @@ button {
 
     .access-content {
         width: 520px;
+    }
+
+    .access-panel {
+        padding: 28px 24px 33px;
     }
 
     .role-list {
