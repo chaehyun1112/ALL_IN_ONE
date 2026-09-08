@@ -1,0 +1,183 @@
+:root {
+    --green: #356e55;
+    --green-dark: #2e604b;
+    --ink: #252d31;
+    --muted: #8a918e;
+    --line: #c5cac6;
+    --mint: #eaf4f0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    color: var(--ink);
+    background: #fbfcfb;
+    font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+.domain-page {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    min-height: 100vh;
+    overflow: hidden;
+    background-color: #fbfcfb;
+    background-image: url('../image/login.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.domain-content {
+    z-index: 2;
+    align-self: start;
+    justify-self: center;
+    width: min(534px, calc(100vw - 40px));
+    margin-top: clamp(130px, 24.5vh, 212px);
+}
+
+.domain-heading {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+.domain-eyebrow {
+    margin: 0 0 8px;
+    color: var(--green);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.domain-heading h1 {
+    margin: 0;
+    font-size: clamp(28px, 2.25vw, 36px);
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    line-height: 1.25;
+}
+
+.domain-description {
+    margin: 13px 0 0;
+    color: #929894;
+    font-size: 14px;
+    letter-spacing: -0.02em;
+}
+
+.domain-card {
+    width: 100%;
+    padding: 42px 47px 36px;
+    border: 1px solid #bfc5c1;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 2px 7px rgba(31, 55, 44, 0.025);
+}
+
+.domain-card label {
+    display: block;
+    margin-bottom: 11px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.domain-card input {
+    width: 100%;
+    height: 57px;
+    padding: 0 18px;
+    border: 1px solid #b8c0bb;
+    border-radius: 11px;
+    outline: none;
+    background: #fbfcfb;
+    color: var(--ink);
+    font-size: 15px;
+}
+
+.domain-card input::placeholder {
+    color: #a3a8a5;
+}
+
+.domain-card input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(53, 110, 85, 0.1);
+}
+
+.domain-card button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 57px;
+    margin-top: 17px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--green);
+    color: #fff;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+}
+
+.button-arrow {
+    margin-left: 11px;
+    font-size: 21px;
+    font-weight: 300;
+    line-height: 1;
+}
+
+.domain-help {
+    margin: 19px 0 0;
+    color: #969c98;
+    font-size: 12px;
+    text-align: center;
+    letter-spacing: -0.025em;
+}
+
+.domain-error {
+    margin: 12px 0 0;
+    color: #b42318;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+    .domain-content {
+        margin-top: 120px;
+    }
+
+    .domain-card {
+        padding: 30px 24px 27px;
+    }
+
+}
+
+@media (max-height: 680px) and (min-width: 701px) {
+    .domain-content {
+        margin-top: 72px;
+    }
+
+    .domain-heading {
+        margin-bottom: 22px;
+    }
+
+    .domain-card {
+        padding-top: 28px;
+        padding-bottom: 26px;
+    }
+}

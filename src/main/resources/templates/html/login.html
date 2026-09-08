@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>로그인 | 늘푸른요양병원</title>
+    <title th:text="|로그인 · ${hospitalName}|">로그인 | 늘푸른요양병원</title>
 
     <!-- 직접 열기: href / Spring Boot + Thymeleaf: th:href -->
 <link rel="stylesheet"
@@ -15,7 +15,7 @@
       <section class="login-content" aria-labelledby="hospital-name">
         <header class="service-intro">
           <p class="service-eyebrow">AI 영상 기반</p>
-          <h1 id="hospital-name">늘푸른요양병원</h1>
+          <h1 id="hospital-name" th:text="${hospitalName}">늘푸른요양병원</h1>
           <p class="service-description">
             등록된 아이디로 로그인해 주세요.
           </p>

@@ -1,0 +1,935 @@
+
+
+테이블 명세서
+
+
+
+
+
+테이블 명세서
+
+
+
+과제명 :
+
+시각지능 기반 요양병원 위험상황 감지 서비스
+
+
+
+2026. 10. 02.
+
+Ⅰ. 테이블 목록
+
+
+
+테이블명
+
+테이블_ID
+
+비고
+
+병동
+
+TB_WARD
+
+직원 계정
+
+TB_EMP
+
+장치
+
+TB_DEVICE
+
+낙상/안전사고 이벤트
+
+TB_SAFETY_EVT
+
+출입문 이벤트
+
+TB_DOOR_EVT
+
+출입문
+
+TB_DOOR
+
+Ⅱ. 테이블 정의서 
+
+
+
+작성일자
+
+2026.09.04
+
+작성자
+
+구정경
+
+테이블명
+
+병동
+
+테이블 ID
+
+TB_WARD
+
+테이블설명
+
+병원별 병동 정보와 병동 도면 경로를 관리하는 테이블
+
+컬럼명
+
+컬럼 ID
+
+타입
+
+길이
+
+NN
+
+PK
+
+FK
+
+UK
+
+CK
+
+비고
+
+병동 ID
+
+WARD_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+자동으로 생성되는 병동 고유번호
+
+병원 구분 ID
+
+HOSP_DIV_ID
+
+VARCHAR
+
+30
+
+Y
+
+Y
+
+병원 도메인 구분값, WARD_NM과 복합 UK
+
+병동명
+
+WARD_NM
+
+VARCHAR
+
+30
+
+Y
+
+병동 이름
+
+도면 경로
+
+MAP_PATH
+
+VARCHAR
+
+255
+
+-
+
+병동 도면 파일의 저장경로
+
+Table 생성 스크립트
+
+CREATE TABLE TB_WARD (
+
+    WARD_ID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    HOSP_DIV_ID VARCHAR(30) NOT NULL,
+
+    WARD_NM VARCHAR(30) NOT NULL,
+
+    MAP_PATH VARCHAR(255), CONSTRAINT UK_WARD_HOSP_NM UNIQUE (HOSP_DIV_ID, WARD_NM)
+
+);
+
+
+
+작성일자
+
+2026.09.04
+
+작성자
+
+구정경
+
+테이블명
+
+직원 계정
+
+테이블 ID
+
+TB_EMP
+
+테이블설명
+
+병원 사용자의 로그인 정보와 역할 및 권한 부여 상태를 관리하는 테이블
+
+컬럼명
+
+컬럼 ID
+
+타입
+
+길이
+
+NN
+
+PK
+
+FK
+
+UK
+
+CK
+
+비고
+
+직원 ID
+
+EMP_ID
+
+VARCHAR
+
+20
+
+Y
+
+Y
+
+로그인에 사용하는 직원 고유 ID
+
+직원 PW
+
+EMP_PW
+
+VARCHAR
+
+50
+
+Y
+
+단방향 해시 처리된 로그인 비밀번호 저장
+
+병원 구분 ID
+
+HOSP_DIV_ID
+
+VARCHAR
+
+30
+
+Y
+
+사용자가 소속된 병원 도메인 구분값
+
+병동 ID
+
+WARD_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+TB_WARD.WARD_ID 참조
+
+직원명
+
+EMP_NM
+
+VARCHAR
+
+20
+
+Y
+
+사용자 이름
+
+직원 역할
+
+ROLE_CD
+
+VARCHAR
+
+10
+
+Y
+
+Y
+
+ADMIN, USER / 기본값 USER
+
+권한 부여 상태
+
+AUTH_ST
+
+VARCHAR
+
+10
+
+Y
+
+Y
+
+PENDING 또는 APPROVED, 기본값 PENDING
+
+생성일시
+
+CRT_DT
+
+TIMESTAMPTZ
+
+-
+
+Y
+
+회원가입 일시, 기본값 NOW()
+
+수정일시
+
+UPD_DT
+
+TIMESTAMPTZ
+
+-
+
+계정정보 수정 시 갱신
+
+Table 생성 스크립트
+
+CREATE TABLE TB_EMP (
+
+    EMP_ID VARCHAR(20) PRIMARY KEY,
+
+    EMP_PW VARCHAR(50) NOT NULL,
+
+    HOSP_DIV_ID VARCHAR(30) NOT NULL,
+
+    WARD_ID BIGINT NOT NULL,
+
+    EMP_NM VARCHAR(20) NOT NULL,
+
+    ROLE_CD VARCHAR(10) NOT NULL DEFAULT 'USER',
+
+    AUTH_ST VARCHAR(10) NOT NULL DEFAULT 'PENDING',
+
+    CRT_DT TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UPD_DT TIMESTAMPTZ,
+
+    CONSTRAINT FK_EMP_WARD
+
+        FOREIGN KEY (WARD_ID)
+
+        REFERENCES TB_WARD(WARD_ID),
+
+    CONSTRAINT CK_EMP_ROLE
+
+        CHECK (ROLE_CD IN ('ADMIN', 'USER')),
+
+    CONSTRAINT CK_EMP_AUTH
+
+        CHECK (AUTH_ST IN ('PENDING', 'APPROVED'))
+
+);
+
+
+
+작성일자
+
+2026.09.04
+
+작성자
+
+구정경
+
+테이블명
+
+장치
+
+테이블 ID
+
+TB_DEVICE
+
+테이블설명
+
+병동에 설치된 장치의 위치와 연결 및 점검 정보를 관리하는 테이블
+
+컬럼명
+
+컬럼 ID
+
+타입
+
+길이
+
+NN
+
+PK
+
+FK
+
+UK
+
+CK
+
+비고
+
+장치 ID
+
+
+
+DEV_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+자동 생성되는 장치 고유번호
+
+병동 ID
+
+WARD_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+TB_WARD.WARD_ID 참조
+
+장치명
+
+DEV_NM
+
+VARCHAR
+
+50
+
+Y
+
+장치를 구분하는 이름
+
+설치 위치
+
+INSTALL_LOC
+
+VARCHAR
+
+50
+
+Y
+
+301호, 중앙 복도 등의 구체적인 위치
+
+일련번호
+
+SERIAL_NO
+
+VARCHAR
+
+50
+
+Y
+
+Y
+
+중복되지 않는 장치 제품번호
+
+IP 주소
+
+IP_ADDR
+
+INET
+
+-
+
+장치의 네트워크 주소
+
+연결 상태
+
+CONN_ST
+
+VARCHAR
+
+10
+
+Y
+
+Y
+
+ONLINE, OFFLINE / 기본값 OFFLINE
+
+최근 통신일시
+
+LAST_COMM_DT
+
+TIMESTAMPTZ
+
+장치가 마지막으로 통신한 시간
+
+설치일시
+
+INSTALL_DT
+
+TIMESTAMPTZ
+
+장치를 설치한 시간
+
+최종점검일시
+
+LAST_CHECK_DT
+
+TIMESTAMPTZ
+
+장치를 마지막으로 점검한 시간
+
+Table 생성 스크립트
+
+CREATE TABLE TB_DEVICE (
+
+    DEV_ID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    WARD_ID BIGINT NOT NULL,
+
+    DEV_NM VARCHAR(50) NOT NULL,
+
+    INSTALL_LOC VARCHAR(50) NOT NULL,
+
+    SERIAL_NO VARCHAR(50) NOT NULL UNIQUE,
+
+    IP_ADDR INET,
+
+    CONN_ST VARCHAR(10) NOT NULL DEFAULT 'OFFLINE',
+
+    LAST_COMM_DT TIMESTAMPTZ,
+
+    INSTALL_DT TIMESTAMPTZ,
+
+    LAST_CHECK_DT TIMESTAMPTZ,
+
+    CONSTRAINT FK_DEVICE_WARD
+
+        FOREIGN KEY (WARD_ID)
+
+        REFERENCES TB_WARD(WARD_ID),
+
+    CONSTRAINT CK_DEVICE_CONN
+
+        CHECK (CONN_ST IN ('ONLINE', 'OFFLINE'))
+
+);
+
+
+
+작성일자
+
+2026.09.04
+
+작성자
+
+구정경
+
+테이블명
+
+낙상/안전사고 이벤트
+
+테이블 ID
+
+TB_SAFETY_EVT
+
+테이블설명
+
+시각지능 모델이 감지한 낙상 및 안전사고와 조치 결과를 기록하는 테이블
+
+컬럼명
+
+컬럼 ID
+
+타입
+
+길이
+
+NN
+
+PK
+
+FK
+
+UK
+
+CK
+
+비고
+
+감지 ID
+
+DETECT_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+자동 생성되는 안전사고 감지 고유번호
+
+장치 ID
+
+DEV_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+TB_DEVICE.DEV_ID 참조
+
+이벤트 유형
+
+EVT_TYPE_CD
+
+VARCHAR
+
+20
+
+Y
+
+낙상, 침대 이탈, 위험물, 통행 장애물 등
+
+사고 발생 일시
+
+OCCUR_DT
+
+TIMESTAMPTZ
+
+-
+
+Y
+
+사고가 감지된 시간
+
+조치 내용
+
+ACT_CONT
+
+TEXT
+
+-
+
+사고 발생 후 수행한 조치 내용
+
+조치 담당자
+
+HANDLER_NM
+
+VARCHAR
+
+20
+
+담당자가 직접 입력한 이름
+
+처리 상태
+
+PROC_ST
+
+VARCHAR
+
+15
+
+Y
+
+Y
+
+UNPROCESSED, COMPLETED / 기본값 UNPROCESSED
+
+처리 완료 일시
+
+COMPLETE_DT
+
+TIMESTAMPTZ
+
+-
+
+사고 조치를 완료한 시간
+
+Table 생성 스크립트
+
+CREATE TABLE TB_SAFETY_EVT ( DETECT_ID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, DEV_ID BIGINT NOT NULL, EVT_TYPE_CD VARCHAR(20) NOT NULL, OCCUR_DT TIMESTAMPTZ NOT NULL, ACT_CONT TEXT, HANDLER_NM VARCHAR(20), PROC_ST VARCHAR(15) NOT NULL DEFAULT 'UNPROCESSED', COMPLETE_DT TIMESTAMPTZ, CONSTRAINT FK_SAFETY_EVT_DEVICE FOREIGN KEY (DEV_ID) REFERENCES TB_DEVICE(DEV_ID), CONSTRAINT CK_SAFETY_EVT_PROC CHECK (PROC_ST IN ('UNPROCESSED', 'COMPLETED')) );
+
+
+
+작성일자
+
+2026.09.04
+
+작성자
+
+구정경
+
+테이블명
+
+출입문 이벤트
+
+테이블 ID
+
+TB_DOOR_EVT
+
+테이블설명
+
+선택한 출입문을 통해 사람이 외부로 이탈한 이벤트를 기록하는 테이블
+
+컬럼명
+
+컬럼 ID
+
+타입
+
+길이
+
+NN
+
+PK
+
+FK
+
+UK
+
+CK
+
+비고
+
+이벤트 ID
+
+DOOR_EVT_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+자동 생성되는 출입문 이벤트 고유번호
+
+출입문 ID
+
+DOOR_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+TB_DOOR.DOOR_ID 참조
+
+장치 ID
+
+DEV_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+TB_DEVICE.DEV_ID 참조
+
+발생 일시
+
+OCCUR_DT
+
+TIMESTAMPTZ
+
+-
+
+Y
+
+외부 이탈이 감지된 시간
+
+Table 생성 스크립트
+
+CREATE TABLE TB_DOOR_EVT ( DOOR_EVT_ID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, DOOR_ID BIGINT NOT NULL, DEV_ID BIGINT NOT NULL, OCCUR_DT TIMESTAMPTZ NOT NULL, CONSTRAINT FK_DOOR_EVT_DOOR FOREIGN KEY (DOOR_ID) REFERENCES TB_DOOR(DOOR_ID), CONSTRAINT FK_DOOR_EVT_DEVICE FOREIGN KEY (DEV_ID) REFERENCES TB_DEVICE(DEV_ID) );
+
+
+
+작성일자
+
+2026.09.04
+
+작성자
+
+구정경
+
+테이블명
+
+출입문
+
+테이블 ID
+
+TB_DOOR
+
+테이블설명
+
+이탈 감지 대상으로 선택한 출입문의 장치와 박스 좌표를 관리하는 테이블
+
+컬럼명
+
+컬럼 ID
+
+타입
+
+길이
+
+NN
+
+PK
+
+FK
+
+UK
+
+CK
+
+비고
+
+출입문 ID
+
+DOOR_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+자동 생성되는 출입문 고유번호
+
+장치 ID
+
+DEV_ID
+
+BIGINT
+
+-
+
+Y
+
+Y
+
+TB_DEVICE.DEV_ID 참조
+
+출입문 X좌표
+
+DOOR_X
+
+NUMERIC
+
+10,4
+
+Y
+
+출입문 박스 시작 X좌표
+
+출입문 Y좌표
+
+DOOR_Y
+
+NUMERIC
+
+10,4
+
+Y
+
+출입문 박스 시작 Y좌표
+
+출입문 너비
+
+DOOR_W
+
+NUMERIC
+
+10,4
+
+Y
+
+출입문 박스 너비
+
+출입문 높이
+
+DOOR_H
+
+NUMERIC
+
+10,4
+
+Y
+
+출입문 박스 높이
+
+Table 생성 스크립트
+
+CREATE TABLE TB_DOOR (
+
+    DOOR_ID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    DEV_ID BIGINT NOT NULL,
+
+    DOOR_X NUMERIC(10,4) NOT NULL,
+
+    DOOR_Y NUMERIC(10,4) NOT NULL,
+
+    DOOR_W NUMERIC(10,4) NOT NULL,
+
+    DOOR_H NUMERIC(10,4) NOT NULL,
+
+    CONSTRAINT FK_DOOR_DEVICE
+
+        FOREIGN KEY (DEV_ID)
+
+        REFERENCES TB_DEVICE(DEV_ID)
+
+);
