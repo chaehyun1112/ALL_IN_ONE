@@ -37,10 +37,12 @@ input {
 .domain-page {
     position: relative;
     isolation: isolate;
-    display: grid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(24px, 4svh, 40px) clamp(16px, 2vw, 32px);
     min-height: 100vh;
     min-height: 100svh;
-    overflow: hidden;
     background-color: #f5f7f5;
     background-image: url('../image/login.png');
     background-position: center 34.85%;
@@ -50,14 +52,12 @@ input {
 
 .domain-content {
     z-index: 2;
-    align-self: start;
-    justify-self: center;
-    width: min(534px, calc(100vw - 40px));
-    margin-top: clamp(130px, 24.5vh, 212px);
+    width: clamp(320px, 39.1vw, 600px);
+    max-width: 100%;
 }
 
 .domain-heading {
-    margin-bottom: 32px;
+    margin-bottom: clamp(20px, 3.6svh, 32px);
     text-align: center;
 }
 
@@ -71,7 +71,7 @@ input {
 
 .domain-heading h1 {
     margin: 0;
-    font-size: clamp(28px, 2.25vw, 36px);
+    font-size: clamp(28px, 2.64vw, 36px);
     font-weight: 700;
     letter-spacing: -0.045em;
     line-height: 1.25;
@@ -86,7 +86,7 @@ input {
 
 .domain-card {
     width: 100%;
-    padding: 42px 47px 36px;
+    padding: clamp(24px, 5.1svh, 42px) clamp(24px, 3.45vw, 47px) clamp(24px, 4.4svh, 36px);
     border: 1px solid #bfc5c1;
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.92);
@@ -103,14 +103,14 @@ input {
 
 .domain-card input {
     width: 100%;
-    height: 57px;
+    height: clamp(48px, 6.9svh, 57px);
     padding: 0 18px;
     border: 1px solid #b8c0bb;
     border-radius: 11px;
     outline: none;
     background: #fbfcfb;
     color: var(--ink);
-    font-size: 15px;
+    font-size: 16px;
 }
 
 .domain-card input::placeholder {
@@ -127,7 +127,7 @@ input {
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 57px;
+    height: clamp(48px, 6.9svh, 57px);
     margin-top: 17px;
     border: 0;
     border-radius: 10px;
@@ -161,28 +161,26 @@ input {
     line-height: 1.5;
 }
 
-@media (max-width: 700px) {
-    .domain-content {
-        margin-top: 120px;
+/* Keep the title and card visually balanced without clipping short screens. */
+@media (min-width: 701px) and (min-height: 601px) {
+    .domain-page {
+        padding-bottom: calc(clamp(24px, 4svh, 40px) + clamp(0px, calc(20svh - 120px), 80px));
     }
-
-    .domain-card {
-        padding: 30px 24px 27px;
-    }
-
 }
 
-@media (max-height: 680px) and (min-width: 701px) {
+@media (max-width: 700px) {
     .domain-content {
-        margin-top: 72px;
+        width: 534px;
     }
-
-    .domain-heading {
-        margin-bottom: 22px;
+    .domain-page {
+        padding: 24px 16px;
     }
+}
 
-    .domain-card {
-        padding-top: 28px;
-        padding-bottom: 26px;
+@media (max-height: 600px) {
+    .domain-page {
+        align-items: flex-start;
+        padding-top: 24px;
+        padding-bottom: 24px;
     }
 }

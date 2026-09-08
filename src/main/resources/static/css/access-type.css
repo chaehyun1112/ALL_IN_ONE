@@ -38,7 +38,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 47px 20px 16px;
+    padding: clamp(24px, 4svh, 40px) clamp(16px, 2vw, 32px);
     min-height: 100vh;
     min-height: 100svh;
     background-color: #f5f7f5;
@@ -49,12 +49,12 @@ button {
 }
 
 .access-content {
-    width: 680px;
+    width: clamp(560px, 49.8vw, 760px);
     max-width: 100%;
 }
 
 .access-heading {
-    margin-bottom: 30px;
+    margin-bottom: clamp(20px, 3.6svh, 30px);
     text-align: center;
 }
 
@@ -70,10 +70,10 @@ button {
 .access-heading h1 {
     margin: 8px 0 0;
     color: #1f2933;
-    font-size: 36px;
+    font-size: clamp(28px, 2.64vw, 36px);
     font-weight: 700;
     letter-spacing: normal;
-    line-height: 48px;
+    line-height: 1.333333;
 }
 
 .access-description {
@@ -86,7 +86,7 @@ button {
 
 .access-panel {
     width: 100%;
-    padding: 35px 41px 39px;
+    padding: clamp(24px, 4.3svh, 35px) clamp(24px, 3vw, 41px) clamp(28px, 4.7svh, 39px);
     border: 1px solid #c6cec9;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.94);
@@ -116,8 +116,8 @@ button {
 .role-card {
     position: relative;
     display: flex;
-    min-height: 224px;
-    padding: 31px 22px 25px;
+    min-height: clamp(200px, 27.2svh, 224px);
+    padding: clamp(20px, 3.8svh, 31px) 22px clamp(20px, 3svh, 25px);
     border: 1px solid var(--line);
     border-radius: 13px;
     outline: none;
@@ -216,17 +216,20 @@ button {
     text-align: center;
 }
 
+/* Keep the title and card visually balanced without clipping short screens. */
+@media (min-width: 701px) and (min-height: 601px) {
+    .access-page {
+        padding-bottom: calc(clamp(24px, 4svh, 40px) + clamp(0px, calc(20svh - 120px), 80px));
+    }
+}
+
 @media (max-width: 700px) {
     .access-page {
-        padding: 32px 20px;
+        padding: 24px 16px;
     }
 
     .access-content {
         width: 520px;
-    }
-
-    .access-panel {
-        padding: 28px 24px 33px;
     }
 
     .role-list {
