@@ -1,9 +1,11 @@
-package com.aio.hospitalsafety;
+package com.aio.hospitalsafety.service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.mybatis.spring.annotation.MapperScan;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.aio.hospitalsafety")
+@MapperScan("com.aio.hospitalsafety.mapper")
 public class HospitalSafetyApplication {
 
 	public static void main(String[] args) {
