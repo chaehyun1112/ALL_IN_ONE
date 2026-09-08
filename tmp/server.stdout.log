@@ -1,0 +1,466 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.aio:hospital-safety >-----------------------
+[INFO] Building hospital-safety 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:4.1.1:run (default-cli) > test-compile @ hospital-safety >>>
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ hospital-safety ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 7 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ hospital-safety ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ hospital-safety ---
+[INFO] skip non existing resourceDirectory C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ hospital-safety ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:4.1.1:run (default-cli) < test-compile @ hospital-safety <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:4.1.1:run (default-cli) @ hospital-safety ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T14:21:00.934+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T14:21:00.934+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T14:21:00.972+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-09-08T14:21:00.972+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-09-08T14:21:01.442+09:00  WARN 16844 --- [hospital-safety] [  restartedMain] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.aio.hospitalsafety]' package. Please check your configuration.
+2026-09-08T14:21:01.761+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T14:21:01.779+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T14:21:01.779+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T14:21:01.816+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 843 ms
+2026-09-08T14:21:01.890+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-09-08T14:21:02.210+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-08T14:21:02.213+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 1.618 seconds (process running for 2.023)
+2026-09-08T14:21:15.103+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-08T14:21:15.103+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-08T14:21:15.103+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-09-08T14:23:45.520+09:00  INFO 16844 --- [hospital-safety] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (0 additions, 3 deletions, 3 modifications)
+2026-09-08T14:23:45.520+09:00  INFO 16844 --- [hospital-safety] [       Thread-1] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-08T14:23:45.520+09:00  INFO 16844 --- [hospital-safety] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T14:23:45.591+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T14:23:45.603+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T14:23:45.720+09:00  WARN 16844 --- [hospital-safety] [  restartedMain] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.aio.hospitalsafety]' package. Please check your configuration.
+2026-09-08T14:23:45.771+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T14:23:45.772+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T14:23:45.773+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T14:23:45.787+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 184 ms
+2026-09-08T14:23:45.804+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-09-08T14:23:45.860+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-08T14:23:45.860+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 0.283 seconds (process running for 165.675)
+2026-09-08T14:23:45.860+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-09-08T14:23:47.279+09:00  INFO 16844 --- [hospital-safety] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 3 class path changes (3 additions, 0 deletions, 0 modifications)
+2026-09-08T14:23:47.285+09:00  INFO 16844 --- [hospital-safety] [       Thread-5] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-08T14:23:47.287+09:00  INFO 16844 --- [hospital-safety] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T14:23:47.339+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T14:23:47.339+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T14:23:47.443+09:00  WARN 16844 --- [hospital-safety] [  restartedMain] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.aio.hospitalsafety]' package. Please check your configuration.
+2026-09-08T14:23:47.477+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T14:23:47.477+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T14:23:47.477+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T14:23:47.489+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 150 ms
+2026-09-08T14:23:47.509+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-09-08T14:23:47.556+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-08T14:23:47.556+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 0.229 seconds (process running for 167.375)
+2026-09-08T14:23:47.556+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-09-08T14:24:03.023+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-08T14:24:03.024+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-08T14:24:03.024+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-09-08T14:26:25.898+09:00  INFO 16844 --- [hospital-safety] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-09-08T14:26:25.899+09:00  INFO 16844 --- [hospital-safety] [       Thread-9] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-08T14:26:25.902+09:00  INFO 16844 --- [hospital-safety] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T14:26:25.971+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T14:26:25.971+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T14:26:26.086+09:00  WARN 16844 --- [hospital-safety] [  restartedMain] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.aio.hospitalsafety]' package. Please check your configuration.
+2026-09-08T14:26:26.123+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T14:26:26.124+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T14:26:26.125+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T14:26:26.132+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 161 ms
+2026-09-08T14:26:26.154+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-09-08T14:26:26.214+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-08T14:26:26.214+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 0.276 seconds (process running for 326.024)
+2026-09-08T14:26:26.214+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-09-08T14:45:20.654+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-08T14:45:20.656+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-08T14:45:20.656+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-09-08T14:46:55.145+09:00  INFO 16844 --- [hospital-safety] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 11 class path changes (8 additions, 3 deletions, 0 modifications)
+2026-09-08T14:46:55.149+09:00  INFO 16844 --- [hospital-safety] [      Thread-13] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-08T14:46:55.161+09:00  INFO 16844 --- [hospital-safety] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T14:46:55.266+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T14:46:55.267+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T14:46:55.408+09:00  WARN 16844 --- [hospital-safety] [  restartedMain] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.aio.hospitalsafety]' package. Please check your configuration.
+2026-09-08T14:46:55.459+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T14:46:55.478+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T14:46:55.478+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T14:46:55.493+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 223 ms
+2026-09-08T14:46:55.518+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-09-08T14:46:55.544+09:00  WARN 16844 --- [hospital-safety] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Unsatisfied dependency expressed through method 'requestMappingHandlerMapping' parameter 0: Error creating bean with name 'mvcContentNegotiationManager' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Failed to instantiate [org.springframework.web.accept.ContentNegotiationManager]: Factory method 'mvcContentNegotiationManager' threw exception with message: Error creating bean with name 'jacksonJsonHttpMessageConvertersCustomizer' defined in class path resource [org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConverterConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonHttpMessageConvertersCustomizer' parameter 0: Error creating bean with name 'jacksonJsonMapper' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonMapper' parameter 0: Error creating bean with name 'jsonMapperBuilder' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+2026-09-08T14:46:55.545+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-09-08T14:46:55.550+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-09-08T14:46:55.560+09:00 ERROR 16844 --- [hospital-safety] [  restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'requestMappingHandlerMapping' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Unsatisfied dependency expressed through method 'requestMappingHandlerMapping' parameter 0: Error creating bean with name 'mvcContentNegotiationManager' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Failed to instantiate [org.springframework.web.accept.ContentNegotiationManager]: Factory method 'mvcContentNegotiationManager' threw exception with message: Error creating bean with name 'jacksonJsonHttpMessageConvertersCustomizer' defined in class path resource [org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConverterConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonHttpMessageConvertersCustomizer' parameter 0: Error creating bean with name 'jacksonJsonMapper' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonMapper' parameter 0: Error creating bean with name 'jsonMapperBuilder' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:804) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:546) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:196) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1225) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1191) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1121) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:994) ~[spring-context-7.0.9.jar:7.0.9]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:621) ~[spring-context-7.0.9.jar:7.0.9]
+	at org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:143) ~[spring-boot-web-server-4.1.1.jar:4.1.1]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:756) ~[spring-boot-4.1.1.jar:4.1.1]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:445) ~[spring-boot-4.1.1.jar:4.1.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:321) ~[spring-boot-4.1.1.jar:4.1.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365) ~[spring-boot-4.1.1.jar:4.1.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-4.1.1.jar:4.1.1]
+	at com.aio.hospitalsafety.HospitalSafetyApplication.main(HospitalSafetyApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:52) ~[spring-boot-devtools-4.1.1.jar:4.1.1]
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'mvcContentNegotiationManager' defined in class path resource [org/springframework/boot/webmvc/autoconfigure/WebMvcAutoConfiguration$EnableWebMvcConfiguration.class]: Failed to instantiate [org.springframework.web.accept.ContentNegotiationManager]: Factory method 'mvcContentNegotiationManager' threw exception with message: Error creating bean with name 'jacksonJsonHttpMessageConvertersCustomizer' defined in class path resource [org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConverterConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonHttpMessageConvertersCustomizer' parameter 0: Error creating bean with name 'jacksonJsonMapper' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonMapper' parameter 0: Error creating bean with name 'jsonMapperBuilder' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:489) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:201) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveBean(DefaultListableBeanFactory.java:1232) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1711) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1658) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:912) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 24 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.web.accept.ContentNegotiationManager]: Factory method 'mvcContentNegotiationManager' threw exception with message: Error creating bean with name 'jacksonJsonHttpMessageConvertersCustomizer' defined in class path resource [org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConverterConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonHttpMessageConvertersCustomizer' parameter 0: Error creating bean with name 'jacksonJsonMapper' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonMapper' parameter 0: Error creating bean with name 'jsonMapperBuilder' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 38 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'jacksonJsonHttpMessageConvertersCustomizer' defined in class path resource [org/springframework/boot/http/converter/autoconfigure/JacksonHttpMessageConvertersConfiguration$JacksonJsonHttpMessageConverterConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonHttpMessageConvertersCustomizer' parameter 0: Error creating bean with name 'jacksonJsonMapper' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonMapper' parameter 0: Error creating bean with name 'jsonMapperBuilder' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:804) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:546) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:201) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:229) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.addCandidateEntry(DefaultListableBeanFactory.java:2022) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.findAutowireCandidates(DefaultListableBeanFactory.java:1978) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveMultipleBeans(DefaultListableBeanFactory.java:1799) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1718) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory$DependencyObjectProvider.resolveStream(DefaultListableBeanFactory.java:2692) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory$DependencyObjectProvider.orderedStream(DefaultListableBeanFactory.java:2686) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration$WebMvcAutoConfigurationAdapter.configureMessageConverters(WebMvcAutoConfiguration.java:252) ~[spring-boot-webmvc-4.1.1.jar:4.1.1]
+	at org.springframework.web.servlet.config.annotation.WebMvcConfigurerComposite.configureMessageConverters(WebMvcConfigurerComposite.java:147) ~[spring-webmvc-7.0.9.jar:7.0.9]
+	at org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfiguration.configureMessageConverters(DelegatingWebMvcConfiguration.java:126) ~[spring-webmvc-7.0.9.jar:7.0.9]
+	at org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport.createMessageConverters(WebMvcConfigurationSupport.java:873) ~[spring-webmvc-7.0.9.jar:7.0.9]
+	at org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport.addDefaultHttpMessageConverters(WebMvcConfigurationSupport.java:920) ~[spring-webmvc-7.0.9.jar:7.0.9]
+	at org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport.getMessageConverters(WebMvcConfigurationSupport.java:855) ~[spring-webmvc-7.0.9.jar:7.0.9]
+	at org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport.getDefaultMediaTypes(WebMvcConfigurationSupport.java:411) ~[spring-webmvc-7.0.9.jar:7.0.9]
+	at org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport.mvcContentNegotiationManager(WebMvcConfigurationSupport.java:402) ~[spring-webmvc-7.0.9.jar:7.0.9]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 41 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'jacksonJsonMapper' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonJsonMapper' parameter 0: Error creating bean with name 'jsonMapperBuilder' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:804) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:546) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:201) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:229) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1769) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1658) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:912) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 68 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jsonMapperBuilder' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration.class]: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:645) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:351) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:201) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:229) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1769) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1658) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:912) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 82 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [tools.jackson.databind.json.JsonMapper$Builder]: Factory method 'jsonMapperBuilder' threw exception with message: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 94 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'standardJsonMapperBuilderCustomizer' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:645) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:201) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:229) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.addCandidateEntry(DefaultListableBeanFactory.java:2022) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.findAutowireCandidates(DefaultListableBeanFactory.java:1978) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveMultipleBeans(DefaultListableBeanFactory.java:1799) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1718) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory$DependencyObjectProvider.resolveStream(DefaultListableBeanFactory.java:2692) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory$DependencyObjectProvider.orderedStream(DefaultListableBeanFactory.java:2686) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration.jsonMapperBuilder(JacksonAutoConfiguration.java:128) ~[spring-boot-jackson-4.1.1.jar:4.1.1]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 97 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer]: Factory method 'standardJsonMapperBuilderCustomizer' threw exception with message: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 117 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'jacksonMixinModule' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Unsatisfied dependency expressed through method 'jacksonMixinModule' parameter 1: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:804) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:546) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:201) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:229) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.lambda$resolveMultipleBeans$0(DefaultListableBeanFactory.java:1804) ~[spring-beans-7.0.9.jar:7.0.9]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.Iterator.forEachRemaining(Iterator.java:133) ~[na:na]
+	at java.base/java.util.Spliterators$IteratorSpliterator.forEachRemaining(Spliterators.java:1939) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:575) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluateToArrayNode(AbstractPipeline.java:260) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:616) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.toArray(ReferencePipeline.java:622) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.toList(ReferencePipeline.java:627) ~[na:na]
+	at org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.standardJsonMapperBuilderCustomizer(JacksonAutoConfiguration.java:176) ~[spring-boot-jackson-4.1.1.jar:4.1.1]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 120 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jacksonMixinModuleEntries' defined in class path resource [org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class]: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:657) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:645) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1360) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1192) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:565) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:525) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:333) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:331) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:201) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:229) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1769) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1658) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:912) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 145 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.boot.jackson.JacksonMixinModuleEntries]: Factory method 'jacksonMixinModuleEntries' threw exception with message: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:183) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiateWithFactoryMethod(SimpleInstantiationStrategy.java:72) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:152) ~[spring-beans-7.0.9.jar:7.0.9]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:653) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 159 common frames omitted
+Caused by: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to read candidate component class: file [C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes\com\aio\hospitalsafety\HospitalSafetyApplication.class]
+	at org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider.scanCandidateComponents(ClassPathScanningCandidateComponentProvider.java:504) ~[spring-context-7.0.9.jar:7.0.9]
+	at org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider.findCandidateComponents(ClassPathScanningCandidateComponentProvider.java:321) ~[spring-context-7.0.9.jar:7.0.9]
+	at org.springframework.boot.jackson.JacksonMixinModuleEntries.lambda$scan$0(JacksonMixinModuleEntries.java:81) ~[spring-boot-jackson-4.1.1.jar:4.1.1]
+	at org.springframework.boot.jackson.JacksonMixinModuleEntries.create(JacksonMixinModuleEntries.java:60) ~[spring-boot-jackson-4.1.1.jar:4.1.1]
+	at org.springframework.boot.jackson.JacksonMixinModuleEntries.scan(JacksonMixinModuleEntries.java:72) ~[spring-boot-jackson-4.1.1.jar:4.1.1]
+	at org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonMixinConfiguration.jacksonMixinModuleEntries(JacksonAutoConfiguration.java:146) ~[spring-boot-jackson-4.1.1.jar:4.1.1]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.lambda$instantiate$0(SimpleInstantiationStrategy.java:155) ~[spring-beans-7.0.9.jar:7.0.9]
+	... 162 common frames omitted
+Caused by: java.lang.ArrayIndexOutOfBoundsException: Index 8 out of bounds for length 0
+	at org.springframework.asm.ClassReader.readUnsignedShort(ClassReader.java:3637) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.asm.ClassReader.<init>(ClassReader.java:208) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.asm.ClassReader.<init>(ClassReader.java:180) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.asm.ClassReader.<init>(ClassReader.java:166) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.asm.ClassReader.<init>(ClassReader.java:292) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.core.type.classreading.SimpleMetadataReader.getClassReader(SimpleMetadataReader.java:56) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.core.type.classreading.SimpleMetadataReader.<init>(SimpleMetadataReader.java:48) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.core.type.classreading.SimpleMetadataReaderFactory.getMetadataReader(SimpleMetadataReaderFactory.java:62) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.core.type.classreading.CachingMetadataReaderFactory.getMetadataReader(CachingMetadataReaderFactory.java:127) ~[spring-core-7.0.9.jar:7.0.9]
+	at org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider.scanCandidateComponents(ClassPathScanningCandidateComponentProvider.java:464) ~[spring-context-7.0.9.jar:7.0.9]
+	... 170 common frames omitted
+
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T14:46:57.013+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T14:46:57.013+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T14:46:57.112+09:00  WARN 16844 --- [hospital-safety] [  restartedMain] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.aio.hospitalsafety]' package. Please check your configuration.
+2026-09-08T14:46:57.130+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T14:46:57.130+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T14:46:57.130+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T14:46:57.150+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 137 ms
+2026-09-08T14:46:57.161+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page template: index
+2026-09-08T14:46:57.231+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-08T14:46:57.233+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 0.235 seconds (process running for 1557.042)
+2026-09-08T14:46:57.233+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-09-08T14:47:08.952+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-08T14:47:08.955+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-08T14:47:08.955+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-09-08T15:18:25.231+09:00  INFO 16844 --- [hospital-safety] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 6 class path changes (0 additions, 3 deletions, 3 modifications)
+2026-09-08T15:18:25.234+09:00  INFO 16844 --- [hospital-safety] [      Thread-17] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-08T15:18:25.237+09:00  INFO 16844 --- [hospital-safety] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T15:18:25.324+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T15:18:25.324+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T15:18:25.541+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T15:18:25.542+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T15:18:25.542+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T15:18:25.555+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 228 ms
+2026-09-08T15:18:25.671+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-08T15:18:25.682+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 0.4 seconds (process running for 3445.49)
+2026-09-08T15:18:25.683+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-09-08T15:18:27.116+09:00  INFO 16844 --- [hospital-safety] [   File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 7 class path changes (7 additions, 0 deletions, 0 modifications)
+2026-09-08T15:18:27.116+09:00  INFO 16844 --- [hospital-safety] [      Thread-24] o.s.boot.tomcat.GracefulShutdown         : Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-08T15:18:27.116+09:00  INFO 16844 --- [hospital-safety] [tomcat-shutdown] o.s.boot.tomcat.GracefulShutdown         : Graceful shutdown complete
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-08T15:18:27.172+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12 with PID 16844 (C:\Users\SMHRD\OneDrive\Desktop\hospital-safety\target\classes started by SMHRD in C:\Users\SMHRD\OneDrive\Desktop\hospital-safety)
+2026-09-08T15:18:27.172+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-08T15:18:27.323+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-08T15:18:27.324+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-08T15:18:27.324+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-08T15:18:27.333+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 161 ms
+2026-09-08T15:18:27.424+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-08T15:18:27.426+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 0.27 seconds (process running for 3447.234)
+2026-09-08T15:18:27.426+09:00  INFO 16844 --- [hospital-safety] [  restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2026-09-08T15:23:37.175+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-08T15:23:37.176+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-08T15:23:37.177+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-09-08T15:23:42.410+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-08T15:23:42.739+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-8] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1a714869
+2026-09-08T15:23:42.744+09:00  INFO 16844 --- [hospital-safety] [nio-8081-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:06 h
+[INFO] Finished at: 2026-09-08T15:27:13+09:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:4.1.1:run (default-cli) on project hospital-safety: Process terminated with exit code: -1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

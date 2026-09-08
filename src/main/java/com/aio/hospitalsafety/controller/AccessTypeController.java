@@ -8,6 +8,6 @@ public class AccessTypeController {
 
     @GetMapping("/access-type")
     public String accessType() {
-        return "access-type";
+        return "html/access-type";
     }
 }

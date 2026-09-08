@@ -37,7 +37,7 @@ input {
     min-height: 100vh;
     overflow: hidden;
     background-color: #fbfcfb;
-    background-image: url('../images/hos.png');
+    background-image: url('../image/login.png');
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -128,7 +128,7 @@ input {
     border-radius: 10px;
     background: var(--green);
     color: #fff;
-    cursor: default;
+    cursor: pointer;
     font-size: 15px;
     font-weight: 650;
     letter-spacing: -0.02em;
@@ -147,6 +147,13 @@ input {
     font-size: 12px;
     text-align: center;
     letter-spacing: -0.025em;
+}
+
+.domain-error {
+    margin: 12px 0 0;
+    color: #b42318;
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 @media (max-width: 700px) {

@@ -15,16 +15,24 @@
                 <p class="domain-description">이용 하실 요양병원의 도메인을 입력해주세요.</p>
             </header>
 
-            <form class="domain-card">
+            <form class="domain-card" action="/domain" th:action="@{/domain}" method="post">
                 <label for="hospital-domain">병원 도메인</label>
                 <input
                     id="hospital-domain"
-                    name="hospital-domain"
+                    name="hospitalDomain"
+                    th:value="${hospitalDomain}"
                     type="text"
                     placeholder="도메인을 입력해주세요."
                     autocomplete="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    required
+                    aria-describedby="domain-error"
+                    th:attr="aria-invalid=${domainError != null}"
                 >
-                <button type="button">
+                <p id="domain-error" class="domain-error" role="alert"
+                   th:if="${domainError != null}" th:text="${domainError}"></p>
+                <button type="submit">
                     <span>접속하기</span>
                     <span class="button-arrow" aria-hidden="true">→</span>
                 </button>
@@ -34,6 +42,5 @@
 
     </main>
 
-    <script th:src="@{/js/domain.js}" src="/js/domain.js" defer></script>
 </body>
 </html>

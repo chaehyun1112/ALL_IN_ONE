@@ -3,7 +3,7 @@ const selectionMessage = document.querySelector('.selection-message');
 
 const roleLabels = {
     admin: '관리자',
-    nurse: '간호사'
+    user: '간호사'
 };
 
 roleCards.forEach((card) => {
