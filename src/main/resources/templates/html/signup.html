@@ -148,130 +148,13 @@
     </section>
   </main>
 
-  <script th:inline="none">
-  (function () {
-    const usernameInput = document.getElementById('username');
-    const checkBtn = document.getElementById('checkUsernameBtn');
-    const messageEl = document.getElementById('usernameMessage');
-    const checkedFlag = document.getElementById('usernameChecked');
-    const form = document.querySelector('.signup-form');
-
-    // 아이디를 수정하면 다시 확인하도록 초기화
-    usernameInput.addEventListener('input', () => {
-      checkedFlag.value = 'false';
-      messageEl.textContent = '';
-      messageEl.className = 'username-message';
-    });
-
-    checkBtn.addEventListener('click', async () => {
-      const username = usernameInput.value.trim();
-
-      if (!username) {
-        messageEl.textContent = '아이디를 입력해 주세요.';
-        messageEl.className = 'username-message is-taken';
-        return;
-      }
-
-      checkBtn.disabled = true;
-      messageEl.textContent = '확인 중...';
-      messageEl.className = 'username-message';
-
-      try {
-        const res = await fetch(
-          `/api/users/check-username?username=${encodeURIComponent(username)}`
-        );
-
-        if (!res.ok) throw new Error('서버 오류');
-
-        const data = await res.json(); // { available: true/false }
-
-        if (data.available) {
-          messageEl.textContent = '사용 가능한 아이디입니다.';
-          messageEl.className = 'username-message is-available';
-          checkedFlag.value = 'true';
-        } else {
-          messageEl.textContent = '이미 사용 중인 아이디입니다.';
-          messageEl.className = 'username-message is-taken';
-          checkedFlag.value = 'false';
-        }
-      } catch (err) {
-        messageEl.textContent = '중복확인 중 오류가 발생했습니다. 다시 시도해 주세요.';
-        messageEl.className = 'username-message is-taken';
-        checkedFlag.value = 'false';
-      } finally {
-        checkBtn.disabled = false;
-      }
-    });
-
-    // 제출 시 중복확인 안 했으면 막기
-    form.addEventListener('submit', (e) => {
-      if (checkedFlag.value !== 'true') {
-        e.preventDefault();
-        messageEl.textContent = '아이디 중복확인을 먼저 진행해 주세요.';
-        messageEl.className = 'username-message is-taken';
-        usernameInput.focus();
-      }
-    });
-  })();
-</script>
-
-<script>
-  const password = document.getElementById("password");
-  const confirmation = document.getElementById("passwordConfirm");
-
-  const letterRule = document.getElementById("rule-letter");
-  const numberRule = document.getElementById("rule-number");
-  const lengthRule = document.getElementById("rule-length");
-  const matchMessage = document.getElementById("password-match");
-
-  function updateRule(element, label, passed) {
-    element.classList.toggle("is-valid", passed);
-    element.textContent = label;
-  }
-
-  function validatePasswords() {
-    const value = password.value;
-    const hasConfirmation = confirmation.value !== "";
-    const matches = value === confirmation.value;
-
-    updateRule(letterRule, "영문 포함", /[A-Za-z]/.test(value));
-    updateRule(numberRule, "숫자 포함", /[0-9]/.test(value));
-    updateRule(lengthRule, "8자 이상", value.length >= 8);
-
-    confirmation.setCustomValidity(
-      hasConfirmation && !matches ? "비밀번호가 일치하지 않습니다." : ""
-    );
-
-    matchMessage.classList.toggle("is-valid", hasConfirmation && matches);
-    matchMessage.classList.toggle("is-invalid", hasConfirmation && !matches);
-    confirmation.setAttribute("aria-invalid", String(hasConfirmation && !matches));
-
-    if (!hasConfirmation) {
-      matchMessage.textContent = "새 비밀번호와 일치하는지 확인해 주세요.";
-    } else if (matches) {
-      matchMessage.textContent = "비밀번호가 일치합니다.";
-    } else {
-      matchMessage.textContent = "비밀번호가 일치하지 않습니다.";
-    }
-  }
-
-  password.addEventListener("input", validatePasswords);
-  confirmation.addEventListener("input", validatePasswords);
-  password.addEventListener("change", validatePasswords);
-  confirmation.addEventListener("change", validatePasswords);
-
-  // 비밀번호 표시·숨김
-  document.querySelectorAll(".password-toggle").forEach((button) => {
-    const input = document.getElementById(button.getAttribute("aria-controls"));
-    button.addEventListener("click", () => {
-      const showPassword = input.type === "password";
-      input.type = showPassword ? "text" : "password";
-      button.setAttribute("aria-pressed", String(showPassword));
-    });
-  });
-
-  validatePasswords();
-</script>
+  <!-- 아이디 확인 -->
+  <script src="../../static/JS/signup.js/ID_check.js"
+          th:src="@{/js/ID_check.js}"></script>
+  
+  <!-- 비밀번호 확인 -->
+  <script src="../../static/JS/signup.js/Password_check.js"
+          th:src="@{/js/Password_check.js}"></script>
 
 </body>
 </html>
