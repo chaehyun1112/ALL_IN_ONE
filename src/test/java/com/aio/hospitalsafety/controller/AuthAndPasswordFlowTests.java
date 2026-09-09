@@ -77,7 +77,7 @@ class AuthAndPasswordFlowTests {
                         .sessionAttr(SessionConstants.HOSPITAL_DOMAIN, "HOSP01")
                         .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/auth/login"))
+                .andExpect(view().name("html/login"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/login.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("userLoginKey")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/signup")));
@@ -101,7 +101,7 @@ class AuthAndPasswordFlowTests {
                         .sessionAttr(LOGIN_HOSPITAL_NAME, "테스트병원")
                         .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/auth/login"))
+                .andExpect(view().name("html/login"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("userLoginKey")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("테스트병원")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("비밀번호 재설정")));
@@ -122,7 +122,7 @@ class AuthAndPasswordFlowTests {
                         .with(user(new HospitalUserDetails(new User("USER01", "unused", "HOSP01", null,
                                 "직원", Role.USER, ApprovalStatus.APPROVED, null, null)))))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/auth/password-change"))
+                .andExpect(view().name("html/password-change"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/password-reset.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-form\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-submit\"")))
@@ -159,7 +159,7 @@ class AuthAndPasswordFlowTests {
     void showsPasswordResetGuide() throws Exception {
         mockMvc.perform(get("/password/reset"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/auth/password-reset"))
+                .andExpect(view().name("html/password-reset"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/password-reset.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-notice\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("소속 병동 관리자")));

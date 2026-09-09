@@ -80,7 +80,7 @@ public class AuthController {
         model.addAttribute("hospitalId", hospital.get().hospitalId());
         model.addAttribute("hospitalName", hospital.get().hospitalName());
         model.addAttribute("accessType", session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE));
-        return "html/auth/login";
+        return "html/login";
     }
 
     /**
@@ -93,13 +93,13 @@ public class AuthController {
             BindingResult bindingResult,
             HttpSession session) {
         if (bindingResult.hasErrors()) {
-            return "html/auth/login";
+            return "html/login";
         }
 
         Optional<Hospital> hospital = hospitalService.findRegisteredHospital(form.getHospitalId());
         if (hospital.isEmpty()) {
             bindingResult.rejectValue("hospitalId", "notFound", "등록되지 않은 병원 구분 ID입니다.");
-            return "html/auth/login";
+            return "html/login";
         }
 
         session.setAttribute(LOGIN_HOSPITAL_ID, hospital.get().hospitalId());
@@ -132,7 +132,7 @@ public class AuthController {
         model.addAttribute("hospitalId", hospitalId);
         model.addAttribute("hospitalName", hospitalName);
         model.addAttribute("accessType", session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE));
-        return "html/auth/login";
+        return "html/login";
     }
 
     /**
@@ -146,6 +146,6 @@ public class AuthController {
 
         model.addAttribute("userId", authentication.getName());
         model.addAttribute("approved", approved);
-        return "html/auth/dashboard";
+        return "html/dashboard";
     }
 }

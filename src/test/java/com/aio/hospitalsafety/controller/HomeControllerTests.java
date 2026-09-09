@@ -41,7 +41,7 @@ class HomeControllerTests {
                 .andExpect(request().sessionAttribute(SessionConstants.HOSPITAL_DOMAIN, "test"));
         mockMvc.perform(get("/access-type").session(session))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/auth/access-type"));
+                .andExpect(view().name("html/access-type"));
     }
 
     @Test

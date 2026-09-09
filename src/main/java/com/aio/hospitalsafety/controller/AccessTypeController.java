@@ -19,6 +19,6 @@ public class AccessTypeController {
         HttpSession session = AuthenticationSessionManager.expireAuthentication(
                 request, response, authentication);
         session.removeAttribute(SessionConstants.LOGIN_ACCESS_TYPE);
-        return "html/auth/access-type";
+        return "html/access-type";
     }
 }
