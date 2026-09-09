@@ -1,0 +1,59 @@
+<!-- PGH -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="|로그인 · ${hospitalName}|">로그인 | 환자낙상예방</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}" href="../../static/css/login.css">
+</head>
+<body>
+  <main class="login-page">
+    <section class="login-content" aria-labelledby="hospital-name">
+      <header class="service-intro">
+        <p class="service-eyebrow">AI 영상 기반</p>
+        <h1 id="hospital-name" th:text="${hospitalName}">병원명</h1>
+        <p class="service-description">등록된 아이디로 로그인해 주세요.</p>
+      </header>
+
+      <!-- POST 요청은 Controller가 아니라 Spring Security 로그인 필터가 처리한다. -->
+      <form id="userLoginForm" class="login-card" th:action="@{/login/user}" method="post">
+        <p class="status error" th:if="${param.error}" role="alert">직원 ID 또는 비밀번호가 올바르지 않습니다.</p>
+
+        <!--
+          Spring Security 내부 전달용 값. submit 직전에 병원 ID와 직원 ID를 조합한다.
+          TODO: ID 허용 문자 규칙에서 | 문자를 사용할 수 있는지 확정해야 한다.
+        -->
+        <input id="userLoginKey" name="userLoginKey" type="hidden" th:value="${hospitalId + '|'}">
+
+        <div class="field">
+          <label for="userId">아이디</label>
+          <input id="userId" type="text" placeholder="아이디를 입력해 주세요."
+                 autocomplete="username" maxlength="20" autofocus required>
+        </div>
+        <div class="field password-field">
+          <label for="password">비밀번호</label>
+          <input id="password" name="password" type="password" placeholder="비밀번호를 입력해 주세요."
+                 autocomplete="current-password" required>
+        </div>
+        <div class="recovery-row"><a th:href="@{/password/reset}" href="/password/reset">비밀번호 재설정</a></div>
+        <button class="login-button" type="submit">로그인</button>
+        <p class="signup-row">병원을 변경하시겠어요?<a th:href="@{/login}" href="/login">다른 병원 선택</a></p>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('userLoginForm');
+    const userLoginKey = document.getElementById('userLoginKey');
+    const userId = document.getElementById('userId');
+    const hospitalPrefix = userLoginKey.value;
+
+    // Spring Security가 하나의 username 파라미터만 받으므로 내부적으로 "병원ID|직원ID"를 만든다.
+    // 서버는 이 값을 다시 분리해 HOSP_DIV_ID와 EMP_ID가 모두 일치하는 계정을 조회한다.
+    form.addEventListener('submit', () => {
+      userLoginKey.value = hospitalPrefix + userId.value.trim();
+    });
+  </script>
+</body>
+</html>
