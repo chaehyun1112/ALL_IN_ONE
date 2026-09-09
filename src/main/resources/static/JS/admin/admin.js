@@ -219,20 +219,38 @@ function renderAdminUsers() {
 
         const userActions = user.status === "PENDING"
             ? [
-                ["APPROVE", "✓ 승인", "admin-approve"],
-                ["REJECT", "× 반려", "admin-reject"]
+                ["APPROVE", "✓ 승인", "admin-approve", ""],
+                ["REJECT", "× 반려", "admin-reject", ""]
             ]
             : [
-                ["ASSIGN", "병동 변경", "admin-approve"],
-                ["DEACTIVATE", "비활성화", "admin-reject"]
+                ["ASSIGN", "병동 변경", "admin-approve", "building"],
+                ["DEACTIVATE", "비활성화", "admin-reject", "trash"]
             ];
 
-        for (const [action, label, className] of userActions) {
+        for (const [action, label, className, icon] of userActions) {
             const button = document.createElement("button");
 
             button.type = "button";
-            button.className = className;
-            button.textContent = label;
+            button.className = icon
+                ? `${className} admin-icon-button`
+                : className;
+
+            if (icon === "building") {
+                button.innerHTML = `
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 21h16M6 21V7l6-3 6 3v14M9 10h1M14 10h1M9 14h1M14 14h1M10 21v-3h4v3" />
+                    </svg>`;
+                button.title = label;
+            } else if (icon === "trash") {
+                button.innerHTML = `
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6" />
+                    </svg>`;
+                button.title = label;
+            } else {
+                button.textContent = label;
+            }
+
             button.setAttribute(
                 "aria-label",
                 `${user.name} ${label.replace(/[✓×]/g, "").trim()}`

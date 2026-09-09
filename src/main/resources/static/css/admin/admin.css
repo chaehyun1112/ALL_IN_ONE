@@ -52,6 +52,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-row-actions button { padding: 5px 13px; border: 0; font-size: 12px; white-space: nowrap; }
 .admin-approve { color: #53846a; background: #e5f2e9; }
 .admin-reject { color: #b06e6a; background: #faeae7; }
+.admin-row-actions .admin-icon-button { display: inline-flex; width: 36px; height: 36px; padding: 0; align-items: center; justify-content: center; border: 1px solid #d9ddd3; border-radius: 9px; background: #fff; }
+.admin-row-actions .admin-icon-button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.admin-row-actions .admin-icon-button.admin-approve { color: #39745e; }
+.admin-row-actions .admin-icon-button.admin-reject { color: #c55454; }
+.admin-row-actions .admin-icon-button:hover { background: #f8f9f5; border-color: currentColor; }
 .admin-empty { text-align: center; color: var(--admin-muted); padding: 60px 16px; }
 .admin-dialog { width: min(420px, calc(100% - 32px)); padding: 28px; border: 1px solid var(--admin-border); border-radius: 14px; color: var(--admin-text); background: var(--admin-surface); }
 .admin-dialog::backdrop { background: #1c302666; }
