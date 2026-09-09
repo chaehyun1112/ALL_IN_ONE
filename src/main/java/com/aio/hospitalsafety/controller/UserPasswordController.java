@@ -2,9 +2,12 @@
 package com.aio.hospitalsafety.controller;
 
 import com.aio.hospitalsafety.dto.PasswordChangeForm;
+import com.aio.hospitalsafety.dto.PasswordResetForm;
 import com.aio.hospitalsafety.config.HospitalUserDetails;
 import com.aio.hospitalsafety.service.UserService;
 import com.aio.hospitalsafety.service.UserService.PasswordChangeResult;
+import com.aio.hospitalsafety.service.UserService.PasswordResetResult;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,15 +45,64 @@ public class UserPasswordController {
     }
 
     /**
-     * 로그아웃 상태에서 접근하는 비밀번호 분실 안내 화면이다.
+     * 로그아웃 상태에서 접근하는 비밀번호 재설정 화면이다.
      *
-     * TODO(요구사항 확정 필요): 이메일, 휴대전화, 관리자 임시 PW 등 본인 확인 방식이
-     * 명세에 없다. 직원 ID와 직원명만으로 PW를 변경하는 것은 위험하므로 구현하지 않는다.
+     * 본인 확인 수단: 직원 ID + 이름 일치 여부만 확인한다(이메일·휴대전화 등 다른 인증
+     * 수단이 DB에 없어서 채택한 최소한의 방식). 로그인 1단계(AuthController)에서
+     * Session에 저장해 둔 병원 구분 ID를 그대로 사용하므로, 병원을 먼저 선택한
+     * 상태에서만 접근할 수 있다.
      */
     @GetMapping("/password/reset")
-    public String resetGuide() {
-        // templates/html/password-reset.html을 렌더링한다.
+    public String resetGuide(HttpSession session, Model model) {
+        if (session.getAttribute(AuthController.LOGIN_HOSPITAL_ID) == null) {
+            return "redirect:/login";
+        }
+        if (!model.containsAttribute("passwordResetForm")) {
+            model.addAttribute("passwordResetForm", new PasswordResetForm());
+        }
         return "html/password-reset";
+    }
+
+    /**
+     * 비밀번호 재설정 요청을 처리한다.
+     *
+     * 처리 순서
+     * 1. @Valid로 DTO 입력값을 검증한다.
+     * 2. Session의 병원 구분 ID로 직원 ID + 이름이 일치하는지 UserService에서 확인한다.
+     * 3. 일치하면 BCrypt로 새 PW를 저장하고, 성공 안내와 함께 로그인 화면으로 보낸다.
+     */
+    @PostMapping("/password/reset")
+    public String resetPassword(
+            HttpSession session,
+            @Valid @ModelAttribute("passwordResetForm") PasswordResetForm form,
+            BindingResult bindingResult,
+            Model model) {
+        String hospitalId = (String) session.getAttribute(AuthController.LOGIN_HOSPITAL_ID);
+        if (hospitalId == null) {
+            return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            clearPasswordFields(form);
+            return "html/password-reset";
+        }
+
+        PasswordResetResult result = userService.resetPassword(
+                hospitalId, form.getEmployeeId().trim(), form.getEmployeeName().trim(), form.getNewPassword());
+
+        if (result == PasswordResetResult.IDENTITY_MISMATCH) {
+            model.addAttribute("resetError", "아이디 또는 이름이 일치하지 않습니다.");
+            clearPasswordFields(form);
+            return "html/password-reset";
+        }
+
+        return "redirect:/login?passwordChanged";
+    }
+
+    /** 재설정 폼의 비밀번호 관련 입력값을 지워 화면 재렌더링 시 원문이 남지 않게 한다. */
+    private void clearPasswordFields(PasswordResetForm form) {
+        form.setNewPassword(null);
+        form.setPasswordConfirm(null);
     }
 
     /**

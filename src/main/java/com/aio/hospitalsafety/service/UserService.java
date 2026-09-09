@@ -74,4 +74,36 @@ public class UserService {
         CURRENT_PASSWORD_MISMATCH, // 사용자가 입력한 현재 PW가 DB 해시와 불일치
         USER_NOT_FOUND            // Session의 직원 ID에 해당하는 TB_EMP 행이 없음
     }
+
+    /**
+     * 로그인 전 상태에서 직원 ID + 이름 일치를 확인한 뒤 비밀번호를 재설정한다.
+     *
+     * 본인 확인 수단이 직원 ID/이름뿐이라 보안 수준이 낮다. 아이디가 아예 없는 경우와
+     * 이름만 틀린 경우를 IDENTITY_MISMATCH 하나로 묶어서, 오류 메시지만 보고
+     * "이 아이디가 실제로 존재하는지"를 추측할 수 없게 한다.
+     *
+     * @param hospitalId 로그인 1단계(AuthController)에서 Session에 저장한 병원 구분 ID
+     * @param employeeId 사용자가 입력한 직원 ID
+     * @param employeeName 사용자가 입력한 이름. TB_EMP.EMP_NM과 정확히 같아야 한다.
+     * @param newPassword 새 비밀번호 원문. encode 직후 더 이상 사용하지 않는다.
+     */
+    @Transactional
+    public PasswordResetResult resetPassword(
+            String hospitalId, String employeeId, String employeeName, String newPassword) {
+        User user = userMapper.findByHospitalIdAndUserId(hospitalId, employeeId).orElse(null);
+        if (user == null || !user.userName().equals(employeeName)) {
+            return PasswordResetResult.IDENTITY_MISMATCH;
+        }
+
+        String newPasswordHash = passwordEncoder.encode(newPassword);
+        if (userMapper.updatePassword(user.userId(), newPasswordHash) != 1) {
+            throw new IllegalStateException("비밀번호 재설정에 실패했습니다.");
+        }
+        return PasswordResetResult.SUCCESS;
+    }
+
+    public enum PasswordResetResult {
+        SUCCESS,
+        IDENTITY_MISMATCH // 아이디가 없거나 이름이 일치하지 않음(둘을 구분해서 알려주지 않는다)
+    }
 }

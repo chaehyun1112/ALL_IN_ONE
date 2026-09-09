@@ -61,4 +61,48 @@ class UserServiceTests {
                 .isEqualTo(UserService.PasswordChangeResult.CURRENT_PASSWORD_MISMATCH);
         verify(userMapper, never()).updatePassword(anyString(), anyString());
     }
+
+    @Test
+    void resetsPasswordWhenEmployeeIdAndNameMatch() {
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        UserService service = new UserService(userMapper, encoder);
+        User user = new User(
+                "EMP001", encoder.encode("Old12345"), "HOSP01", 1L, "홍길동",
+                Role.USER, ApprovalStatus.APPROVED, Instant.now(), null);
+        when(userMapper.findByHospitalIdAndUserId("HOSP01", "EMP001")).thenReturn(Optional.of(user));
+        when(userMapper.updatePassword(eq("EMP001"), anyString())).thenReturn(1);
+
+        assertThat(service.resetPassword("HOSP01", "EMP001", "홍길동", "NewPassword123"))
+                .isEqualTo(UserService.PasswordResetResult.SUCCESS);
+
+        ArgumentCaptor<String> savedPassword = ArgumentCaptor.forClass(String.class);
+        verify(userMapper).updatePassword(eq("EMP001"), savedPassword.capture());
+        assertThat(savedPassword.getValue()).isNotEqualTo("NewPassword123");
+        assertThat(encoder.matches("NewPassword123", savedPassword.getValue())).isTrue();
+    }
+
+    @Test
+    void doesNotResetPasswordWhenNameDoesNotMatch() {
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        UserService service = new UserService(userMapper, encoder);
+        User user = new User(
+                "EMP001", encoder.encode("Old12345"), "HOSP01", 1L, "홍길동",
+                Role.USER, ApprovalStatus.APPROVED, Instant.now(), null);
+        when(userMapper.findByHospitalIdAndUserId("HOSP01", "EMP001")).thenReturn(Optional.of(user));
+
+        assertThat(service.resetPassword("HOSP01", "EMP001", "다른이름", "NewPassword123"))
+                .isEqualTo(UserService.PasswordResetResult.IDENTITY_MISMATCH);
+        verify(userMapper, never()).updatePassword(anyString(), anyString());
+    }
+
+    @Test
+    void doesNotResetPasswordWhenEmployeeIdDoesNotExist() {
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        UserService service = new UserService(userMapper, encoder);
+        when(userMapper.findByHospitalIdAndUserId("HOSP01", "NOBODY")).thenReturn(Optional.empty());
+
+        assertThat(service.resetPassword("HOSP01", "NOBODY", "홍길동", "NewPassword123"))
+                .isEqualTo(UserService.PasswordResetResult.IDENTITY_MISMATCH);
+        verify(userMapper, never()).updatePassword(anyString(), anyString());
+    }
 }

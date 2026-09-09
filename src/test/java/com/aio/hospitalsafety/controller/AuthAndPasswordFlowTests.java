@@ -149,14 +149,64 @@ class AuthAndPasswordFlowTests {
         verify(userService).changePassword("HOSP01", "USER01", "Current123", "NewPassword123");
     }
 
-    /** 본인 확인 방식이 미정인 비밀번호 재설정 안내 페이지는 로그인 없이 열려야 한다. */
+    /** 병원을 먼저 선택하지 않고 재설정 화면에 접근하면 로그인(병원 선택) 화면으로 보낸다. */
     @Test
-    void showsPasswordResetGuide() throws Exception {
+    void redirectsPasswordResetToLoginWhenNoHospitalSelected() throws Exception {
         mockMvc.perform(get("/password/reset"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    /** 병원 선택(Session)이 있는 상태에서는 아이디+이름 확인 폼이 로그인 없이 열려야 한다. */
+    @Test
+    void showsPasswordResetForm() throws Exception {
+        mockMvc.perform(get("/password/reset").sessionAttr(LOGIN_HOSPITAL_ID, "HOSP01"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/password-reset"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/password-reset.css")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-notice\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-form\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"employeeId\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"employeeName\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("소속 병동 관리자")));
+    }
+
+    /** 아이디+이름이 일치하면 UserService에 재설정을 위임하고 로그인 화면으로 이동한다. */
+    @Test
+    void resetsPasswordWithMatchingIdentity() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        when(userService.resetPassword("HOSP01", "USER01", "홍길동", "NewPassword123"))
+                .thenReturn(UserService.PasswordResetResult.SUCCESS);
+
+        mockMvc.perform(post("/password/reset")
+                        .with(csrf())
+                        .session(session)
+                        .param("employeeId", "USER01")
+                        .param("employeeName", "홍길동")
+                        .param("newPassword", "NewPassword123")
+                        .param("passwordConfirm", "NewPassword123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?passwordChanged"));
+        verify(userService).resetPassword("HOSP01", "USER01", "홍길동", "NewPassword123");
+    }
+
+    /** 아이디 또는 이름이 일치하지 않으면 어느 쪽이 틀렸는지 알려주지 않고 같은 오류만 보여준다. */
+    @Test
+    void showsGenericErrorWhenIdentityDoesNotMatch() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        when(userService.resetPassword(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(UserService.PasswordResetResult.IDENTITY_MISMATCH);
+
+        mockMvc.perform(post("/password/reset")
+                        .with(csrf())
+                        .session(session)
+                        .param("employeeId", "USER01")
+                        .param("employeeName", "다른이름")
+                        .param("newPassword", "NewPassword123")
+                        .param("passwordConfirm", "NewPassword123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("html/password-reset"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("아이디 또는 이름이 일치하지 않습니다.")));
     }
 }

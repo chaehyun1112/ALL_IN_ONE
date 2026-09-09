@@ -93,15 +93,28 @@ input:focus-visible, button:focus-visible, a:focus-visible {
   outline-offset: 3px; 
 }
 
-.status { 
-  margin-top: 12px; color: var(--primary); 
-  font-size: 12px; 
-  line-height: 18px; 
+.status {
+  margin-top: 12px; color: var(--primary);
+  font-size: 12px;
+  line-height: 18px;
 }
 
-.status.error { 
+.status.success {
+  margin: 0 0 16px;
+  padding: 11px 14px;
+  border: 1px solid #cbd9d1;
+  border-radius: 9px;
+  background: #f0f5f2;
+  color: #294f3d;
+  font-weight: 700;
+}
+
+.status.error {
   color: #b42318;
 }
+
+/* 병합 메모: park의 로그인 1단계 화면(login.html)이 쓰는 클래스. chae 쪽 CSS에는 없어서 병합 시 누락됐던 것을 park 원본에서 복원. */
+.hospital-card { min-height: 0; padding-bottom: 45px; }
 
 .login-card .forgot-password,
 .login-card a[href*="password"] {
