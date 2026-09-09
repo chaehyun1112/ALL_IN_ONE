@@ -29,12 +29,21 @@ public class MailService {
 
     /** 아이디 찾기 인증코드를 발송한다. 실패하면 MailException을 그대로 던진다(호출자가 처리). */
     public void sendFindIdVerificationCode(String toEmail, String code) {
+        sendVerificationCode(toEmail, "아이디 찾기", code);
+    }
+
+    /** 비밀번호 재설정 인증코드를 발송한다. 실패하면 MailException을 그대로 던진다(호출자가 처리). */
+    public void sendPasswordResetVerificationCode(String toEmail, String code) {
+        sendVerificationCode(toEmail, "비밀번호 재설정", code);
+    }
+
+    private void sendVerificationCode(String toEmail, String purpose, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromAddress);
         message.setTo(toEmail);
-        message.setSubject("[늘푸른요양병원] 아이디 찾기 인증코드");
+        message.setSubject("[늘푸른요양병원] " + purpose + " 인증코드");
         message.setText(
-                "요청하신 아이디 찾기 인증코드는 [" + code + "] 입니다.\n"
+                "요청하신 " + purpose + " 인증코드는 [" + code + "] 입니다.\n"
                         + "인증코드는 5분간 유효합니다.\n"
                         + "본인이 요청하지 않았다면 이 메일을 무시해 주세요.");
 

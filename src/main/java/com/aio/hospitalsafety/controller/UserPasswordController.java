@@ -1,12 +1,15 @@
 // PGH
 package com.aio.hospitalsafety.controller;
 
+import com.aio.hospitalsafety.dto.NewPasswordForm;
 import com.aio.hospitalsafety.dto.PasswordChangeForm;
+import com.aio.hospitalsafety.dto.PasswordResetCodeForm;
 import com.aio.hospitalsafety.dto.PasswordResetForm;
 import com.aio.hospitalsafety.config.HospitalUserDetails;
+import com.aio.hospitalsafety.service.PasswordResetService;
+import com.aio.hospitalsafety.service.PasswordResetService.IdentifyResult;
 import com.aio.hospitalsafety.service.UserService;
 import com.aio.hospitalsafety.service.UserService.PasswordChangeResult;
-import com.aio.hospitalsafety.service.UserService.PasswordResetResult;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,37 +23,50 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.time.Duration;
+import java.time.Instant;
+
 /**
  * 비밀번호 관련 화면 요청을 처리하는 MVC Controller다.
  *
  * 이 클래스가 담당하는 기능은 두 가지다.
- * 1. 비로그인 사용자에게 비밀번호 분실 안내 화면 제공
+ * 1. 비로그인 사용자를 위한 3단계 비밀번호 재설정(본인 확인 -> 이메일 인증코드 -> 새 비밀번호)
  * 2. 로그인한 사용자의 현재 PW 확인 후 새 PW 변경
  *
- * Controller는 HTTP 요청값 검사와 화면 이동을 담당하고,
- * 실제 사용자 조회·비밀번호 비교·DB 수정은 UserService에 위임한다.
+ * Controller는 HTTP 요청값 검사와 화면 이동, Session 상태 전이를 담당하고,
+ * 실제 사용자 조회·이메일 발송·비밀번호 저장은 Service 계층에 위임한다.
  */
 @Controller
 public class UserPasswordController {
 
+    private static final String PWRESET_CODE = "PWRESET_CODE";
+    private static final String PWRESET_USER_ID = "PWRESET_USER_ID";
+    private static final String PWRESET_EMAIL = "PWRESET_EMAIL";
+    private static final String PWRESET_EXPIRES_AT = "PWRESET_EXPIRES_AT";
+    private static final String PWRESET_ATTEMPTS = "PWRESET_ATTEMPTS";
+    private static final String PWRESET_VERIFIED_USER_ID = "PWRESET_VERIFIED_USER_ID";
+
+    private static final Duration CODE_TTL = Duration.ofMinutes(5);
+    private static final int MAX_ATTEMPTS = 5;
+
     // final 필드는 객체 생성 후 다른 Service로 바뀌지 않는다.
     private final UserService userService;
+    private final PasswordResetService passwordResetService;
 
     /**
-     * 생성자 주입 방식이다. Spring이 UserService Bean을 찾아 자동으로 전달한다.
-     * 생성자가 하나뿐이면 @Autowired를 생략할 수 있다.
+     * 생성자 주입 방식이다. Spring이 Bean을 찾아 자동으로 전달한다.
      */
-    public UserPasswordController(UserService userService) {
+    public UserPasswordController(UserService userService, PasswordResetService passwordResetService) {
         this.userService = userService;
+        this.passwordResetService = passwordResetService;
     }
 
     /**
-     * 로그아웃 상태에서 접근하는 비밀번호 재설정 화면이다.
+     * 로그아웃 상태에서 접근하는 비밀번호 재설정 1단계(본인 확인) 화면이다.
      *
-     * 본인 확인 수단: 직원 ID + 이름 일치 여부만 확인한다(이메일·휴대전화 등 다른 인증
-     * 수단이 DB에 없어서 채택한 최소한의 방식). 로그인 1단계(AuthController)에서
-     * Session에 저장해 둔 병원 구분 ID를 그대로 사용하므로, 병원을 먼저 선택한
-     * 상태에서만 접근할 수 있다.
+     * 본인 확인 수단: 직원 ID + 이름 + 이메일이 모두 일치해야 한다. 로그인 1단계
+     * (AuthController)에서 Session에 저장해 둔 병원 구분 ID를 그대로 사용하므로,
+     * 병원을 먼저 선택한 상태에서만 접근할 수 있다.
      */
     @GetMapping("/password/reset")
     public String resetGuide(HttpSession session, Model model) {
@@ -60,19 +76,13 @@ public class UserPasswordController {
         if (!model.containsAttribute("passwordResetForm")) {
             model.addAttribute("passwordResetForm", new PasswordResetForm());
         }
+        model.addAttribute("step", "identify");
         return "html/password-reset";
     }
 
-    /**
-     * 비밀번호 재설정 요청을 처리한다.
-     *
-     * 처리 순서
-     * 1. @Valid로 DTO 입력값을 검증한다.
-     * 2. Session의 병원 구분 ID로 직원 ID + 이름이 일치하는지 UserService에서 확인한다.
-     * 3. 일치하면 BCrypt로 새 PW를 저장하고, 성공 안내와 함께 로그인 화면으로 보낸다.
-     */
-    @PostMapping("/password/reset")
-    public String resetPassword(
+    /** 직원 ID+이름+이메일이 일치하면 인증코드를 발송하고 2단계 화면으로 이동한다. */
+    @PostMapping("/password/reset/verify-identity")
+    public String verifyIdentity(
             HttpSession session,
             @Valid @ModelAttribute("passwordResetForm") PasswordResetForm form,
             BindingResult bindingResult,
@@ -83,26 +93,154 @@ public class UserPasswordController {
         }
 
         if (bindingResult.hasErrors()) {
-            clearPasswordFields(form);
+            model.addAttribute("step", "identify");
             return "html/password-reset";
         }
 
-        PasswordResetResult result = userService.resetPassword(
-                hospitalId, form.getEmployeeId().trim(), form.getEmployeeName().trim(), form.getNewPassword());
+        String employeeId = form.getEmployeeId().trim();
+        String employeeName = form.getEmployeeName().trim();
+        String email = form.getEmail().trim();
+        IdentifyResult result = passwordResetService.verifyIdentityAndSendCode(
+                hospitalId, employeeId, employeeName, email);
 
-        if (result == PasswordResetResult.IDENTITY_MISMATCH) {
-            // 화면에서는 아이디/이름 라벨 옆에 이 문구를 그대로 붙여 보여준다.
-            // 어느 쪽이 틀렸는지는 알려주지 않으므로 두 라벨에 동일하게 표시한다.
-            model.addAttribute("resetError", "* 잘못 입력했습니다!");
-            clearPasswordFields(form);
+        if (result.status() == IdentifyResult.Status.NOT_FOUND) {
+            // 화면에서는 아이디/이름/이메일 라벨 옆에 이 문구를 그대로 붙여 보여준다.
+            // 어느 쪽이 틀렸는지는 알려주지 않으므로 세 라벨에 동일하게 표시한다.
+            model.addAttribute("identityError", "* 잘못된 내용입니다!");
+            model.addAttribute("step", "identify");
+            return "html/password-reset";
+        }
+        if (result.status() == IdentifyResult.Status.SEND_FAILED) {
+            model.addAttribute("formError", "인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
+            model.addAttribute("step", "identify");
             return "html/password-reset";
         }
 
+        session.setAttribute(PWRESET_CODE, result.code());
+        session.setAttribute(PWRESET_USER_ID, result.userId());
+        session.setAttribute(PWRESET_EMAIL, email);
+        session.setAttribute(PWRESET_EXPIRES_AT, Instant.now().plus(CODE_TTL).toEpochMilli());
+        session.setAttribute(PWRESET_ATTEMPTS, 0);
+
+        model.addAttribute("step", "verify");
+        model.addAttribute("maskedEmail", maskEmail(email));
+        model.addAttribute("passwordResetCodeForm", new PasswordResetCodeForm());
+        return "html/password-reset";
+    }
+
+    /** 인증코드를 확인하고, 일치하면 새 비밀번호 입력 단계로 이동한다. */
+    @PostMapping("/password/reset/verify-code")
+    public String verifyCode(
+            HttpSession session,
+            @Valid @ModelAttribute("passwordResetCodeForm") PasswordResetCodeForm form,
+            BindingResult bindingResult,
+            Model model) {
+        String hospitalId = (String) session.getAttribute(AuthController.LOGIN_HOSPITAL_ID);
+        if (hospitalId == null) {
+            return "redirect:/login";
+        }
+
+        String storedCode = (String) session.getAttribute(PWRESET_CODE);
+        String storedUserId = (String) session.getAttribute(PWRESET_USER_ID);
+        String storedEmail = (String) session.getAttribute(PWRESET_EMAIL);
+        Long expiresAt = (Long) session.getAttribute(PWRESET_EXPIRES_AT);
+
+        if (storedCode == null || storedUserId == null || expiresAt == null
+                || Instant.now().toEpochMilli() > expiresAt) {
+            clearPasswordResetSession(session);
+            model.addAttribute("formError", "인증 시간이 만료되었습니다. 처음부터 다시 시도해 주세요.");
+            model.addAttribute("step", "identify");
+            model.addAttribute("passwordResetForm", new PasswordResetForm());
+            return "html/password-reset";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("step", "verify");
+            model.addAttribute("maskedEmail", maskEmail(storedEmail));
+            return "html/password-reset";
+        }
+
+        int attempts = (int) session.getAttribute(PWRESET_ATTEMPTS);
+        if (attempts >= MAX_ATTEMPTS) {
+            clearPasswordResetSession(session);
+            model.addAttribute("formError", "인증 시도 횟수를 초과했습니다. 처음부터 다시 시도해 주세요.");
+            model.addAttribute("step", "identify");
+            model.addAttribute("passwordResetForm", new PasswordResetForm());
+            return "html/password-reset";
+        }
+
+        if (!storedCode.equals(form.getCode().trim())) {
+            session.setAttribute(PWRESET_ATTEMPTS, attempts + 1);
+            model.addAttribute("codeError", "* 잘못된 내용입니다!");
+            model.addAttribute("step", "verify");
+            model.addAttribute("maskedEmail", maskEmail(storedEmail));
+            return "html/password-reset";
+        }
+
+        // 코드 검증까지 끝났으므로 코드/이메일 관련 세션 값은 지우고, 확인된 직원 ID만 남긴다.
+        session.removeAttribute(PWRESET_CODE);
+        session.removeAttribute(PWRESET_EMAIL);
+        session.removeAttribute(PWRESET_EXPIRES_AT);
+        session.removeAttribute(PWRESET_ATTEMPTS);
+        session.setAttribute(PWRESET_VERIFIED_USER_ID, storedUserId);
+
+        model.addAttribute("step", "reset");
+        model.addAttribute("newPasswordForm", new NewPasswordForm());
+        return "html/password-reset";
+    }
+
+    /** 이메일 인증까지 끝난 상태에서만 실제로 새 비밀번호를 저장한다. */
+    @PostMapping("/password/reset")
+    public String resetPassword(
+            HttpSession session,
+            @Valid @ModelAttribute("newPasswordForm") NewPasswordForm form,
+            BindingResult bindingResult,
+            Model model) {
+        String hospitalId = (String) session.getAttribute(AuthController.LOGIN_HOSPITAL_ID);
+        if (hospitalId == null) {
+            return "redirect:/login";
+        }
+
+        String verifiedUserId = (String) session.getAttribute(PWRESET_VERIFIED_USER_ID);
+        if (verifiedUserId == null) {
+            // 이메일 인증 없이 곧바로 이 URL에 접근한 경우 처음부터 다시 시작한다.
+            model.addAttribute("formError", "이메일 인증을 먼저 완료해 주세요.");
+            model.addAttribute("step", "identify");
+            model.addAttribute("passwordResetForm", new PasswordResetForm());
+            return "html/password-reset";
+        }
+
+        if (bindingResult.hasErrors()) {
+            clearPasswordFields(form);
+            model.addAttribute("step", "reset");
+            return "html/password-reset";
+        }
+
+        passwordResetService.resetPassword(verifiedUserId, form.getNewPassword());
+        session.removeAttribute(PWRESET_VERIFIED_USER_ID);
         return "redirect:/login?passwordChanged";
     }
 
+    private void clearPasswordResetSession(HttpSession session) {
+        session.removeAttribute(PWRESET_CODE);
+        session.removeAttribute(PWRESET_USER_ID);
+        session.removeAttribute(PWRESET_EMAIL);
+        session.removeAttribute(PWRESET_EXPIRES_AT);
+        session.removeAttribute(PWRESET_ATTEMPTS);
+        session.removeAttribute(PWRESET_VERIFIED_USER_ID);
+    }
+
+    /** 화면에 "ab***@domain.com" 형태로 이메일 일부만 보여준다. */
+    private String maskEmail(String email) {
+        int at = email.indexOf('@');
+        if (at <= 1) {
+            return email;
+        }
+        return email.charAt(0) + "***" + email.substring(at);
+    }
+
     /** 재설정 폼의 비밀번호 관련 입력값을 지워 화면 재렌더링 시 원문이 남지 않게 한다. */
-    private void clearPasswordFields(PasswordResetForm form) {
+    private void clearPasswordFields(NewPasswordForm form) {
         form.setNewPassword(null);
         form.setPasswordConfirm(null);
     }

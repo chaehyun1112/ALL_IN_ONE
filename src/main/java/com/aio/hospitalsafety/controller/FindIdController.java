@@ -82,12 +82,13 @@ public class FindIdController {
         FindIdRequestResult result = findIdService.requestVerificationCode(hospitalId, employeeName, email);
 
         if (result.status() == FindIdRequestResult.Status.NOT_FOUND) {
-            model.addAttribute("requestError", "입력하신 정보와 일치하는 계정을 찾을 수 없습니다.");
+            // 이름/이메일 라벨 옆에 바로 붙여 보여줄 문구다. 어느 쪽이 틀렸는지는 알려주지 않는다.
+            model.addAttribute("identityError", "* 잘못된 내용입니다!");
             model.addAttribute("step", "request");
             return "html/find-id";
         }
         if (result.status() == FindIdRequestResult.Status.SEND_FAILED) {
-            model.addAttribute("requestError", "인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
+            model.addAttribute("formError", "인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
             model.addAttribute("step", "request");
             return "html/find-id";
         }
@@ -125,7 +126,7 @@ public class FindIdController {
         if (storedCode == null || storedUserId == null || expiresAt == null
                 || Instant.now().toEpochMilli() > expiresAt) {
             clearFindIdSession(session);
-            model.addAttribute("requestError", "인증 시간이 만료되었습니다. 처음부터 다시 시도해 주세요.");
+            model.addAttribute("formError", "인증 시간이 만료되었습니다. 처음부터 다시 시도해 주세요.");
             model.addAttribute("step", "request");
             model.addAttribute("findIdRequestForm", new FindIdRequestForm());
             return "html/find-id";
@@ -140,7 +141,7 @@ public class FindIdController {
         int attempts = (int) session.getAttribute(FIND_ID_ATTEMPTS);
         if (attempts >= MAX_ATTEMPTS) {
             clearFindIdSession(session);
-            model.addAttribute("requestError", "인증 시도 횟수를 초과했습니다. 처음부터 다시 시도해 주세요.");
+            model.addAttribute("formError", "인증 시도 횟수를 초과했습니다. 처음부터 다시 시도해 주세요.");
             model.addAttribute("step", "request");
             model.addAttribute("findIdRequestForm", new FindIdRequestForm());
             return "html/find-id";
@@ -148,7 +149,8 @@ public class FindIdController {
 
         if (!storedCode.equals(form.getCode().trim())) {
             session.setAttribute(FIND_ID_ATTEMPTS, attempts + 1);
-            model.addAttribute("verifyError", "인증코드가 일치하지 않습니다.");
+            // 인증코드 라벨 옆에 바로 붙여 보여줄 문구다.
+            model.addAttribute("codeError", "* 잘못된 내용입니다!");
             model.addAttribute("step", "verify");
             model.addAttribute("maskedEmail", maskEmail(storedEmail));
             return "html/find-id";

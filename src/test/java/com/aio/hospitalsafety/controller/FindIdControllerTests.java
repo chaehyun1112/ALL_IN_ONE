@@ -67,7 +67,8 @@ class FindIdControllerTests {
                         .param("email", "nobody@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/find-id"))
-                .andExpect(content().string(containsString("입력하신 정보와 일치하는 계정을 찾을 수 없습니다.")));
+                .andExpect(content().string(containsString("class=\"label-error\"")))
+                .andExpect(content().string(containsString("* 잘못된 내용입니다!")));
     }
 
     @Test
@@ -138,7 +139,7 @@ class FindIdControllerTests {
                         .session(session)
                         .param("code", "000000"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("인증코드가 일치하지 않습니다.")));
+                .andExpect(content().string(containsString("* 잘못된 내용입니다!")));
     }
 
     @Test

@@ -6,6 +6,8 @@ import com.aio.hospitalsafety.domain.User;
 import com.aio.hospitalsafety.domain.Role;
 import com.aio.hospitalsafety.domain.ApprovalStatus;
 import com.aio.hospitalsafety.config.HospitalUserDetails;
+import com.aio.hospitalsafety.service.PasswordResetService;
+import com.aio.hospitalsafety.service.PasswordResetService.IdentifyResult;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -57,6 +59,10 @@ class AuthAndPasswordFlowTests {
     // 비밀번호 변경 Controller가 호출할 결과를 테스트마다 원하는 값으로 지정하기 위한 가짜 Service다.
     @MockitoBean
     private UserService userService;
+
+    // 비밀번호 재설정(이메일 인증) Controller가 호출할 결과를 테스트마다 지정하기 위한 가짜 Service다.
+    @MockitoBean
+    private PasswordResetService passwordResetService;
 
     /** 로그인 1단계 화면이 정상 렌더링되고 병원 ID 전송 주소를 포함하는지 확인한다. */
     @Test
@@ -178,7 +184,7 @@ class AuthAndPasswordFlowTests {
                 .andExpect(redirectedUrl("/login"));
     }
 
-    /** 병원 선택(Session)이 있는 상태에서는 아이디+이름 확인 폼이 로그인 없이 열려야 한다. */
+    /** 병원 선택(Session)이 있는 상태에서는 아이디+이름+이메일 확인 폼이 로그인 없이 열려야 한다. */
     @Test
     void showsPasswordResetForm() throws Exception {
         mockMvc.perform(get("/password/reset").sessionAttr(LOGIN_HOSPITAL_ID, "HOSP01"))
@@ -188,47 +194,135 @@ class AuthAndPasswordFlowTests {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-form\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"employeeId\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"employeeName\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"email\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("소속 병동 관리자")));
     }
 
-    /** 아이디+이름이 일치하면 UserService에 재설정을 위임하고 로그인 화면으로 이동한다. */
+    /** 아이디+이름+이메일이 일치하면 인증코드를 발송하고 2단계 화면으로 이동한다. */
     @Test
-    void resetsPasswordWithMatchingIdentity() throws Exception {
+    void sendsVerificationCodeWhenIdentityMatches() throws Exception {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
-        when(userService.resetPassword("HOSP01", "USER01", "홍길동", "NewPassword123"))
-                .thenReturn(UserService.PasswordResetResult.SUCCESS);
+        when(passwordResetService.verifyIdentityAndSendCode("HOSP01", "USER01", "홍길동", "hong@example.com"))
+                .thenReturn(IdentifyResult.success("USER01", "123456"));
 
-        mockMvc.perform(post("/password/reset")
+        mockMvc.perform(post("/password/reset/verify-identity")
                         .with(csrf())
                         .session(session)
                         .param("employeeId", "USER01")
                         .param("employeeName", "홍길동")
-                        .param("newPassword", "NewPassword123")
-                        .param("passwordConfirm", "NewPassword123"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?passwordChanged"));
-        verify(userService).resetPassword("HOSP01", "USER01", "홍길동", "NewPassword123");
+                        .param("email", "hong@example.com"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("html/password-reset"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"code\"")));
+        verify(passwordResetService).verifyIdentityAndSendCode("HOSP01", "USER01", "홍길동", "hong@example.com");
     }
 
-    /** 아이디 또는 이름이 일치하지 않으면 어느 쪽이 틀렸는지 알려주지 않고 같은 오류만 보여준다. */
+    /** 아이디/이름/이메일 중 하나라도 일치하지 않으면 어느 쪽이 틀렸는지 알려주지 않고 같은 오류만 보여준다. */
     @Test
     void showsGenericErrorWhenIdentityDoesNotMatch() throws Exception {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
-        when(userService.resetPassword(anyString(), anyString(), anyString(), anyString()))
-                .thenReturn(UserService.PasswordResetResult.IDENTITY_MISMATCH);
+        when(passwordResetService.verifyIdentityAndSendCode(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(IdentifyResult.notFound());
 
-        mockMvc.perform(post("/password/reset")
+        mockMvc.perform(post("/password/reset/verify-identity")
                         .with(csrf())
                         .session(session)
                         .param("employeeId", "USER01")
                         .param("employeeName", "다른이름")
-                        .param("newPassword", "NewPassword123")
-                        .param("passwordConfirm", "NewPassword123"))
+                        .param("email", "hong@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/password-reset"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"label-error\"")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("* 잘못 입력했습니다!")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("* 잘못된 내용입니다!")));
+    }
+
+    /** 인증코드가 일치하면 3단계(새 비밀번호 설정) 화면으로 이동한다. */
+    @Test
+    void movesToNewPasswordStepWhenCodeMatches() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        when(passwordResetService.verifyIdentityAndSendCode("HOSP01", "USER01", "홍길동", "hong@example.com"))
+                .thenReturn(IdentifyResult.success("USER01", "123456"));
+
+        mockMvc.perform(post("/password/reset/verify-identity")
+                        .with(csrf())
+                        .session(session)
+                        .param("employeeId", "USER01")
+                        .param("employeeName", "홍길동")
+                        .param("email", "hong@example.com"));
+
+        mockMvc.perform(post("/password/reset/verify-code")
+                        .with(csrf())
+                        .session(session)
+                        .param("code", "123456"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("html/password-reset"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"newPassword\"")));
+    }
+
+    /** 인증코드가 틀리면 인증코드 라벨 옆에 오류를 보여준다. */
+    @Test
+    void showsGenericErrorWhenCodeDoesNotMatch() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        when(passwordResetService.verifyIdentityAndSendCode("HOSP01", "USER01", "홍길동", "hong@example.com"))
+                .thenReturn(IdentifyResult.success("USER01", "123456"));
+
+        mockMvc.perform(post("/password/reset/verify-identity")
+                        .with(csrf())
+                        .session(session)
+                        .param("employeeId", "USER01")
+                        .param("employeeName", "홍길동")
+                        .param("email", "hong@example.com"));
+
+        mockMvc.perform(post("/password/reset/verify-code")
+                        .with(csrf())
+                        .session(session)
+                        .param("code", "000000"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("* 잘못된 내용입니다!")));
+    }
+
+    /** 이메일 인증 없이 곧바로 비밀번호 저장 URL에 접근하면 1단계로 되돌아간다. */
+    @Test
+    void rejectsPasswordSaveWithoutEmailVerification() throws Exception {
+        mockMvc.perform(post("/password/reset")
+                        .with(csrf())
+                        .sessionAttr(LOGIN_HOSPITAL_ID, "HOSP01")
+                        .param("newPassword", "NewPassword123")
+                        .param("passwordConfirm", "NewPassword123"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("이메일 인증을 먼저 완료해 주세요.")));
+    }
+
+    /** 이메일 인증까지 끝난 뒤에만 실제로 비밀번호를 저장하고 로그인 화면으로 보낸다. */
+    @Test
+    void resetsPasswordAfterEmailVerification() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        when(passwordResetService.verifyIdentityAndSendCode("HOSP01", "USER01", "홍길동", "hong@example.com"))
+                .thenReturn(IdentifyResult.success("USER01", "123456"));
+
+        mockMvc.perform(post("/password/reset/verify-identity")
+                        .with(csrf())
+                        .session(session)
+                        .param("employeeId", "USER01")
+                        .param("employeeName", "홍길동")
+                        .param("email", "hong@example.com"));
+        mockMvc.perform(post("/password/reset/verify-code")
+                        .with(csrf())
+                        .session(session)
+                        .param("code", "123456"));
+
+        mockMvc.perform(post("/password/reset")
+                        .with(csrf())
+                        .session(session)
+                        .param("newPassword", "NewPassword123")
+                        .param("passwordConfirm", "NewPassword123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?passwordChanged"));
+        verify(passwordResetService).resetPassword("USER01", "NewPassword123");
     }
 }

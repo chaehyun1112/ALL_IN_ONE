@@ -46,7 +46,8 @@ public class SecurityConfig {
                         // 병합 메모(park + chae): 회원가입 진입 전 병원 도메인 선택(/, /domain, /access-type)과
                         // 회원가입 자체(/signup, 아이디 중복확인 API)도 비로그인 상태에서 접근 가능해야 한다.
                         .requestMatchers("/login", "/login/hospital", "/login/user",
-                                "/password/reset", "/id/find", "/id/find/send", "/id/find/verify",
+                                "/password/reset", "/password/reset/verify-identity", "/password/reset/verify-code",
+                                "/id/find", "/id/find/send", "/id/find/verify",
                                 "/css/**", "/JS/**", "/js/**", "/image/**", "/error",
                                 "/", "/domain", "/access-type", "/signup", "/api/users/check-user-id").permitAll()
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
