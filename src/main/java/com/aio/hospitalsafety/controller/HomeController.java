@@ -55,6 +55,7 @@ public class HomeController {
             HospitalDto hospital = hospitalService.findHospitalByDomain(hospitalDomain);
             if (hospital != null) {
                 model.addAttribute("hospitalName", hospital.hospitalName());
+                model.addAttribute("hospitalId", hospital.hospitalDomain());
                 return "html/login";
             }
         } catch (DataAccessException exception) {

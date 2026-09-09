@@ -3,15 +3,16 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
 
   <title th:text="|로그인 · ${hospitalName}|">
-    로그인 | 늘푸른요양병원
+    로그인 | 환자낙상예방
   </title>
 
   <link rel="stylesheet"
-        href="../../static/css/auth/login.css"
-        th:href="@{/css/auth/login.css}">
+        th:href="@{/css/auth/login.css}"
+        href="../../static/css/auth/login.css">
 </head>
 
 <body>
@@ -26,7 +27,7 @@
 
         <h1 id="hospital-name"
             th:text="${hospitalName}">
-          늘푸른요양병원
+          병원명
         </h1>
 
         <p class="service-description">
@@ -34,24 +35,44 @@
         </p>
       </header>
 
-      <form class="login-card"
-            action="/login"
-            th:action="@{/login}"
+      <!-- 로그인 실패 메시지 -->
+      <p class="status error"
+         th:if="${param.error}"
+         role="alert">
+        직원 ID 또는 비밀번호가 올바르지 않습니다.
+      </p>
+
+      <!-- Spring Security 로그인 처리 -->
+      <form id="userLoginForm"
+            class="login-card"
+            th:action="@{/login/user}"
             method="post">
 
-        <div class="field">
-          <label for="username">아이디</label>
+        <!-- 병원 ID와 직원 ID를 합쳐 userLoginKey로 전송 -->
+        <input id="userLoginKey"
+               name="userLoginKey"
+               type="hidden"
+               th:value="${hospitalId + '|'}">
 
-          <input id="username"
-                 name="username"
+        <div class="field">
+          <label for="userId">
+            아이디
+          </label>
+
+          <input id="userId"
+                 name="userId"
                  type="text"
                  placeholder="아이디를 입력해 주세요."
                  autocomplete="username"
+                 maxlength="20"
+                 autofocus
                  required>
         </div>
 
         <div class="field password-field">
-          <label for="password">비밀번호</label>
+          <label for="password">
+            비밀번호
+          </label>
 
           <input id="password"
                  name="password"
@@ -62,9 +83,9 @@
         </div>
 
         <div class="recovery-row">
-          <a href="password-reset.html"
-             th:href="@{/password-reset}">
-            비밀번호 찾기
+          <a href="/password/reset"
+             th:href="@{/password/reset}">
+            비밀번호 재설정
           </a>
         </div>
 
@@ -76,22 +97,23 @@
         <p class="signup-row">
           계정이 없으신가요?
 
-          <a href="signup.html"
+          <a href="/signup"
              th:href="@{/signup}">
             회원가입
           </a>
         </p>
+
       </form>
     </section>
   </main>
 
-  <!-- JS가 읽을 회원가입 성공 메시지 -->
-  <p id="signupSuccessMessage"
-     th:if="${signupSuccessMessage != null}"
-     th:text="${signupSuccessMessage}"
-     hidden>
-  </p>
+  <!-- 로그인 시 병원 ID와 직원 ID 조합 -->
+  <script src="../../static/JS/login/login.js"
+          th:src="@{/JS/login/login.js}"
+          defer>
+  </script>
 
+  <!-- 회원가입 완료 알림 -->
   <script src="../../static/JS/signup/signup-success.js"
           th:src="@{/JS/signup/signup-success.js}"
           defer>
