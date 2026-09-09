@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>회원가입 | 늘푸른요양병원</title>
 
   <link rel="stylesheet"
@@ -11,6 +13,7 @@
 </head>
 
 <body class="signup-body">
+
   <main class="signup-page">
     <section class="signup-card" aria-labelledby="signup-title">
 
@@ -22,72 +25,117 @@
       <form class="signup-form"
             action="/signup"
             th:action="@{/signup}"
+            th:object="${signup}"
             method="post">
 
+        <!-- Service에서 발생한 회원가입 오류 -->
+        <p class="signup-error"
+           role="alert"
+           th:if="${errorMessage}"
+           th:text="${errorMessage}">
+        </p>
+
+        <!-- DTO Validation 오류 -->
+        <ul class="signup-error"
+            role="alert"
+            th:if="${#fields.hasErrors('*')}">
+
+          <li th:each="error : ${#fields.errors('*')}"
+              th:text="${error}">
+          </li>
+        </ul>
+
+        <!-- 이름 -->
         <div class="signup-field name-field">
-          <label for="name">이름</label>
-          <input id="name"
-                 name="name"
+          <label for="userName">이름</label>
+
+          <input id="userName"
+                 name="userName"
+                 th:field="*{userName}"
                  type="text"
+                 maxlength="20"
                  autocomplete="name"
                  placeholder="이름을 입력해 주세요."
                  required>
         </div>
 
+        <!-- 사용자 아이디 -->
         <div class="signup-field username-field">
-          <label for="username">아이디</label>
+          <label for="userId">아이디</label>
+
           <div class="username-check-row">
-            <input id="username"
-                 name="username"
-                 type="text"
-                 autocomplete="username"
-                 autocapitalize="none"
-                 spellcheck="false"
-                 placeholder="아이디를 입력하세요."
-                 required>
-            <button type="button" id="checkUsernameBtn" class="username-check-btn">중복확인</button>
+            <input id="userId"
+                   name="userId"
+                   th:field="*{userId}"
+                   type="text"
+                   maxlength="20"
+                   autocomplete="username"
+                   autocapitalize="none"
+                   spellcheck="false"
+                   placeholder="아이디를 입력하세요."
+                   required>
+
+            <button type="button"
+                    id="checkUserIdBtn"
+                    class="username-check-btn">
+              중복확인
+            </button>
           </div>
-            <p id="usernameMessage" class="username-message" role="status"></p>
-            <!-- 중복확인 통과 여부를 서버로 같이 넘기기 위한 hidden 필드 -->
-            <input type="hidden" id="usernameChecked" name="usernameChecked" value="false">
+
+          <p id="userIdMessage"
+             class="username-message"
+             role="status">
+          </p>
+
+          <input type="hidden"
+                 id="userIdChecked"
+                 name="userIdChecked"
+                 value="false">
         </div>
 
-                <div class="signup-field ward-field">
+        <!-- 담당 병동 -->
+        <div class="signup-field ward-field">
           <label for="wardId">담당 병동</label>
 
-          <select id="wardId" name="wardId" required>
-            <option value="" disabled selected>병동을 선택해 주세요.</option>
-            <option value="A">A병동</option>
-            <option value="B">B병동</option>
-            <option value="C">C병동</option>
-            <option value="D">D병동</option>
-            <option value="E">E병동</option>
-            <option value="F">F병동</option>
+          <select id="wardId"
+                  name="wardId"
+                  th:field="*{wardId}">
+
+            <option value="">특정 병동 없음</option>
+
+            <option th:each="ward : ${wards}"
+                    th:value="${ward.wardId}"
+                    th:text="${ward.wardName}">
+            </option>
           </select>
         </div>
 
-
+        <!-- 비밀번호 -->
         <div class="signup-field password-field">
           <label for="password">비밀번호</label>
 
           <div class="password-input-wrap">
             <input id="password"
-                  name="password"
-                  type="password"
-                  autocomplete="new-password"
-                  minlength="8"
-                  pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
-                  title="영문과 숫자를 포함해 8자 이상 입력해 주세요."
-                  placeholder="영문, 숫자 포함 8자 이상"
-                  aria-describedby="password-rules"
-                  required>
+                   name="password"
+                   type="password"
+                   autocomplete="new-password"
+                   minlength="8"
+                   pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
+                   title="영문과 숫자를 포함해 8자 이상 입력해 주세요."
+                   placeholder="영문, 숫자 포함 8자 이상"
+                   aria-describedby="password-rules"
+                   required>
 
             <button class="password-toggle"
                     type="button"
                     aria-label="비밀번호 표시"
                     aria-controls="password"
                     aria-pressed="false">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+              <svg viewBox="0 0 24 24"
+                   aria-hidden="true"
+                   focusable="false">
+
                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
                 <circle cx="12" cy="12" r="3"/>
                 <path class="eye-slash" d="M3 3 21 21"/>
@@ -95,32 +143,50 @@
             </button>
           </div>
 
-          <div id="password-rules" class="password-feedback">
-            <span id="rule-letter" class="validation-item">영문 포함</span>
-            <span id="rule-number" class="validation-item">숫자 포함</span>
-            <span id="rule-length" class="validation-item">8자 이상</span>
+          <div id="password-rules"
+               class="password-feedback">
+
+            <span id="rule-letter"
+                  class="validation-item">
+              영문 포함
+            </span>
+
+            <span id="rule-number"
+                  class="validation-item">
+              숫자 포함
+            </span>
+
+            <span id="rule-length"
+                  class="validation-item">
+              8자 이상
+            </span>
           </div>
         </div>
 
+        <!-- 비밀번호 확인 -->
         <div class="signup-field confirm-field">
           <label for="passwordConfirm">비밀번호 확인</label>
 
           <div class="password-input-wrap">
             <input id="passwordConfirm"
-                  name="passwordConfirm"
-                  type="password"
-                  autocomplete="new-password"
-                  minlength="8"
-                  placeholder="비밀번호를 한 번 더 입력해 주세요."
-                  aria-describedby="password-match"
-                  required>
+                   name="passwordConfirm"
+                   type="password"
+                   autocomplete="new-password"
+                   minlength="8"
+                   placeholder="비밀번호를 한 번 더 입력해 주세요."
+                   aria-describedby="password-match"
+                   required>
 
             <button class="password-toggle"
                     type="button"
                     aria-label="비밀번호 확인 표시"
                     aria-controls="passwordConfirm"
                     aria-pressed="false">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+
+              <svg viewBox="0 0 24 24"
+                   aria-hidden="true"
+                   focusable="false">
+
                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
                 <circle cx="12" cy="12" r="3"/>
                 <path class="eye-slash" d="M3 3 21 21"/>
@@ -128,33 +194,43 @@
             </button>
           </div>
 
-          <div class="password-feedback" aria-live="polite">
-            <span id="password-match" class="validation-item">
+          <div class="password-feedback"
+               aria-live="polite">
+
+            <span id="password-match"
+                  class="validation-item">
               새 비밀번호와 일치하는지 확인해 주세요.
             </span>
           </div>
         </div>
 
-        <button class="signup-submit full-width" type="submit">
+        <button class="signup-submit full-width"
+                type="submit">
           가입하기
         </button>
 
         <p class="signup-login full-width">
           이미 계정이 있으신가요?
-          <a href="login.html" th:href="@{/login}">로그인</a>
-        </p>
-      </form>
 
+          <a href="login.html"
+             th:href="@{/login}">
+            로그인
+          </a>
+        </p>
+
+      </form>
     </section>
   </main>
 
-  <!-- 아이디 확인 -->
-  <script src="../../static/JS/signup.js/ID_check.js"
-          th:src="@{/js/ID_check.js}"></script>
-  
+  <!-- 사용자 아이디 중복확인 -->
+  <script src="../../static/JS/signup/ID_check.js"
+          th:src="@{/JS/signup/ID_check.js}">
+  </script>
+
   <!-- 비밀번호 확인 -->
-  <script src="../../static/JS/signup.js/Password_check.js"
-          th:src="@{/js/Password_check.js}"></script>
+  <script src="../../static/JS/signup/Password_check.js"
+          th:src="@{/JS/signup/Password_check.js}">
+  </script>
 
 </body>
 </html>
