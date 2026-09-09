@@ -65,7 +65,7 @@ class AuthAndPasswordFlowTests {
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/login"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/login/hospital")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/login.css")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/login.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"login-card hospital-card\"")));
     }
 
@@ -118,7 +118,7 @@ class AuthAndPasswordFlowTests {
                                 "직원", Role.USER, ApprovalStatus.APPROVED, null, null)))))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/password-change"))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/password-reset.css")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/password-reset.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-form\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-submit\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/JS/password-rest/Password_check.js")));
@@ -155,7 +155,7 @@ class AuthAndPasswordFlowTests {
         mockMvc.perform(get("/password/reset"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/password-reset"))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/password-reset.css")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/password-reset.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-notice\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("소속 병동 관리자")));
     }

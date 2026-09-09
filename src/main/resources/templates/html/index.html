@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요양병원 안전 모니터링</title>
+    <link rel="stylesheet" th:href="@{/css/auth/domain.css}" href="../../static/css/auth/domain.css">
+</head>
+<body>
+    <main class="domain-page">
+        <section class="domain-content" aria-labelledby="domain-title">
+            <header class="domain-heading">
+                <p class="domain-eyebrow">AI 영상 기반</p>
+                <h1 id="domain-title">요양병원 안전 모니터링</h1>
+                <p class="domain-description">이용 하실 요양병원의 도메인을 입력해주세요.</p>
+            </header>
+
+            <form class="domain-card" action="access-type.html" th:action="@{/domain}" method="get" th:method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <label for="hospital-domain">병원 도메인</label>
+                <input
+                    id="hospital-domain"
+                    name="hospitalDomain"
+                    th:value="${hospitalDomain}"
+                    type="text"
+                    placeholder="도메인을 입력해주세요."
+                    autocomplete="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    required
+                    aria-describedby="domain-error"
+                    th:attr="aria-invalid=${domainError != null}"
+                >
+                <p id="domain-error" class="domain-error" role="alert"
+                   th:if="${domainError != null}" th:text="${domainError}"></p>
+                <button type="submit">
+                    <span>접속하기</span>
+                    <span class="button-arrow" aria-hidden="true">→</span>
+                </button>
+                <p class="domain-help">도메인을 모르는 경우 관리자에게 문의해 주세요.</p>
+            </form>
+        </section>
+
+    </main>
+
+</body>
+</html>

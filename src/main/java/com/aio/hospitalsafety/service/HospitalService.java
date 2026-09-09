@@ -2,13 +2,20 @@
 package com.aio.hospitalsafety.service;
 
 import com.aio.hospitalsafety.domain.Hospital;
+import com.aio.hospitalsafety.dto.HospitalDto;
 import com.aio.hospitalsafety.mapper.HospitalMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-/** 로그인 1단계에서 병원 구분 ID가 실제 등록된 병원인지 확인한다. */
+/**
+ * TB_HOSPITAL 조회를 담당한다.
+ *
+ * findRegisteredHospital: 2단계 로그인(AuthController)에서 사용.
+ * findHospitalByDomain: 도메인 선택/회원가입(HomeController, SignupService)에서 사용.
+ * 두 메서드 모두 결국 같은 테이블을 조회하므로 추후 하나로 통합하는 것이 좋다.
+ */
 @Service
 public class HospitalService {
 
@@ -22,5 +29,12 @@ public class HospitalService {
     @Transactional(readOnly = true)
     public Optional<Hospital> findRegisteredHospital(String hospitalId) {
         return hospitalMapper.findByHospitalId(hospitalId.trim());
+    }
+
+    public HospitalDto findHospitalByDomain(String hospitalDomain) {
+        if (hospitalDomain == null || hospitalDomain.isBlank()) {
+            return null;
+        }
+        return hospitalMapper.findHospitalByDomain(hospitalDomain.strip());
     }
 }
