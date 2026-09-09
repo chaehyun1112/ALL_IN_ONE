@@ -1,3 +1,4 @@
+// PGH
   const idInput = document.getElementById("user-id");
     const idButton = document.getElementById("id-check-button");
     const idMessage = document.getElementById("id-check-message");
