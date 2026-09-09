@@ -1,14 +1,6 @@
 ﻿"use strict";
 
-// 프런트엔드 시연 데이터입니다. 새로고침하면 초기화되며 실제 계정은 변경하지 않습니다.
-const adminUsers = [
-    { userId: "user.kim01", name: "김서윤", ward: "A병동", status: "PENDING" },
-    { userId: "user.kang02", name: "강하은", ward: "C병동", status: "PENDING" },
-    { userId: "user.park03", name: "박지영", ward: "B병동", status: "PENDING" },
-    { userId: "user.lee04", name: "이하늘", ward: "D병동", status: "PENDING" },
-    { userId: "user.choi05", name: "최유진", ward: "C병동", status: "PENDING" },
-    { userId: "user.jung06", name: "정다은", ward: "F병동", status: "PENDING" }
-];
+let adminUsers = [];
 let adminActiveStatus = "PENDING";
 let adminSearchQuery = "";
 let adminSelectedUser = null;
@@ -17,7 +9,6 @@ let adminToastTimer;
 const adminRows = document.querySelector("#admin-user-rows");
 const adminTabs = Array.from(document.querySelectorAll("[data-status]"));
 const adminDialog = document.querySelector("#admin-action-dialog");
-const adminWardSelect = document.querySelector("#admin-ward-select");
 
 function showAdminFeedback(message) {
     const feedback = document.querySelector("#admin-feedback");
@@ -28,7 +19,7 @@ function showAdminFeedback(message) {
 }
 
 function renderAdminUsers() {
-    const currentUsers = adminUsers.filter(user => user.status !== "REJECTED");
+    const currentUsers = adminUsers;
     document.querySelector("#admin-total-count").textContent = `${currentUsers.length}명`;
     document.querySelector("#admin-approved-count").textContent = `${currentUsers.filter(user => user.status === "APPROVED").length}명`;
     document.querySelector("#admin-pending-count").textContent = `${currentUsers.filter(user => user.status === "PENDING").length}명`;
@@ -47,7 +38,7 @@ function renderAdminUsers() {
         actions.className = "admin-row-actions";
         const userActions = user.status === "PENDING"
             ? [["APPROVE", "✓ 승인", "admin-approve"], ["REJECT", "× 반려", "admin-reject"]]
-            : [["ASSIGN", "병동 변경", "admin-approve"]];
+            : [];
         for (const [action, label, className] of userActions) {
             const button = document.createElement("button");
             button.type = "button";
@@ -102,37 +93,54 @@ function openAdminAction(user, action) {
     adminSelectedUser = user;
     adminAction = action;
     const isReject = action === "REJECT";
-    const isAssign = action === "ASSIGN";
-    document.querySelector("#admin-dialog-title").textContent = isReject ? "가입 신청 반려" : isAssign ? "담당 병동 변경" : "가입 신청 승인";
+    document.querySelector("#admin-dialog-title").textContent = isReject ? "가입 신청 반려" : "가입 신청 승인";
     document.querySelector("#admin-dialog-description").textContent = isReject
         ? `${user.name}님의 가입 신청을 반려하시겠습니까?`
-        : isAssign ? `${user.name} (${user.userId})님의 담당 병동을 선택해주세요.` : `${user.name}님의 가입 신청을 승인하시겠습니까?`;
-    document.querySelector("#admin-ward-field").hidden = !isAssign;
-    adminWardSelect.disabled = !isAssign;
-    adminWardSelect.required = isAssign;
-    adminWardSelect.value = user.ward;
-    document.querySelector("#admin-dialog-confirm").textContent = isReject ? "반려하기" : isAssign ? "배정 변경" : "승인하기";
+        : `${user.name}님의 가입 신청을 승인하시겠습니까?`;
+    document.querySelector("#admin-dialog-confirm").textContent = isReject ? "반려하기" : "승인하기";
     adminDialog.showModal();
 }
 
 document.querySelector("#admin-dialog-cancel").addEventListener("click", () => adminDialog.close());
-document.querySelector("#admin-action-form").addEventListener("submit", event => {
+document.querySelector("#admin-action-form").addEventListener("submit", async event => {
     event.preventDefault();
     if (!adminSelectedUser) return;
-    if (adminAction === "REJECT") {
-        adminSelectedUser.status = "REJECTED";
-    } else if (adminAction === "ASSIGN") {
-        adminSelectedUser.ward = adminWardSelect.value;
-    } else {
-        adminSelectedUser.status = "APPROVED";
+    const confirmButton = document.querySelector("#admin-dialog-confirm");
+    const isReject = adminAction === "REJECT";
+    const actionPath = isReject ? "reject" : "approve";
+    confirmButton.disabled = true;
+    try {
+        const response = await fetch(`/api/admin/users/${encodeURIComponent(adminSelectedUser.userId)}/${actionPath}`, {
+            method: isReject ? "DELETE" : "PATCH",
+            headers: { "Accept": "application/json" }
+        });
+        if (!response.ok) throw new Error(`관리자 처리 실패: ${response.status}`);
+        adminDialog.close();
+        await loadAdminUsers(true);
+        adminTabs.find(tab => tab.dataset.status === adminActiveStatus).focus();
+        showAdminFeedback(isReject ? "가입 신청을 반려했습니다." : "가입 신청을 승인했습니다.");
+    } catch (error) {
+        showAdminFeedback("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+        confirmButton.disabled = false;
+        adminSelectedUser = null;
     }
-    const message = adminAction === "REJECT" ? "가입 신청을 반려했습니다." : adminAction === "ASSIGN" ? "담당 병동을 변경했습니다." : "가입 신청을 승인했습니다.";
-    adminDialog.close();
-    renderAdminUsers();
-    adminTabs.find(tab => tab.dataset.status === adminActiveStatus).focus();
-    showAdminFeedback(message);
-    adminSelectedUser = null;
 });
+
+async function loadAdminUsers(silent = false) {
+    try {
+        const response = await fetch("/api/admin/users", {
+            headers: { "Accept": "application/json" }
+        });
+        if (!response.ok) throw new Error(`사용자 목록 조회 실패: ${response.status}`);
+        adminUsers = await response.json();
+        renderAdminUsers();
+    } catch (error) {
+        adminUsers = [];
+        renderAdminUsers();
+        if (!silent) showAdminFeedback("사용자 목록을 불러오지 못했습니다.");
+    }
+}
 
 document.querySelector("#admin-logout").addEventListener("click", () => {
     showAdminFeedback("현재는 화면 미리보기입니다. 로그아웃은 로그인 기능 연동 후 사용할 수 있습니다.");
@@ -149,6 +157,6 @@ function updateAdminClock() {
     clock.textContent = `${values.year}년 ${values.month}월 ${values.day}일 ${values.hour}:${values.minute}`;
 }
 
-renderAdminUsers();
+loadAdminUsers();
 updateAdminClock();
 setInterval(updateAdminClock, 30000);
