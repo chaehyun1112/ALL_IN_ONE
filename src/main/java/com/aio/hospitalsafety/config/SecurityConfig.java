@@ -43,7 +43,7 @@ public class SecurityConfig {
                 // authorizeHttpRequests: URL별 접근 권한을 설정한다.
                 .authorizeHttpRequests(auth -> auth
                         // 로그인 화면, 재설정 화면, 정적 파일은 로그인하지 않아도 접근할 수 있다.
-                        .requestMatchers("/", "/domain", "/access-type", "/login", "/login/user", "/signup", "/api/users/check-user-id",
+                        .requestMatchers("/", "/domain", "/login", "/login/user", "/signup", "/api/users/check-user-id",
                                 "/password/reset", "/css/**", "/JS/**", "/image/**", "/error").permitAll()
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
                         // 위에서 허용하지 않은 나머지 URL은 로그인한 사용자만 접근할 수 있다.

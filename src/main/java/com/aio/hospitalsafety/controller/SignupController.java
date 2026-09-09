@@ -54,7 +54,7 @@ public class SignupController {
                 signupService.getWardsByHospital(hospitalDomain)
         );
 
-        return "html/signup";
+        return "html/auth/signup";
     }
 
     // 회원가입 처리
@@ -82,7 +82,7 @@ public class SignupController {
                     signupService.getWardsByHospital(hospitalDomain)
             );
 
-            return "html/signup";
+            return "html/auth/signup";
         }
 
         try {
@@ -101,7 +101,7 @@ public class SignupController {
                     signupService.getWardsByHospital(hospitalDomain)
             );
 
-            return "html/signup";
+            return "html/auth/signup";
         }
 
         redirectAttributes.addFlashAttribute(
