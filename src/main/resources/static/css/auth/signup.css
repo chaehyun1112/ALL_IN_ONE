@@ -25,7 +25,7 @@
   padding: 24px 20px;
 
   /* Figma 기준: 1536×826 화면에서 배경 상단 -71px */
-  background-image: url("../image/login.png");
+  background-image: url("../../image/login.png");
   background-repeat: no-repeat;
   background-position: center 35.8586%;
   background-size: cover;
