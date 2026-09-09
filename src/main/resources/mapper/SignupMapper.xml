@@ -52,6 +52,7 @@
             hosp_div_id,
             ward_id,
             emp_nm,
+            email,
             role_cd,
             auth_st
         )
@@ -61,6 +62,7 @@
             #{hospDivId},
             #{wardId,jdbcType=BIGINT},
             #{userName},
+            #{email},
             'USER',
             'PENDING'
         )

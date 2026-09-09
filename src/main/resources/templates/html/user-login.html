@@ -36,7 +36,10 @@
           <input id="password" name="password" type="password" placeholder="비밀번호를 입력해 주세요."
                  autocomplete="current-password" required>
         </div>
-        <div class="recovery-row"><a th:href="@{/password/reset}" href="/password/reset">비밀번호 재설정</a></div>
+        <div class="recovery-row">
+          <a th:href="@{/id/find}" href="/id/find">아이디 찾기</a>
+          <a th:href="@{/password/reset}" href="/password/reset">비밀번호 재설정</a>
+        </div>
         <button class="login-button" type="submit">로그인</button>
         <p class="signup-row">병원을 변경하시겠어요?<a th:href="@{/login}" href="/login">다른 병원 선택</a></p>
       </form>

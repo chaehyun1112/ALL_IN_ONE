@@ -96,6 +96,20 @@
                  value="false">
         </div>
 
+        <!-- 이메일 -->
+        <div class="signup-field email-field">
+          <label for="email">이메일</label>
+
+          <input id="email"
+                 name="email"
+                 th:field="*{email}"
+                 type="email"
+                 maxlength="100"
+                 autocomplete="email"
+                 placeholder="아이디 찾기에 사용할 이메일을 입력해 주세요."
+                 required>
+        </div>
+
         <!-- 담당 병동 -->
         <div class="signup-field ward-field">
           <label for="wardId">담당 병동</label>

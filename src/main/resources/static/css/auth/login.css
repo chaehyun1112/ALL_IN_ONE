@@ -135,6 +135,24 @@ input:focus-visible, button:focus-visible, a:focus-visible {
   margin-top: 22px;
 }
 
+/* 아이디 찾기 + 비밀번호 재설정 두 링크를 한 줄에 나란히 오른쪽 정렬한다. */
+.login-card .recovery-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.login-card .recovery-row a {
+  display: inline;
+  width: auto;
+  margin-top: 0;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 13px;
+  color: #527361;
+}
+
 [hidden] { 
   display: none !important; 
 }

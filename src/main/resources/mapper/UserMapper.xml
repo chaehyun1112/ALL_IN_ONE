@@ -48,4 +48,16 @@
         SET EMP_PW = #{passwordHash}, UPD_DT = CURRENT_TIMESTAMP
         WHERE EMP_ID = #{userId}
     </update>
+
+    <!--
+      id="findMatchingUserIdsForFindId"는 UserMapper의 같은 이름 메서드와 연결된다.
+      아이디 찾기 본인 확인용으로 PW 등 다른 값은 조회하지 않고 EMP_ID만 반환한다.
+    -->
+    <select id="findMatchingUserIdsForFindId" resultType="java.lang.String">
+        SELECT EMP_ID
+        FROM TB_EMP
+        WHERE HOSP_DIV_ID = #{hospitalId}
+          AND EMP_NM = #{userName}
+          AND EMAIL = #{email}
+    </select>
 </mapper>

@@ -46,7 +46,7 @@ public class SignupController {
 
         model.addAttribute(
                 "signup",
-                new Signup(null, null, null, null, null)
+                new Signup(null, null, null, null, null, null)
         );
 
         model.addAttribute(
