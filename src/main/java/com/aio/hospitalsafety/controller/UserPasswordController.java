@@ -49,8 +49,8 @@ public class UserPasswordController {
      */
     @GetMapping("/password/reset")
     public String resetGuide() {
-        // templates/html/password-reset.html을 렌더링한다.
-        return "html/password-reset";
+        // templates/html/auth/password-reset.html을 렌더링한다.
+        return "html/auth/password-reset";
     }
 
     /**
@@ -66,7 +66,7 @@ public class UserPasswordController {
             // 빈 DTO를 넣어야 HTML의 th:object="${passwordChangeForm}"이 정상 동작한다.
             model.addAttribute("passwordChangeForm", new PasswordChangeForm());
         }
-        return "html/password-change";
+        return "html/auth/password-change";
     }
 
     /**
@@ -92,7 +92,7 @@ public class UserPasswordController {
         if (bindingResult.hasErrors()) {
             // 검증 실패 화면의 HTML에 사용자가 입력한 PW가 다시 포함되지 않도록 비운다.
             clearPasswordFields(form);
-            return "html/password-change";
+            return "html/auth/password-change";
         }
 
         // Authentication#getName()에는 로그인에 사용한 직원 ID가 들어 있다.
@@ -101,7 +101,7 @@ public class UserPasswordController {
         if (!(authentication.getPrincipal() instanceof HospitalUserDetails userDetails)) {
             model.addAttribute("userError", "병원 로그인 정보가 없습니다. 다시 로그인해 주세요.");
             clearPasswordFields(form);
-            return "html/password-change";
+            return "html/auth/password-change";
         }
 
         PasswordChangeResult result = userService.changePassword(
@@ -112,13 +112,13 @@ public class UserPasswordController {
             // password-change.html의 th:errors="*{currentPassword}"에서 출력된다.
             bindingResult.rejectValue("currentPassword", "mismatch", "현재 비밀번호가 일치하지 않습니다.");
             clearPasswordFields(form);
-            return "html/password-change";
+            return "html/auth/password-change";
         }
         if (result == PasswordChangeResult.USER_NOT_FOUND) {
             // 특정 필드 오류가 아니라 계정 전체 오류이므로 Model에 메시지를 넣는다.
             model.addAttribute("userError", "사용자 정보를 확인할 수 없습니다.");
             clearPasswordFields(form);
-            return "html/password-change";
+            return "html/auth/password-change";
         }
 
         // 변경 성공 후 인증 정보와 기존 세션을 제거하고 새 비밀번호로 다시 로그인한다.

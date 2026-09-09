@@ -1,6 +1,8 @@
 // PGH
 package com.aio.hospitalsafety.controller;
 
+import com.aio.hospitalsafety.common.SessionConstants;
+
 import com.aio.hospitalsafety.domain.Hospital;
 import com.aio.hospitalsafety.domain.User;
 import com.aio.hospitalsafety.domain.Role;
@@ -60,24 +62,26 @@ class AuthAndPasswordFlowTests {
 
     /** 로그인 1단계 화면이 정상 렌더링되고 병원 ID 전송 주소를 포함하는지 확인한다. */
     @Test
-    void showsHospitalLoginPage() throws Exception {
+    void redirectsToDomainPageWhenHospitalIsNotSelected() throws Exception {
         mockMvc.perform(get("/login"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("html/login"))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/login/hospital")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/login.css")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"login-card hospital-card\"")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/access-type"));
     }
-
     /** 비밀번호 변경 후 로그인 화면에 완료 안내가 표시되는지 확인한다. */
     @Test
-    void showsPasswordChangedMessageOnLoginPage() throws Exception {
-        mockMvc.perform(get("/login").param("passwordChanged", ""))
-                .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.")));
-    }
+    void showsLoginPageAfterHospitalSelection() throws Exception {
+        when(hospitalService.findRegisteredHospital("HOSP01"))
+                .thenReturn(Optional.of(new Hospital("HOSP01", "테스트병원")));
 
+        mockMvc.perform(get("/login")
+                        .sessionAttr(SessionConstants.HOSPITAL_DOMAIN, "HOSP01")
+                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("html/auth/login"))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/login.css")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("userLoginKey")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/signup")));
+    }
     /** 등록 병원을 선택하면 병원 정보를 Session에 저장하고 사용자 로그인 화면으로 이동한다. */
     @Test
     void movesToUserLoginAfterHospitalSelection() throws Exception {
@@ -94,9 +98,10 @@ class AuthAndPasswordFlowTests {
         // 두 번째 화면은 첫 단계에서 저장한 병원 Session 값이 있을 때만 열려야 한다.
         mockMvc.perform(get("/login/user")
                         .sessionAttr(LOGIN_HOSPITAL_ID, "HOSP01")
-                        .sessionAttr(LOGIN_HOSPITAL_NAME, "테스트병원"))
+                        .sessionAttr(LOGIN_HOSPITAL_NAME, "테스트병원")
+                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/user-login"))
+                .andExpect(view().name("html/auth/login"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("userLoginKey")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("테스트병원")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("비밀번호 재설정")));
@@ -117,7 +122,7 @@ class AuthAndPasswordFlowTests {
                         .with(user(new HospitalUserDetails(new User("USER01", "unused", "HOSP01", null,
                                 "직원", Role.USER, ApprovalStatus.APPROVED, null, null)))))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/password-change"))
+                .andExpect(view().name("html/auth/password-change"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/password-reset.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-form\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-submit\"")))
@@ -154,9 +159,11 @@ class AuthAndPasswordFlowTests {
     void showsPasswordResetGuide() throws Exception {
         mockMvc.perform(get("/password/reset"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/password-reset"))
+                .andExpect(view().name("html/auth/password-reset"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/password-reset.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"reset-notice\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("소속 병동 관리자")));
     }
 }
+
+

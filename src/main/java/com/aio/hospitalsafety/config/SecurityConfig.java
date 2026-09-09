@@ -1,7 +1,10 @@
 // PGH
 package com.aio.hospitalsafety.config;
 
+import com.aio.hospitalsafety.common.SessionConstants;
+import com.aio.hospitalsafety.domain.Role;
 import com.aio.hospitalsafety.domain.User;
+import jakarta.servlet.http.HttpSession;
 import com.aio.hospitalsafety.mapper.UserMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,13 +14,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * 애플리케이션 전체의 로그인, 로그아웃, URL 접근 권한, 비밀번호 암호화 방식을 설정한다.
  *
  * 로그인 요청 처리 흐름
- * 1. login.html에서 병원 ID를 확인하고 user-login.html로 이동한다.
- * 2. user-login.html이 병원 ID와 직원 ID를 합친 userLoginKey, password를 전송한다.
+ * 1. 도메인 화면에서 병원을 확인하고 접속 유형 선택 화면으로 이동한다.
+ * 2. login.html이 병원 ID와 직원 ID를 합친 userLoginKey, password를 전송한다.
  * 3. Spring Security가 userDetailsService()를 호출해 병원 ID와 직원 ID로 TB_EMP를 조회한다.
  * 4. Spring Security가 입력 PW와 DB의 BCrypt 해시를 passwordEncoder()로 비교한다.
  * 5. 성공하면 인증 정보를 HTTP Session에 저장하고 /dashboard로 이동한다.
@@ -43,8 +48,12 @@ public class SecurityConfig {
                 // authorizeHttpRequests: URL별 접근 권한을 설정한다.
                 .authorizeHttpRequests(auth -> auth
                         // 로그인 화면, 재설정 화면, 정적 파일은 로그인하지 않아도 접근할 수 있다.
-                        .requestMatchers("/login", "/login/hospital", "/login/user",
+                        .requestMatchers("/", "/domain", "/access-type", "/signup",
+                                "/api/users/check-user-id",
+                                "/login", "/login/hospital", "/login/user",
                                 "/password/reset", "/css/**", "/JS/**", "/image/**", "/error").permitAll()
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/dashboard", "/user/**").hasRole("USER")
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
                         // 위에서 허용하지 않은 나머지 URL은 로그인한 사용자만 접근할 수 있다.
                         // TODO(화면 URL 확정 필요): 관제 URL이 정해지면 해당 URL에는
@@ -60,14 +69,19 @@ public class SecurityConfig {
                         // userLoginKey는 "병원 구분 ID|직원 ID" 형식의 내부 인증용 값이다.
                         .usernameParameter("userLoginKey")
                         // 두 번째 인자 true는 로그인 전에 접근하려던 URL보다 대시보드를 우선한다는 뜻이다.
-                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler((request, response, authentication) -> {
+                            boolean admin = authentication.getAuthorities().stream()
+                                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+                            String destination = admin ? "/admin" : "/dashboard";
+                            response.sendRedirect(request.getContextPath() + destination);
+                        })
                         // 로그인 실패 시 error 쿼리 파라미터를 붙여 화면에 오류를 표시한다.
                         .failureUrl("/login/user?error")
                         // 로그인 처리와 관련된 URL은 비로그인 상태에서도 접근 가능해야 한다.
                         .permitAll())
                 // 로그아웃 요청 역시 Spring Security가 처리한다.
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessUrl("/")
                         // 로그아웃 후 서버 세션과 브라우저의 세션 쿠키를 모두 제거한다.
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"));
@@ -88,7 +102,7 @@ public class SecurityConfig {
         // userLoginKey -> { ... }는 UserDetailsService의 loadUserByUsername 메서드를
         // 람다식으로 구현한 것이다.
         return userLoginKey -> {
-            // userLoginKey는 user-login.html이 "병원ID|직원ID"로 조합해 전송한다.
+            // userLoginKey는 login.html이 "병원ID|직원ID"로 조합해 전송한다.
             // TODO(ID 문자 규칙 확정 필요): 두 ID에 구분자 |를 허용하지 않는 규칙을 명세에 추가하거나,
             // 허용해야 한다면 구분자 조합 대신 별도 AuthenticationProvider 방식으로 변경한다.
             // limit=2로 분리하여 직원 ID 안에 추가 문자가 있어도 두 부분까지만 만든다.
@@ -109,6 +123,23 @@ public class SecurityConfig {
 
             // DB의 passwordHash는 이미 BCrypt로 해시된 값이다.
             // Spring Security가 사용자가 입력한 비밀번호와 이 해시를 안전하게 비교한다.
+            ServletRequestAttributes requestAttributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpSession session = requestAttributes == null
+                    ? null
+                    : requestAttributes.getRequest().getSession(false);
+            String accessType = session == null
+                    ? null
+                    : (String) session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE);
+            Role requiredRole = switch (accessType == null ? "" : accessType) {
+                case "admin" -> Role.ADMIN;
+                case "user" -> Role.USER;
+                default -> null;
+            };
+            if (requiredRole == null || user.role() != requiredRole) {
+                throw new UsernameNotFoundException("선택한 접속 유형과 계정 권한이 일치하지 않습니다.");
+            }
+
             return new HospitalUserDetails(user);
         };
     }
