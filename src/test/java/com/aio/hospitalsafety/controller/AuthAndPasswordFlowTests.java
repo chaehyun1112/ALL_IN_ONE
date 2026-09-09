@@ -228,6 +228,7 @@ class AuthAndPasswordFlowTests {
                         .param("passwordConfirm", "NewPassword123"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/password-reset"))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("아이디 또는 이름이 일치하지 않습니다.")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"label-error\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("* 잘못 입력했습니다!")));
     }
 }

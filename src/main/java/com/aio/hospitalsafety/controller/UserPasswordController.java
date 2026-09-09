@@ -91,7 +91,9 @@ public class UserPasswordController {
                 hospitalId, form.getEmployeeId().trim(), form.getEmployeeName().trim(), form.getNewPassword());
 
         if (result == PasswordResetResult.IDENTITY_MISMATCH) {
-            model.addAttribute("resetError", "아이디 또는 이름이 일치하지 않습니다.");
+            // 화면에서는 아이디/이름 라벨 옆에 이 문구를 그대로 붙여 보여준다.
+            // 어느 쪽이 틀렸는지는 알려주지 않으므로 두 라벨에 동일하게 표시한다.
+            model.addAttribute("resetError", "* 잘못 입력했습니다!");
             clearPasswordFields(form);
             return "html/password-reset";
         }
