@@ -49,6 +49,10 @@ public class SecurityConfig {
                         // 위에서 허용하지 않은 나머지 URL은 로그인한 사용자만 접근할 수 있다.
                         // TODO(화면 URL 확정 필요): 관제 URL이 정해지면 해당 URL에는
                         // hasAuthority("STATUS_APPROVED") 조건을 별도로 먼저 추가해야 한다.
+
+                        .requestMatchers("/admin/**", "/api/admin/**")
+                        .hasRole("ADMIN")
+
                         .anyRequest().authenticated())
                 // formLogin: 직원 ID/PW를 사용하는 세션 기반 로그인을 설정한다.
                 .formLogin(form -> form

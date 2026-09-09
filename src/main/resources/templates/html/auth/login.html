@@ -16,6 +16,14 @@
 </head>
 
 <body>
+
+  <!-- 회원가입 완료 메시지를 JavaScript에 전달 -->
+  <p id="signupSuccessMessage"
+     th:if="${signupSuccessMessage}"
+     th:text="${signupSuccessMessage}"
+     hidden>
+  </p>
+
   <main class="login-page">
     <section class="login-content"
              aria-labelledby="hospital-name">
@@ -118,6 +126,6 @@
           th:src="@{/JS/signup/signup-success.js}"
           defer>
   </script>
-</body>
 
+</body>
 </html>
