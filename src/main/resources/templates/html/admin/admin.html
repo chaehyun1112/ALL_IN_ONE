@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Spring Security CSRF -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <title>간호사 회원 관리 | 병동 통합 관제</title>
+
+    <link rel="stylesheet"
+          href="../../../static/css/admin/admin.css"
+          th:href="@{/css/admin/admin.css}">
+
+    <script src="../../../static/JS/admin/admin.js"
+            th:src="@{/JS/admin/admin.js}"
+            defer></script>
+</head>
+
+<body>
+<header class="admin-topbar">
+    <div class="admin-brand">
+        <strong>서비스 이름 주실 분</strong>
+        <span>병동 통합 관제</span>
+    </div>
+
+    <div class="admin-topbar-actions">
+        <time id="admin-clock"></time>
+
+        <form action="/logout" th:action="@{/logout}" method="post">
+            <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
+        </form>
+    </div>
+</header>
+
+<main class="admin-page" aria-labelledby="admin-title">
+    <header class="admin-heading">
+        <h1 id="admin-title">간호사 회원 관리</h1>
+        <p>가입을 신청한 간호사를 승인하고 담당 병동을 배정합니다.</p>
+    </header>
+
+    <section class="admin-summary" aria-label="회원 현황">
+        <article class="admin-stat">
+            <h2>전체</h2>
+            <strong id="admin-total-count" class="admin-count-total">0명</strong>
+        </article>
+
+        <article class="admin-stat">
+            <h2>승인완료</h2>
+            <strong id="admin-approved-count" class="admin-count-approved">0명</strong>
+        </article>
+
+        <article class="admin-stat">
+            <h2>승인대기</h2>
+            <strong id="admin-pending-count" class="admin-count-pending">0명</strong>
+        </article>
+    </section>
+
+    <section class="admin-panel" aria-labelledby="admin-list-title">
+        <header class="admin-panel-heading">
+            <h2 id="admin-list-title">가입 신청 및 병동 배정</h2>
+            <p>이름 또는 아이디로 검색하고 승인 상태와 담당 병동을 관리합니다.</p>
+        </header>
+
+        <div class="admin-toolbar">
+            <form id="admin-search-form" class="admin-search" role="search">
+                <div class="admin-search-field">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                        <path d="m16 16 4 4"></path>
+                    </svg>
+
+                    <label class="visually-hidden" for="admin-search-input">
+                        이름 또는 아이디 검색
+                    </label>
+
+                    <input type="search"
+                           id="admin-search-input"
+                           placeholder="이름 또는 아이디 검색"
+                           autocomplete="off">
+                </div>
+
+                <button type="submit" class="admin-search-button">검색</button>
+            </form>
+
+            <div class="admin-tabs" role="tablist" aria-label="승인 상태">
+                <button type="button"
+                        id="admin-approved-tab"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="admin-list"
+                        tabindex="-1"
+                        data-status="APPROVED">
+                    승인완료
+                </button>
+
+                <button type="button"
+                        id="admin-pending-tab"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="admin-list"
+                        tabindex="0"
+                        data-status="PENDING">
+                    승인대기
+                </button>
+            </div>
+        </div>
+
+        <div id="admin-list"
+             class="admin-table-wrap"
+             role="tabpanel"
+             aria-labelledby="admin-pending-tab"
+             tabindex="0">
+
+            <table class="admin-table">
+                <caption class="visually-hidden">간호사 사용자 관리 목록</caption>
+
+                <thead>
+                <tr>
+                    <th scope="col">이름</th>
+                    <th scope="col">로그인 아이디</th>
+                    <th scope="col">배정 병동</th>
+                    <th scope="col">관리</th>
+                </tr>
+                </thead>
+
+                <tbody id="admin-user-rows"></tbody>
+            </table>
+
+            <p id="admin-empty" class="admin-empty" hidden>
+                해당하는 사용자가 없습니다.
+            </p>
+        </div>
+
+        <noscript>
+            <p>사용자 목록을 확인하려면 JavaScript를 활성화해주세요.</p>
+        </noscript>
+    </section>
+</main>
+
+<!-- 승인, 반려, 병동 변경, 비활성화 공용 팝업 -->
+<dialog id="admin-action-dialog"
+        class="admin-dialog"
+        aria-labelledby="admin-dialog-title">
+
+    <form id="admin-action-form">
+        <h2 id="admin-dialog-title">사용자 관리</h2>
+        <p id="admin-dialog-description"></p>
+
+        <div id="admin-ward-field" hidden>
+            <label for="admin-ward-select">변경할 병동</label>
+
+            <select id="admin-ward-select">
+                <option value="">병동을 선택해주세요</option>
+            </select>
+        </div>
+
+        <div class="admin-dialog-actions">
+            <button type="button" id="admin-dialog-cancel">취소</button>
+            <button type="submit" id="admin-dialog-confirm" class="admin-primary">
+                확인
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<p id="admin-feedback"
+   class="admin-toast"
+   role="status"
+   aria-live="polite"
+   hidden></p>
+
+<script src="../../../static/JS/auth/session-history.js"
+        th:src="@{/JS/auth/session-history.js}"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 class HomeControllerTests {
 
@@ -24,25 +25,22 @@ class HomeControllerTests {
     void setUp() {
         hospitalMapper = mock(HospitalMapper.class);
         mockMvc = MockMvcBuilders.standaloneSetup(
-                new HomeController(new HospitalService(hospitalMapper)), new AccessTypeController()).build();
+                new HomeController(new HospitalService(hospitalMapper))).build();
     }
 
     @Test
-    void registeredDomainOpensAccessTypeAndKeepsHospitalForLogin() throws Exception {
+    void registeredDomainOpensLoginAndKeepsHospitalInSession() throws Exception {
         when(hospitalMapper.findHospitalByDomain("test"))
                 .thenReturn(new HospitalDto("test", "늘푸른병원"));
         MockHttpSession session = new MockHttpSession();
 
         mockMvc.perform(post("/domain").param("hospitalDomain", " test ").session(session))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/access-type"))
+                .andExpect(redirectedUrl("/login"))
                 .andExpect(request().sessionAttribute(SessionConstants.HOSPITAL_DOMAIN, "test"));
-        mockMvc.perform(get("/access-type").session(session))
-                .andExpect(status().isOk())
-                .andExpect(view().name("html/access-type"));
         mockMvc.perform(get("/login").session(session))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/login"))
+                .andExpect(view().name("html/auth/login"))
                 .andExpect(model().attribute("hospitalName", "늘푸른병원"));
     }
 
@@ -52,7 +50,7 @@ class HomeControllerTests {
         session.setAttribute(SessionConstants.HOSPITAL_DOMAIN, "test");
         mockMvc.perform(post("/domain").param("hospitalDomain", "unknown").session(session))
                 .andExpect(status().isOk())
-                .andExpect(view().name("html/index"))
+                .andExpect(view().name("html/auth/index"))
                 .andExpect(model().attributeExists("domainError"))
                 .andExpect(model().attribute("hospitalDomain", "unknown"))
                 .andExpect(request().sessionAttributeDoesNotExist(SessionConstants.HOSPITAL_DOMAIN));
@@ -61,7 +59,7 @@ class HomeControllerTests {
     @Test
     void blankDomainDoesNotQueryDatabase() throws Exception {
         mockMvc.perform(post("/domain").param("hospitalDomain", "   "))
-                .andExpect(view().name("html/index"))
+                .andExpect(view().name("html/auth/index"))
                 .andExpect(model().attributeExists("domainError"));
         verifyNoInteractions(hospitalMapper);
     }
@@ -71,7 +69,7 @@ class HomeControllerTests {
         when(hospitalMapper.findHospitalByDomain("test"))
                 .thenThrow(new DataAccessResourceFailureException("unavailable"));
         mockMvc.perform(post("/domain").param("hospitalDomain", "test"))
-                .andExpect(view().name("html/index"))
+                .andExpect(view().name("html/auth/index"))
                 .andExpect(model().attribute("domainError",
                         "병원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요."));
     }

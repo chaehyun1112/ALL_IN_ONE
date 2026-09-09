@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>요양병원 안전 모니터링</title>
-    <link rel="stylesheet" th:href="@{/css/domain.css}" href="../../static/css/domain.css">
+    <link rel="stylesheet" th:href="@{/css/auth/domain.css}" href="../../static/css/auth/domain.css">
 </head>
 <body>
     <main class="domain-page">
@@ -15,7 +15,7 @@
                 <p class="domain-description">이용 하실 요양병원의 도메인을 입력해주세요.</p>
             </header>
 
-            <form class="domain-card" action="access-type.html" th:action="@{/domain}" method="get" th:method="post">
+            <form class="domain-card" action="/domain" th:action="@{/domain}" method="post">
                 <label for="hospital-domain">병원 도메인</label>
                 <input
                     id="hospital-domain"

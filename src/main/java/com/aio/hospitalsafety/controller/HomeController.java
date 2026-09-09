@@ -22,7 +22,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "html/index";
+        return "html/auth/index";
     }
 
     @PostMapping("/domain")
@@ -32,19 +32,19 @@ public class HomeController {
         model.addAttribute("hospitalDomain", hospitalDomain);
         if (hospitalDomain.isBlank()) {
             model.addAttribute("domainError", "병원 도메인을 입력해 주세요.");
-            return "html/index";
+            return "html/auth/index";
         }
         try {
             HospitalDto hospital = hospitalService.findHospitalByDomain(hospitalDomain);
             if (hospital == null) {
                 model.addAttribute("domainError", "등록되지 않은 병원 도메인입니다. 다시 확인해 주세요.");
-                return "html/index";
+                return "html/auth/index";
             }
             session.setAttribute(SessionConstants.HOSPITAL_DOMAIN, hospital.hospitalDomain());
-            return "redirect:/access-type";
+            return "redirect:/login";
         } catch (DataAccessException exception) {
             model.addAttribute("domainError", "병원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.");
-            return "html/index";
+            return "html/auth/index";
         }
     }
 
@@ -55,11 +55,12 @@ public class HomeController {
             HospitalDto hospital = hospitalService.findHospitalByDomain(hospitalDomain);
             if (hospital != null) {
                 model.addAttribute("hospitalName", hospital.hospitalName());
-                return "html/login";
+                model.addAttribute("hospitalId", hospital.hospitalDomain());
+                return "html/auth/login";
             }
         } catch (DataAccessException exception) {
             model.addAttribute("domainError", "병원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.");
-            return "html/index";
+            return "html/auth/index";
         }
         session.removeAttribute(SessionConstants.HOSPITAL_DOMAIN);
         return "redirect:/";
