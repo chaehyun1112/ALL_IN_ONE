@@ -69,6 +69,27 @@ class AuthAndPasswordFlowTests {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"login-card hospital-card\"")));
     }
 
+    /**
+     * 회귀 테스트: GET /login은 이미 선택된 병원 세션 값을 지우면 안 된다.
+     *
+     * user-login.html의 "다른 병원 선택" 링크(href="/login")가 브라우저 프리페치로
+     * 사용자가 클릭하지 않아도 조용히 호출될 수 있는데, 예전 구현은 이 GET에서
+     * LOGIN_HOSPITAL_ID/NAME을 무조건 지워서 비밀번호 재설정 등 이후 화면이
+     * 세션 없음으로 오인해 로그인 화면으로 튕기는 버그가 있었다.
+     */
+    @Test
+    void gettingLoginPageDoesNotClearExistingHospitalSelection() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        session.setAttribute(LOGIN_HOSPITAL_NAME, "테스트병원");
+
+        mockMvc.perform(get("/login").session(session))
+                .andExpect(status().isOk());
+
+        org.assertj.core.api.Assertions.assertThat(session.getAttribute(LOGIN_HOSPITAL_ID)).isEqualTo("HOSP01");
+        org.assertj.core.api.Assertions.assertThat(session.getAttribute(LOGIN_HOSPITAL_NAME)).isEqualTo("테스트병원");
+    }
+
     /** 비밀번호 변경 후 로그인 화면에 완료 안내가 표시되는지 확인한다. */
     @Test
     void showsPasswordChangedMessageOnLoginPage() throws Exception {

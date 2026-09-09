@@ -38,16 +38,23 @@ public class AuthController {
         this.hospitalService = hospitalService;
     }
 
-    /** 로그인 1단계인 병원 구분 ID 입력 화면을 보여준다. */
+    /**
+     * 로그인 1단계인 병원 구분 ID 입력 화면을 보여준다.
+     *
+     * 예전에는 여기서 Session의 LOGIN_HOSPITAL_ID/NAME을 무조건 지웠다("병원 변경 시
+     * 이전 선택값 제거" 의도). 하지만 GET 요청에 상태를 바꾸는 부작용을 넣으면 안 된다 —
+     * user-login.html의 "다른 병원 선택" 링크(href="/login")가 화면에 보이기만 해도
+     * 브라우저의 링크 프리페치(prefetch) 기능이 사용자가 클릭하지 않았는데도 조용히
+     * GET /login을 미리 요청해서, 방금 선택한 병원 정보가 세션에서 사라지는 버그가
+     * 있었다(비밀번호 재설정 링크가 로그인 화면으로 튕기는 문제로 발견됨).
+     * 병원을 바꾸는 실제 반영은 POST /login/hospital이 새 값으로 덮어쓰는 것만으로
+     * 충분하고, 이 화면 자체는 세션 값을 표시하지 않으므로 GET에서 지울 이유가 없다.
+     */
     @GetMapping("/login")
-    public String hospitalLogin(Authentication authentication, HttpSession session, Model model) {
+    public String hospitalLogin(Authentication authentication, Model model) {
         if (authentication != null && authentication.isAuthenticated()) {
             return "redirect:/dashboard";
         }
-
-        // 사용자가 "병원 변경"을 위해 1단계로 돌아온 경우 이전 선택값을 제거한다.
-        session.removeAttribute(LOGIN_HOSPITAL_ID);
-        session.removeAttribute(LOGIN_HOSPITAL_NAME);
         model.addAttribute("hospitalLoginForm", new HospitalLoginForm());
         return "html/login";
     }
