@@ -151,7 +151,7 @@ main{gap:16px}
   .alert-card{gap:7px}
   .alert-card p{font-size:12px;line-height:1.6}
   .alert-card h3{font-size:23px}
-
+}
 
 /* 공통 색상과 서체: 별도 설치 없이 시스템의 한글 글꼴을 사용합니다. */
 :root {
@@ -1424,5 +1424,3 @@ main {
 .alerts-panel .locate-room[aria-pressed="true"]:hover {
   background:#fff;
   border-color:#d9e1da}
-
-}
