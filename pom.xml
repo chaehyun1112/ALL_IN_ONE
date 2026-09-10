@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<maven.test.skip>true</maven.test.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -99,6 +100,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<addResources>true</addResources>
+					<systemPropertyVariables>
+						<spring.thymeleaf.cache>false</spring.thymeleaf.cache>
+						<spring.web.resources.cache.period>0</spring.web.resources.cache.period>
+						<spring.web.resources.chain.cache>false</spring.web.resources.chain.cache>
+					</systemPropertyVariables>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -49,6 +49,8 @@ public class SecurityConfig {
                                 "/password/reset", "/id/find",
                                 "/css/**", "/JS/**", "/js/**", "/image/**", "/error",
                                 "/", "/domain", "/access-type", "/signup", "/api/users/check-user-id").permitAll()
+                        // 병합 메모(tae + yejin): 관리자 승인 화면은 ADMIN 권한을 가진 계정만 접근할 수 있다.
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
                         // 위에서 허용하지 않은 나머지 URL은 로그인한 사용자만 접근할 수 있다.
                         // TODO(화면 URL 확정 필요): 관제 URL이 정해지면 해당 URL에는

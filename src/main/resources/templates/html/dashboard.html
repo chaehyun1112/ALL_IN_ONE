@@ -1,41 +1,357 @@
-<!-- PGH -->
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>대시보드 | 환자낙상예방</title>
-  <link rel="stylesheet" th:href="@{/css/auth/dashboard.css}" href="../../static/css/auth/dashboard.css">
-</head>
-<body>
-  <main class="dashboard-page">
-    <section class="dashboard-content">
-      <div class="dashboard-card">
-        <h1>로그인되었습니다.</h1>
-        <!-- Controller가 Model에 넣은 userId(현재 로그인 사용자의 직원 ID)를 화면에 출력한다. -->
-        <p><span th:text="${userId}">사용자</span>님, 환영합니다.</p>
+  <title>CareGuard · 병동 통합 관제</title>
 
-        <!-- 관리자가 APPROVED로 변경한 계정에만 실제 기능 영역을 보여준다. -->
-        <div class="dashboard-status" th:if="${approved}">
-          <h2>승인이 완료된 계정입니다.</h2>
-          <!-- TODO: 관제·조회 화면 URL이 확정되면 승인 사용자용 링크를 이 영역에 추가한다. -->
-          <div class="dashboard-actions">
-            <a th:href="@{/user/password}" href="/user/password">비밀번호 변경</a>
+  <!-- CSS 파일 연결 -->
+  <link
+    rel="stylesheet"
+    th:href="@{/css/dashboard.css}"
+  >
+</head>
+
+<body>
+  <!-- 상단 헤더 -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">+</div>
+      <strong>CareGuard</strong>
+      <span>병동 통합 관제</span>
+    </div>
+
+    <div class="header-actions">
+      <!-- 현재 시간 -->
+      <time id="clock"></time>
+
+      <!-- 메뉴 버튼 -->
+      <div class="header-menu">
+        <button
+          type="button"
+          class="menu-toggle"
+          id="menu-toggle"
+          aria-label="더보기"
+          aria-expanded="false"
+          aria-controls="header-menu-list"
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M5 6h14"></path>
+            <path d="M5 12h14"></path>
+            <path d="M5 18h14"></path>
+          </svg>
+        </button>
+
+        <nav
+          class="header-menu-list"
+          id="header-menu-list"
+          aria-label="대시보드 메뉴"
+          hidden
+        >
+          <a>조치기록</a>
+          <button
+            type="button"
+            id="settings-open"
+          >
+            설정
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 오늘의 안전 현황 -->
+    <div class="page-heading">
+      <section class="panel summary">
+        <h2>오늘의 안전 현황</h2>
+
+        <div class="counts">
+          <div class="count">
+            <span>정상 병실</span>
+            <b id="normal-count">15</b>
+          </div>
+
+          <div class="count caution">
+            <span>주의</span>
+            <b id="caution-count">1</b>
+          </div>
+
+          <div class="count urgent">
+            <span>긴급</span>
+            <b id="urgent-count">1</b>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="layout">
+      <!-- 병동 평면도 -->
+      <section class="panel floor-panel">
+        <div class="panel-heading">
+          <h2>병실별 안전 상태</h2>
+
+          <div class="legend">
+            <span>정상</span>
+            <span class="caution">주의</span>
+            <span class="urgent">긴급</span>
           </div>
         </div>
 
-        <!-- PENDING 사용자는 로그인은 가능하지만 관제·조회 기능을 표시하지 않는다. -->
-        <div class="dashboard-status pending" th:unless="${approved}">
-          <h2>관리자 승인 대기 중입니다.</h2>
-          <p>관리자가 권한을 승인한 후 관제 및 조회 기능을 사용할 수 있습니다.</p>
+        <div class="floor-toolbar">
+          <span>병동 평면도 · 총 17개 병실</span>
+
+          <!-- 위치 확인 후 나타나는 대응 등록 버튼 -->
+          <button
+            type="button"
+            id="response-open"
+            class="response-open"
+            style="visibility: hidden"
+            disabled
+          >
+            대응 등록
+          </button>
         </div>
 
-        <!-- 로그아웃은 상태를 변경하므로 링크(GET)가 아닌 CSRF 보호를 받는 POST form을 사용한다. -->
-        <form th:action="@{/logout}" method="post">
-          <button class="dashboard-logout" type="submit">로그아웃</button>
-        </form>
-      </div>
-    </section>
+        <div class="floor">
+          <!-- 위쪽 병실은 JS로 생성됩니다 -->
+          <div
+            class="room-row"
+            id="upper-rooms"
+          ></div>
+
+          <!-- 중앙 복도 -->
+          <div class="corridor">
+            <span>←</span>
+            <span>중앙 복도</span>
+            <span>→</span>
+          </div>
+
+          <!-- 아래쪽 병실은 JS로 생성됩니다 -->
+          <div
+            class="room-row bottom"
+            id="lower-rooms"
+          ></div>
+        </div>
+
+        <!-- 병실 선택 결과 -->
+        <div class="floor-footer">
+          <span
+            id="room-detail"
+            class="selection"
+            role="status"
+          >
+            병실을 선택해 주세요.
+          </span>
+        </div>
+      </section>
+
+      <!-- 확인이 필요한 알림 -->
+      <aside class="side">
+        <section class="panel alerts-panel">
+          <div class="alert-heading">
+            <h2>확인이 필요한 알림</h2>
+            <span
+              class="alert-total"
+              id="alert-total"
+            >
+              2건
+            </span>
+          </div>
+
+          <!-- 낙상 감지 알림 -->
+          <article
+            class="alert-card"
+            data-alert-room="305"
+          >
+            <div class="alert-top">
+              <strong>● 긴급</strong>
+              <time>14:28</time>
+            </div>
+
+            <h3>
+              305호
+              <span class="event-label">낙상 감지</span>
+            </h3>
+
+            <p>즉시 확인해 주세요.</p>
+
+            <button
+              type="button"
+              class="locate-room"
+              data-locate="305"
+            >
+              위치 확인 →
+            </button>
+          </article>
+
+          <!-- 침대 이탈 알림 -->
+          <article
+            class="alert-card caution"
+            data-alert-room="312"
+          >
+            <div class="alert-top">
+              <strong>● 주의</strong>
+              <time>14:31</time>
+            </div>
+
+            <h3>
+              312호
+              <span class="event-label">침대 이탈</span>
+            </h3>
+
+            <p>병실을 확인해 주세요.</p>
+
+            <button
+              type="button"
+              class="locate-room"
+              data-locate="312"
+            >
+              위치 확인 →
+            </button>
+          </article>
+        </section>
+      </aside>
+    </div>
   </main>
+
+  <!-- 설정 창 -->
+  <dialog
+    class="settings-dialog"
+    id="settings-dialog"
+  >
+    <h2>설정</h2>
+
+    <p>
+      설정 화면은 준비 중입니다.
+    </p>
+
+    <form method="dialog">
+      <button type="submit">
+        닫기
+      </button>
+    </form>
+  </dialog>
+
+  <!-- 대응 등록 창 -->
+  <dialog
+    id="response-dialog"
+    class="response-dialog"
+    aria-labelledby="response-title"
+  >
+    <form id="response-form">
+      <h2 id="response-title">
+        경보 대응 등록
+      </h2>
+
+      <p>
+        현장 확인 후 대응 정보를 등록해 주세요.
+      </p>
+
+      <!-- 선택한 경보 정보가 JS로 표시됩니다 -->
+      <div
+        id="response-event"
+        class="response-event"
+      ></div>
+
+      <!-- 환자 이름 -->
+      <label
+        class="field"
+        for="response-patient"
+      >
+        환자 이름
+      </label>
+
+      <input
+        id="response-patient"
+        type="text"
+        required
+        maxlength="50"
+        placeholder="환자 이름을 입력하세요."
+      >
+
+      <!-- 간호사 이름 -->
+      <label
+        class="field"
+        for="response-nurse"
+      >
+        간호사 이름
+      </label>
+
+      <input
+        id="response-nurse"
+        type="text"
+        required
+        maxlength="50"
+        placeholder="간호사 이름을 입력하세요."
+      >
+
+      <!-- 조치 상태 -->
+      <fieldset>
+        <legend>조치 상태</legend>
+
+        <div class="response-options">
+          <label>
+            <input
+              type="radio"
+              name="response-status"
+              value="checking"
+              checked
+            >
+            확인 중
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="response-status"
+              value="complete"
+            >
+            조치 완료
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- 조치 내용 -->
+      <label
+        class="field"
+        for="response-note"
+      >
+        조치 내용
+      </label>
+
+      <textarea
+        id="response-note"
+        maxlength="1000"
+        required
+        placeholder="확인한 상태와 조치 내용을 입력하세요."
+      ></textarea>
+
+      <div class="response-actions">
+        <button
+          type="button"
+          id="response-cancel"
+        >
+          취소
+        </button>
+
+        <button type="submit">
+          조치 기록 등록
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
+  <script th:src="@{/JS/dashboard.js}"></script>
 </body>
 </html>

@@ -100,18 +100,4 @@ public class AuthController {
         model.addAttribute("hospitalName", hospitalName);
         return "html/user-login";
     }
-
-    /**
-     * 로그인 성공 후 보여줄 임시 화면이다.
-     * PENDING 사용자는 로그인은 되지만 승인 대기 안내만 확인할 수 있다.
-     */
-    @GetMapping("/dashboard")
-    public String dashboard(Authentication authentication, Model model) {
-        boolean approved = authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("STATUS_APPROVED"));
-
-        model.addAttribute("userId", authentication.getName());
-        model.addAttribute("approved", approved);
-        return "html/dashboard";
-    }
 }
