@@ -95,10 +95,11 @@ select:focus-visible,
   margin-left: auto;
   font-size: 10px;
   white-space: nowrap;
+  padding: 20px;
 }
 
 /* 로그아웃 버튼 */
-.logout-button {
+/* .logout-button {
   width: 71.59px;
   height: 27.53px;
   border: 1px solid #ffffff73;
@@ -106,7 +107,7 @@ select:focus-visible,
   background: #ffffff1f;
   color: white;
   font-size: 9.64px;
-}
+} */
 
 .logout-button:hover {
   background: #ffffff30;

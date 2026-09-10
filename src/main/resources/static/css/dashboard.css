@@ -146,6 +146,7 @@ main{gap:16px}
 .alert-card .response{font-size:12px;line-height:1.6;color:#685c52}
 .alert-card .response-badge{font-size:11px}
 .alert-card .locate-room{font-size:12px;font-weight:600;min-height:37px}
+
 @media(max-height:760px) and (min-width:1101px){
   .floor{grid-template-rows:110px minmax(48px,1fr) 110px}
   .alert-card{gap:7px}
@@ -1423,4 +1424,8 @@ main {
   font-weight:600}
 .alerts-panel .locate-room[aria-pressed="true"]:hover {
   background:#fff;
+<<<<<<< HEAD
   border-color:#d9e1da}
+=======
+  border-color:#d9e1da}
+>>>>>>> c84a0c2ee73d2d8c2ec929d2ed13769bc2a8aacf

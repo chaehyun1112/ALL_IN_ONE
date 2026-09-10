@@ -373,22 +373,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+/* 로그아웃 처리 */
+const logoutOpen = document.getElementById("logout-open");
 
-  /*
-   * 설정 창
-   */
-  const settingsOpen =
-    document.getElementById("settings-open");
+if (logoutOpen) {
+  logoutOpen.addEventListener("click", () => {
+    closeMenu();
 
-  const settingsDialog =
-    document.getElementById("settings-dialog");
-
-  if (settingsOpen && settingsDialog) {
-    settingsOpen.addEventListener("click", () => {
-      closeMenu();
-      settingsDialog.showModal();
-    });
-  }
+    // Spring Security 로그아웃 주소
+    window.location.href = "/logout";
+  });
+}
 
 
   /*

@@ -1226,11 +1226,11 @@ function initializePage() {
   });
 
   /* 로그아웃 */
-  logoutButton.addEventListener("click", () => {
-    window.alert(
-      "로그아웃은 Spring Boot 인증 기능과 연결해주세요."
-    );
-  });
+  // logoutButton.addEventListener("click", () => {
+  //   window.alert(
+  //     "로그아웃은 Spring Boot 인증 기능과 연결해주세요."
+  //   );
+  // });
 
   /* ==================================================
      초기 실행
