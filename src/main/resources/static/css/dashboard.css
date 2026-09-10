@@ -146,12 +146,13 @@ main{gap:16px}
 .alert-card .response{font-size:12px;line-height:1.6;color:#685c52}
 .alert-card .response-badge{font-size:11px}
 .alert-card .locate-room{font-size:12px;font-weight:600;min-height:37px}
+
 @media(max-height:760px) and (min-width:1101px){
   .floor{grid-template-rows:110px minmax(48px,1fr) 110px}
   .alert-card{gap:7px}
   .alert-card p{font-size:12px;line-height:1.6}
   .alert-card h3{font-size:23px}
-
+}
 
 /* 공통 색상과 서체: 별도 설치 없이 시스템의 한글 글꼴을 사용합니다. */
 :root {
@@ -1424,5 +1425,3 @@ main {
 .alerts-panel .locate-room[aria-pressed="true"]:hover {
   background:#fff;
   border-color:#d9e1da}
-
-}
