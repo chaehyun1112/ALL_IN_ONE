@@ -569,7 +569,21 @@ main {
 .summary {
   padding:14px}
 }
-/* 대응 등록 버튼 */ .response-open{background:#FFFFFF;color:#355B45;border:1px solid #B8CDBD}.response-open:hover{background:#E6F1E9;border-color:#B8CDBD}.response-open:focus-visible{outline:2px solid #547B60;outline-offset:3px}
+/* 대응 등록 버튼 */ 
+.response-open{
+    background:#FFFFFF;
+    color:#355B45;
+    border:1px solid #B8CDBD
+}
+.response-open:hover{
+    background:#E6F1E9;
+    border-color:#B8CDBD
+}
+.response-open:focus-visible{
+    outline:2px solid #547B60
+    ;outline-offset:3px
+}
+
 /* 알림 카드는 내용 높이에 맞추고 외부 패널만 평면도 높이를 유지합니다. */
 .alerts-panel .alert-card{flex:0 0 auto;min-height:0;padding:18px;gap:12px}
 .alerts-panel .alert-card .response{margin-top:0}
@@ -1244,20 +1258,6 @@ main {
 .alert-card h3 {
   font-size:23px}
 }
-
-
-/* 대응 등록 버튼 */
-.response-open {
-  background:#FFFFFF;
-  color:#355B45;
-  border:1px solid #B8CDBD}
-.response-open:hover {
-  background:#E6F1E9;
-  border-color:#B8CDBD}
-.response-open:focus-visible {
-  outline:2px solid #547B60;
-  outline-offset:3px}
-
 
 /* 알림 카드는 내용 높이에 맞추고 외부 패널만 평면도 높이를 유지합니다. */
 .alerts-panel .alert-card {
