@@ -25,6 +25,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let selectedRoomNumber = null;
 
+  // 필수 영역이 HTML에 없으면 이후 오류를 막고 종료합니다.
+  if (!upperRooms || !lowerRooms || !roomDetail) {
+    console.error("upper-rooms, lower-rooms, room-detail 요소를 확인하세요.");
+    return;
+  }
+
+  // HTML에 임시 병실이 남아 있어도 JS 생성 병실과 중복되지 않게 비웁니다.
+  upperRooms.replaceChildren();
+  lowerRooms.replaceChildren();
+
 
   /*
    * 병실 버튼 생성
@@ -483,3 +493,4 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 });
+
