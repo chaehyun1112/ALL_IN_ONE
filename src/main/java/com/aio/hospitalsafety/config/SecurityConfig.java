@@ -83,6 +83,7 @@ public class SecurityConfig {
                         // 로그아웃 후 서버 세션과 브라우저의 세션 쿠키를 모두 제거한다.
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
+                        
                 .sessionManagement(session -> session
                     .maximumSessions(-1)
                     .expiredUrl("/")

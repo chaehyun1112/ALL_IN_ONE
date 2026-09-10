@@ -16,13 +16,13 @@
   <link
     rel="stylesheet"
     href="../../../static/css/auth/Record.css"
-    th:href="@{/css/auth/Record.css}"
+    th:href="@{/css/Record.css}"
   >
 
   <!-- JS 연결 -->
   <script
     src="../../../static/JS/Record/Record.js"
-    th:src="@{/js/Record/Record.js}"
+    th:src="@{/js/Record.js}"
     defer
   ></script>
 </head>
@@ -30,6 +30,7 @@
 <body>
   <!-- 공통 상단 메뉴 -->
   <header class="page-header">
+    <!-- 대시보드 이동 -->
     <a
       class="dashboard-link"
       href=""
@@ -38,6 +39,7 @@
       ← 대시보드로 가기
     </a>
 
+    <!-- 병동 이름 -->
     <span class="hospital-name">
       _병동 통합 관제
     </span>
@@ -48,13 +50,13 @@
       id="current-time"
     ></time>
 
-    <button
+    <!-- <button
       class="logout-button"
       id="logout-button"
       type="button"
     >
       로그아웃
-    </button>
+    </button> -->
   </header>
 
   <!--
