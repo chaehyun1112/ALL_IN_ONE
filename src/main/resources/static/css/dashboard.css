@@ -213,6 +213,12 @@ header {
   font-size:12px;
   font-variant-numeric:tabular-nums;
   color:#dbe6df}
+.demo {
+  font-size:11px;
+  padding:5px 9px;
+  border:1px solid #ffffff40;
+  border-radius:5px}
+
 
 /* PC에서는 화면 높이 안에 평면도와 경보 패널을 배치합니다. */
 main {
@@ -1417,6 +1423,6 @@ main {
   font-weight:600}
 .alerts-panel .locate-room[aria-pressed="true"]:hover {
   background:#fff;
-  border-color:#d9e1da
-}
+  border-color:#d9e1da}
+
 }
