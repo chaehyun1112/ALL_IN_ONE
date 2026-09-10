@@ -11,6 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 /**
  * 애플리케이션 전체의 로그인, 로그아웃, URL 접근 권한, 비밀번호 암호화 방식을 설정한다.
@@ -36,7 +39,7 @@ public class SecurityConfig {
      * 직접 작성하지 않아도 된다.
      */
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         // HttpSecurity는 메서드를 이어서 호출하는 DSL 방식으로 보안 설정을 작성한다.
         // CSRF 설정을 끄지 않았으므로 Spring Security의 CSRF 보호가 기본으로 적용된다.
         http
@@ -46,7 +49,7 @@ public class SecurityConfig {
                         // 병합 메모(park + chae): 회원가입 진입 전 병원 도메인 선택(/, /domain, /access-type)과
                         // 회원가입 자체(/signup, 아이디 중복확인 API)도 비로그인 상태에서 접근 가능해야 한다.
                         .requestMatchers("/login", "/login/hospital", "/login/user",
-                                "/password/reset", "/id/find",
+                                "/password/reset", "/password/reset/**", "/id/find", "/id/find/**",
                                 "/css/**", "/JS/**", "/js/**", "/image/**", "/error",
                                 "/", "/domain", "/access-type", "/signup", "/api/users/check-user-id").permitAll()
                         // 병합 메모(tae + yejin): 관리자 승인 화면은 ADMIN 권한을 가진 계정만 접근할 수 있다.
@@ -76,7 +79,13 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         // 로그아웃 후 서버 세션과 브라우저의 세션 쿠키를 모두 제거한다.
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"));
+                        .deleteCookies("JSESSIONID"))
+                .sessionManagement(session -> session
+                    .maximumSessions(-1)
+                    .expiredUrl("/")
+                    .sessionRegistry(sessionRegistry));
+
+
         // 위에서 작성한 규칙을 실제 SecurityFilterChain 객체로 만들어 Spring Bean으로 반환한다.
         return http.build();
     }
@@ -128,5 +137,15 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    @Bean
+    HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 }
