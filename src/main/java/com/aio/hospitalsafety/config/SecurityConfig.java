@@ -49,7 +49,8 @@ public class SecurityConfig {
                         .requestMatchers( 
                                 "/", "/domain", "/login", "/login/user",
                                 "/signup", "/api/users/check-user-id",
-                                "/password/reset",
+                                "/id/find", "/id/find/**",
+                                "/password/reset", "/password/reset/**",
                                 "/css/**", "/JS/**", "/image/**", "/error"
                         ).permitAll()
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
