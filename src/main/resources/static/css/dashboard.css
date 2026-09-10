@@ -1417,5 +1417,6 @@ main {
   font-weight:600}
 .alerts-panel .locate-room[aria-pressed="true"]:hover {
   background:#fff;
-  border-color:#d9e1da}
-
+  border-color:#d9e1da
+}
+}
