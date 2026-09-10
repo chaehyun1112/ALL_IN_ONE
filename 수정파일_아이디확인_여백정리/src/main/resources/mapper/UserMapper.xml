@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- PGH -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace는 이 XML과 연결되는 Java Mapper 인터페이스의 전체 패키지 경로다. -->
+<mapper namespace="com.aio.hospitalsafety.mapper.UserMapper">
+    <!--
+      resultMap은 SELECT 결과의 DB 컬럼을 Java 객체로 변환하는 규칙이다.
+      User가 record이므로 <constructor>를 사용해 record 생성자에 값을 전달한다.
+      <arg> 순서는 User record에 선언된 필드 순서와 같아야 한다.
+    -->
+    <resultMap id="userMap" type="com.aio.hospitalsafety.domain.User">
+        <constructor>
+            <!-- idArg는 PK 컬럼을 뜻하고, arg는 일반 생성자 인자를 뜻한다. -->
+            <idArg column="EMP_ID" javaType="java.lang.String"/>
+            <arg column="EMP_PW" javaType="java.lang.String"/>
+            <arg column="HOSP_DIV_ID" javaType="java.lang.String"/>
+            <arg column="WARD_ID" javaType="java.lang.Long"/>
+            <arg column="EMP_NM" javaType="java.lang.String"/>
+            <arg column="ROLE_CD" javaType="com.aio.hospitalsafety.domain.Role"/>
+            <arg column="AUTH_ST" javaType="com.aio.hospitalsafety.domain.ApprovalStatus"/>
+            <arg column="CRT_DT" javaType="java.time.Instant"/>
+            <arg column="UPD_DT" javaType="java.time.Instant"/>
+        </constructor>
+    </resultMap>
+
+    <!--
+      id="findByHospitalIdAndUserId"는 UserMapper의 같은 이름 메서드와 연결된다.
+      resultMap="userMap"을 통해 조회 결과를 User로 변환한다.
+      EMP_ID는 PK이므로 조회 결과는 최대 한 건이다.
+    -->
+    <select id="findByHospitalIdAndUserId" resultMap="userMap">
+        SELECT EMP_ID, EMP_PW, HOSP_DIV_ID, WARD_ID, EMP_NM,
+               ROLE_CD, AUTH_ST, CRT_DT, UPD_DT
+        FROM TB_EMP
+        <!-- 병원 구분 ID와 직원 ID가 모두 일치해야 해당 병원 계정으로 로그인할 수 있다. -->
+        WHERE HOSP_DIV_ID = #{hospitalId}
+          AND EMP_ID = #{userId}
+    </select>
+
+    <!--
+      id="updatePassword"는 UserMapper.updatePassword()와 연결된다.
+      #{passwordHash}에는 UserService에서 BCrypt로 변환한 문자열만 들어온다.
+      PW 확인값과 PW 원문은 SQL로 전달하지 않는다.
+    -->
+    <update id="updatePassword">
+        UPDATE TB_EMP
+        <!-- CURRENT_TIMESTAMP는 DB 서버의 현재 시각으로 UPD_DT를 갱신한다. -->
+        SET EMP_PW = #{passwordHash}, UPD_DT = CURRENT_TIMESTAMP
+        WHERE EMP_ID = #{userId}
+    </update>
+
+    <!--
+      id="findMatchingUserIdsForFindId"는 UserMapper의 같은 이름 메서드와 연결된다.
+      아이디 찾기 본인 확인용으로 PW 등 다른 값은 조회하지 않고 EMP_ID만 반환한다.
+    -->
+    <select id="findMatchingUserIdsForFindId" resultType="java.lang.String">
+        SELECT EMP_ID
+        FROM TB_EMP
+        WHERE HOSP_DIV_ID = #{hospitalId}
+          AND EMP_NM = #{userName}
+          AND EMAIL = #{email}
+    </select>
+
+    <!--
+      id="existsByHospitalIdAndUserIdAndUserName"는 UserMapper의 같은 이름 메서드와 연결된다.
+      아이디만으로 존재 여부가 새어나가지 않도록 이름까지 함께 일치하는지 확인한다.
+    -->
+    <select id="existsByHospitalIdAndUserIdAndUserName" resultType="java.lang.Boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM TB_EMP
+            WHERE HOSP_DIV_ID = #{hospitalId}
+              AND EMP_ID = #{userId}
+              AND EMP_NM = #{userName}
+        )
+    </select>
+</mapper>
