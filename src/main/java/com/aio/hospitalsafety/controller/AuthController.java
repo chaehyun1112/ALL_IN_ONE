@@ -17,7 +17,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 
@@ -45,24 +44,12 @@ public class AuthController {
 
     /** 로그인 1단계인 병원 구분 ID 입력 화면을 보여준다. */
     @GetMapping("/login")
-    public String hospitalLogin(@RequestParam(defaultValue = "") String accessType,
-                                Authentication authentication,
+    public String hospitalLogin(Authentication authentication,
                                 HttpServletRequest request,
                                 HttpServletResponse response,
                                 Model model) {
         HttpSession session = AuthenticationSessionManager.expireAuthentication(
                 request, response, authentication);
-
-        if (!accessType.isBlank()) {
-            if (!accessType.equals("admin") && !accessType.equals("user")) {
-                return "redirect:/access-type";
-            }
-            session.setAttribute(SessionConstants.LOGIN_ACCESS_TYPE, accessType);
-        }
-
-        if (session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE) == null) {
-            return "redirect:/access-type";
-        }
 
         String hospitalId = (String) session.getAttribute(SessionConstants.HOSPITAL_DOMAIN);
         if (hospitalId == null || hospitalId.isBlank()) {
@@ -79,7 +66,6 @@ public class AuthController {
         session.setAttribute(LOGIN_HOSPITAL_NAME, hospital.get().hospitalName());
         model.addAttribute("hospitalId", hospital.get().hospitalId());
         model.addAttribute("hospitalName", hospital.get().hospitalName());
-        model.addAttribute("accessType", session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE));
         return "html/login";
     }
 
@@ -125,13 +111,9 @@ public class AuthController {
         if (hospitalId == null || hospitalName == null) {
             return "redirect:/login";
         }
-        if (session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE) == null) {
-            return "redirect:/access-type";
-        }
 
         model.addAttribute("hospitalId", hospitalId);
         model.addAttribute("hospitalName", hospitalName);
-        model.addAttribute("accessType", session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE));
         return "html/login";
     }
 

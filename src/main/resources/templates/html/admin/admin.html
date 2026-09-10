@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>간호사 회원 관리 | 병동 통합 관제</title>
     <link rel="stylesheet" href="../../../static/css/admin/admin.css" th:href="@{/css/admin/admin.css}">
     <script src="../../../static/JS/admin/admin.js" th:src="@{/JS/admin/admin.js}" defer></script>

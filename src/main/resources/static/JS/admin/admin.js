@@ -9,6 +9,14 @@ let adminToastTimer;
 const adminRows = document.querySelector("#admin-user-rows");
 const adminTabs = Array.from(document.querySelectorAll("[data-status]"));
 const adminDialog = document.querySelector("#admin-action-dialog");
+const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+function requestHeaders() {
+    return csrfToken && csrfHeader
+        ? { "Accept": "application/json", [csrfHeader]: csrfToken }
+        : { "Accept": "application/json" };
+}
 
 function showAdminFeedback(message) {
     const feedback = document.querySelector("#admin-feedback");
@@ -112,13 +120,15 @@ document.querySelector("#admin-action-form").addEventListener("submit", async ev
     try {
         const response = await fetch(`/api/admin/users/${encodeURIComponent(adminSelectedUser.userId)}/${actionPath}`, {
             method: isReject ? "DELETE" : "PATCH",
-            headers: { "Accept": "application/json" }
+            headers: requestHeaders()
         });
         if (!response.ok) throw new Error(`관리자 처리 실패: ${response.status}`);
         adminDialog.close();
         await loadAdminUsers(true);
         adminTabs.find(tab => tab.dataset.status === adminActiveStatus).focus();
-        showAdminFeedback(isReject ? "가입 신청을 반려했습니다." : "가입 신청을 승인했습니다.");
+        showAdminFeedback(isReject
+            ? "가입 신청을 반려하고 계정을 삭제했습니다."
+            : "가입 신청을 승인하고 권한을 부여했습니다.");
     } catch (error) {
         showAdminFeedback("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
@@ -142,8 +152,9 @@ async function loadAdminUsers(silent = false) {
     }
 }
 
-document.querySelector("#admin-logout").addEventListener("click", () => {
-    showAdminFeedback("현재는 화면 미리보기입니다. 로그아웃은 로그인 기능 연동 후 사용할 수 있습니다.");
+document.querySelector("#admin-logout").addEventListener("click", async () => {
+    const response = await fetch("/logout", { method: "POST", headers: requestHeaders() });
+    if (response.ok || response.redirected) window.location.assign("/login?logout");
 });
 
 function updateAdminClock() {

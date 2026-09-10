@@ -1,6 +1,5 @@
 package com.aio.hospitalsafety.config;
 
-import com.aio.hospitalsafety.common.SessionConstants;
 import com.aio.hospitalsafety.domain.ApprovalStatus;
 import com.aio.hospitalsafety.domain.Role;
 import com.aio.hospitalsafety.domain.User;
@@ -24,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AccessTypeAuthenticationTests {
+class AccountRoleAuthenticationTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,12 +35,12 @@ class AccessTypeAuthenticationTests {
     private UserMapper userMapper;
 
     @Test
-    void allowsAdminAccountForAdminAccessType() throws Exception {
+    void routesAdminAccountToAdmin() throws Exception {
         mockUser("admin", Role.ADMIN);
 
         mockMvc.perform(post("/login/user")
                         .with(csrf())
-                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "admin")
+
                         .param("userLoginKey", "HOSP01|admin")
                         .param("password", "pw"))
                 .andExpect(status().is3xxRedirection())
@@ -49,12 +48,12 @@ class AccessTypeAuthenticationTests {
     }
 
     @Test
-    void allowsUserAccountForUserAccessType() throws Exception {
+    void routesUserAccountToDashboard() throws Exception {
         mockUser("user01", Role.USER);
 
         mockMvc.perform(post("/login/user")
                         .with(csrf())
-                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user")
+
                         .param("userLoginKey", "HOSP01|user01")
                         .param("password", "pw"))
                 .andExpect(status().is3xxRedirection())
@@ -62,28 +61,28 @@ class AccessTypeAuthenticationTests {
     }
 
     @Test
-    void rejectsAdminAccountForUserAccessType() throws Exception {
+    void rejectsAdminAccountWithWrongPassword() throws Exception {
         mockUser("admin", Role.ADMIN);
 
         mockMvc.perform(post("/login/user")
                         .with(csrf())
-                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user")
+
                         .param("userLoginKey", "HOSP01|admin")
-                        .param("password", "pw"))
+                        .param("password", "wrong"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login/user?error"))
                 .andExpect(unauthenticated());
     }
 
     @Test
-    void rejectsUserAccountForAdminAccessType() throws Exception {
+    void rejectsUserAccountWithWrongPassword() throws Exception {
         mockUser("user01", Role.USER);
 
         mockMvc.perform(post("/login/user")
                         .with(csrf())
-                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "admin")
+
                         .param("userLoginKey", "HOSP01|user01")
-                        .param("password", "pw"))
+                        .param("password", "wrong"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login/user?error"))
                 .andExpect(unauthenticated());

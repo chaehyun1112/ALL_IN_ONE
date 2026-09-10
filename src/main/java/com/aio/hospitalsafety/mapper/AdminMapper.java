@@ -22,6 +22,7 @@ public interface AdminMapper {
             FROM public.tb_emp user_account
             LEFT JOIN public.tb_ward ward
                 ON ward.ward_id = user_account.ward_id
+               AND ward.hosp_div_id = user_account.hosp_div_id
             WHERE user_account.hosp_div_id = #{hospitalDomain}
               AND user_account.role_cd = 'USER'
               AND user_account.auth_st IN ('PENDING', 'APPROVED')

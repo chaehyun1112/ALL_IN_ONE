@@ -26,22 +26,20 @@ class HomeControllerTests {
     void setUp() {
         hospitalMapper = mock(HospitalMapper.class);
         mockMvc = MockMvcBuilders.standaloneSetup(
-                new HomeController(new HospitalService(hospitalMapper)), new AccessTypeController()).build();
+                new HomeController(new HospitalService(hospitalMapper))).build();
     }
 
     @Test
-    void registeredDomainOpensAccessTypeAndKeepsHospitalForLogin() throws Exception {
+    void registeredDomainOpensLoginAndKeepsHospital() throws Exception {
         when(hospitalMapper.findByHospitalId("test"))
                 .thenReturn(Optional.of(new Hospital("test", "늘푸른병원")));
         MockHttpSession session = new MockHttpSession();
 
         mockMvc.perform(post("/domain").param("hospitalDomain", " test ").session(session))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/access-type"))
+                .andExpect(redirectedUrl("/login"))
                 .andExpect(request().sessionAttribute(SessionConstants.HOSPITAL_DOMAIN, "test"));
-        mockMvc.perform(get("/access-type").session(session))
-                .andExpect(status().isOk())
-                .andExpect(view().name("html/access-type"));
+
     }
 
     @Test

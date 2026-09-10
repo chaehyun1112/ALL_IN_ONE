@@ -24,16 +24,12 @@ public final class AuthenticationSessionManager {
         }
 
         Object hospitalDomain = session.getAttribute(SessionConstants.HOSPITAL_DOMAIN);
-        Object accessType = session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE);
 
         new SecurityContextLogoutHandler().logout(request, response, authentication);
 
         HttpSession newSession = request.getSession(true);
         if (hospitalDomain != null) {
             newSession.setAttribute(SessionConstants.HOSPITAL_DOMAIN, hospitalDomain);
-        }
-        if (accessType != null) {
-            newSession.setAttribute(SessionConstants.LOGIN_ACCESS_TYPE, accessType);
         }
         return newSession;
     }

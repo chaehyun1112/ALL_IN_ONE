@@ -43,7 +43,7 @@ public class HomeController {
                 return "html/index";
             }
             session.setAttribute(SessionConstants.HOSPITAL_DOMAIN, hospital.get().hospitalId());
-            return "redirect:/access-type";
+            return "redirect:/login";
         } catch (DataAccessException exception) {
             model.addAttribute("domainError", "병원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.");
             return "html/index";

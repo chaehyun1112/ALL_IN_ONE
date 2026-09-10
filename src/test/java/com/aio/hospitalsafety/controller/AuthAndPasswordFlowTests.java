@@ -65,7 +65,7 @@ class AuthAndPasswordFlowTests {
     void redirectsToDomainPageWhenHospitalIsNotSelected() throws Exception {
         mockMvc.perform(get("/login"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/access-type"));
+                .andExpect(redirectedUrl("/"));
     }
     /** 비밀번호 변경 후 로그인 화면에 완료 안내가 표시되는지 확인한다. */
     @Test
@@ -74,8 +74,7 @@ class AuthAndPasswordFlowTests {
                 .thenReturn(Optional.of(new Hospital("HOSP01", "테스트병원")));
 
         mockMvc.perform(get("/login")
-                        .sessionAttr(SessionConstants.HOSPITAL_DOMAIN, "HOSP01")
-                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user"))
+                        .sessionAttr(SessionConstants.HOSPITAL_DOMAIN, "HOSP01"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/login"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/auth/login.css")))
@@ -98,8 +97,7 @@ class AuthAndPasswordFlowTests {
         // 두 번째 화면은 첫 단계에서 저장한 병원 Session 값이 있을 때만 열려야 한다.
         mockMvc.perform(get("/login/user")
                         .sessionAttr(LOGIN_HOSPITAL_ID, "HOSP01")
-                        .sessionAttr(LOGIN_HOSPITAL_NAME, "테스트병원")
-                        .sessionAttr(SessionConstants.LOGIN_ACCESS_TYPE, "user"))
+                        .sessionAttr(LOGIN_HOSPITAL_NAME, "테스트병원"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("html/login"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("userLoginKey")))

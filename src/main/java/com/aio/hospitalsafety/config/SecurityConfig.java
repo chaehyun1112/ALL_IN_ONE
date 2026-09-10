@@ -1,10 +1,7 @@
 // PGH
 package com.aio.hospitalsafety.config;
 
-import com.aio.hospitalsafety.common.SessionConstants;
-import com.aio.hospitalsafety.domain.Role;
 import com.aio.hospitalsafety.domain.User;
-import jakarta.servlet.http.HttpSession;
 import com.aio.hospitalsafety.mapper.UserMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,18 +11,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * 애플리케이션 전체의 로그인, 로그아웃, URL 접근 권한, 비밀번호 암호화 방식을 설정한다.
  *
  * 로그인 요청 처리 흐름
- * 1. 도메인 화면에서 병원을 확인하고 접속 유형 선택 화면으로 이동한다.
+ * 1. 도메인 화면에서 병원을 확인하고 로그인 화면으로 이동한다.
  * 2. login.html이 병원 ID와 직원 ID를 합친 userLoginKey, password를 전송한다.
  * 3. Spring Security가 userDetailsService()를 호출해 병원 ID와 직원 ID로 TB_EMP를 조회한다.
  * 4. Spring Security가 입력 PW와 DB의 BCrypt 해시를 passwordEncoder()로 비교한다.
- * 5. 성공하면 인증 정보를 HTTP Session에 저장하고 /dashboard로 이동한다.
+ * 5. DB 권한이 ADMIN이면 /admin, USER이면 /dashboard로 이동한다.
  *
  * @Configuration이 붙은 클래스는 Spring 설정 클래스로 인식된다.
  * 이 클래스 안에서 @Bean으로 반환한 객체들은 Spring 컨테이너가 생성하고 관리한다.
@@ -48,11 +43,11 @@ public class SecurityConfig {
                 // authorizeHttpRequests: URL별 접근 권한을 설정한다.
                 .authorizeHttpRequests(auth -> auth
                         // 로그인 화면, 재설정 화면, 정적 파일은 로그인하지 않아도 접근할 수 있다.
-                        .requestMatchers("/", "/domain", "/access-type", "/signup",
+                        .requestMatchers("/", "/domain", "/signup",
                                 "/api/users/check-user-id",
                                 "/login", "/login/hospital", "/login/user",
                                 "/password/reset", "/css/**", "/JS/**", "/image/**", "/error").permitAll()
-                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin", "/admin/**", "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/dashboard", "/user/**").hasRole("USER")
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
                         // 위에서 허용하지 않은 나머지 URL은 로그인한 사용자만 접근할 수 있다.
@@ -68,7 +63,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login/user")
                         // userLoginKey는 "병원 구분 ID|직원 ID" 형식의 내부 인증용 값이다.
                         .usernameParameter("userLoginKey")
-                        // 두 번째 인자 true는 로그인 전에 접근하려던 URL보다 대시보드를 우선한다는 뜻이다.
+                        // DB에서 조회한 계정 권한으로 로그인 후 화면을 결정한다.
                         .successHandler((request, response, authentication) -> {
                             boolean admin = authentication.getAuthorities().stream()
                                     .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
@@ -123,23 +118,6 @@ public class SecurityConfig {
 
             // DB의 passwordHash는 이미 BCrypt로 해시된 값이다.
             // Spring Security가 사용자가 입력한 비밀번호와 이 해시를 안전하게 비교한다.
-            ServletRequestAttributes requestAttributes =
-                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            HttpSession session = requestAttributes == null
-                    ? null
-                    : requestAttributes.getRequest().getSession(false);
-            String accessType = session == null
-                    ? null
-                    : (String) session.getAttribute(SessionConstants.LOGIN_ACCESS_TYPE);
-            Role requiredRole = switch (accessType == null ? "" : accessType) {
-                case "admin" -> Role.ADMIN;
-                case "user" -> Role.USER;
-                default -> null;
-            };
-            if (requiredRole == null || user.role() != requiredRole) {
-                throw new UsernameNotFoundException("선택한 접속 유형과 계정 권한이 일치하지 않습니다.");
-            }
-
             return new HospitalUserDetails(user);
         };
     }
