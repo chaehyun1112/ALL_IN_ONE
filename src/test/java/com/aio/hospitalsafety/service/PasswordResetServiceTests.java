@@ -85,6 +85,24 @@ class PasswordResetServiceTests {
     }
 
     @Test
+    void employeeIdMatchesNameReturnsTrueWhenIdAndNameBothMatch() {
+        when(userMapper.existsByHospitalIdAndUserIdAndUserName("HOSP01", "EMP001", "홍길동"))
+                .thenReturn(true);
+        PasswordResetService service = new PasswordResetService(userMapper, mailService, passwordEncoder);
+
+        assertThat(service.employeeIdMatchesName("HOSP01", "EMP001", "홍길동")).isTrue();
+    }
+
+    @Test
+    void employeeIdMatchesNameReturnsFalseWhenNameDoesNotMatch() {
+        when(userMapper.existsByHospitalIdAndUserIdAndUserName("HOSP01", "EMP001", "다른이름"))
+                .thenReturn(false);
+        PasswordResetService service = new PasswordResetService(userMapper, mailService, passwordEncoder);
+
+        assertThat(service.employeeIdMatchesName("HOSP01", "EMP001", "다른이름")).isFalse();
+    }
+
+    @Test
     void storesOnlyBcryptHashWhenPasswordIsReset() {
         when(userMapper.updatePassword(eq("EMP001"), anyString())).thenReturn(1);
         PasswordResetService service = new PasswordResetService(userMapper, mailService, passwordEncoder);

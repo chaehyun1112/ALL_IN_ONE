@@ -43,4 +43,14 @@ public interface UserMapper {
             @Param("hospitalId") String hospitalId,
             @Param("userName") String userName,
             @Param("email") String email);
+
+    /**
+     * 비밀번호 재설정 화면의 '아이디 확인' 버튼용 조회다. HOSP_DIV_ID + EMP_ID + EMP_NM이
+     * 모두 일치하는지만 boolean으로 반환한다. 아이디만으로 존재 여부를 알려주면 계정 열거
+     * 공격에 악용될 수 있어, 이름까지 함께 일치해야 확인되도록 한다.
+     */
+    boolean existsByHospitalIdAndUserIdAndUserName(
+            @Param("hospitalId") String hospitalId,
+            @Param("userId") String userId,
+            @Param("userName") String userName);
 }

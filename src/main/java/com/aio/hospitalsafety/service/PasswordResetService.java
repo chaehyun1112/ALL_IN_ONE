@@ -53,6 +53,15 @@ public class PasswordResetService {
         return IdentifyResult.success(employeeId, code);
     }
 
+    /**
+     * '아이디 확인' 버튼용이다. 아이디만으로 존재 여부를 알려주면 계정 열거 공격에
+     * 악용될 수 있어, 아이디+이름이 함께 일치할 때만 true를 반환한다.
+     */
+    @Transactional(readOnly = true)
+    public boolean employeeIdMatchesName(String hospitalId, String employeeId, String employeeName) {
+        return userMapper.existsByHospitalIdAndUserIdAndUserName(hospitalId, employeeId, employeeName);
+    }
+
     /** 이메일 인증코드 검증까지 끝난 직원 ID에 대해서만 호출해야 한다. */
     @Transactional
     public void resetPassword(String employeeId, String newPassword) {

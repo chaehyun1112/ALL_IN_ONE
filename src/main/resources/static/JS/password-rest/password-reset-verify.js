@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const employeeId = document.getElementById("employeeId");
   const employeeName = document.getElementById("employeeName");
   const email = document.getElementById("email");
+  const checkIdBtn = document.getElementById("checkIdBtn");
+  const idMessage = document.getElementById("idMessage");
   const sendCodeBtn = document.getElementById("sendCodeBtn");
   const identityMessage = document.getElementById("identityMessage");
 
@@ -56,6 +58,35 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body: JSON.stringify(body)
     }).then((res) => res.json());
+  }
+
+  if (checkIdBtn) {
+    checkIdBtn.addEventListener("click", () => {
+      const id = employeeId.value.trim();
+      const name = employeeName.value.trim();
+
+      if (!id || !name) {
+        idMessage.textContent = "아이디와 이름을 입력해 주세요.";
+        idMessage.className = "id-check-message is-error";
+        return;
+      }
+
+      checkIdBtn.disabled = true;
+      postJson("/password/reset/check-id", { employeeId: id, employeeName: name })
+        .then((data) => {
+          idMessage.textContent = data.message;
+          idMessage.className = data.status === "MATCH"
+            ? "id-check-message is-success"
+            : "id-check-message is-error";
+        })
+        .catch(() => {
+          idMessage.textContent = "요청 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+          idMessage.className = "id-check-message is-error";
+        })
+        .finally(() => {
+          checkIdBtn.disabled = false;
+        });
+    });
   }
 
   sendCodeBtn.addEventListener("click", () => {

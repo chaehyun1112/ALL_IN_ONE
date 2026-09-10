@@ -60,4 +60,18 @@
           AND EMP_NM = #{userName}
           AND EMAIL = #{email}
     </select>
+
+    <!--
+      id="existsByHospitalIdAndUserIdAndUserName"는 UserMapper의 같은 이름 메서드와 연결된다.
+      아이디만으로 존재 여부가 새어나가지 않도록 이름까지 함께 일치하는지 확인한다.
+    -->
+    <select id="existsByHospitalIdAndUserIdAndUserName" resultType="java.lang.Boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM TB_EMP
+            WHERE HOSP_DIV_ID = #{hospitalId}
+              AND EMP_ID = #{userId}
+              AND EMP_NM = #{userName}
+        )
+    </select>
 </mapper>

@@ -1,6 +1,8 @@
 // PGH
 package com.aio.hospitalsafety.controller;
 
+import com.aio.hospitalsafety.dto.CheckEmployeeIdForm;
+import com.aio.hospitalsafety.dto.CheckEmployeeIdResponse;
 import com.aio.hospitalsafety.dto.NewPasswordForm;
 import com.aio.hospitalsafety.dto.PasswordChangeForm;
 import com.aio.hospitalsafety.dto.PasswordResetCodeForm;
@@ -86,6 +88,35 @@ public class UserPasswordController {
         }
         model.addAttribute("verified", session.getAttribute(PWRESET_VERIFIED_USER_ID) != null);
         return "html/password-reset";
+    }
+
+    /**
+     * '아이디 확인' 버튼 요청이다(JSON 응답, 화면 전환 없음). 아이디만으로 존재 여부를
+     * 알려주지 않고, 아이디+이름이 함께 일치할 때만 확인된 것으로 응답한다.
+     */
+    @PostMapping("/password/reset/check-id")
+    @ResponseBody
+    public ResponseEntity<CheckEmployeeIdResponse> checkEmployeeId(
+            HttpSession session,
+            @RequestBody @Valid CheckEmployeeIdForm form,
+            BindingResult bindingResult) {
+        String hospitalId = (String) session.getAttribute(AuthController.LOGIN_HOSPITAL_ID);
+        if (hospitalId == null) {
+            return ResponseEntity.status(401)
+                    .body(new CheckEmployeeIdResponse("UNAUTHORIZED", "다시 로그인해 주세요."));
+        }
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest()
+                    .body(new CheckEmployeeIdResponse("INVALID_INPUT", "아이디와 이름을 올바르게 입력해 주세요."));
+        }
+
+        boolean matches = passwordResetService.employeeIdMatchesName(
+                hospitalId, form.getEmployeeId().trim(), form.getEmployeeName().trim());
+
+        if (matches) {
+            return ResponseEntity.ok(new CheckEmployeeIdResponse("MATCH", "확인된 아이디입니다."));
+        }
+        return ResponseEntity.ok(new CheckEmployeeIdResponse("NOT_MATCH", "아이디와 이름이 일치하는 계정을 찾을 수 없습니다."));
     }
 
     /** 직원 ID+이름+이메일이 일치하면 인증코드를 발송한다(JSON 응답, 화면 전환 없음). */

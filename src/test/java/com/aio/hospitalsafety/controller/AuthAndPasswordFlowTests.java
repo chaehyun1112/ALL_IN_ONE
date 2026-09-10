@@ -197,7 +197,53 @@ class AuthAndPasswordFlowTests {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"employeeName\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"email\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"sendCodeBtn\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"checkIdBtn\"")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("소속 병동 관리자")));
+    }
+
+    /** '아이디 확인' 버튼은 병원 선택(Session)이 없으면 401을 돌려준다. */
+    @Test
+    void checkEmployeeIdWithoutHospitalSessionIsUnauthorized() throws Exception {
+        mockMvc.perform(post("/password/reset/check-id")
+                        .with(csrf())
+                        .contentType("application/json")
+                        .content("{\"employeeId\":\"USER01\",\"employeeName\":\"홍길동\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value("UNAUTHORIZED"));
+    }
+
+    /** 아이디+이름이 함께 일치하면 확인된 상태를 돌려준다. */
+    @Test
+    void checkEmployeeIdMatches() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        when(passwordResetService.employeeIdMatchesName("HOSP01", "USER01", "홍길동"))
+                .thenReturn(true);
+
+        mockMvc.perform(post("/password/reset/check-id")
+                        .with(csrf())
+                        .session(session)
+                        .contentType("application/json")
+                        .content("{\"employeeId\":\"USER01\",\"employeeName\":\"홍길동\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("MATCH"));
+    }
+
+    /** 아이디만으로는 존재 여부가 새어나가지 않도록, 이름이 다르면 미확인 상태를 돌려준다. */
+    @Test
+    void checkEmployeeIdDoesNotLeakExistenceWhenNameDoesNotMatch() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LOGIN_HOSPITAL_ID, "HOSP01");
+        when(passwordResetService.employeeIdMatchesName("HOSP01", "USER01", "다른이름"))
+                .thenReturn(false);
+
+        mockMvc.perform(post("/password/reset/check-id")
+                        .with(csrf())
+                        .session(session)
+                        .contentType("application/json")
+                        .content("{\"employeeId\":\"USER01\",\"employeeName\":\"다른이름\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("NOT_MATCH"));
     }
 
     /**
