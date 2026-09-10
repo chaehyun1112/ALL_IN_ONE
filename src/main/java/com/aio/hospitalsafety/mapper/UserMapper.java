@@ -5,7 +5,6 @@ import com.aio.hospitalsafety.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -33,24 +32,4 @@ public interface UserMapper {
      * 반환값은 UPDATE된 행의 개수이며 정상적으로 한 명이 수정되면 1이다.
      */
     int updatePassword(@Param("userId") String userId, @Param("passwordHash") String passwordHash);
-
-    /**
-     * 아이디 찾기 1단계 본인 확인용 조회다. HOSP_DIV_ID + 이름 + 이메일이 모두 일치하는
-     * 직원 ID 목록을 반환한다. 정상적인 데이터라면 0건(불일치) 또는 1건(일치)이어야 하며,
-     * Service에서 정확히 1건일 때만 인증코드를 발송한다(2건 이상이면 모호하므로 실패로 처리).
-     */
-    List<String> findMatchingUserIdsForFindId(
-            @Param("hospitalId") String hospitalId,
-            @Param("userName") String userName,
-            @Param("email") String email);
-
-    /**
-     * 비밀번호 재설정 화면의 '아이디 확인' 버튼용 조회다. HOSP_DIV_ID + EMP_ID + EMP_NM이
-     * 모두 일치하는지만 boolean으로 반환한다. 아이디만으로 존재 여부를 알려주면 계정 열거
-     * 공격에 악용될 수 있어, 이름까지 함께 일치해야 확인되도록 한다.
-     */
-    boolean existsByHospitalIdAndUserIdAndUserName(
-            @Param("hospitalId") String hospitalId,
-            @Param("userId") String userId,
-            @Param("userName") String userName);
 }
