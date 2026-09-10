@@ -413,6 +413,10 @@ async function submitAdminAction() {
         });
 
         adminDialog.close();
+        if (selectedAction === "DEACTIVATE") {
+            window.location.assign(document.querySelector("#admin-settings").href);
+            return;
+        }
         await loadAdminData(true);
 
         const currentTab = adminTabs.find(
@@ -532,6 +536,9 @@ function updateAdminClock() {
 }
 
 /* 초기 실행 */
+if (new URLSearchParams(window.location.search).get("status") === "APPROVED") {
+    selectAdminTab(document.querySelector("#admin-approved-tab"));
+}
 updateAdminClock();
 setInterval(updateAdminClock, 30000);
 

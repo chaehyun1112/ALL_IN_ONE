@@ -13,138 +13,142 @@ document.addEventListener("DOMContentLoaded", () => {
   const codeTimer = document.getElementById("codeTimer");
   const emailVerified = document.getElementById("emailVerified");
 
-  let timerInterval = null;
-  let remainingSeconds = 0;
+  const requiredElements = [
+    emailLocal,
+    emailDomainSelect,
+    emailDomainCustom,
+    emailHidden,
+    sendCodeBtn,
+    emailMessage,
+    verifyCodeRow,
+    verifyCodeInput,
+    checkCodeBtn,
+    codeTimer,
+    emailVerified
+  ];
 
-  // 도메인 선택 → "직접 입력"이면 커스텀 인풋 보여주기
-  emailDomainSelect.addEventListener("change", () => {
-    if (emailDomainSelect.value === "direct") {
-      emailDomainCustom.style.display = "block";
-      emailDomainCustom.value = "";
-      emailDomainCustom.focus();
-    } else {
-      emailDomainCustom.style.display = "none";
-    }
-  });
-
-  function getDomain() {
-    return emailDomainSelect.value === "direct"
-      ? emailDomainCustom.value.trim()
-      : emailDomainSelect.value;
+  if (requiredElements.some((element) => !element)) {
+    console.error("이메일 인증 영역의 HTML id를 확인해 주세요.");
+    return;
   }
 
+  // 안내 메시지 표시
+  function showMessage(text, isError = false) {
+    emailMessage.textContent = text;
+    emailMessage.className = text
+      ? `username-message ${isError ? "is-taken" : "is-available"}`
+      : "username-message";
+  }
+
+  // 이메일 아이디와 도메인 조합
   function buildEmail() {
     const local = emailLocal.value.trim();
-    const domain = getDomain();
+    const domain =
+      emailDomainSelect.value === "direct"
+        ? emailDomainCustom.value.trim()
+        : emailDomainSelect.value.trim();
+
     const email = local && domain ? `${local}@${domain}` : "";
+
     emailHidden.value = email;
     return email;
   }
 
-  function formatTime(sec) {
-    const m = String(Math.floor(sec / 60)).padStart(2, "0");
-    const s = String(sec % 60).padStart(2, "0");
-    return `${m}:${s}`;
+  // 직접 입력 선택 여부에 따라 도메인 입력칸 표시
+  function updateDomainInput() {
+    const isDirect = emailDomainSelect.value === "direct";
+
+    emailDomainCustom.style.display = isDirect ? "block" : "none";
+    emailDomainCustom.required = isDirect;
   }
 
-  function startTimer(seconds) {
-    clearInterval(timerInterval);
-    remainingSeconds = seconds;
-    codeTimer.textContent = formatTime(remainingSeconds);
+  // 이메일 변경 시 인증번호 입력 영역 초기화
+  function resetCodeArea() {
+    verifyCodeRow.style.display = "none";
+    verifyCodeInput.value = "";
+    verifyCodeInput.disabled = false;
+    checkCodeBtn.disabled = true;
 
-    timerInterval = setInterval(() => {
-      remainingSeconds--;
-      if (remainingSeconds <= 0) {
-        clearInterval(timerInterval);
-        codeTimer.textContent = "";
-        emailMessage.textContent = "인증 시간이 만료됐어요. 다시 발송해 주세요.";
-        emailMessage.className = "username-message is-taken";
-        checkCodeBtn.disabled = true;
-      } else {
-        codeTimer.textContent = formatTime(remainingSeconds);
-      }
-    }, 1000);
+    emailVerified.value = "false";
+    codeTimer.textContent = "";
+
+    showMessage("");
+    buildEmail();
   }
 
-  // 인증번호 발송
+  emailDomainSelect.addEventListener("change", () => {
+    updateDomainInput();
+    resetCodeArea();
+
+    if (emailDomainSelect.value === "direct") {
+      emailDomainCustom.focus();
+    }
+  });
+
+  emailLocal.addEventListener("input", resetCodeArea);
+  emailDomainCustom.addEventListener("input", resetCodeArea);
+
+  // 발송 버튼 클릭 → 인증번호 입력칸 표시
   sendCodeBtn.addEventListener("click", () => {
     const email = buildEmail();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!email || !emailPattern.test(email)) {
-      emailMessage.textContent = "이메일 아이디와 도메인을 올바르게 입력해 주세요.";
-      emailMessage.className = "username-message is-taken";
+    if (!emailPattern.test(email)) {
+      showMessage(
+        "이메일 아이디와 도메인을 올바르게 입력해 주세요.",
+        true
+      );
       return;
     }
 
-    sendCodeBtn.disabled = true;
+    verifyCodeRow.style.display = "flex";
+    verifyCodeInput.value = "";
+    verifyCodeInput.disabled = false;
+    checkCodeBtn.disabled = false;
 
-    fetch("/email/send-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("발송 실패");
-        return res.json();
-      })
-      .then(() => {
-        emailMessage.textContent = "인증번호를 발송했어요.";
-        emailMessage.className = "username-message is-available";
+    emailVerified.value = "false";
+    codeTimer.textContent = "";
 
-        verifyCodeRow.style.display = "flex";
-        checkCodeBtn.disabled = false;
-        startTimer(180);
-      })
-      .catch(() => {
-        emailMessage.textContent = "발송 중 오류가 발생했어요. 다시 시도해 주세요.";
-        emailMessage.className = "username-message is-taken";
-      })
-      .finally(() => {
-        sendCodeBtn.disabled = false;
-      });
+    showMessage(
+      "인증번호 입력칸이 표시됐어요. 현재는 화면 확인용으로 메일이 발송되지 않아요."
+    );
+
+    verifyCodeInput.focus();
   });
 
-  // 인증번호 확인
-  checkCodeBtn.addEventListener("click", () => {
-    const email = emailHidden.value;
-    const code = verifyCodeInput.value.trim();
-
-    if (!code) {
-      emailMessage.textContent = "인증번호를 입력해 주세요.";
-      emailMessage.className = "username-message is-taken";
-      return;
-    }
-
-    fetch("/email/verify-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code })
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.verified) {
-          emailMessage.textContent = "이메일 인증이 완료됐어요.";
-          emailMessage.className = "username-message is-available";
-          emailVerified.value = "true";
-
-          clearInterval(timerInterval);
-          codeTimer.textContent = "";
-          verifyCodeInput.disabled = true;
-          checkCodeBtn.disabled = true;
-          sendCodeBtn.disabled = true;
-          emailLocal.disabled = true;
-          emailDomainSelect.disabled = true;
-          emailDomainCustom.disabled = true;
-        } else {
-          emailMessage.textContent = "인증번호가 일치하지 않아요.";
-          emailMessage.className = "username-message is-taken";
-          emailVerified.value = "false";
-        }
-      })
-      .catch(() => {
-        emailMessage.textContent = "확인 중 오류가 발생했어요.";
-        emailMessage.className = "username-message is-taken";
-      });
+  // 인증번호 입력은 숫자 6자리까지 허용
+  verifyCodeInput.addEventListener("input", () => {
+    verifyCodeInput.value = verifyCodeInput.value
+      .replace(/[^0-9]/g, "")
+      .slice(0, 6);
   });
+
+// 화면 테스트용 인증번호 확인
+checkCodeBtn.addEventListener("click", () => {
+  const code = verifyCodeInput.value.trim();
+
+  if (!/^[0-9]{6}$/.test(code)) {
+    showMessage("인증번호 숫자 6자리를 입력해 주세요.", true);
+    verifyCodeInput.focus();
+    return;
+  }
+
+  if (code === "123456") {
+    showMessage("이메일 인증이 완료됐어요. (화면 테스트)", false);
+  } else {
+    showMessage("인증번호가 일치하지 않아요. 다시 확인해 주세요.", true);
+  }
+
+  // 화면 테스트이므로 실제 인증 완료 상태로 저장하지 않음
+  emailVerified.value = "false";
+});
+
+  // 페이지 초기 상태
+  sendCodeBtn.disabled = false;
+  emailLocal.disabled = false;
+  emailDomainSelect.disabled = false;
+  emailDomainCustom.disabled = false;
+
+  updateDomainInput();
+  resetCodeArea();
 });

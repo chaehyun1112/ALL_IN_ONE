@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>조치 기록 | 병동 통합 관제</title>
+
+  <!-- Excel 파일 생성 라이브러리 -->
+  <script
+    src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+    defer
+  ></script>
+
+  <!-- CSS 연결 -->
+  <link
+    rel="stylesheet"
+    href="../../../static/css/auth/Record.css"
+    th:href="@{/css/auth/Record.css}"
+  >
+
+  <!-- JS 연결 -->
+  <script
+    src="../../../static/JS/Record/Record.js"
+    th:src="@{/js/Record/Record.js}"
+    defer
+  ></script>
+</head>
+
+<body>
+  <!-- 공통 상단 메뉴 -->
+  <header class="page-header">
+    <a
+      class="dashboard-link"
+      href=""
+      th:href="@{}"
+    >
+      ← 대시보드로 가기
+    </a>
+
+    <span class="hospital-name">
+      _병동 통합 관제
+    </span>
+
+    <!-- JS에서 현재 시각을 표시합니다. -->
+    <time
+      class="current-time"
+      id="current-time"
+    ></time>
+
+    <button
+      class="logout-button"
+      id="logout-button"
+      type="button"
+    >
+      로그아웃
+    </button>
+  </header>
+
+  <!--
+    백엔드 API 주소입니다.
+    JS에서 useDemoData를 false로 변경하면
+    이 주소로 조치 기록을 조회합니다.
+  -->
+  <main
+    class="page-content"
+    id="history-page"
+    data-api-url="/api/action-history"
+    th:attr="data-api-url=@{/api/action-history}"
+  >
+    <!-- 화면 제목 -->
+    <section
+      class="page-intro"
+      aria-labelledby="page-title"
+    >
+      <h1
+        class="page-title"
+        id="page-title"
+      >
+        조치 기록
+      </h1>
+
+      <p class="page-description">
+        낙상 감지와 침대 이탈 알림의 발생부터 대응 완료까지
+        전체 이력을 확인합니다.
+      </p>
+    </section>
+
+    <!-- 검색 조건 영역 -->
+    <form
+      class="search-form"
+      id="search-form"
+      aria-label="조치 기록 검색"
+    >
+      <!-- 기간 필터 -->
+      <div
+        class="period-dropdown"
+        id="period-dropdown"
+      >
+        <button
+          class="period-button"
+          id="period-button"
+          type="button"
+          aria-label="조회 기간"
+          aria-expanded="false"
+          aria-controls="period-options"
+        >
+          <span id="period-label">
+            전체 기간
+          </span>
+
+          <span aria-hidden="true">
+            ▾
+          </span>
+        </button>
+
+        <!-- JS에서 검색에 사용하는 실제 기간 값 -->
+        <input
+          type="hidden"
+          id="period-filter"
+          name="period"
+          value="all"
+        >
+
+        <!-- 기간 선택 목록 -->
+        <div
+          class="period-options"
+          id="period-options"
+          hidden
+        >
+          <button
+            type="button"
+            data-period="all"
+          >
+            전체 기간
+          </button>
+
+          <button
+            type="button"
+            data-period="7"
+          >
+            최근 7일
+          </button>
+
+          <button
+            type="button"
+            data-period="30"
+          >
+            최근 30일
+          </button>
+
+          <button
+            type="button"
+            data-period="custom"
+          >
+            직접 설정
+          </button>
+        </div>
+      </div>
+
+      <!-- 병실 필터 -->
+      <div
+        class="choice-dropdown"
+        id="room-dropdown"
+      >
+        <button
+          class="choice-button room-button"
+          type="button"
+          aria-label="병실"
+          aria-expanded="false"
+          aria-controls="room-options"
+        >
+          <span class="choice-label">
+            전체 병실
+          </span>
+        </button>
+
+        <!-- JS에서 선택된 병실 값을 저장합니다. -->
+        <input
+          type="hidden"
+          id="room-filter"
+          name="room"
+          value="all"
+        >
+
+        <!-- JS에서 전체 병실 버튼을 추가합니다. -->
+        <div
+          class="choice-options"
+          id="room-options"
+          hidden
+        ></div>
+      </div>
+
+      <!-- 처리 상태 필터 -->
+      <div
+        class="choice-dropdown"
+        id="status-dropdown"
+      >
+        <button
+          class="choice-button status-button"
+          type="button"
+          aria-label="처리 상태"
+          aria-expanded="false"
+          aria-controls="status-options"
+        >
+          <span class="choice-label">
+            처리 상태 전체
+          </span>
+        </button>
+
+        <!-- JS에서 선택된 상태 값을 저장합니다. -->
+        <input
+          type="hidden"
+          id="status-filter"
+          name="status"
+          value="all"
+        >
+
+        <!-- 처리 상태 목록 -->
+        <div
+          class="choice-options"
+          id="status-options"
+          hidden
+        >
+          <button
+            type="button"
+            data-value="all"
+          >
+            처리 상태 전체
+          </button>
+
+          <button
+            type="button"
+            data-value="미확인"
+          >
+            미확인
+          </button>
+
+          <button
+            type="button"
+            data-value="완료"
+          >
+            완료
+          </button>
+        </div>
+      </div>
+
+      <!-- 검색 대상 필터 -->
+      <div
+        class="choice-dropdown"
+        id="target-dropdown"
+      >
+        <button
+          class="choice-button target-button"
+          type="button"
+          aria-label="검색 대상"
+          aria-expanded="false"
+          aria-controls="target-options"
+        >
+          <span class="choice-label">
+            검색 대상 · 전체
+          </span>
+        </button>
+
+        <!-- JS에서 선택된 검색 대상을 저장합니다. -->
+        <input
+          type="hidden"
+          id="target-filter"
+          name="target"
+          value="all"
+        >
+
+        <!-- 검색 대상 목록 -->
+        <div
+          class="choice-options"
+          id="target-options"
+          hidden
+        >
+          <button
+            type="button"
+            data-value="all"
+          >
+            검색 대상 · 전체
+          </button>
+
+          <button
+            type="button"
+            data-value="patient"
+          >
+            환자명
+          </button>
+
+          <button
+            type="button"
+            data-value="staff"
+          >
+            담당자
+          </button>
+        </div>
+      </div>
+
+      <!-- 이름 검색 -->
+      <label
+        class="screen-reader-only"
+        for="search-input"
+      >
+        이름 검색
+      </label>
+
+      <input
+        class="search-input"
+        id="search-input"
+        name="keyword"
+        type="text"
+        placeholder="이름을 입력하세요."
+        autocomplete="off"
+      >
+
+      <!-- 검색 버튼 -->
+      <button
+        class="search-button"
+        type="submit"
+      >
+        검색
+      </button>
+
+      <!-- 내보내기 팝업을 여는 버튼 -->
+      <button
+        class="export-button"
+        id="export-button"
+        type="button"
+      >
+        <!-- 별도 이미지 파일이 필요 없는 다운로드 아이콘 -->
+        <svg
+          class="download-icon"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <!-- 아래 방향 화살표 -->
+          <path d="M12 3v12M7 10l5 5 5-5"></path>
+
+          <!-- 다운로드 받침 -->
+          <path d="M5 16v4h14v-4"></path>
+        </svg>
+
+        내보내기
+      </button>
+    </form>
+
+    <!-- 전체 조치 기록 표 -->
+    <section
+      class="record-panel"
+      aria-labelledby="record-title"
+    >
+      <h2
+        class="record-title"
+        id="record-title"
+      >
+        전체 안전 조치 기록
+      </h2>
+
+      <!-- 기록이 많으면 실제 스크롤이 표시됩니다. -->
+      <div
+        class="table-scroll"
+        tabindex="0"
+        role="region"
+        aria-label="전체 안전 조치 기록 표"
+      >
+        <table class="record-table">
+          <!-- 각 열의 너비는 CSS에서 지정합니다. -->
+          <colgroup>
+            <col class="time-column">
+            <col class="room-column">
+            <col class="patient-column">
+            <col class="type-column">
+            <col class="staff-column">
+            <col class="status-column">
+            <col class="complete-column">
+          </colgroup>
+
+          <!-- 표 머리글 -->
+          <thead>
+            <tr>
+              <th scope="col">발생 시각</th>
+              <th scope="col">병실</th>
+              <th scope="col">환자명</th>
+              <th scope="col">알림 유형</th>
+              <th scope="col">담당자</th>
+              <th scope="col">처리 상태</th>
+              <th scope="col">완료 시각</th>
+            </tr>
+          </thead>
+
+          <!-- JS에서 기록을 추가합니다. -->
+          <tbody id="record-list"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 검색 결과 안내 -->
+    <p
+      class="screen-reader-only"
+      id="result-message"
+      role="status"
+      aria-live="polite"
+    ></p>
+
+    <!-- JS가 꺼져 있을 때 표시합니다. -->
+    <noscript>
+      조치 기록을 표시하려면 JavaScript를 활성화해주세요.
+    </noscript>
+  </main>
+
+  <!-- 화면 검색용 기간 달력 -->
+  <dialog
+    class="calendar-dialog"
+    id="calendar-dialog"
+    aria-label="조회 기간 선택"
+  >
+    <!-- 이전 달·현재 달·다음 달 -->
+    <div class="calendar-header">
+      <button
+        id="previous-month"
+        type="button"
+        aria-label="이전 달"
+      >
+        ‹
+      </button>
+
+      <strong
+        id="calendar-month"
+        aria-live="polite"
+      ></strong>
+
+      <button
+        id="next-month"
+        type="button"
+        aria-label="다음 달"
+      >
+        ›
+      </button>
+    </div>
+
+    <!-- 선택 중인 기간 안내 -->
+    <p
+      id="calendar-help"
+      aria-live="polite"
+    >
+      시작일과 종료일을 차례로 선택하세요.
+    </p>
+
+    <!-- 요일 -->
+    <div
+      class="calendar-week"
+      aria-hidden="true"
+    >
+      <span>일</span>
+      <span>월</span>
+      <span>화</span>
+      <span>수</span>
+      <span>목</span>
+      <span>금</span>
+      <span>토</span>
+    </div>
+
+    <!-- JS에서 날짜 버튼을 추가합니다. -->
+    <div
+      class="calendar-days"
+      id="calendar-days"
+    ></div>
+
+    <!-- 달력 하단 버튼 -->
+    <div class="calendar-actions">
+      <button
+        id="calendar-cancel"
+        type="button"
+      >
+        취소
+      </button>
+
+      <button
+        id="calendar-confirm"
+        type="button"
+        disabled
+      >
+        확인
+      </button>
+    </div>
+  </dialog>
+
+  <!-- 현재 필터 결과의 파일 형식 선택 팝업 -->
+  <dialog
+    class="export-dialog"
+    id="export-dialog"
+    aria-labelledby="export-title"
+  >
+    <form
+      id="export-form"
+      class="export-form"
+    >
+      <!-- 팝업 제목 -->
+      <header class="export-header">
+        <div>
+          <h2 id="export-title">
+            조치 기록 내보내기
+          </h2>
+
+          <p>
+            현재 필터 결과를 원하는 파일 형식으로 저장합니다.
+          </p>
+        </div>
+
+        <!-- 팝업 닫기 -->
+        <button
+          class="export-close"
+          id="export-close"
+          type="button"
+          aria-label="내보내기 닫기"
+        >
+          ×
+        </button>
+      </header>
+
+      <!-- 파일 형식만 선택합니다. -->
+      <fieldset class="export-section">
+        <legend>
+          파일 형식
+        </legend>
+
+        <div class="export-formats">
+          <!-- Excel -->
+          <label class="export-format">
+            <input
+              type="radio"
+              name="format"
+              value="xlsx"
+              checked
+            >
+
+            <span>
+              <strong>Excel</strong>
+              <small>.xlsx · 표 편집용</small>
+            </span>
+          </label>
+
+          <!-- CSV -->
+          <label class="export-format">
+            <input
+              type="radio"
+              name="format"
+              value="csv"
+            >
+
+            <span>
+              <strong>CSV</strong>
+              <small>.csv · 데이터 분석용</small>
+            </span>
+          </label>
+
+          <!-- PDF -->
+          <label class="export-format">
+            <input
+              type="radio"
+              name="format"
+              value="pdf"
+            >
+
+            <span>
+              <strong>PDF</strong>
+              <small>보고서 · 인쇄용</small>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- 현재 검색 결과 건수 -->
+      <div class="export-summary">
+        <p>
+          현재 필터 결과
+        </p>
+
+        <strong
+          id="export-count"
+          role="status"
+          aria-live="polite"
+        >
+          0건
+        </strong>
+      </div>
+
+      <!-- 파일 형식 안내 -->
+      <p
+        class="export-note"
+        id="export-note"
+      ></p>
+
+      <!-- 오류 안내 -->
+      <p
+        class="export-error"
+        id="export-error"
+        role="alert"
+      ></p>
+
+      <!-- 하단 버튼 -->
+      <footer class="export-actions">
+        <button
+          class="export-cancel"
+          id="export-cancel"
+          type="button"
+        >
+          취소
+        </button>
+
+        <button
+          class="export-submit"
+          id="export-submit"
+          type="submit"
+        >
+          내보내기
+        </button>
+      </footer>
+    </form>
+  </dialog>
+</body>
+</html>

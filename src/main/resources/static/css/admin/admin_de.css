@@ -45,11 +45,15 @@
 .admin-inactive-action[data-status="ACTIVATE"] { background: #e4f1e9; border-color: #b8d0be; color: #39745e; }
 #admin-status-confirm.admin-delete-confirm { background: #b45b55; border-color: #b45b55; }
 .admin-inactive-action option { background: var(--admin-surface); color: var(--admin-text); }
+.admin-inactive-action:disabled { opacity: .55; cursor: wait; }
+#admin-inactive-error { margin-bottom: 16px; padding: 12px 16px; border: 1px solid #ead3ce; border-radius: 8px; background: #faeeeb; color: #984c45; font-size: 12px; }
+#admin-inactive-error p { margin: 0 0 8px; white-space: pre-line; }
+#admin-inactive-retry { padding: 7px 12px; background: #fff; color: #984c45; }
 .admin-inactive-empty { padding: 64px 16px; text-align: center; }
 .admin-inactive-empty strong { font-size: 15px; }
 .admin-inactive-empty p { color: #7b8473; font-size: 12px; }
 .admin-inactive-empty button { margin-top: 8px; padding: 9px 14px; background: #e4f1e9; color: #557e66; font-size: 12px; }
-.admin-inactive-footer { display: flex; align-items: center; gap: 7px; padding: 18px 0; color: #7a8370; font-size: 11px; line-height: 1.7; }
+.admin-inactive-footer { display: flex; align-items: center; align-self: flex-start; gap: 7px; padding: 16px 0 0; color: #7a8370; font-size: 11px; line-height: 1.7; }
 .admin-inactive-footer svg { width: 15px; height: 15px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
 .admin-bulk-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding: 12px 14px; border: 1px solid var(--admin-border); border-radius: 8px; background: #f2f3eb; }
 .admin-bulk-actions > span { color: #65765e; font-size: 12px; }

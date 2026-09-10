@@ -25,7 +25,7 @@
 <header class="admin-topbar">
     <div class="admin-brand">
         <strong>병동 통합 관제</strong>
-        <a class="admin-back-button" id="admin-settings-back" href="admin.html" th:href="@{/admin}">
+        <a class="admin-back-button" id="admin-settings-back" href="admin.html?status=APPROVED" th:href="@{/admin(status='APPROVED')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
             사용자 관리로 돌아가기
         </a>
@@ -59,7 +59,7 @@
             <span class="admin-inactive-symbol" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21v-2a7 7 0 0 1 10-6M17 15v6M21 15v6"/></svg>
             </span>
-            <div><h2 id="admin-inactive-stat-title">비활성화 사용자</h2><strong id="admin-inactive-count">3<span>명</span></strong></div>
+            <div><h2 id="admin-inactive-stat-title">비활성화 사용자</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
         </section>
         <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title">
             <div class="admin-guide-heading">
@@ -87,13 +87,10 @@
                 <label for="admin-inactive-ward">이전 배정 병동</label>
                 <select id="admin-inactive-ward">
                     <option value="">전체 병동</option>
-                    <option value="1병동">1병동</option>
-                    <option value="2병동">2병동</option>
-                    <option value="3병동">3병동</option>
                 </select>
             </div>
         </div>
-        <p class="admin-inactive-result" id="admin-inactive-result" role="status">검색 결과 3명</p>
+        <p class="admin-inactive-result" id="admin-inactive-result" role="status">사용자 목록을 불러오는 중입니다.</p>
         <div class="admin-bulk-actions" role="group" aria-label="선택 사용자 일괄 관리">
             <span id="admin-bulk-count" role="status">현재 목록에서 0명 선택</span>
             <div class="admin-bulk-buttons">
@@ -102,37 +99,37 @@
                 <button type="button" data-bulk-status="DELETE" class="admin-bulk-delete" disabled>선택 삭제</button>
             </div>
         </div>
-        <div class="admin-table-wrap">
+        <div id="admin-inactive-error" role="alert" hidden>
+            <p id="admin-inactive-error-message"></p>
+            <button type="button" id="admin-inactive-retry">다시 불러오기</button>
+        </div>
+        <div class="admin-table-wrap" id="admin-inactive-list" aria-busy="true">
             <table class="admin-table admin-inactive-table">
                 <caption class="visually-hidden">비활성화 사용자 목록</caption>
                 <thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><th scope="col">로그인 아이디</th><th scope="col">이전 배정 병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead>
-                <tbody id="admin-inactive-rows">
-                    <tr data-ward="1병동"><td><label class="admin-inactive-selection"><input type="checkbox" class="admin-inactive-checkbox" value="sample_user01" aria-label="김하늘 선택"></label></td><td>김하늘</td><td>sample_user01</td><td>1병동</td><td><time datetime="2026-09-09">2026.09.09</time></td><td><select class="admin-inactive-action" aria-label="김하늘 계정 관리"><option value="INACTIVE" selected>비활성화</option><option value="ACTIVATE">활성화</option><option value="DELETE">삭제</option></select></td></tr>
-                    <tr data-ward="2병동"><td><label class="admin-inactive-selection"><input type="checkbox" class="admin-inactive-checkbox" value="sample_user02" aria-label="이서연 선택"></label></td><td>이서연</td><td>sample_user02</td><td>2병동</td><td><time datetime="2026-09-08">2026.09.08</time></td><td><select class="admin-inactive-action" aria-label="이서연 계정 관리"><option value="INACTIVE" selected>비활성화</option><option value="ACTIVATE">활성화</option><option value="DELETE">삭제</option></select></td></tr>
-                    <tr data-ward="3병동"><td><label class="admin-inactive-selection"><input type="checkbox" class="admin-inactive-checkbox" value="sample_user03" aria-label="박지우 선택"></label></td><td>박지우</td><td>sample_user03</td><td>3병동</td><td><time datetime="2026-09-07">2026.09.07</time></td><td><select class="admin-inactive-action" aria-label="박지우 계정 관리"><option value="INACTIVE" selected>비활성화</option><option value="ACTIVATE">활성화</option><option value="DELETE">삭제</option></select></td></tr>
-                </tbody>
+                <tbody id="admin-inactive-rows"></tbody>
             </table>
             <div class="admin-inactive-empty" id="admin-inactive-empty" hidden>
-                <strong>검색 결과가 없습니다</strong>
-                <p>이름, 아이디 또는 병동 조건을 다시 확인해주세요.</p>
+                <strong id="admin-inactive-empty-title">비활성화 사용자가 없습니다</strong>
+                <p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 사용자가 여기에 표시됩니다.</p>
                 <button type="button" id="admin-inactive-reset">검색 조건 초기화</button>
             </div>
         </div>
-        <footer class="admin-inactive-footer">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>
-            일괄 작업은 현재 검색된 목록에서 선택한 사용자에게만 적용됩니다.
-        </footer>
     </section>
+    <footer class="admin-inactive-footer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>
+        일괄 작업은 현재 검색된 목록에서 선택한 사용자에게만 적용됩니다.
+    </footer>
 </main>
 
 <dialog id="admin-status-dialog" class="admin-dialog" aria-labelledby="admin-status-dialog-title" aria-describedby="admin-status-dialog-description">
-    <form method="dialog">
+    <form id="admin-status-form">
         <h2 id="admin-status-dialog-title">상태 변경</h2>
         <p id="admin-status-dialog-description"></p>
         <p id="admin-status-dialog-note"></p>
         <div class="admin-dialog-actions">
-            <button type="submit" value="cancel" autofocus>취소</button>
-            <button type="submit" value="confirm" id="admin-status-confirm" class="admin-primary">확인</button>
+            <button type="button" id="admin-status-cancel" autofocus>취소</button>
+            <button type="submit" id="admin-status-confirm" class="admin-primary">확인</button>
         </div>
     </form>
 </dialog>

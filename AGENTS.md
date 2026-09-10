@@ -28,6 +28,8 @@
 
 # 개발 서버 실행 규칙
 
+- Windows에서 서버 실행 전 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`를 `[Environment]::GetEnvironmentVariable`로 다시 읽어 현재 실행 프로세스에 반영한다. 사용자(User) 값, 시스템(Machine) 값, 기존 Process 값 순서로 사용한다. 저장된 환경변수 조회가 제한되면 권한을 요청하며, 오래된 Process 값으로 임의 실행하지 않는다.
+- `DB_URL`은 `jdbc:postgresql://호스트:포트/DB명` 형식의 전체 JDBC URL을 그대로 사용한다. 접속 정보를 코드에 하드코딩하거나 로그에 출력하지 않는다.
 - 테스트 폴더를 실행하지 않는다. Maven 실행 시 `-Dmaven.test.skip=true`를 유지한다.
 - 개발 서버는 `spring-boot:run`의 `addResources=true`로 원본 JS·CSS·HTML을 직접 제공하고 캐시를 비활성화한다.
 - pull로 Java 소스가 변경된 경우 이 프로젝트 서버를 종료한 뒤 새로 빌드하고 재시작한다.
