@@ -5,6 +5,9 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.aio.hospitalsafety.common.SessionConstants;
+import com.aio.hospitalsafety.config.HospitalUserDetails;
 import com.aio.hospitalsafety.dto.WardOption;
 import com.aio.hospitalsafety.dto.admin.ApprovedUserResponse;
 import com.aio.hospitalsafety.dto.admin.ChangeUserWardRequest;
+import com.aio.hospitalsafety.dto.admin.InactiveUserResponse;
 import com.aio.hospitalsafety.service.UserSessionService;
 import com.aio.hospitalsafety.service.admin.AdminUserManagementService;
 
@@ -130,7 +135,38 @@ public class AdminUserManagementController {
         }
     }
 
-    // 세션에서 현재 병원 도메인 확인
+    @GetMapping("/users/inactive")
+    public List<InactiveUserResponse> getInactiveUsers(HttpSession session) {
+        return adminUserManagementService.getInactiveUsers(requireHospitalDomain(session));
+    }
+
+    @PatchMapping("/users/{userId}/activate")
+    public ResponseEntity<Map<String, String>> activateUser(@PathVariable String userId, HttpSession session) {
+        String hospitalDomain = requireHospitalDomain(session);
+        try {
+            adminUserManagementService.activateUser(hospitalDomain, userId);
+            return ResponseEntity.ok(Map.of("message", "계정이 활성화되어 승인완료 목록으로 이동했습니다."));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", exception.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/users/{userId}/inactive")
+    public ResponseEntity<Map<String, String>> deleteInactiveUser(@PathVariable String userId, HttpSession session) {
+        String hospitalDomain = requireHospitalDomain(session);
+        try {
+            adminUserManagementService.deleteInactiveUser(hospitalDomain, userId);
+            userSessionService.expireUserSessions(hospitalDomain, userId);
+            return ResponseEntity.ok(Map.of("message", "계정이 삭제되었습니다."));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", exception.getMessage()));
+        } catch (DataIntegrityViolationException exception) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "연결된 업무 기록으로 인해 삭제할 수 없습니다. 관련 기록을 확인해 주세요."));
+        }
+    }
+
+    // 접속 병원과 인증된 관리자의 소속 병원이 같아야 한다.
     private String requireHospitalDomain(HttpSession session) {
         String hospitalDomain = (String) session.getAttribute(
                 SessionConstants.HOSPITAL_DOMAIN
@@ -143,6 +179,10 @@ public class AdminUserManagementController {
             );
         }
 
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof HospitalUserDetails admin) || !hospitalDomain.equals(admin.getHospitalId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "로그인한 관리자의 병원만 관리할 수 있습니다.");
+        }
         return hospitalDomain;
     }
 }

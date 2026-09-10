@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aio.hospitalsafety.dto.WardOption;
 import com.aio.hospitalsafety.dto.admin.ApprovedUserResponse;
+import com.aio.hospitalsafety.dto.admin.InactiveUserResponse;
 import com.aio.hospitalsafety.mapper.admin.AdminUserManagementMapper;
 
 @Service
@@ -78,7 +79,26 @@ public class AdminUserManagementService {
         }
     }
 
-    // 계정 비활성화: APPROVED에서 PENDING으로 변경
+    @Transactional(readOnly = true)
+    public List<InactiveUserResponse> getInactiveUsers(String hospitalDomain) {
+        return adminUserManagementMapper.findInactiveUsers(hospitalDomain);
+    }
+
+    @Transactional
+    public void activateUser(String hospitalDomain, String userId) {
+        if (adminUserManagementMapper.activateUser(hospitalDomain, userId) != 1) {
+            throw new IllegalArgumentException("활성화할 비활성화 사용자를 찾을 수 없습니다. 목록을 새로고침해 주세요.");
+        }
+    }
+
+    @Transactional
+    public void deleteInactiveUser(String hospitalDomain, String userId) {
+        if (adminUserManagementMapper.deleteInactiveUser(hospitalDomain, userId) != 1) {
+            throw new IllegalArgumentException("삭제할 비활성화 사용자를 찾을 수 없습니다. 목록을 새로고침해 주세요.");
+        }
+    }
+
+    // 계정 비활성화: APPROVED에서 INACTIVE로 변경
     @Transactional
     public void deactivateUser(
             String hospitalDomain,
