@@ -18,6 +18,7 @@ import com.aio.hospitalsafety.common.SessionConstants;
 import com.aio.hospitalsafety.dto.WardOption;
 import com.aio.hospitalsafety.dto.admin.ApprovedUserResponse;
 import com.aio.hospitalsafety.dto.admin.ChangeUserWardRequest;
+import com.aio.hospitalsafety.service.UserSessionService;
 import com.aio.hospitalsafety.service.admin.AdminUserManagementService;
 
 import jakarta.servlet.http.HttpSession;
@@ -28,12 +29,14 @@ import jakarta.validation.Valid;
 public class AdminUserManagementController {
 
     private final AdminUserManagementService adminUserManagementService;
+    private final UserSessionService userSessionService;
 
     public AdminUserManagementController(
-            AdminUserManagementService adminUserManagementService
+            AdminUserManagementService adminUserManagementService,
+            UserSessionService userSessionService
     ) {
-        this.adminUserManagementService =
-                adminUserManagementService;
+        this.adminUserManagementService = adminUserManagementService;
+        this.userSessionService = userSessionService;
     }
 
     // 승인 완료 사용자 목록 조회
@@ -42,8 +45,7 @@ public class AdminUserManagementController {
             @RequestParam(defaultValue = "") String keyword,
             HttpSession session
     ) {
-        String hospitalDomain =
-                requireHospitalDomain(session);
+        String hospitalDomain = requireHospitalDomain(session);
 
         return adminUserManagementService.getApprovedUsers(
                 hospitalDomain,
@@ -53,15 +55,10 @@ public class AdminUserManagementController {
 
     // 현재 병원의 병동 목록 조회
     @GetMapping("/wards")
-    public List<WardOption> getWards(
-            HttpSession session
-    ) {
-        String hospitalDomain =
-                requireHospitalDomain(session);
+    public List<WardOption> getWards(HttpSession session) {
+        String hospitalDomain = requireHospitalDomain(session);
 
-        return adminUserManagementService.getWards(
-                hospitalDomain
-        );
+        return adminUserManagementService.getWards(hospitalDomain);
     }
 
     // 승인 완료 사용자의 담당 병동 변경
@@ -71,8 +68,7 @@ public class AdminUserManagementController {
             @Valid @RequestBody ChangeUserWardRequest request,
             HttpSession session
     ) {
-        String hospitalDomain =
-                requireHospitalDomain(session);
+        String hospitalDomain = requireHospitalDomain(session);
 
         try {
             adminUserManagementService.changeUserWard(
@@ -97,17 +93,23 @@ public class AdminUserManagementController {
         }
     }
 
-    // 계정 비활성화: APPROVED에서 PENDING으로 변경
+    // 계정 비활성화: APPROVED에서 INACTIVE로 변경하고 기존 세션 만료
     @PatchMapping("/users/{userId}/deactivate")
     public ResponseEntity<Map<String, String>> deactivateUser(
             @PathVariable("userId") String userId,
             HttpSession session
     ) {
-        String hospitalDomain =
-                requireHospitalDomain(session);
+        String hospitalDomain = requireHospitalDomain(session);
 
         try {
+            // DB 상태를 INACTIVE로 변경한다.
             adminUserManagementService.deactivateUser(
+                    hospitalDomain,
+                    userId
+            );
+
+            // DB 변경이 성공한 뒤 해당 사용자의 기존 로그인 세션을 만료시킨다.
+            userSessionService.expireUserSessions(
                     hospitalDomain,
                     userId
             );
@@ -129,17 +131,12 @@ public class AdminUserManagementController {
     }
 
     // 세션에서 현재 병원 도메인 확인
-    private String requireHospitalDomain(
-            HttpSession session
-    ) {
-        String hospitalDomain =
-                (String) session.getAttribute(
-                        SessionConstants.HOSPITAL_DOMAIN
-                );
+    private String requireHospitalDomain(HttpSession session) {
+        String hospitalDomain = (String) session.getAttribute(
+                SessionConstants.HOSPITAL_DOMAIN
+        );
 
-        if (hospitalDomain == null
-                || hospitalDomain.isBlank()) {
-
+        if (hospitalDomain == null || hospitalDomain.isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
                     "병원 접속 정보가 없습니다."

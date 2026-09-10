@@ -75,7 +75,7 @@
     <update id="deactivateUser">
 
         UPDATE tb_emp
-        SET auth_st = 'PENDING',
+        SET auth_st = 'INACTIVE',
             upd_dt = NOW()
         WHERE hosp_div_id = #{hospitalDomain}
           AND emp_id = #{userId}
