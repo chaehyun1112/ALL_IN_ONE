@@ -30,7 +30,8 @@ const roomNumbers = [
  */
 const demoRecords = [
   ["2026-08-25T14:41", "306호", "김OO", "낙상 감지", "", "미확인", ""],
-  ["2026-08-25T14:39", "303호", "이OO", "침대 이탈", "박OO", "완료", "2026-08-25T14:43"],
+  /* [수정] 아이콘 확인용 예시 내용입니다. 실제 저장된 조치 기록이 아닙니다. */
+  ["2026-08-25T14:39", "303호", "이OO", "침대 이탈", "박OO", "완료", "2026-08-25T14:43", "[예시] 조치 등록에서 작성한 내용입니다.\n줄바꿈도 그대로 표시됩니다."],
   ["2026-08-25T14:37", "307호", "박OO", "낙상 감지", "정OO", "완료", "2026-08-25T14:42"],
   ["2026-08-25T14:28", "305호", "최OO", "침대 이탈", "고OO", "완료", "2026-08-25T14:33"],
   ["2026-08-25T14:10", "302호", "정OO", "낙상 감지", "임OO", "완료", "2026-08-25T14:17"],
@@ -48,7 +49,9 @@ const demoRecords = [
   type,
   staff,
   status,
-  completedAt
+  completedAt,
+  /* [추가] 여덟 번째 배열 값은 작성 내용입니다. 없으면 빈 문자열입니다. */
+  actionContent = ""
 ]) => ({
   occurredAt,
   room,
@@ -56,7 +59,9 @@ const demoRecords = [
   type,
   staff,
   status,
-  completedAt
+  completedAt,
+  /* [추가] 기록 내용 아이콘에서 읽는 필드 */
+  actionContent
 }));
 
 /* HTML을 모두 읽은 뒤 실행합니다. */
@@ -100,8 +105,7 @@ function initializePage() {
   const exportError = document.querySelector("#export-error");
   const exportSubmit = document.querySelector("#export-submit");
 
-  /* 로그아웃 */
-  const logoutButton = document.querySelector("#logout-button");
+  /* [수정] 삭제된 로그아웃 버튼은 조회하거나 이벤트를 연결하지 않습니다. */
 
   /* 전체 기록과 현재 검색 결과 */
   let allRecords = [];
@@ -422,12 +426,82 @@ function initializePage() {
     return cell;
   }
 
+  /*
+   * [추가] 기록 내용 열을 만듭니다.
+   * [수정] 완료된 기록에는 내용 유무와 관계없이 아이콘을 표시합니다.
+   * 미완료 행도 td를 생성하여 8개 열을 유지합니다.
+   */
+  function createRecordContentCell(record) {
+    const cell = document.createElement("td");
+    cell.className = "record-content-cell";
+
+    /*
+     * [추가] 실제 API가 조치 등록 내용을 actionContent로 반환해야 합니다.
+     * 서버 필드명이 다르면 아래 record.actionContent를 변경하세요.
+     * 누락된 내용은 빈 값으로 처리하며 임의의 조치 내용을 만들지 않습니다.
+     */
+    const content = typeof record.actionContent === "string"
+      ? record.actionContent
+      : "";
+
+    /* [수정] 아이콘 표시 여부는 작성 내용이 아닌 완료 상태로 판단합니다. */
+    if (record.status !== "완료") {
+      const empty = document.createElement("span");
+      empty.className = "record-content-empty";
+      empty.textContent = "-";
+      empty.setAttribute("aria-label", "조치 미완료");
+      cell.append(empty);
+      return cell;
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "record-content-button";
+    button.title = "기록 내용 보기";
+    button.setAttribute("aria-label", `${record.room} ${record.patient} 기록 내용 보기`);
+    button.setAttribute("aria-haspopup", "dialog");
+    button.setAttribute("aria-controls", "record-content-dialog");
+
+    /* [추가] 고정된 문서 아이콘입니다. 별도 이미지가 필요 없습니다. */
+    button.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+        aria-hidden="true" focusable="false">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+        <path d="M14 2v6h6"></path>
+        <path d="M8 13h8M8 17h6"></path>
+      </svg>
+    `;
+
+    button.addEventListener("click", () => {
+      const dialog = document.querySelector("#record-content-dialog");
+      const text = document.querySelector("#record-content-text");
+      if (!dialog || !text) {
+        window.alert("HTML에 기록 내용 팝업을 추가해주세요.");
+        return;
+      }
+
+      /* [추가] 입력 내용을 HTML로 실행하지 않고 그대로 표시합니다. */
+      /* [수정] 완료 상태라도 작성 내용이 비어 있으면 안내를 표시합니다. */
+      text.textContent = content.trim()
+        ? content
+        : "등록된 기록 내용이 없습니다.";
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    });
+
+    cell.append(button);
+    return cell;
+  }
+
   /* 표 안내 메시지 */
   function showTableMessage(message) {
     const row = document.createElement("tr");
     const cell = createCell(message);
 
-    cell.colSpan = 7;
+    /* [수정] 기록 내용까지 8개 열에 안내를 표시합니다. */
+    cell.colSpan = 8;
     cell.className = "empty-message";
 
     row.append(cell);
@@ -474,7 +548,9 @@ function initializePage() {
         typeCell,
         createCell(record.staff),
         createCell(record.status),
-        createCell(formatTime(record.completedAt))
+        createCell(formatTime(record.completedAt)),
+        /* [추가] 완료된 모든 행에 문서 아이콘을 표시합니다. */
+        createRecordContentCell(record)
       );
 
       rows.append(row);
@@ -804,7 +880,7 @@ function initializePage() {
     return `"${text.replaceAll('"', '""')}"`;
   }
 
-  /* 파일에 공통으로 사용할 행 데이터 */
+  /* [수정] Excel·CSV·PDF 공통 데이터에 아이콘 대신 실제 기록 내용을 포함합니다. */
   function makeExportRows(records) {
     return [
       [
@@ -814,7 +890,9 @@ function initializePage() {
         "알림 유형",
         "담당자",
         "처리 상태",
-        "완료 시각"
+        "완료 시각",
+        /* [추가] 내보내기의 여덟 번째 열 */
+        "기록 내용"
       ],
       ...records.map(record => [
         record.occurredAt.replace("T", " "),
@@ -825,6 +903,10 @@ function initializePage() {
         record.status,
         record.completedAt
           ? record.completedAt.replace("T", " ")
+          : "",
+        /* [추가] 작성한 줄바꿈을 유지하며 내용이 없으면 빈칸으로 내보냅니다. */
+        typeof record.actionContent === "string"
+          ? record.actionContent
           : ""
       ])
     ];
@@ -874,7 +956,9 @@ function initializePage() {
       { wch: 14 },
       { wch: 12 },
       { wch: 12 },
-      { wch: 20 }
+      { wch: 20 },
+      /* [추가] Excel의 기록 내용 열을 넓게 설정합니다. */
+      { wch: 60 }
     ];
 
     const workbook = window.XLSX.utils.book_new();
@@ -935,6 +1019,8 @@ function initializePage() {
         width: 100%;
         margin-top: 20px;
         border-collapse: collapse;
+        /* [추가] 긴 기록 내용이 보고서 너비를 밀어내지 않도록 고정합니다. */
+        table-layout: fixed;
       }
 
       th,
@@ -946,6 +1032,22 @@ function initializePage() {
 
       th {
         background: #e7eee8;
+      }
+
+      /* [추가] 모든 셀의 긴 문자열을 보고서 너비 안에서 줄바꿈합니다. */
+      th, td {
+        overflow-wrap: anywhere;
+        vertical-align: top;
+      }
+
+      /* [추가] 기록 내용 열에 너비를 확보하고 입력한 줄바꿈을 유지합니다. */
+      th:last-child {
+        width: 30%;
+      }
+
+      td:last-child {
+        text-align: left;
+        white-space: pre-wrap;
       }
 
       button {
@@ -1225,12 +1327,7 @@ function initializePage() {
     closeExportDialog();
   });
 
-  /* 로그아웃 */
-  // logoutButton.addEventListener("click", () => {
-  //   window.alert(
-  //     "로그아웃은 Spring Boot 인증 기능과 연결해주세요."
-  //   );
-  // });
+  /* [수정] 로그아웃 이벤트를 제거하여 버튼이 없어도 목록이 초기화됩니다. */
 
   /* ==================================================
      초기 실행
