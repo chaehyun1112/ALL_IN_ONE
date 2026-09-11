@@ -32,10 +32,18 @@
         <form action="/logout" th:action="@{/logout}" method="post">
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
         </form>
+
+        <a class="admin-settings" id="admin-settings" href="admin_de.html" th:href="@{/admin/admin_de}" aria-label="설정" title="설정">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M9.67 4.14a2.34 2.34 0 0 1 4.66 0 2.34 2.34 0 0 0 3.32 1.92 2.34 2.34 0 0 1 2.33 4.03 2.34 2.34 0 0 0 0 3.82 2.34 2.34 0 0 1-2.33 4.03 2.34 2.34 0 0 0-3.32 1.92 2.34 2.34 0 0 1-4.66 0 2.34 2.34 0 0 0-3.32-1.92 2.34 2.34 0 0 1-2.33-4.03 2.34 2.34 0 0 0 0-3.82 2.34 2.34 0 0 1 2.33-4.03 2.34 2.34 0 0 0 3.32-1.92"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        </a>
+
     </div>
 </header>
 
-<main class="admin-page" aria-labelledby="admin-title">
+<main class="admin-page" id="admin-management-page" aria-labelledby="admin-title">
     <header class="admin-heading">
         <h1 id="admin-title">간호사 회원 관리</h1>
         <p>가입을 신청한 간호사를 승인하고 담당 병동을 배정합니다.</p>

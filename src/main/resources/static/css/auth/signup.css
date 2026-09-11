@@ -134,9 +134,9 @@
 
 /* 병동 선택 화살표 */
 .signup-page .signup-field select {
-  appearance: none;
+  appearance: auto;
   padding-right: 42px;
-  background-image: url("../image/chevron-down.svg");
+  background-image: none;
   background-repeat: no-repeat;
   background-position: right 14px center;
   background-size: 14px 14px;
@@ -292,7 +292,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px
+  margin-top: 8px;
 }
 
 .signup-page .email-input-row input#emailLocal {
@@ -328,10 +328,20 @@
   margin-top: 8px;
 }
 
-.signup-page .verify-code-row input {
-  flex: 1;
+/* 인증번호 입력칸 너비 */
+.signup-page .signup-form .verify-code-row input {
+  flex: 0 1 160px;
+  width: 140px;
+  min-width: 0;
   height: 42px;
   margin-top: 0;
+}
+/* 인증번호 입력칸 너비 고정 */
+.signup-page .signup-form #verifyCode {
+  flex: none;
+  width: 180px;
+  max-width: 1800px;
+  min-width: 0;
 }
 
 /* 인증번호 남은 시간 */
@@ -468,4 +478,46 @@
     padding-top: 24px;
     padding-bottom: 24px;
   }
+}
+/* 숨겨진 값과 좁은 화면의 입력칸 처리 */
+.signup-page input[type="hidden"] {
+  display: none !important;
+}
+.signup-page .signup-field {
+  min-width: 0;
+}
+.signup-page .email-input-row {
+  flex-wrap: wrap;
+}
+.signup-page .signup-form .email-input-row input,
+.signup-page .signup-form .email-input-row select,
+.signup-page .signup-form .verify-code-row input {
+  margin-top: 0;
+}
+.signup-page .email-domain-custom {
+  flex-basis: 120px;
+}
+@media (max-width: 480px) {
+  .signup-page .signup-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .signup-page .name-field input {
+    max-width: none;
+  }
+  .signup-page #sendCodeBtn {
+    width: 100%;
+  }
+}
+
+/* 아이디 중복 확인 */
+/* 중복확인 통과: 연한 초록색 */
+.signup-page .signup-form #username.is-available {
+  background-color: #edf7ef;
+  border-color: #35624d;
+}
+
+/* 중복된 아이디: 연한 붉은색 */
+.signup-page .signup-form #username.is-taken {
+  background-color: #fff2f0;
+  border-color: #c0392b;
 }

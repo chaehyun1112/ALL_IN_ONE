@@ -8,5 +8,6 @@ package com.aio.hospitalsafety.domain;
  */
 public enum ApprovalStatus {
     PENDING,  // 승인 대기: 신규 가입 기본값
-    APPROVED  // 승인 완료
+    APPROVED, // 승인 완료
+    INACTIVE  // 비활성화
 }

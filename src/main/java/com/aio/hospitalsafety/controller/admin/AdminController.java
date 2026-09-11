@@ -10,4 +10,9 @@ public class AdminController {
     public String adminHome() {
         return "html/admin/admin";
     }
+
+    @GetMapping({"/admin/admin_de", "/admin/admin_de/"})
+    public String adminDeactivatedUsers() {
+        return "html/admin/admin_de";
+    }
 }

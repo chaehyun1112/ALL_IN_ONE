@@ -1,99 +1,95 @@
-(function () {
-  const userIdInput =
-    document.getElementById("userId");
+document.addEventListener("DOMContentLoaded", () => {
+  const usernameInput = document.getElementById("username");
+  const checkBtn = document.getElementById("checkUsernameBtn");
+  const message = document.getElementById("usernameMessage");
+  const checked = document.getElementById("usernameChecked");
 
-  const checkUserIdButton =
-    document.getElementById("checkUserIdBtn");
+  if (!usernameInput || !checkBtn || !message || !checked) {
+    console.error("아이디 중복확인 HTML id를 확인해 주세요.");
+    return;
+  }
 
-  const userIdMessage =
-    document.getElementById("userIdMessage");
+  let checking = false;
 
-  const userIdChecked =
-    document.getElementById("userIdChecked");
+  function showMessage(text, success = false) {
+    message.textContent = text;
+    message.className =
+      "username-message " + (success ? "is-available" : "is-taken");
+  }
 
-  const signupForm =
-    document.querySelector(".signup-form");
-
-  // 사용자 아이디를 수정하면 중복확인 상태 초기화
-  userIdInput.addEventListener("input", () => {
-    userIdChecked.value = "false";
-    userIdMessage.textContent = "";
-    userIdMessage.className = "username-message";
+  // 아이디를 수정하면 이전 중복확인 결과 초기화
+  usernameInput.addEventListener("input", () => {
+    checked.value = "false";
+    usernameInput.classList.remove("is-available", "is-taken");
+    message.textContent = "";
+    message.className = "username-message";
   });
 
-  // 사용자 아이디 중복확인
-  checkUserIdButton.addEventListener("click", async () => {
-    const userId = userIdInput.value.trim(); 
+  checkBtn.addEventListener("click", async () => {
+    if (checking) return;
+
+    const userId = usernameInput.value.trim();
+
+    checked.value = "false";
+    usernameInput.classList.remove("is-available", "is-taken");
 
     if (!userId) {
-      userIdMessage.textContent =
-        "아이디를 입력해 주세요.";
-
-      userIdMessage.className =
-        "username-message is-taken";
-
-      userIdInput.focus();
+      showMessage("아이디를 입력해 주세요.");
+      usernameInput.focus();
       return;
     }
 
-    checkUserIdButton.disabled = true;
-
-    userIdMessage.textContent = "확인 중...";
-    userIdMessage.className = "username-message";
+    usernameInput.value = userId;
+    checking = true;
+    checkBtn.disabled = true;
+    message.textContent = "아이디 중복 여부를 확인하고 있어요.";
+    message.className = "username-message";
 
     try {
-      const response = await fetch(
-        `/api/users/check-user-id?userId=${encodeURIComponent(userId)}`
+      const url = new URL(
+        "/api/users/check-user-id",
+        window.location.origin
       );
+      url.searchParams.set("userId", userId);
 
-      if (!response.ok) {
-        throw new Error("서버 요청에 실패했습니다.");
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/json"
+        },
+        cache: "no-store"
+      });
+
+      if (!response.ok || response.redirected) {
+        throw new Error("중복확인 요청 실패");
       }
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (result.available) {
-        userIdMessage.textContent =
-          "사용 가능한 아이디입니다.";
+      // 요청 중 아이디가 바뀌었다면 이전 결과를 적용하지 않음
+      if (usernameInput.value !== userId) {
+        return;
+      }
 
-        userIdMessage.className =
-          "username-message is-available";
+      if (typeof data.available !== "boolean") {
+        throw new Error("중복확인 응답 형식 오류");
+      }
 
-        userIdChecked.value = "true";
+      if (data.available) {
+        checked.value = "true";
+        usernameInput.classList.add("is-available");
+        showMessage("사용 가능한 아이디예요.", true);
       } else {
-        userIdMessage.textContent =
-          "이미 사용 중인 아이디입니다.";
-
-        userIdMessage.className =
-          "username-message is-taken";
-
-        userIdChecked.value = "false";
+        usernameInput.classList.add("is-taken");
+        showMessage("이미 사용 중인 아이디예요.");
       }
     } catch (error) {
-      userIdMessage.textContent =
-        "중복확인 중 오류가 발생했습니다. 다시 시도해 주세요.";
-
-      userIdMessage.className =
-        "username-message is-taken";
-
-      userIdChecked.value = "false";
+      if (usernameInput.value === userId) {
+        showMessage("중복확인에 실패했어요. 다시 시도해 주세요.");
+      }
+      console.error("아이디 중복확인 오류:", error);
     } finally {
-      checkUserIdButton.disabled = false;
+      checking = false;
+      checkBtn.disabled = false;
     }
   });
-
-  // 중복확인을 하지 않은 경우 회원가입 제출 방지
-  signupForm.addEventListener("submit", (event) => {
-    if (userIdChecked.value !== "true") {
-      event.preventDefault();
-
-      userIdMessage.textContent =
-        "아이디 중복확인을 먼저 진행해 주세요.";
-
-      userIdMessage.className =
-        "username-message is-taken";
-
-      userIdInput.focus();
-    }
-  });
-})();
+});

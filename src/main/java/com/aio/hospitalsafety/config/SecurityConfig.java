@@ -11,6 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 /**
  * 애플리케이션 전체의 로그인, 로그아웃, URL 접근 권한, 비밀번호 암호화 방식을 설정한다.
@@ -36,15 +39,20 @@ public class SecurityConfig {
      * 직접 작성하지 않아도 된다.
      */
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         // HttpSecurity는 메서드를 이어서 호출하는 DSL 방식으로 보안 설정을 작성한다.
         // CSRF 설정을 끄지 않았으므로 Spring Security의 CSRF 보호가 기본으로 적용된다.
         http
                 // authorizeHttpRequests: URL별 접근 권한을 설정한다.
                 .authorizeHttpRequests(auth -> auth
                         // 로그인 화면, 재설정 화면, 정적 파일은 로그인하지 않아도 접근할 수 있다.
-                        .requestMatchers("/", "/domain", "/login", "/login/user", "/signup", "/api/users/check-user-id",
-                                "/password/reset", "/css/**", "/JS/**", "/image/**", "/error").permitAll()
+                        .requestMatchers( 
+                                "/", "/domain", "/login", "/login/user",
+                                "/signup", "/api/users/check-user-id",
+                                "/id/find", "/id/find/**",
+                                "/password/reset", "/password/reset/**",
+                                "/css/**", "/JS/**", "/image/**", "/error"
+                        ).permitAll()
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
                         // 위에서 허용하지 않은 나머지 URL은 로그인한 사용자만 접근할 수 있다.
                         // TODO(화면 URL 확정 필요): 관제 URL이 정해지면 해당 URL에는
@@ -74,7 +82,14 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         // 로그아웃 후 서버 세션과 브라우저의 세션 쿠키를 모두 제거한다.
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"));
+                        .deleteCookies("JSESSIONID"))
+                        
+                .sessionManagement(session -> session
+                    .maximumSessions(-1)
+                    .expiredUrl("/")
+                    .sessionRegistry(sessionRegistry));
+
+
         // 위에서 작성한 규칙을 실제 SecurityFilterChain 객체로 만들어 Spring Bean으로 반환한다.
         return http.build();
     }
@@ -126,5 +141,15 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    @Bean
+    HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 }

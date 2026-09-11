@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 :root { color-scheme: light; --admin-background: #f4f1e8; --admin-surface: #fbfaf5; --admin-border: #e2e2d7; --admin-green: #405c4f; --admin-text: #42483e; --admin-muted: #8b9083; }
 * { box-sizing: border-box; }
+html:has(#admin-management-page) { min-height: 100%; overflow-y: auto; scrollbar-gutter: stable; }
 body { margin: 0; background: var(--admin-background); color: var(--admin-text); font-family: "Noto Sans KR", "Malgun Gothic", sans-serif; font-size: 14px; }
 button, input, select { font: inherit; border: 1px solid var(--admin-border); border-radius: 7px; }
 button { cursor: pointer; }
@@ -11,9 +12,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-brand, .admin-topbar-actions { display: flex; align-items: center; gap: 32px; }
 .admin-brand strong { font-size: 15px; }
 .admin-brand span { font-size: 14px; font-weight: 600; }
-.admin-topbar-actions { gap: 20px; }
-.admin-topbar time { font-size: 11px; color: #e1e9df; font-variant-numeric: tabular-nums; }
-.admin-logout { padding: 7px 16px; background: #536d60; border-color: #74887b; color: #f3f5ee; font-size: 11px; }
+.admin-topbar-actions { gap: 10px; flex-shrink: 0; }
+.admin-topbar-actions form { display: flex; margin: 0; }
+.admin-topbar time { margin-right: 10px; font-size: 11px; color: #e1e9df; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.admin-settings, .admin-logout { display: inline-flex; align-items: center; justify-content: center; height: 36px; background: #536d60; border-color: #74887b; color: #f3f5ee; }
+.admin-settings { width: 36px; padding: 0; border: 1px solid #74887b; border-radius: 7px; text-decoration: none; }
+.admin-settings svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.admin-logout { padding: 0 16px; font-size: 11px; white-space: nowrap; }
+.admin-settings:hover, .admin-logout:hover { background: #607c6c; border-color: #a1b4a7; }
+.admin-settings:focus-visible, .admin-logout:focus-visible { outline-color: #f1f4ed; }
 .admin-page { display: flex; flex-direction: column; min-height: calc(100vh - 68px); max-width: 1800px; margin: 0 auto; padding: 24px 24px 36px; }
 .admin-heading { padding: 0 12px; margin-bottom: 20px; }
 .admin-heading h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.35; letter-spacing: -1px; }
@@ -39,6 +46,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-tabs button { flex: 1; padding: 9px 12px; border: 0; background: transparent; color: #737b6c; font-size: 11px; }
 .admin-tabs button[aria-selected="true"] { background: #fff; color: #4c6353; box-shadow: 0 1px 4px #3943320a; font-weight: 700; }
 .admin-table-wrap { overflow-x: auto; }
+#admin-management-page .admin-table-wrap { min-height: 440px; }
 .admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: center; font-size: 11px; }
 .admin-table th { height: 46px; background: #f5f5ec; color: #7b8274; font-weight: 600; }
 .admin-table th:first-child { width: 22%; border-radius: 7px 0 0 7px; }
@@ -52,6 +60,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-row-actions button { padding: 5px 13px; border: 0; font-size: 12px; white-space: nowrap; }
 .admin-approve { color: #53846a; background: #e5f2e9; }
 .admin-reject { color: #b06e6a; background: #faeae7; }
+.admin-row-actions button.admin-approve:not(.admin-icon-button),
+.admin-row-actions button.admin-reject:not(.admin-icon-button) { font-weight: 600; }
 .admin-row-actions .admin-icon-button { display: inline-flex; width: 36px; height: 36px; padding: 0; align-items: center; justify-content: center; border: 1px solid #d9ddd3; border-radius: 9px; background: #fff; }
 .admin-row-actions .admin-icon-button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .admin-row-actions .admin-icon-button.admin-approve { color: #39745e; }

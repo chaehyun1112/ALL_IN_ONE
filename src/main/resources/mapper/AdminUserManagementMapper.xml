@@ -35,6 +35,40 @@
         ORDER BY e.emp_nm, e.emp_id
     </select>
 
+    <select id="findInactiveUsers" resultType="com.aio.hospitalsafety.dto.admin.InactiveUserResponse">
+        SELECT e.emp_id AS user_id,
+               e.emp_nm AS user_name,
+               e.auth_st AS auth_status,
+               e.ward_id,
+               w.ward_nm AS ward_name,
+               e.upd_dt AS deactivated_at
+        FROM tb_emp e
+        LEFT JOIN tb_ward w ON w.ward_id = e.ward_id AND w.hosp_div_id = e.hosp_div_id
+        WHERE e.hosp_div_id = #{hospitalDomain}
+          AND e.role_cd = 'USER'
+          AND e.auth_st = 'INACTIVE'
+        ORDER BY e.upd_dt DESC NULLS LAST, e.emp_id
+    </select>
+
+    <!-- 활성화 시 이전 병동은 유지하고 승인 완료 상태로 복귀한다. -->
+    <update id="activateUser">
+        UPDATE tb_emp
+        SET auth_st = 'APPROVED', upd_dt = NOW()
+        WHERE hosp_div_id = #{hospitalDomain}
+          AND emp_id = #{userId}
+          AND role_cd = 'USER'
+          AND auth_st = 'INACTIVE'
+    </update>
+
+    <!-- 현재 병원의 비활성화 일반 사용자만 실제 삭제한다. -->
+    <delete id="deleteInactiveUser">
+        DELETE FROM tb_emp
+        WHERE hosp_div_id = #{hospitalDomain}
+          AND emp_id = #{userId}
+          AND role_cd = 'USER'
+          AND auth_st = 'INACTIVE'
+    </delete>
+
     <!-- 3번 팝업: 현재 병원의 병동 목록 -->
     <select id="findWardsByHospital"
             resultType="com.aio.hospitalsafety.dto.WardOption">
@@ -75,7 +109,7 @@
     <update id="deactivateUser">
 
         UPDATE tb_emp
-        SET auth_st = 'PENDING',
+        SET auth_st = 'INACTIVE',
             upd_dt = NOW()
         WHERE hosp_div_id = #{hospitalDomain}
           AND emp_id = #{userId}

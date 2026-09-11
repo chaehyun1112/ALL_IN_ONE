@@ -337,9 +337,9 @@ function openAdminAction(user, action) {
     if (action === "DEACTIVATE") {
         adminDialogTitle.textContent = "계정 비활성화";
         adminDialogDescription.textContent =
-            `${user.name} 계정을 비활성화할까요? `
-            + "비활성화하면 해당 계정은 로그인할 수 없으며 "
-            + "권한 상태가 승인 대기로 변경됩니다.";
+            `${user.name} 계정을 비활성화하시겠습니까? `
+            + "비활성화하면 해당 계정으로 로그인할 수 없습니다. "
+            + "기존 활동 및 업무 처리 기록은 유지됩니다.";
         adminDialogConfirm.textContent = "비활성화";
     }
 
@@ -413,6 +413,10 @@ async function submitAdminAction() {
         });
 
         adminDialog.close();
+        if (selectedAction === "DEACTIVATE") {
+            window.location.assign(document.querySelector("#admin-settings").href);
+            return;
+        }
         await loadAdminData(true);
 
         const currentTab = adminTabs.find(
@@ -532,6 +536,9 @@ function updateAdminClock() {
 }
 
 /* 초기 실행 */
+if (new URLSearchParams(window.location.search).get("status") === "APPROVED") {
+    selectAdminTab(document.querySelector("#admin-approved-tab"));
+}
 updateAdminClock();
 setInterval(updateAdminClock, 30000);
 
