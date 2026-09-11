@@ -8,7 +8,7 @@
   <!-- CSS 파일 연결 -->
   <link
     rel="stylesheet"
-    th:href="@{/css/dashboard.css}"
+    href="./dashboard.css" th:href="@{/css/dashboard.css}"
   >
 </head>
 
@@ -57,12 +57,13 @@
           aria-label="대시보드 메뉴"
           hidden
         >
-          <a>조치기록</a>
+          <a href=""
+             th:href="@{/Record}">조치기록</a>
           <button
             type="button"
-            id="settings-open"
+            id="logout-open"
           >
-            설정
+            로그아웃
           </button>
         </nav>
       </div>
@@ -76,6 +77,8 @@
         <h2>오늘의 안전 현황</h2>
 
         <div class="counts">
+          <!-- [추가] 전체 관제 화면으로 복귀하는 카드 -->
+          <div class="count all"><span>전체</span><b id="all-count">17</b></div>
           <div class="count">
             <span>정상 병실</span>
             <b id="normal-count">15</b>
@@ -100,17 +103,7 @@
         <div class="panel-heading">
           <h2>병실별 안전 상태</h2>
 
-          <div class="legend">
-            <span>정상</span>
-            <span class="caution">주의</span>
-            <span class="urgent">긴급</span>
-          </div>
-        </div>
-
-        <div class="floor-toolbar">
-          <span>병동 평면도 · 총 17개 병실</span>
-
-          <!-- 위치 확인 후 나타나는 대응 등록 버튼 -->
+          <div class="heading-response"><!-- 위치 확인 후 나타나는 대응 등록 버튼 -->
           <button
             type="button"
             id="response-open"
@@ -119,7 +112,16 @@
             disabled
           >
             대응 등록
-          </button>
+          </button></div>
+          <div class="legend">
+            <span>정상</span>
+            <span class="caution">주의</span>
+            <span class="urgent">긴급</span>
+          </div>
+        </div>
+
+        <div class="floor-toolbar">
+          <!-- [수정] 제목 아래 병실 수 안내 문구 삭제 -->
         </div>
 
         <div class="floor">
@@ -352,6 +354,6 @@
   </dialog>
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
-  <script th:src="@{/JS/dashboard.js}"></script>
+  <script src="./dashboard.js" th:src="@{/JS/dashboard.js}"></script>
 </body>
 </html>
