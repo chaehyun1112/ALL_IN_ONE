@@ -43,33 +43,24 @@
     </div>
 </header>
 
-<main class="admin-page" id="admin-management-page" aria-labelledby="admin-title">
+<main class="admin-page" id="admin-management-page" aria-labelledby="admin-title" data-admin-id="admin01" th:attr="data-admin-id=${adminId}">
     <header class="admin-heading">
         <h1 id="admin-title">간호사 회원 관리</h1>
         <p>가입을 신청한 간호사를 승인하고 담당 병동을 배정합니다.</p>
     </header>
 
-    <section class="admin-summary" aria-label="회원 현황">
-        <article class="admin-stat">
-            <h2>전체</h2>
-            <strong id="admin-total-count" class="admin-count-total">0명</strong>
-        </article>
-
-        <article class="admin-stat">
-            <h2>승인완료</h2>
-            <strong id="admin-approved-count" class="admin-count-approved">0명</strong>
-        </article>
-
-        <article class="admin-stat">
-            <h2>승인대기</h2>
-            <strong id="admin-pending-count" class="admin-count-pending">0명</strong>
-        </article>
+    <section class="admin-history-summary" aria-label="관리 이력 처리 내용별 현황">
+        <article class="history-filter-card active" data-history-filter="전체" tabindex="0"><span class="history-card-icon all">⌕</span><div><small>전체</small><strong>4건</strong></div></article>
+        <article class="history-filter-card active" data-history-filter="계정 생성" tabindex="0"><span class="history-card-icon create">+</span><div><small>계정 생성</small><strong>1건</strong></div></article>
+        <article class="history-filter-card" data-history-filter="병동 변경" tabindex="0"><span class="history-card-icon ward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21h16M6 21V7l6-3 6 3v14M9 10h1M14 10h1M9 14h1M14 14h1M10 21v-3h4v3"/></svg></span><div><small>병동 변경</small><strong>1건</strong></div></article>
+        <article class="history-filter-card" data-history-filter="비밀번호 초기화" tabindex="0"><span class="history-card-icon password"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><div><small>비밀번호 초기화</small><strong>1건</strong></div></article>
+        <article class="history-filter-card" data-history-filter="계정 비활성화" tabindex="0"><span class="history-card-icon disable">×</span><div><small>계정 비활성화</small><strong>1건</strong></div></article>
     </section>
 
     <section class="admin-panel" aria-labelledby="admin-list-title">
         <header class="admin-panel-heading">
-            <h2 id="admin-list-title">가입 신청 및 병동 배정</h2>
-            <p>이름 또는 아이디로 검색하고 승인 상태와 담당 병동을 관리합니다.</p>
+                <div><h2 id="admin-list-title">관리 이력</h2><p>관리자가 처리한 계정 및 병동 변경 내역을 확인합니다.</p></div>
+            <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
         </header>
 
         <div class="admin-toolbar">
@@ -93,33 +84,11 @@
                 <button type="submit" class="admin-search-button">검색</button>
             </form>
 
-            <div class="admin-tabs" role="tablist" aria-label="승인 상태">
-                <button type="button"
-                        id="admin-approved-tab"
-                        role="tab"
-                        aria-selected="false"
-                        aria-controls="admin-list"
-                        tabindex="-1"
-                        data-status="APPROVED">
-                    승인완료
-                </button>
-
-                <button type="button"
-                        id="admin-pending-tab"
-                        role="tab"
-                        aria-selected="true"
-                        aria-controls="admin-list"
-                        tabindex="0"
-                        data-status="PENDING">
-                    승인대기
-                </button>
-            </div>
         </div>
 
         <div id="admin-list"
              class="admin-table-wrap"
              role="tabpanel"
-             aria-labelledby="admin-pending-tab"
              tabindex="0">
 
             <table class="admin-table">
@@ -128,7 +97,7 @@
                 <thead>
                 <tr>
                     <th scope="col">이름</th>
-                    <th scope="col">로그인 아이디</th>
+                    <th scope="col">아이디</th>
                     <th scope="col">배정 병동</th>
                     <th scope="col">관리</th>
                 </tr>
@@ -145,6 +114,35 @@
         <noscript>
             <p>사용자 목록을 확인하려면 JavaScript를 활성화해주세요.</p>
         </noscript>
+
+    <div class="admin-history-panel" aria-labelledby="admin-history-title">
+        <header class="admin-panel-heading">
+            <div>
+                <h2 id="admin-history-title">관리 이력</h2>
+                <p>관리자가 처리한 계정 및 병동 변경 내역을 확인합니다.</p>
+            </div>
+        </header>
+
+        <div class="admin-history-wrap">
+            <table class="admin-history-table">
+                <thead>
+                <tr>
+                    <th scope="col">처리 시각</th>
+                    <th scope="col">작업 관리자</th>
+                    <th scope="col">대상 직원</th>
+                    <th scope="col">담당 병동</th>
+                    <th scope="col">처리 내용</th>
+                    <th scope="col">관리</th>
+                </tr>
+                </thead>
+                <tbody id="admin-history-rows">
+                <tr data-history-action="계정 생성"><td>2026-09-12 10:20</td><td>admin01</td><td>user102</td><td>A병동</td><td>계정 생성</td><td class="history-actions"><button class="history-edit" aria-label="계정 생성 이력 수정">✎</button><button class="history-delete" aria-label="계정 생성 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td></tr>
+                <tr data-history-action="병동 변경"><td>2026-09-12 11:05</td><td>admin01</td><td>user102</td><td>F병동</td><td>병동 변경</td><td class="history-actions"><button class="history-edit" aria-label="병동 변경 이력 수정">✎</button><button class="history-delete" aria-label="병동 변경 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td></tr>
+                <tr data-history-action="계정 비활성화"><td>2026-09-13 09:00</td><td>admin01</td><td>user102</td><td>E병동</td><td>계정 비활성화</td><td class="history-actions"><button class="history-edit" aria-label="계정 비활성화 이력 수정">✎</button><button class="history-delete" aria-label="계정 비활성화 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
     </section>
 </main>
 
@@ -172,6 +170,64 @@
             </button>
         </div>
     </form>
+</dialog>
+
+<dialog id="admin-create-dialog" class="admin-dialog admin-create-dialog" aria-labelledby="admin-create-title">
+    <form id="admin-create-form" novalidate>
+        <h2 id="admin-create-title">간호사 계정 생성</h2>
+        <p>생성 후 로그인 정보를 안내할 수 있도록 표시합니다.</p>
+        <div class="admin-create-grid">
+            <label>이름<input id="admin-create-name" placeholder="예: 김서윤"><small class="admin-field-error" id="admin-create-name-error"></small></label>
+            <label>아이디<input id="admin-create-user-id" placeholder="예: nurse.ksy01"><small class="admin-field-error" id="admin-create-user-id-error"></small></label>
+            <label>담당 병동<select id="admin-create-ward"><option value="">담당 병동을 선택해주세요</option></select><small class="admin-field-error" id="admin-create-ward-error"></small></label>
+        </div>
+        <div class="admin-dialog-actions"><button type="button" id="admin-create-cancel">취소</button><button type="submit" class="admin-primary">계정 생성</button></div>
+    </form>
+</dialog>
+
+<dialog id="admin-create-complete-dialog" class="admin-dialog admin-create-complete-dialog" aria-labelledby="admin-create-complete-title">
+    <div class="admin-complete-mark">✓</div>
+    <h2 id="admin-create-complete-title">계정 생성 완료</h2>
+    <p>아래 로그인 정보를 간호사에게 전달해주세요.</p>
+    <dl class="admin-account-info">
+        <div><dt>이름</dt><dd id="complete-account-name"></dd></div>
+        <div><dt>아이디</dt><dd id="complete-account-user-id"></dd></div>
+        <div><dt>담당 병동</dt><dd id="complete-account-ward"></dd></div>
+        <div><dt>임시 비밀번호</dt><dd class="admin-password-value"><span id="complete-account-password"></span><button type="button" id="copy-account-password">복사하기</button></dd></div>
+    </dl>
+    <button type="button" class="admin-complete-close" id="admin-create-complete-close">확인</button>
+</dialog>
+
+<dialog id="admin-history-event-dialog" class="admin-dialog admin-history-event-dialog" aria-labelledby="admin-history-event-title">
+    <h2 id="admin-history-event-title">관리 이력 상세</h2>
+    <p>선택한 작업의 처리 내용을 확인합니다.</p>
+    <dl class="admin-event-info">
+        <div><dt>처리 시각</dt><dd id="event-time"></dd></div>
+        <div><dt>작업 관리자</dt><dd id="event-admin"></dd></div>
+        <div><dt>대상 직원</dt><dd id="event-target"></dd></div>
+        <div><dt>처리 내용</dt><dd id="event-action"></dd></div>
+        <div><dt>비밀번호</dt><dd><button type="button" class="admin-event-change" id="admin-event-change">비밀번호 초기화</button></dd></div>
+    </dl>
+    <button type="button" class="admin-complete-close" id="admin-history-event-close">확인</button>
+</dialog>
+
+<dialog id="admin-password-reset-dialog" class="admin-dialog admin-create-complete-dialog" aria-labelledby="admin-password-reset-title">
+    <div class="admin-complete-mark">✓</div>
+    <h2 id="admin-password-reset-title">비밀번호 초기화 완료</h2>
+    <p>아래 변경된 비밀번호를 간호사에게 전달해주세요.</p>
+    <dl class="admin-account-info">
+        <div><dt>아이디</dt><dd id="reset-account-user-id"></dd></div>
+        <div><dt>변경된 비밀번호</dt><dd class="admin-password-value"><span id="reset-account-password"></span><button type="button" id="copy-reset-password">복사하기</button></dd></div>
+    </dl>
+    <button type="button" class="admin-complete-close" id="admin-password-reset-close">확인</button>
+</dialog>
+
+<dialog id="admin-deactivate-dialog" class="admin-dialog admin-deactivate-dialog" aria-labelledby="admin-deactivate-title">
+    <span class="warning-mark">!</span>
+    <h2 id="admin-deactivate-title">계정 비활성화</h2>
+    <p><strong id="deactivate-target"></strong> 계정을 비활성화하시겠습니까?</p>
+    <p class="admin-deactivate-note">비활성화하면 해당 계정으로 로그인할 수 없습니다.</p>
+    <div class="admin-dialog-actions"><button type="button" id="admin-deactivate-cancel">취소</button><button type="button" class="admin-deactivate-confirm" id="admin-deactivate-confirm">비활성화</button></div>
 </dialog>
 
 <p id="admin-feedback"

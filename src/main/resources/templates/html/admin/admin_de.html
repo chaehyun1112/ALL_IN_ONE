@@ -24,7 +24,7 @@
 <body>
 <header class="admin-topbar">
     <div class="admin-brand">
-        <strong>병동 통합 관제</strong>
+        <!-- 변경: 비활성화 사용자 화면의 상단 왼쪽 문구를 사용자 관리 복귀 링크로 통일 -->
         <a class="admin-back-button" id="admin-settings-back" href="admin.html?status=APPROVED" th:href="@{/admin(status='APPROVED')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
             사용자 관리로 돌아가기
@@ -53,6 +53,14 @@
         <p class="admin-settings-eyebrow">관리자 설정 / 계정 관리</p>
         <h1 id="admin-settings-title" tabindex="-1">비활성화 사용자</h1>
         <p>사용자의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
+        <!-- [수정] 계정 상태 관리 안내를 설명문 아래의 가로형 영역으로 배치 -->
+        <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title">
+            <div class="admin-guide-heading">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg>
+                <strong id="admin-account-guide-title">계정 상태 관리</strong>
+            </div>
+            <p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 사용자는 <strong>활성화</strong>로 변경해 주세요.</p>
+        </aside>
     </header>
     <div class="admin-inactive-overview">
         <section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title">
@@ -61,13 +69,6 @@
             </span>
             <div><h2 id="admin-inactive-stat-title">비활성화 사용자</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
         </section>
-        <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title">
-            <div class="admin-guide-heading">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg>
-                <strong id="admin-account-guide-title">계정 상태 관리</strong>
-            </div>
-            <p>비활성화된 계정은 서비스에 로그인할 수 없습니다.<br>서비스 이용을 재개할 사용자는 <strong>활성화</strong>로 변경해 주세요.</p>
-        </aside>
     </div>
     <section class="admin-panel admin-inactive-panel" aria-labelledby="admin-inactive-list-title">
         <header class="admin-panel-heading admin-inactive-panel-heading">

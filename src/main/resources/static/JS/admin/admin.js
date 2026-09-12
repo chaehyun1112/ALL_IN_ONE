@@ -2,7 +2,7 @@
 
 let adminUsers = [];
 let adminWards = [];
-let adminActiveStatus = "PENDING";
+let adminActiveStatus = "ALL";
 let adminSearchQuery = "";
 let adminSelectedUser = null;
 let adminAction = "";
@@ -26,6 +26,18 @@ const adminApprovedCount = document.querySelector("#admin-approved-count");
 const adminPendingCount = document.querySelector("#admin-pending-count");
 const adminList = document.querySelector("#admin-list");
 const adminClock = document.querySelector("#admin-clock");
+const adminCreateDialog = document.querySelector("#admin-create-dialog");
+const adminCreateForm = document.querySelector("#admin-create-form");
+const adminCreateWard = document.querySelector("#admin-create-ward");
+const adminCreateCompleteDialog = document.querySelector("#admin-create-complete-dialog");
+const adminHistoryEventDialog = document.querySelector("#admin-history-event-dialog");
+const adminPasswordResetDialog = document.querySelector("#admin-password-reset-dialog");
+const adminDeactivateDialog = document.querySelector("#admin-deactivate-dialog");
+let pendingDeactivateRow = null;
+let pendingEventRow = null;
+const adminHistoryRows = document.querySelector("#admin-history-rows");
+const currentAdminId = document.querySelector("#admin-management-page")?.dataset.adminId || "admin01";
+const historyFilterCards = [...document.querySelectorAll(".history-filter-card")];
 
 const csrfToken = document.querySelector('meta[name="_csrf"]')?.content ?? "";
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content ?? "X-CSRF-TOKEN";
@@ -157,17 +169,34 @@ async function loadAdminData(silent = false) {
  */
 function renderAdminWardOptions() {
     adminWardSelect.replaceChildren();
+    if (adminCreateWard) adminCreateWard.replaceChildren();
 
     const emptyOption = document.createElement("option");
     emptyOption.value = "";
     emptyOption.textContent = "병동을 선택해주세요";
     adminWardSelect.append(emptyOption);
+    if (adminCreateWard) {
+        const createEmpty = emptyOption.cloneNode(true);
+        createEmpty.textContent = "담당 병동을 선택해주세요";
+        adminCreateWard.append(createEmpty);
+    }
 
     for (const ward of adminWards) {
         const option = document.createElement("option");
         option.value = String(ward.wardId);
         option.textContent = ward.wardName;
         adminWardSelect.append(option);
+        if (adminCreateWard) adminCreateWard.append(option.cloneNode(true));
+    }
+
+    const additionalWards = ["A병동", "B병동", "C병동", "D병동", "E병동", "F병동"];
+    for (const [index, wardName] of additionalWards.entries()) {
+        if (adminWards.some(ward => ward.wardName === wardName)) continue;
+        const option = document.createElement("option");
+        option.value = String(wardName);
+        option.textContent = wardName;
+        adminWardSelect.append(option);
+        if (adminCreateWard) adminCreateWard.append(option.cloneNode(true));
     }
 }
 
@@ -175,6 +204,9 @@ function renderAdminWardOptions() {
  * 전체, 승인 완료, 승인 대기 인원을 계산한다.
  */
 function renderAdminCounts() {
+    if (!adminTotalCount || !adminApprovedCount || !adminPendingCount) {
+        return;
+    }
     const approvedCount = adminUsers.filter(
         user => user.status === "APPROVED"
     ).length;
@@ -195,7 +227,7 @@ function renderAdminUsers() {
     renderAdminCounts();
 
     const visibleUsers = adminUsers.filter(user => {
-        const sameStatus = user.status === adminActiveStatus;
+        const sameStatus = adminActiveStatus === "ALL" || user.status === adminActiveStatus;
         const searchableText = `${user.name} ${user.userId}`.toLowerCase();
         const matchesSearch = searchableText.includes(adminSearchQuery);
 
@@ -382,7 +414,9 @@ async function submitAdminAction() {
 
         url = `/api/admin/users/${encodeURIComponent(selectedUser.userId)}/ward`;
         body = JSON.stringify({
-            wardId: Number(adminWardSelect.value)
+            wardId: /^\d+$/.test(adminWardSelect.value)
+                ? Number(adminWardSelect.value)
+                : adminWardSelect.value
         });
         successMessage = "담당 병동을 변경했습니다.";
     }
@@ -509,6 +543,125 @@ adminDialog.addEventListener("close", () => {
     adminWardSelect.value = "";
 });
 
+document.querySelector("#admin-create-account")?.addEventListener("click", () => {
+    adminCreateForm.reset();
+    document.querySelectorAll(".admin-field-error").forEach(error => error.textContent = "");
+    adminCreateDialog.showModal();
+});
+document.querySelector("#admin-create-cancel")?.addEventListener("click", () => adminCreateDialog.close());
+document.querySelector("#admin-create-complete-close")?.addEventListener("click", () => adminCreateCompleteDialog.close());
+document.querySelector("#admin-history-event-close")?.addEventListener("click", () => adminHistoryEventDialog.close());
+document.querySelector("#admin-password-reset-close")?.addEventListener("click", () => adminPasswordResetDialog.close());
+document.querySelector("#admin-deactivate-cancel")?.addEventListener("click", () => adminDeactivateDialog.close());
+document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", () => {
+    pendingDeactivateRow?.remove();
+    pendingDeactivateRow = null;
+    adminDeactivateDialog.close();
+});
+document.querySelector("#admin-event-change")?.addEventListener("click", () => {
+    const userId = document.querySelector("#event-target").textContent;
+    const temporaryPassword = `Care${Math.random().toString(36).slice(2, 8)}!`;
+    if (pendingEventRow) {
+        const processedAt = new Date().toISOString().slice(0, 16).replace("T", " ");
+        pendingEventRow.querySelectorAll("td")[0].textContent = processedAt;
+        pendingEventRow.dataset.historyAction = "비밀번호 초기화";
+        pendingEventRow.querySelectorAll("td")[4].textContent = "비밀번호 초기화";
+    }
+    document.querySelector("#reset-account-user-id").textContent = userId;
+    document.querySelector("#reset-account-password").textContent = temporaryPassword;
+    adminHistoryEventDialog.close();
+    adminPasswordResetDialog.showModal();
+});
+document.querySelector("#copy-reset-password")?.addEventListener("click", async event => {
+    await navigator.clipboard.writeText(document.querySelector("#reset-account-password").textContent);
+    event.currentTarget.textContent = "복사됨";
+    setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
+});
+document.querySelector("#copy-account-password")?.addEventListener("click", async event => {
+    const password = document.querySelector("#complete-account-password").textContent;
+    await navigator.clipboard.writeText(password);
+    event.currentTarget.textContent = "복사됨";
+    setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
+});
+
+function filterHistory(action) {
+    historyFilterCards.forEach(card => card.classList.toggle("active", card.dataset.historyFilter === action));
+    document.querySelectorAll("#admin-history-rows tr").forEach(row => {
+        row.hidden = action !== "전체" && row.dataset.historyAction !== action;
+    });
+}
+
+adminHistoryRows?.addEventListener("click", event => {
+    const deleteButton = event.target.closest(".history-delete");
+    if (deleteButton) {
+        pendingDeactivateRow = deleteButton.closest("tr");
+        document.querySelector("#deactivate-target").textContent = pendingDeactivateRow.querySelectorAll("td")[2].textContent;
+        adminDeactivateDialog.showModal();
+        return;
+    }
+    const editButton = event.target.closest(".history-edit");
+    if (!editButton) return;
+    const row = editButton.closest("tr");
+    pendingEventRow = row;
+    const cells = row.querySelectorAll("td");
+    document.querySelector("#event-time").textContent = cells[0].textContent;
+    document.querySelector("#event-admin").textContent = cells[1].textContent;
+    document.querySelector("#event-target").textContent = cells[2].textContent;
+    document.querySelector("#event-action").textContent = cells[4].textContent;
+    adminHistoryEventDialog.showModal();
+});
+
+historyFilterCards.forEach(card => {
+    card.addEventListener("click", () => filterHistory(card.dataset.historyFilter));
+    card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            filterHistory(card.dataset.historyFilter);
+        }
+    });
+});
+adminCreateForm?.addEventListener("submit", event => {
+    event.preventDefault();
+    const name = document.querySelector("#admin-create-name")?.value.trim();
+    const userId = document.querySelector("#admin-create-user-id")?.value.trim();
+    const ward = adminCreateWard?.value;
+    const errors = {
+        "admin-create-name-error": name ? "" : "이름을 입력해주세요.",
+        "admin-create-user-id-error": userId ? "" : "아이디를 입력해주세요.",
+        "admin-create-ward-error": ward ? "" : "담당 병동을 선택해주세요."
+    };
+    Object.entries(errors).forEach(([id, message]) => {
+        document.querySelector(`#${id}`).textContent = message;
+    });
+    if (Object.values(errors).some(Boolean)) {
+        return;
+    }
+    const temporaryPassword = `Care${Math.random().toString(36).slice(2, 8)}!`;
+    const selectedWard = adminWards.find(item => String(item.wardId) === String(ward));
+    adminUsers.unshift({
+        userId,
+        name,
+        status: "APPROVED",
+        wardId: selectedWard?.wardId ?? null,
+        ward: selectedWard?.wardName ?? ward
+    });
+    if (adminHistoryRows) {
+        const now = new Date();
+        const time = now.toISOString().slice(0, 16).replace("T", " ");
+        const row = document.createElement("tr");
+        row.dataset.historyAction = "계정 생성";
+        row.innerHTML = `<td>${time}</td><td>${currentAdminId}</td><td>${userId}</td><td>${selectedWard?.wardName ?? ward}</td><td>계정 생성</td><td class="history-actions"><button class="history-edit" aria-label="계정 생성 이력 수정">✎</button><button class="history-delete" aria-label="계정 생성 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td>`;
+        adminHistoryRows.prepend(row);
+    }
+    adminCreateDialog.close();
+    renderAdminUsers();
+    document.querySelector("#complete-account-name").textContent = name;
+    document.querySelector("#complete-account-user-id").textContent = userId;
+    document.querySelector("#complete-account-ward").textContent = selectedWard?.wardName ?? ward;
+    document.querySelector("#complete-account-password").textContent = temporaryPassword;
+    adminCreateCompleteDialog.showModal();
+});
+
 /**
  * 관리자 화면 현재 시각 표시
  */
@@ -536,9 +689,6 @@ function updateAdminClock() {
 }
 
 /* 초기 실행 */
-if (new URLSearchParams(window.location.search).get("status") === "APPROVED") {
-    selectAdminTab(document.querySelector("#admin-approved-tab"));
-}
 updateAdminClock();
 setInterval(updateAdminClock, 30000);
 

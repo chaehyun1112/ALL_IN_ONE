@@ -4,9 +4,10 @@
 .admin-back-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
 .admin-back-button:hover { color: #fff; background: #ffffff14; }
 .admin-back-button:focus-visible { outline: 2px solid #f1f4ed; outline-offset: 3px; }
-.admin-settings-heading { padding: 0; margin-bottom: 24px; }
+.admin-settings-page { position: relative; }
+.admin-settings-heading { position: relative; padding: 0; margin-bottom: 24px; }
 .admin-settings-heading .admin-settings-eyebrow { margin-bottom: 10px; font-size: 11px; color: #687b6d; }
-.admin-inactive-overview { display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: 18px; margin-bottom: 24px; }
+.admin-inactive-overview { position: absolute; top: 24px; right: 24px; display: flex; justify-content: flex-end; margin: 0; }
 .admin-inactive-stat { display: flex; align-items: center; gap: 18px; padding: 18px 24px; border: 1px solid var(--admin-border); border-radius: 14px; background: var(--admin-surface); }
 .admin-inactive-stat h2 { margin: 0 0 6px; font-size: 12px; font-weight: 400; color: #717b6b; }
 .admin-inactive-stat strong { font-size: 28px; line-height: 1.2; }
@@ -14,6 +15,9 @@
 .admin-inactive-symbol { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: #edf0e7; color: #71806b; }
 .admin-inactive-symbol svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .admin-account-guide { display: flex; flex-direction: column; justify-content: center; padding: 18px 24px; border: 1px solid #dce3d7; border-radius: 14px; background: #edf1e8; }
+.admin-settings-heading .admin-account-guide { width: 100%; max-width: none; margin-top: 14px; }
+.admin-inactive-overview .admin-inactive-stat { width: min(340px, 100%); margin-left: auto; }
+.admin-settings-heading .admin-account-guide p { white-space: nowrap; }
 .admin-guide-heading { display: flex; align-items: center; gap: 9px; color: #405c4f; font-size: 14px; }
 .admin-guide-heading svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .admin-account-guide p { margin: 8px 0 0; color: #626f5c; font-size: 12px; line-height: 1.7; }
@@ -69,7 +73,9 @@
     .admin-back-button { padding: 4px 0; font-size: 11px; }
     .admin-bulk-actions { align-items: flex-start; flex-direction: column; }
     .admin-account-guide { padding: 20px; }
-    .admin-inactive-overview { grid-template-columns: 1fr; gap: 12px; }
+    /* [수정] 모바일에서는 통계 카드를 문서 흐름 안으로 되돌려 겹침을 방지 */
+    .admin-inactive-overview { position: static; display: flex; justify-content: flex-end; margin-bottom: 24px; }
+    .admin-settings-heading .admin-account-guide p { white-space: normal; }
     .admin-inactive-toolbar { align-items: stretch; flex-direction: column; gap: 12px; }
     .admin-inactive-toolbar .admin-search input { width: 100%; }
     .admin-inactive-filter { justify-content: space-between; }
