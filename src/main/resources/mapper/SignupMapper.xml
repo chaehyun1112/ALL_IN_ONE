@@ -44,7 +44,7 @@
         ORDER BY ward_id
     </select>
 
-    <!-- 사용자 회원가입 정보 저장 -->
+    <!-- 사용자 계정 생성: 계정 상태와 생성 일시는 DB 기본값을 사용한다. -->
     <insert id="insertUser">
         INSERT INTO tb_emp (
             emp_id,
@@ -52,8 +52,7 @@
             hosp_div_id,
             ward_id,
             emp_nm,
-            role_cd,
-            auth_st
+            role_cd
         )
         VALUES (
             #{userId},
@@ -61,8 +60,7 @@
             #{hospDivId},
             #{wardId,jdbcType=BIGINT},
             #{userName},
-            'USER',
-            'PENDING'
+            'USER'
         )
     </insert>
 

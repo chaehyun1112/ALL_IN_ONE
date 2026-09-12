@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 /**
  * 비밀번호 관련 화면 요청을 처리하는 MVC Controller다.
  *
- * 이 클래스가 담당하는 기능은 두 가지다.
- * 1. 비로그인 사용자에게 비밀번호 분실 안내 화면 제공
- * 2. 로그인한 사용자의 현재 PW 확인 후 새 PW 변경
+ * 로그인한 사용자의 현재 PW 확인 후 새 PW 변경을 담당한다.
  *
  * Controller는 HTTP 요청값 검사와 화면 이동을 담당하고,
  * 실제 사용자 조회·비밀번호 비교·DB 수정은 UserService에 위임한다.
@@ -40,18 +38,6 @@ public class UserPasswordController {
      */
     public UserPasswordController(UserService userService) {
         this.userService = userService;
-    }
-
-    /**
-     * 로그아웃 상태에서 접근하는 비밀번호 분실 안내 화면이다.
-     *
-     * TODO(요구사항 확정 필요): 이메일, 휴대전화, 관리자 임시 PW 등 본인 확인 방식이
-     * 명세에 없다. 직원 ID와 직원명만으로 PW를 변경하는 것은 위험하므로 구현하지 않는다.
-     */
-    @GetMapping("/password/reset")
-    public String resetGuide() {
-        // templates/html/password-reset.html을 렌더링한다.
-        return "html/auth/password-reset";
     }
 
     /**

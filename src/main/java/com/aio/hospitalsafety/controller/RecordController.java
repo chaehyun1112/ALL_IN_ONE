@@ -4,10 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class FindIdController {
+public class RecordController {
 
-    @GetMapping("/id/find")
-    public String findIdPage() {
-        return "html/auth/find-id";
+    @GetMapping("/Record")
+    public String record() {
+        return "html/auth/Record";
     }
 }

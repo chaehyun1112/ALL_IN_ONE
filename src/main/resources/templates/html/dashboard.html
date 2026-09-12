@@ -8,7 +8,7 @@
   <!-- CSS 파일 연결 -->
   <link
     rel="stylesheet"
-    href="./dashboard.css" th:href="@{/css/dashboard.css}"
+    href="../../static/css/dashboard.css" th:href="@{/css/dashboard.css}"
   >
 </head>
 
@@ -57,11 +57,12 @@
           aria-label="대시보드 메뉴"
           hidden
         >
-          <a href=""
+          <a href="auth/Record.html"
              th:href="@{/Record}">조치기록</a>
           <button
-            type="button"
+            type="submit"
             id="logout-open"
+            form="logout-form"
           >
             로그아웃
           </button>
@@ -69,6 +70,9 @@
       </div>
     </div>
   </header>
+
+  <form id="logout-form" action="auth/index.html" th:action="@{/logout}"
+        method="get" th:method="post" hidden></form>
 
   <main>
     <!-- 오늘의 안전 현황 -->
@@ -354,6 +358,6 @@
   </dialog>
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
-  <script src="./dashboard.js" th:src="@{/JS/dashboard.js}"></script>
+  <script src="../../static/JS/dashboard.js" th:src="@{/JS/dashboard.js}"></script>
 </body>
 </html>
