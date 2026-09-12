@@ -19,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.aio.hospitalsafety.common.SessionConstants;
 import com.aio.hospitalsafety.config.HospitalUserDetails;
-import com.aio.hospitalsafety.dto.WardOption;
 import com.aio.hospitalsafety.dto.admin.ApprovedUserResponse;
 import com.aio.hospitalsafety.dto.admin.ChangeUserWardRequest;
 import com.aio.hospitalsafety.dto.admin.InactiveUserResponse;
@@ -58,14 +57,7 @@ public class AdminUserManagementController {
         );
     }
 
-    // 현재 병원의 병동 목록 조회
-    @GetMapping("/wards")
-    public List<WardOption> getWards(HttpSession session) {
-        String hospitalDomain = requireHospitalDomain(session);
-
-        return adminUserManagementService.getWards(hospitalDomain);
-    }
-
+    // GET /api/admin/wards는 Backend A의 UserProvisioningController에서 처리한다.
     // 승인 완료 사용자의 담당 병동 변경
     @PatchMapping("/users/{userId}/ward")
     public ResponseEntity<Map<String, String>> changeUserWard(

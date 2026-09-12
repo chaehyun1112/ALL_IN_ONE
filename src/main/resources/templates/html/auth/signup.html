@@ -11,7 +11,7 @@
   <title>회원가입 | 늘푸른요양병원</title>
 
   <link rel="stylesheet"
-        href="/css/auth/signup.css?v=20260910a"
+        href="../../../static/css/auth/signup.css?v=20260910a"
         th:href="@{/css/auth/signup.css(v=20260910a)}">
 </head>
 
@@ -253,7 +253,7 @@
 
         <p class="signup-login full-width">
           이미 계정이 있으신가요?
-          <a href="/login" th:href="@{/login}">로그인</a>
+          <a href="login.html" th:href="@{/login}">로그인</a>
         </p>
       </form>
 
@@ -261,15 +261,11 @@
   </main>
 
   <!-- 아이디 중복확인 -->
-  <script src="/JS/signup/ID_check.js"
-          th:src="@{/JS/signup/ID_check.js}"></script>
-
-  <!-- 이메일 인증 -->
-  <script src="/JS/signup/email_check.js?v=20260910a"
-          th:src="@{/JS/signup/email_check.js(v=20260910a)}"></script>
+  <script src="../../../static/JS/auth/ID_check.js"
+          th:src="@{/JS/auth/ID_check.js}"></script>
 
   <!-- 비밀번호 확인 -->
-  <script src="/JS/signup/Password_check.js"
-          th:src="@{/JS/signup/Password_check.js}"></script>
+  <script src="../../../static/JS/auth/Password_check.js"
+          th:src="@{/JS/auth/Password_check.js}"></script>
 </body>
 </html>
