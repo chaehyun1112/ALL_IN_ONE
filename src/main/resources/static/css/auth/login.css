@@ -51,6 +51,8 @@ h1 { margin-top: 8px; font-size: 36px; line-height: 48px; font-weight: 700; }
 }
 .field input::placeholder { color: #8a9490; opacity: 1; }
 .password-field { margin-top: 18px; }
+/* [수정완료] 이름 입력칸과 아이디 입력칸 사이에 여백을 둡니다. */
+.field:has(#displayName) + .field { margin-top: 18px; }
 a { color: #527361; text-decoration: none; }
 a:hover { text-decoration: underline; }
 .forgot-password, .login-card > a { display: block; margin-top: 6px; text-align: right; font-size: 11px; font-weight: 700; line-height: 13px; }

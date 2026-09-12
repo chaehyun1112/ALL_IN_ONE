@@ -25,30 +25,21 @@
       <!-- 현재 시간 -->
       <time id="clock"></time>
 
-      <!-- 메뉴 버튼 -->
+      <!-- [수정완료] 더보기 버튼을 사용자 프로필 드롭다운으로 변경합니다. -->
       <div class="header-menu">
         <button
           type="button"
-          class="menu-toggle"
-          id="menu-toggle"
-          aria-label="더보기"
+          class="profile-toggle"
+          id="profile-toggle"
+          aria-label="사용자 메뉴"
           aria-expanded="false"
           aria-controls="header-menu-list"
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-            aria-hidden="true"
-          >
-            <path d="M5 6h14"></path>
-            <path d="M5 12h14"></path>
-            <path d="M5 18h14"></path>
-          </svg>
+          <span class="profile-avatar" aria-hidden="true">●</span>
+          <!-- [수정완료] 로그인한 계정 아이디에 따라 프로필 이름을 표시합니다. -->
+          <!-- [수정완료] 로그인에서 입력한 이름을 프로필에 표시합니다. -->
+          <span class="profile-copy"><strong th:text="${displayName + ' 간호사'}">이름 간호사</strong><small>A병동</small></span>
+          <span class="profile-chevron" aria-hidden="true">▿</span>
         </button>
 
         <nav
@@ -59,6 +50,9 @@
         >
           <a href="auth/Record.html"
              th:href="@{/Record}">조치기록</a>
+          <!-- [수정완료] 프로필 메뉴에서 설정 화면으로 이동합니다. -->
+          <a href="settings.html" th:href="@{/settings}" id="settings-open">설정</a>
+          <!-- [수정완료] 프로필 메뉴의 마지막에 로그아웃을 배치합니다. -->
           <button
             type="submit"
             id="logout-open"
@@ -237,9 +231,9 @@
   >
     <h2>설정</h2>
 
-    <p>
-      설정 화면은 준비 중입니다.
-    </p>
+    <!-- [수정완료] 대시보드에서 선택한 필터 내용을 설정 창에 표시합니다. -->
+    <p id="settings-filter">현재 필터: 전체 병실</p>
+    <p id="settings-summary">전체 병실을 표시하고 있습니다.</p>
 
     <form method="dialog">
       <button type="submit">

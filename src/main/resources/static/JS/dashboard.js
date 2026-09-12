@@ -180,7 +180,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if(completed){room.status="normal";room.acknowledged=false;cancelAudio(room.number);}
     dialog.close();render();detail.textContent=`${room.number}호 · ${completed?"조치 완료":"확인 중"} (화면 반영 · 서버 미저장)`;
   });
-  const toggle=document.getElementById("menu-toggle"),menu=document.getElementById("header-menu-list");
+  const toggle=document.getElementById("profile-toggle"),menu=document.getElementById("header-menu-list");
+  /* [수정완료] 사용자 프로필의 ▿ 버튼으로 조치기록·설정·로그아웃 메뉴를 엽니다. */
   function closeMenu(){menu.hidden=true;toggle.setAttribute("aria-expanded","false");}
   toggle.addEventListener("click",()=>{menu.hidden=!menu.hidden;toggle.setAttribute("aria-expanded",String(!menu.hidden));});
   document.addEventListener("click",e=>{if(!e.target.closest(".header-menu"))closeMenu();});

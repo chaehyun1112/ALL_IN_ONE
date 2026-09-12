@@ -74,7 +74,18 @@ public class SecurityConfig {
                         // userLoginKey는 "병원 구분 ID|직원 ID" 형식의 내부 인증용 값이다.
                         .usernameParameter("userLoginKey")
                         // 두 번째 인자 true는 로그인 전에 접근하려던 URL보다 대시보드를 우선한다는 뜻이다.
-                        .defaultSuccessUrl("/dashboard", true)
+                        // [수정완료] 인증 성공 후 입력한 표시 이름을 현재 로그인 세션에 보관합니다.
+                        .successHandler((request, response, authentication) -> {
+                            String displayName = request.getParameter("displayName");
+                            displayName = displayName == null ? "" : displayName.strip();
+                            request.getSession().setAttribute(UserDisplaySession.DISPLAY_NAME,
+                                    displayName.substring(0, Math.min(displayName.length(), 50)));
+                            // [수정완료] 새로고침 시 바뀌지 않는 실제 로그인 성공 시각을 기록합니다.
+                            request.getSession().setAttribute(UserDisplaySession.LOGIN_TIME,
+                                    java.time.ZonedDateTime.now(java.time.ZoneId.of("Asia/Seoul"))
+                                            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                            response.sendRedirect(request.getContextPath() + "/dashboard");
+                        })
                         // 인증 결과로 확인된 실패 원인만 화면에 전달한다.
                         .failureHandler((request, response, exception) -> {
                             String error = switch (exception) {

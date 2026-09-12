@@ -85,6 +85,9 @@ main{gap:16px}
 .header-menu-list[hidden]{display:none}
 .header-menu-list a,.header-menu-list button{display:block;width:100%;padding:12px;text-align:left;border:0;border-radius:5px;background:transparent;color:#385b4d;font-size:13px;text-decoration:none}
 .header-menu-list a:hover,.header-menu-list button:hover,.header-menu-list a:focus-visible,.header-menu-list button:focus-visible{background:#e3eee5;color:#294937;text-decoration:none;outline:none}
+/* [수정완료] 이미지와 같은 사용자 프로필형 드롭다운 버튼을 구성합니다. */
+.profile-toggle{display:flex;align-items:center;gap:7px;min-width:175px;padding:5px 7px;border:0;border-radius:8px;background:transparent;color:#fff;text-align:left}.profile-toggle:hover,.profile-toggle[aria-expanded="true"]{background:#ffffff18}.profile-toggle:focus-visible{outline:2px solid #d3e3d7;outline-offset:3px}.profile-avatar{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#f0f3ec;color:#6e8378;font-size:19px;line-height:1}.profile-copy{display:flex;flex:1;flex-direction:column;gap:1px}.profile-copy strong{font-size:11px;font-weight:600;white-space:nowrap}.profile-copy small{font-size:9px;color:#d3dfd7}.profile-chevron{font-size:18px;line-height:1;transform:translateY(-2px)}
+/* [수정완료] 프로필 영역을 상단바에 맞게 살짝 축소합니다. */
 .settings-dialog{width:min(360px,90vw);padding:24px;border:1px solid #d4ddd3;border-radius:13px;color:#293e34;font:inherit;box-shadow:0 12px 40px #203c3426}
 .settings-dialog::backdrop{background:#203c3450}.settings-dialog h2{font-size:18px;margin:0 0 14px}.settings-dialog p{color:#697e74;line-height:1.7}.settings-dialog button{float:right;padding:8px 18px;background:#385b4d;border:0;border-radius:6px;color:white}/* 상태별 강조: 병실 위치는 유지하고 해당 병실을 선명하게 보여줍니다. */
 .room-filters{display:flex;gap:3px;padding:3px;border:1px solid #dbe3d9;background:#eff3ed;border-radius:7px}
