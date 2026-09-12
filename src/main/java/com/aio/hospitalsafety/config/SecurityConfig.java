@@ -5,12 +5,16 @@ import com.aio.hospitalsafety.domain.User;
 import com.aio.hospitalsafety.mapper.UserMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -45,12 +49,10 @@ public class SecurityConfig {
         http
                 // authorizeHttpRequests: URL별 접근 권한을 설정한다.
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인 화면, 재설정 화면, 정적 파일은 로그인하지 않아도 접근할 수 있다.
+                        // 로그인 화면과 정적 파일은 로그인하지 않아도 접근할 수 있다.
                         .requestMatchers( 
                                 "/", "/domain", "/login", "/login/user",
                                 "/signup", "/api/users/check-user-id",
-                                "/id/find", "/id/find/**",
-                                "/password/reset", "/password/reset/**",
                                 "/css/**", "/JS/**", "/image/**", "/error"
                         ).permitAll()
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
@@ -73,13 +75,22 @@ public class SecurityConfig {
                         .usernameParameter("userLoginKey")
                         // 두 번째 인자 true는 로그인 전에 접근하려던 URL보다 대시보드를 우선한다는 뜻이다.
                         .defaultSuccessUrl("/dashboard", true)
-                        // 로그인 실패 시 error 쿼리 파라미터를 붙여 화면에 오류를 표시한다.
-                        .failureUrl("/login?error")
+                        // 인증 결과로 확인된 실패 원인만 화면에 전달한다.
+                        .failureHandler((request, response, exception) -> {
+                            String error = switch (exception) {
+                                case UsernameNotFoundException ignored -> "userId";
+                                case BadCredentialsException ignored -> "password";
+                                case DisabledException ignored -> "disabled";
+                                default -> "unavailable";
+                            };
+                            new SimpleUrlAuthenticationFailureHandler("/login?error=" + error)
+                                    .onAuthenticationFailure(request, response, exception);
+                        })
                         // 로그인 처리와 관련된 URL은 비로그인 상태에서도 접근 가능해야 한다.
                         .permitAll())
                 // 로그아웃 요청 역시 Spring Security가 처리한다.
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessUrl("/")
                         // 로그아웃 후 서버 세션과 브라우저의 세션 쿠키를 모두 제거한다.
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
@@ -133,11 +144,19 @@ public class SecurityConfig {
     }
 
     /**
-     * 비밀번호를 BCrypt 방식으로 해시하고 검증하는 객체를 Bean으로 등록한다.
-     * BCrypt는 같은 비밀번호라도 매번 다른 salt를 사용하므로 결과 문자열이 달라진다.
-     * 복호화해서 원문을 찾는 방식이 아니라 matches(입력값, 저장된 해시)로 일치 여부만 확인한다.
-     * 생성자 인자를 생략했으므로 Spring Security가 제공하는 기본 strength 값을 사용한다.
+     * 아이디 조회 실패를 비밀번호 불일치와 구분해서 전달하는 인증 제공자를 등록한다.
      */
+    @Bean
+    DaoAuthenticationProvider userAuthenticationProvider(UserDetailsService userDetailsService,
+                                                        PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        // 아이디 조회 실패와 해당 계정의 비밀번호 불일치를 구분한다.
+        provider.setHideUserNotFoundExceptions(false);
+        return provider;
+    }
+
+    /** 비밀번호를 BCrypt로 해시하고 입력값과 저장된 해시의 일치 여부를 검증한다. */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

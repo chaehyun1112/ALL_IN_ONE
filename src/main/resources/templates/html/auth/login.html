@@ -8,7 +8,7 @@
 
   <link rel="stylesheet"
         th:href="@{/css/auth/login.css}"
-        href="../../static/css/auth/login.css">
+        href="../../../static/css/auth/login.css">
 </head>
 
 <body>
@@ -33,13 +33,6 @@
         비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.
       </p>
 
-      <!-- 로그인 실패 메시지 -->
-      <p class="status error"
-         th:if="${param.error}"
-         role="alert">
-        직원 ID 또는 비밀번호가 올바르지 않습니다.
-      </p>
-
       <!-- Spring Security 로그인 처리 -->
       <form id="userLoginForm"
             class="login-card"
@@ -59,6 +52,7 @@
                  type="text"
                  placeholder="아이디를 입력해 주세요."
                  autocomplete="username"
+                 aria-describedby="loginError"
                  maxlength="20"
                  autofocus
                  required>
@@ -71,38 +65,38 @@
                  type="password"
                  placeholder="비밀번호를 입력해 주세요."
                  autocomplete="current-password"
+                 aria-describedby="loginError"
                  required>
         </div>
 
-        <div class="recovery-row">
-          <a href="/id/find"
-            th:href="@{/id/find}">
-            아이디 찾기
-          </a>
-
-          <a href="/password/reset"
-            th:href="@{/password/reset}">
-            비밀번호 재설정
-          </a>
-        </div>
+        <p id="loginError"
+           class="status error"
+           th:if="${param.error}"
+           th:switch="${param.error[0]}"
+           hidden th:hidden="${param.error == null}"
+           role="alert">
+          <span th:case="'userId'">등록되지 않은 아이디입니다.</span>
+          <span th:case="'password'">비밀번호가 올바르지 않습니다.</span>
+          <span th:case="'disabled'">로그인할 수 없는 계정입니다. 관리자에게 문의해 주세요.</span>
+          <span th:case="*">로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.</span>
+        </p>
 
         <button class="login-button" type="submit">로그인</button>
 
-        <p class="signup-row">
-          계정이 없으신가요?
-          <a href="/signup" th:href="@{/signup}">회원가입</a>
+        <p class="admin-contact">
+          비밀번호를 잊으셨다면 관리자에게 문의해 주세요.
         </p>
       </form>
     </section>
   </main>
 
   <!-- 병원 ID와 직원 ID 조합 -->
-  <script src="../../static/JS/login/login.js"
+  <script src="../../../static/JS/login/login.js"
           th:src="@{/JS/login/login.js}"
           defer></script>
 
   <!-- 회원가입 완료 알림 -->
-  <script src="../../static/JS/signup/signup-success.js"
+  <script src="../../../static/JS/signup/signup-success.js"
           th:src="@{/JS/signup/signup-success.js}"
           defer></script>
 </body>

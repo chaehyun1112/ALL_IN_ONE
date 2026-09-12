@@ -185,8 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
   toggle.addEventListener("click",()=>{menu.hidden=!menu.hidden;toggle.setAttribute("aria-expanded",String(!menu.hidden));});
   document.addEventListener("click",e=>{if(!e.target.closest(".header-menu"))closeMenu();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
-  document.getElementById("logout-open")?.addEventListener("click",()=>{window.location.href="/logout";});
-  const updateClock=()=>{document.getElementById("clock").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());};
+  const updateClock=()=>{document.getElementById("clock").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());};
   updateClock();setInterval(updateClock,1000);render();
   window.addEventListener("pagehide",()=>{audioAllowed=false;for(const n of [...jobs.keys()])cancelAudio(n);audio.pause();});
 });

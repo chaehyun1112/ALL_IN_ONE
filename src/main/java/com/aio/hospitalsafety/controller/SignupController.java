@@ -106,7 +106,7 @@ public class SignupController {
 
         redirectAttributes.addFlashAttribute(
                 "signupSuccessMessage",
-                "회원가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다."
+                "계정이 생성되었습니다. 로그인해 주세요."
         );
 
         return "redirect:/login";
