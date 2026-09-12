@@ -35,26 +35,26 @@
             ROLE_CD, AUTH_ST, MUST_CHANGE_PASSWORD
         ) VALUES (
             #{userId}, #{passwordHash}, #{hospitalId}, #{wardId}, #{userName},
-            #{role}, 'ACTIVE', TRUE
+            #{role}, 'APPROVED', TRUE
         )
     </insert>
 
     <update id="disableUser">
         UPDATE TB_EMP
-        SET AUTH_ST = 'DISABLED', UPD_DT = CURRENT_TIMESTAMP
+        SET AUTH_ST = 'INACTIVE', UPD_DT = CURRENT_TIMESTAMP
         WHERE HOSP_DIV_ID = #{hospitalId}
           AND EMP_ID = #{userId}
           AND ROLE_CD = 'USER'
-          AND AUTH_ST = 'ACTIVE'
+          AND AUTH_ST = 'APPROVED'
     </update>
 
     <update id="reactivateUser">
         UPDATE TB_EMP
-        SET AUTH_ST = 'ACTIVE', UPD_DT = CURRENT_TIMESTAMP
+        SET AUTH_ST = 'APPROVED', UPD_DT = CURRENT_TIMESTAMP
         WHERE HOSP_DIV_ID = #{hospitalId}
           AND EMP_ID = #{userId}
           AND ROLE_CD = 'USER'
-          AND AUTH_ST = 'DISABLED'
+          AND AUTH_ST = 'INACTIVE'
     </update>
 
     <select id="findWardsByHospitalId"

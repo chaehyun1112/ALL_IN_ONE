@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- 이메일 인증 요청에 사용할 CSRF 토큰 -->
+  <!-- 폼 요청에 사용할 CSRF 토큰 -->
   <meta name="_csrf" th:content="${_csrf.token}">
   <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
@@ -84,92 +84,6 @@
           <input type="hidden"
                  id="usernameChecked"
                  name="usernameChecked"
-                 value="false">
-        </div>
-
-        <!-- 이메일 -->
-        <div class="signup-field email-field full-width"
-             data-send-url="/email/send-code"
-             data-verify-url="/email/verify-code"
-             th:attr="data-send-url=@{/email/send-code},data-verify-url=@{/email/verify-code}">
-
-          <label for="emailLocal">이메일</label>
-
-          <div class="email-input-row">
-            <input id="emailLocal"
-                   name="emailLocal"
-                   type="text"
-                   autocomplete="off"
-                   autocapitalize="none"
-                   spellcheck="false"
-                   placeholder="이메일 아이디"
-                   required>
-
-            <span class="email-at" aria-hidden="true">@</span>
-
-            <input id="emailDomainCustom"
-                   name="emailDomainCustom"
-                   type="text"
-                   autocomplete="off"
-                   autocapitalize="none"
-                   spellcheck="false"
-                   placeholder="도메인을 입력하세요."
-                   class="email-domain-custom"
-                   style="display: none;">
-
-            <select id="emailDomainSelect"
-                    name="emailDomainSelect"
-                    required>
-              <option value="" disabled selected>도메인 선택</option>
-              <option value="naver.com">naver.com</option>
-              <option value="gmail.com">gmail.com</option>
-              <option value="daum.net">daum.net</option>
-              <option value="hanmail.net">hanmail.net</option>
-              <option value="nate.com">nate.com</option>
-              <option value="direct">직접 입력</option>
-            </select>
-
-            <button type="button"
-                    id="sendCodeBtn"
-                    class="username-check-btn">
-              인증번호 발송
-            </button>
-          </div>
-
-          <!-- 조합된 이메일 주소 -->
-          <input type="hidden" id="email" name="email">
-
-          <!-- 발송 성공 후 표시 -->
-          <div class="verify-code-row"
-               id="verifyCodeRow"
-               style="display: none;">
-
-            <input id="verifyCode"
-                   name="verifyCode"
-                   type="text"
-                   inputmode="numeric"
-                   autocomplete="one-time-code"
-                   aria-label="이메일 인증번호"
-                   maxlength="6"
-                   placeholder="인증번호 6자리">
-
-            <button type="button"
-                    id="checkCodeBtn"
-                    class="username-check-btn"
-                    disabled>
-              인증 확인
-            </button>
-
-            <span id="codeTimer" class="code-timer"></span>
-          </div>
-            <p id="emailMessage"
-             class="username-message"
-             role="status"></p>
-
-
-          <input type="hidden"
-                 id="emailVerified"
-                 name="emailVerified"
                  value="false">
         </div>
 

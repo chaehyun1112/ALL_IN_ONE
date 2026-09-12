@@ -69,7 +69,7 @@ public class UserProvisioningService {
                 normalizedUserName,
                 request.wardId(),
                 request.role(),
-                AccountStatus.ACTIVE,
+                AccountStatus.APPROVED,
                 true,
                 temporaryPassword);
     }
@@ -82,7 +82,7 @@ public class UserProvisioningService {
         if (userProvisioningMapper.disableUser(normalizedHospitalId, normalizedUserId) != 1) {
             throw new UserConflictException("이미 비활성화되었거나 상태를 변경할 수 없는 계정입니다.");
         }
-        return new UserStatusResponse(normalizedUserId, AccountStatus.DISABLED);
+        return new UserStatusResponse(normalizedUserId, AccountStatus.INACTIVE);
     }
 
     @Transactional
@@ -93,7 +93,7 @@ public class UserProvisioningService {
         if (userProvisioningMapper.reactivateUser(normalizedHospitalId, normalizedUserId) != 1) {
             throw new UserConflictException("이미 활성화되었거나 상태를 변경할 수 없는 계정입니다.");
         }
-        return new UserStatusResponse(normalizedUserId, AccountStatus.ACTIVE);
+        return new UserStatusResponse(normalizedUserId, AccountStatus.APPROVED);
     }
 
     @Transactional(readOnly = true)

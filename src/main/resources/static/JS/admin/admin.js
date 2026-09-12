@@ -62,7 +62,7 @@ async function requestAdminApi(url, options = {}) {
         headers
     });
 
-    if (response.status === 401) {
+    if (response.status === 401 || (response.redirected && new URL(response.url).pathname === "/login")) {
         window.location.href = "/login";
         throw new Error("로그인이 만료되었습니다.");
     }
@@ -79,12 +79,17 @@ async function requestAdminApi(url, options = {}) {
 
             if (errorBody.message) {
                 message = errorBody.message;
+            } else {
+                const validationMessages = Object.values(errorBody).filter(value => typeof value === "string");
+                if (validationMessages.length) message = validationMessages.join(" ");
             }
         } catch (error) {
             // JSON 응답이 아니면 기본 오류 메시지를 사용한다.
         }
 
-        throw new Error(message);
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
     }
 
     if (response.status === 204) {
@@ -544,12 +549,17 @@ adminDialog.addEventListener("close", () => {
 });
 
 document.querySelector("#admin-create-account")?.addEventListener("click", () => {
+    if (adminCreatePending) return;
     adminCreateForm.reset();
     document.querySelectorAll(".admin-field-error").forEach(error => error.textContent = "");
     adminCreateDialog.showModal();
 });
 document.querySelector("#admin-create-cancel")?.addEventListener("click", () => adminCreateDialog.close());
 document.querySelector("#admin-create-complete-close")?.addEventListener("click", () => adminCreateCompleteDialog.close());
+adminCreateCompleteDialog?.addEventListener("close", () => {
+    document.querySelector("#complete-account-password").textContent = "";
+    document.querySelector("#copy-account-password").textContent = "복사하기";
+});
 document.querySelector("#admin-history-event-close")?.addEventListener("click", () => adminHistoryEventDialog.close());
 document.querySelector("#admin-password-reset-close")?.addEventListener("click", () => adminPasswordResetDialog.close());
 document.querySelector("#admin-deactivate-cancel")?.addEventListener("click", () => adminDeactivateDialog.close());
@@ -578,10 +588,16 @@ document.querySelector("#copy-reset-password")?.addEventListener("click", async 
     setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
 });
 document.querySelector("#copy-account-password")?.addEventListener("click", async event => {
+    const button = event.currentTarget;
     const password = document.querySelector("#complete-account-password").textContent;
-    await navigator.clipboard.writeText(password);
-    event.currentTarget.textContent = "복사됨";
-    setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
+    if (!password) return;
+    try {
+        await navigator.clipboard.writeText(password);
+        button.textContent = "복사됨";
+        setTimeout(() => { button.textContent = "복사하기"; }, 1600);
+    } catch {
+        showAdminFeedback("자동 복사가 불가능합니다. 표시된 임시 비밀번호를 직접 복사해주세요.");
+    }
 });
 
 function filterHistory(action) {
@@ -620,15 +636,20 @@ historyFilterCards.forEach(card => {
         }
     });
 });
-adminCreateForm?.addEventListener("submit", event => {
+let adminCreatePending = false;
+adminCreateDialog?.addEventListener("cancel", event => {
+    if (adminCreatePending) event.preventDefault();
+});
+adminCreateForm?.addEventListener("submit", async event => {
     event.preventDefault();
+    if (adminCreatePending) return;
     const name = document.querySelector("#admin-create-name")?.value.trim();
     const userId = document.querySelector("#admin-create-user-id")?.value.trim();
     const ward = adminCreateWard?.value;
     const errors = {
-        "admin-create-name-error": name ? "" : "이름을 입력해주세요.",
-        "admin-create-user-id-error": userId ? "" : "아이디를 입력해주세요.",
-        "admin-create-ward-error": ward ? "" : "담당 병동을 선택해주세요."
+        "admin-create-name-error": name && name.length <= 20 ? "" : "이름을 20자 이내로 입력해주세요.",
+        "admin-create-user-id-error": /^[A-Za-z0-9._-]{1,20}$/.test(userId ?? "") ? "" : "아이디는 영문, 숫자, 마침표, 밑줄, 하이픈으로 20자 이내로 입력해주세요.",
+        "admin-create-ward-error": ward && adminWards.some(item => String(item.wardId) === ward) ? "" : "담당 병동을 선택해주세요."
     };
     Object.entries(errors).forEach(([id, message]) => {
         document.querySelector(`#${id}`).textContent = message;
@@ -636,30 +657,38 @@ adminCreateForm?.addEventListener("submit", event => {
     if (Object.values(errors).some(Boolean)) {
         return;
     }
-    const temporaryPassword = `Care${Math.random().toString(36).slice(2, 8)}!`;
-    const selectedWard = adminWards.find(item => String(item.wardId) === String(ward));
-    adminUsers.unshift({
-        userId,
-        name,
-        status: "APPROVED",
-        wardId: selectedWard?.wardId ?? null,
-        ward: selectedWard?.wardName ?? ward
-    });
-    if (adminHistoryRows) {
-        const now = new Date();
-        const time = now.toISOString().slice(0, 16).replace("T", " ");
-        const row = document.createElement("tr");
-        row.dataset.historyAction = "계정 생성";
-        row.innerHTML = `<td>${time}</td><td>${currentAdminId}</td><td>${userId}</td><td>${selectedWard?.wardName ?? ward}</td><td>계정 생성</td><td class="history-actions"><button class="history-edit" aria-label="계정 생성 이력 수정">✎</button><button class="history-delete" aria-label="계정 생성 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td>`;
-        adminHistoryRows.prepend(row);
+    const errorElement = document.querySelector("#admin-create-error");
+    errorElement.textContent = "";
+    adminCreatePending = true;
+    const controls = [...adminCreateForm.querySelectorAll("input, select, button")];
+    controls.forEach(control => { control.disabled = true; });
+    try {
+        const created = await requestAdminApi("/api/admin/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, userName: name, wardId: Number(ward), role: "USER" })
+        });
+        const selectedWard = adminWards.find(item => String(item.wardId) === String(created.wardId));
+        document.querySelector("#complete-account-name").textContent = created.userName;
+        document.querySelector("#complete-account-user-id").textContent = created.userId;
+        document.querySelector("#complete-account-ward").textContent = selectedWard?.wardName ?? String(created.wardId);
+        document.querySelector("#complete-account-password").textContent = created.temporaryPassword;
+        adminCreateDialog.close();
+        adminCreateForm.reset();
+        adminCreateCompleteDialog.showModal();
+        try {
+            await loadAdminData(true);
+        } catch {
+            showAdminFeedback("계정은 생성됐지만 목록을 새로 불러오지 못했습니다. 임시 비밀번호를 보관한 후 새로고침해주세요.");
+        }
+    } catch (error) {
+        errorElement.textContent = error.status
+            ? error.message
+            : "생성 결과를 확인하지 못했습니다. 중복 생성을 피하려면 사용자 목록을 확인한 후 다시 시도해주세요.";
+    } finally {
+        adminCreatePending = false;
+        controls.forEach(control => { control.disabled = false; });
     }
-    adminCreateDialog.close();
-    renderAdminUsers();
-    document.querySelector("#complete-account-name").textContent = name;
-    document.querySelector("#complete-account-user-id").textContent = userId;
-    document.querySelector("#complete-account-ward").textContent = selectedWard?.wardName ?? ward;
-    document.querySelector("#complete-account-password").textContent = temporaryPassword;
-    adminCreateCompleteDialog.showModal();
 });
 
 /**

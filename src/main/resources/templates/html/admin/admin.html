@@ -177,10 +177,11 @@
         <h2 id="admin-create-title">간호사 계정 생성</h2>
         <p>생성 후 로그인 정보를 안내할 수 있도록 표시합니다.</p>
         <div class="admin-create-grid">
-            <label>이름<input id="admin-create-name" placeholder="예: 김서윤"><small class="admin-field-error" id="admin-create-name-error"></small></label>
-            <label>아이디<input id="admin-create-user-id" placeholder="예: nurse.ksy01"><small class="admin-field-error" id="admin-create-user-id-error"></small></label>
+            <label>이름<input id="admin-create-name" maxlength="20" placeholder="예: 김서윤"><small class="admin-field-error" id="admin-create-name-error"></small></label>
+            <label>아이디<input id="admin-create-user-id" maxlength="20" placeholder="예: user.ksy01"><small class="admin-field-error" id="admin-create-user-id-error"></small></label>
             <label>담당 병동<select id="admin-create-ward"><option value="">담당 병동을 선택해주세요</option></select><small class="admin-field-error" id="admin-create-ward-error"></small></label>
         </div>
+        <p id="admin-create-error" class="admin-field-error" role="alert"></p>
         <div class="admin-dialog-actions"><button type="button" id="admin-create-cancel">취소</button><button type="submit" class="admin-primary">계정 생성</button></div>
     </form>
 </dialog>
@@ -188,7 +189,7 @@
 <dialog id="admin-create-complete-dialog" class="admin-dialog admin-create-complete-dialog" aria-labelledby="admin-create-complete-title">
     <div class="admin-complete-mark">✓</div>
     <h2 id="admin-create-complete-title">계정 생성 완료</h2>
-    <p>아래 로그인 정보를 간호사에게 전달해주세요.</p>
+    <p>아래 로그인 정보를 간호사에게 전달해주세요. 임시 비밀번호는 이 창을 닫으면 다시 볼 수 없습니다.</p>
     <dl class="admin-account-info">
         <div><dt>이름</dt><dd id="complete-account-name"></dd></div>
         <div><dt>아이디</dt><dd id="complete-account-user-id"></dd></div>
