@@ -18,11 +18,12 @@ function showAdminFeedback(message) {
 function updateAdminClock() {
     const now = new Date();
 
-    const parts = new Intl.DateTimeFormat("en-GB", {
+    const parts = new Intl.DateTimeFormat("ko-KR", {
         timeZone: "Asia/Seoul",
         year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
+        month: "numeric",
+        day: "numeric",
+        weekday: "long",
         hour: "2-digit",
         minute: "2-digit",
         hourCycle: "h23"
@@ -34,7 +35,7 @@ function updateAdminClock() {
 
     adminClock.dateTime = now.toISOString();
     adminClock.textContent =
-        `${values.year}년 ${values.month}월 ${values.day}일 `
+        `${values.year}년 ${values.month}월 ${values.day}일 ${values.weekday} `
         + `${values.hour}:${values.minute}`;
 }
 
@@ -336,5 +337,5 @@ document.querySelector("#admin-inactive-reset").addEventListener("click", () => 
 document.querySelector("#admin-inactive-retry").addEventListener("click", loadAdminInactiveData);
 
 updateAdminClock();
-setInterval(updateAdminClock, 30000);
+setInterval(updateAdminClock, 1000);
 loadAdminInactiveData();

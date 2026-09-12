@@ -185,7 +185,24 @@ document.addEventListener("DOMContentLoaded", () => {
   toggle.addEventListener("click",()=>{menu.hidden=!menu.hidden;toggle.setAttribute("aria-expanded",String(!menu.hidden));});
   document.addEventListener("click",e=>{if(!e.target.closest(".header-menu"))closeMenu();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
-  const updateClock=()=>{document.getElementById("clock").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());};
+  const updateClock = () => {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      weekday: "long",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(now);
+    const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    const clock = document.getElementById("clock");
+    clock.dateTime = now.toISOString();
+    clock.textContent = `${values.year}년 ${values.month}월 ${values.day}일 ${values.weekday} `
+      + `${values.hour}:${values.minute}`;
+  };
   updateClock();setInterval(updateClock,1000);render();
   window.addEventListener("pagehide",()=>{audioAllowed=false;for(const n of [...jobs.keys()])cancelAudio(n);audio.pause();});
 });
