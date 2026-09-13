@@ -51,7 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 로그인 화면과 정적 파일은 로그인하지 않아도 접근할 수 있다.
                         .requestMatchers( 
-                                "/", "/domain", "/login", "/login/user",
+                                "/", "/domain", "/role", "/login", "/login/user",
                                 "/signup", "/api/users/check-user-id",
                                 "/css/**", "/JS/**", "/image/**", "/error"
                         ).permitAll()
@@ -94,7 +94,12 @@ public class SecurityConfig {
                                 case DisabledException ignored -> "disabled";
                                 default -> "unavailable";
                             };
-                            new SimpleUrlAuthenticationFailureHandler("/login?error=" + error)
+                            // [09.13]수정내용: 관리자·간호사 로그인 실패 모두 선택한 유형을 유지한 채 로그인 화면으로 돌아간다.
+                            String requestedRole = request.getParameter("role");
+                            String role = "ADMIN".equalsIgnoreCase(requestedRole)
+                                    ? "&role=ADMIN"
+                                    : "&role=USER";
+                            new SimpleUrlAuthenticationFailureHandler("/login?error=" + error + role)
                                     .onAuthenticationFailure(request, response, exception);
                         })
                         // 로그인 처리와 관련된 URL은 비로그인 상태에서도 접근 가능해야 한다.

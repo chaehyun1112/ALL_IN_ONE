@@ -8,6 +8,11 @@ public class RecordController {
 
     @GetMapping("/Record")
     public String record() {
-        return "html/auth/Record";
+        // [09.13]수정내용: 조치 기록 화면 이동에 맞춰 새 HTML 경로를 반환합니다.
+        return "html/record/record";
     }
 }
+
+
+
+

@@ -35,7 +35,8 @@ public class DashboardController {
         model.addAttribute("userId", authentication.getName());
         model.addAttribute("approved", approved);
 
-        return "html/dashboard";
+        // [09.13]수정내용: 이동한 대시보드 HTML 경로를 반환하도록 경로를 갱신했습니다.
+        return "html/dashboard/dashboard";
     }
 
     // [수정완료] 대시보드 메뉴에서 설정 HTML 화면으로 연결합니다.
@@ -43,6 +44,11 @@ public class DashboardController {
     public String settings(Authentication authentication, @RequestParam(defaultValue = "all") String filter, Model model) {
         model.addAttribute("filter", filter);
         model.addAttribute("userId", authentication == null ? "사용자" : authentication.getName());
-        return "html/settings";
+        // [09.13]수정내용: 설정 화면을 settings 폴더의 화면 파일로 연결합니다.
+        return "html/settings/settings";
     }
 }
+
+
+
+

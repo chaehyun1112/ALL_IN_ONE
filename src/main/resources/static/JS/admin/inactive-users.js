@@ -18,11 +18,12 @@ function showAdminFeedback(message) {
 function updateAdminClock() {
     const now = new Date();
 
-    const parts = new Intl.DateTimeFormat("en-GB", {
+    const parts = new Intl.DateTimeFormat("ko-KR", {
         timeZone: "Asia/Seoul",
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
+        weekday: "short",
         hour: "2-digit",
         minute: "2-digit",
         hourCycle: "h23"
@@ -33,8 +34,9 @@ function updateAdminClock() {
     );
 
     adminClock.dateTime = now.toISOString();
+    // [09.13]수정내용: 비활성화 관리 화면 날짜에 한국어 요일을 함께 표시한다.
     adminClock.textContent =
-        `${values.year}년 ${values.month}월 ${values.day}일 `
+        `${values.year}년 ${values.month}월 ${values.day}일 (${values.weekday}) `
         + `${values.hour}:${values.minute}`;
 }
 
@@ -84,12 +86,22 @@ function showAdminError(message) {
     adminError.hidden = false;
 }
 
+// [09.13]추가내용: 저장된 1~6병동 이름을 화면에서 A~F병동으로 표시하며 기존 영문 병동 이름은 유지한다.
+function formatAdminWardName(wardName) {
+    const name = String(wardName ?? "").trim();
+    const numberedWard = /^([1-6])\s*병동$/.exec(name);
+    return numberedWard ? `${"ABCDEF"[Number(numberedWard[1]) - 1]}병동` : name;
+}
+
 function getAdminVisibleUsers() {
     const query = adminInactiveSearch.value.trim().toLowerCase();
-    const wardId = adminInactiveWard.value;
+    // [09.13]수정내용: A~F병동 표시 이름으로 목록을 필터링하고 미배정은 병동 ID 유무로 구분한다.
+    const wardName = adminInactiveWard.value;
     return adminInactiveUsers.filter(user =>
         (user.userName + " " + user.userId).toLowerCase().includes(query)
-        && (!wardId || String(user.wardId ?? "UNASSIGNED") === wardId));
+        && (!wardName || (wardName === "UNASSIGNED"
+            ? user.wardId == null
+            : user.wardId != null && user.wardName === wardName)));
 }
 
 function getAdminSelectedUsers() {
@@ -201,11 +213,17 @@ async function loadAdminInactiveData() {
             requestAdminInactiveApi("/api/admin/wards")
         ]);
         if (!Array.isArray(users) || !Array.isArray(wards)) throw new Error("목록 응답 형식이 올바르지 않습니다.");
-        adminInactiveUsers = users.filter(user => user.authStatus === "INACTIVE");
+        // [09.13]수정내용: 목록과 필터가 같은 병동 이름을 사용하도록 조회 결과의 표시 이름만 변환한다.
+        const wardNames = new Map(wards.map(ward => [String(ward.wardId), ward.wardName]));
+        adminInactiveUsers = users.filter(user => user.authStatus === "INACTIVE").map(user => ({
+            ...user,
+            wardName: formatAdminWardName(wardNames.get(String(user.wardId)) ?? user.wardName)
+        }));
         const previousWard = adminInactiveWard.value;
         adminInactiveWard.replaceChildren();
         for (const [value, text] of [
-            ["", "전체 병동"], ...wards.map(ward => [String(ward.wardId), ward.wardName]), ["UNASSIGNED", "미배정"]
+            // [09.13]수정내용: 병동 필터에 A~F병동을 순서대로 표시한다.
+            ["", "전체 병동"], ...Array.from("ABCDEF", letter => [`${letter}병동`, `${letter}병동`]), ["UNASSIGNED", "미배정"]
         ]) {
             const option = document.createElement("option");
             option.value = value;
@@ -238,12 +256,13 @@ function openAdminStatusChange(users, nextStatus, trigger, bulk = false) {
     const isDelete = nextStatus === "DELETE";
     const subject = bulk ? "선택한 사용자 " + users.length + "명" : users[0].userName + "님";
     adminPendingStatusChange = { users: [...users], nextStatus, trigger, subject };
-    document.querySelector("#admin-status-dialog-title").textContent = isDelete ? "사용자 삭제" : "상태 변경";
+    // [09.13]수정내용: 계정 삭제 버튼과 확인창의 표현을 일치시켜 삭제 대상을 명확하게 안내한다.
+    document.querySelector("#admin-status-dialog-title").textContent = isDelete ? "계정 삭제" : "상태 변경";
     document.querySelector("#admin-status-dialog-description").textContent = isDelete
-        ? subject + "의 계정을 삭제하시겠습니까?"
+        ? subject + "의 계정을 정말 삭제하시겠습니까?"
         : subject + "의 상태를 활성화로 바꾸시겠습니까?";
     document.querySelector("#admin-status-dialog-note").textContent = isDelete
-        ? "계정이 DB에서 영구 삭제되며 복구할 수 없습니다."
+        ? "삭제한 계정은 복구할 수 없습니다. 계속 진행하시겠습니까?"
         : "승인완료 상태로 복귀하며, 이전 배정 병동은 유지됩니다.";
     adminStatusConfirm.classList.toggle("admin-delete-confirm", isDelete);
     adminStatusDialog.showModal();

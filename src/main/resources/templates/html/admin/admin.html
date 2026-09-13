@@ -8,14 +8,19 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
-    <title>간호사 회원 관리 | 병동 통합 관제</title>
+    <!-- [09.13]수정내용: 관리자 화면의 제목을 직원 계정 관리로 변경해 계정 운영 범위를 명확히 표시한다. -->
+    <title>직원 계정 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/admin.css"
-          th:href="@{/css/admin/admin.css}">
+          href="../../../static/css/admin/dashboard.css"
+          th:href="@{/css/admin/dashboard.css}">
+        <link rel="stylesheet" href="../../../static/css/admin/account-create.css" th:href="@{/css/admin/account-create.css}">
 
-    <script src="../../../static/JS/admin/admin.js"
-            th:src="@{/JS/admin/admin.js}"
+    <script src="../../../static/JS/admin/dashboard.js"
+            th:src="@{/JS/admin/dashboard.js}"
+            defer></script>
+    <script src="../../../static/JS/admin/account-create.js"
+            th:src="@{/JS/admin/account-create.js}"
             defer></script>
 </head>
 
@@ -33,20 +38,16 @@
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
         </form>
 
-        <a class="admin-settings" id="admin-settings" href="admin_de.html" th:href="@{/admin/admin_de}" aria-label="설정" title="설정">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M9.67 4.14a2.34 2.34 0 0 1 4.66 0 2.34 2.34 0 0 0 3.32 1.92 2.34 2.34 0 0 1 2.33 4.03 2.34 2.34 0 0 0 0 3.82 2.34 2.34 0 0 1-2.33 4.03 2.34 2.34 0 0 0-3.32 1.92 2.34 2.34 0 0 1-4.66 0 2.34 2.34 0 0 0-3.32-1.92 2.34 2.34 0 0 1-2.33-4.03 2.34 2.34 0 0 0 0-3.82 2.34 2.34 0 0 1 2.33-4.03 2.34 2.34 0 0 0 3.32-1.92"/>
-                <circle cx="12" cy="12" r="3"/>
-            </svg>
-        </a>
+        <!-- [09.13]수정내용: 비활성화 사용자 관리 진입 버튼을 상단 설정 자리에서 계정 생성 옆으로 이동한다. -->
 
     </div>
 </header>
 
 <main class="admin-page" id="admin-management-page" aria-labelledby="admin-title" data-admin-id="admin01" th:attr="data-admin-id=${adminId}">
     <header class="admin-heading">
-        <h1 id="admin-title">간호사 회원 관리</h1>
-        <p>가입을 신청한 간호사를 승인하고 담당 병동을 배정합니다.</p>
+        <h1 id="admin-title">직원 계정 관리</h1>
+        <!-- [09.13]수정내용: 계정 생성, 병동 배정, 비밀번호 초기화, 비활성화 기능을 안내하도록 문구를 변경한다. -->
+        <p>직원 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
     </header>
 
     <section class="admin-history-summary" aria-label="관리 이력 처리 내용별 현황">
@@ -60,7 +61,11 @@
     <section class="admin-panel" aria-labelledby="admin-list-title">
         <header class="admin-panel-heading">
                 <div><h2 id="admin-list-title">관리 이력</h2><p>관리자가 처리한 계정 및 병동 변경 내역을 확인합니다.</p></div>
-            <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
+            <!-- [09.13]수정내용: 계정 관리 버튼을 함께 배치하고 기존 이동 연결을 유지한다. -->
+            <div class="admin-account-actions">
+                <a class="admin-inactive-management-link" id="admin-settings" href="admin-inactive-users.html" th:href="@{/admin/admin_de}">비활성화 사용자 관리</a>
+                <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
+            </div>
         </header>
 
         <div class="admin-toolbar">
@@ -240,3 +245,12 @@
         th:src="@{/JS/auth/session-history.js}"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

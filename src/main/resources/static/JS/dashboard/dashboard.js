@@ -2,10 +2,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   /* [수정] 화면 예시 상태입니다. 실제 서버 조회 결과로 교체하세요.
      페이지를 열 때 조회한 이전 경보에는 음성을 재생하지 않습니다. */
-  const rooms = new Map(Array.from({length:17}, (_,i) => [301+i, {
-    number:301+i, status:i===4?"urgent":i===11?"caution":"normal", acknowledged:false
-  }]));
-  const labels={normal:"안전 정상",caution:"침대 이탈",urgent:"낙상 감지"};
+  const rooms = window.CareGuardRoomStatus.rooms;
+  const labels = window.CareGuardRoomStatus.labels;
   const upper=document.getElementById("upper-rooms"), lower=document.getElementById("lower-rooms");
   const detail=document.getElementById("room-detail"), responseOpen=document.getElementById("response-open");
   const dialog=document.getElementById("response-dialog"), form=document.getElementById("response-form");
@@ -87,7 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click",resumeAudio);
   document.addEventListener("keydown",resumeAudio);
 
-  function choose(number){selected=number;render();}
+  // [09.13]수정내용: 병실 선택 처리를 전용 모듈에 위임하고 현재 화면 상태만 전달합니다.
+  function choose(number){window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);}
   /* [추가] 전체/상태 카드가 아닌 화면을 클릭하면 카드 선택 테두리를 제거합니다. */
   document.addEventListener("click", event => {
     if (event.target.closest(".counts .count")) return;
@@ -186,7 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
   toggle.addEventListener("click",()=>{menu.hidden=!menu.hidden;toggle.setAttribute("aria-expanded",String(!menu.hidden));});
   document.addEventListener("click",e=>{if(!e.target.closest(".header-menu"))closeMenu();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
-  const updateClock=()=>{document.getElementById("clock").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());};
+  // [09.13]수정내용: 날짜 표시 설정에 현재 연도를 추가하여 대시보드에 연도와 날짜, 시간을 함께 표시한다.
+  const updateClock=()=>{document.getElementById("clock").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());};
   updateClock();setInterval(updateClock,1000);render();
   window.addEventListener("pagehide",()=>{audioAllowed=false;for(const n of [...jobs.keys()])cancelAudio(n);audio.pause();});
 });

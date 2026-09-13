@@ -8,8 +8,11 @@
   <!-- CSS 파일 연결 -->
   <link
     rel="stylesheet"
-    href="../../static/css/dashboard.css" th:href="@{/css/dashboard.css}"
+    href="../../../static/css/dashboard/dashboard.css" th:href="@{/css/dashboard/dashboard.css}"
   >
+  <!-- [09.13]추가내용: 병실 상태와 선택 표시를 기능별 CSS 파일로 연결합니다. -->
+  <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
+  <link rel="stylesheet" href="../../../static/css/dashboard/room-selection.css" th:href="@{/css/dashboard/room-selection.css}">
 </head>
 
 <body>
@@ -35,7 +38,13 @@
           aria-expanded="false"
           aria-controls="header-menu-list"
         >
-          <span class="profile-avatar" aria-hidden="true">●</span>
+          <!-- [09.13]수정내용: 단순 점을 머리와 어깨가 보이는 사람 모양 SVG 아이콘으로 변경합니다. -->
+          <span class="profile-avatar" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <circle cx="12" cy="8" r="3.5"/>
+              <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+            </svg>
+          </span>
           <!-- [수정완료] 로그인한 계정 아이디에 따라 프로필 이름을 표시합니다. -->
           <!-- [수정완료] 로그인에서 입력한 이름을 프로필에 표시합니다. -->
           <span class="profile-copy"><strong th:text="${displayName + ' 간호사'}">이름 간호사</strong><small>A병동</small></span>
@@ -51,7 +60,7 @@
           <a href="auth/Record.html"
              th:href="@{/Record}">조치기록</a>
           <!-- [수정완료] 프로필 메뉴에서 설정 화면으로 이동합니다. -->
-          <a href="settings.html" th:href="@{/settings}" id="settings-open">설정</a>
+          <a href="settings/settings.html" th:href="@{/settings}" id="settings-open">설정</a>
           <!-- [수정완료] 프로필 메뉴의 마지막에 로그아웃을 배치합니다. -->
           <button
             type="submit"
@@ -101,26 +110,21 @@
         <div class="panel-heading">
           <h2>병실별 안전 상태</h2>
 
-          <div class="heading-response"><!-- 위치 확인 후 나타나는 대응 등록 버튼 -->
-          <button
-            type="button"
-            id="response-open"
-            class="response-open"
-            style="visibility: hidden"
-            disabled
-          >
-            대응 등록
-          </button></div>
+          <!-- [09.13]수정내용: 범례와 등록 버튼을 오른쪽 세로 영역으로 묶습니다. -->
+          <div class="room-heading-actions">
           <div class="legend">
             <span>정상</span>
             <span class="caution">주의</span>
             <span class="urgent">긴급</span>
           </div>
+          <!-- [09.13]수정내용: 대응 등록 버튼을 병실 범례의 정상·주의·긴급 표시 바로 아래에 배치합니다. -->
+          <div class="legend-response">
+            <button type="button" id="response-open" class="response-open" style="visibility: hidden" disabled>대응 등록</button>
+          </div>
+          </div>
         </div>
 
-        <div class="floor-toolbar">
-          <!-- [수정] 제목 아래 병실 수 안내 문구 삭제 -->
-        </div>
+        <!-- [09.13]수정내용: 버튼 이동 후 남은 빈 도구 모음을 제거해 관제 화면 위 여백을 줄입니다. -->
 
         <div class="floor">
           <!-- 위쪽 병실은 JS로 생성됩니다 -->
@@ -352,6 +356,13 @@
   </dialog>
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
-  <script src="../../static/JS/dashboard.js" th:src="@{/JS/dashboard.js}"></script>
+  <script src="../../../static/JS/dashboard/room-status.js" th:src="@{/JS/dashboard/room-status.js}"></script>
+  <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js" th:src="@{/JS/dashboard/dashboard.js}"></script>
 </body>
 </html>
+
+
+
+
+

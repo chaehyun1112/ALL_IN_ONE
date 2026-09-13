@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 let adminUsers = [];
 let adminWards = [];
@@ -524,6 +524,15 @@ adminSearchInput.addEventListener("input", event => {
     }
 });
 
+
+/* [09.13]추가내용: 계정 생성 전용 파일이 관리자 목록 상태를 안전하게 사용하도록 읽기 전용 연결을 제공합니다. */
+window.adminCreateContext = {
+    get users() { return adminUsers; },
+    get wards() { return adminWards; },
+    get historyRows() { return adminHistoryRows; },
+    get adminId() { return currentAdminId; },
+    renderUsers: () => renderAdminUsers()
+};
 /* 팝업 취소 */
 adminDialogCancel.addEventListener("click", () => {
     adminDialog.close();
@@ -543,20 +552,38 @@ adminDialog.addEventListener("close", () => {
     adminWardSelect.value = "";
 });
 
-document.querySelector("#admin-create-account")?.addEventListener("click", () => {
-    adminCreateForm.reset();
-    document.querySelectorAll(".admin-field-error").forEach(error => error.textContent = "");
-    adminCreateDialog.showModal();
-});
 document.querySelector("#admin-create-cancel")?.addEventListener("click", () => adminCreateDialog.close());
 document.querySelector("#admin-create-complete-close")?.addEventListener("click", () => adminCreateCompleteDialog.close());
 document.querySelector("#admin-history-event-close")?.addEventListener("click", () => adminHistoryEventDialog.close());
 document.querySelector("#admin-password-reset-close")?.addEventListener("click", () => adminPasswordResetDialog.close());
 document.querySelector("#admin-deactivate-cancel")?.addEventListener("click", () => adminDeactivateDialog.close());
-document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", () => {
-    pendingDeactivateRow?.remove();
-    pendingDeactivateRow = null;
-    adminDeactivateDialog.close();
+// [09.13]수정내용: 화면의 행만 삭제하던 처리를 서버의 계정 비활성화 요청으로 변경하고 성공하면 비활성화 사용자 목록으로 이동한다.
+document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", async event => {
+    const confirmButton = event.currentTarget;
+    if (confirmButton.disabled || !pendingDeactivateRow) return;
+    const userId = pendingDeactivateRow.querySelectorAll("td")[2]?.textContent.trim();
+    if (!userId) {
+        showAdminFeedback("비활성화할 계정 아이디를 확인할 수 없습니다.");
+        return;
+    }
+    confirmButton.disabled = true;
+    const cancelButton = document.querySelector("#admin-deactivate-cancel");
+    cancelButton.disabled = true;
+    try {
+        await requestAdminApi(`/api/admin/users/${encodeURIComponent(userId)}/deactivate`, {
+            method: "PATCH"
+        });
+        pendingDeactivateRow = null;
+        adminDeactivateDialog.close();
+        window.location.assign(document.querySelector("#admin-settings").href);
+    } catch (error) {
+        // [09.13]추가내용: 실패한 계정은 화면에서 제거하지 않고 오류를 안내하여 다시 처리할 수 있도록 한다.
+        adminDeactivateDialog.close();
+        showAdminFeedback(error.message || "계정 비활성화에 실패했습니다.");
+    } finally {
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+    }
 });
 document.querySelector("#admin-event-change")?.addEventListener("click", () => {
     const userId = document.querySelector("#event-target").textContent;
@@ -620,47 +647,7 @@ historyFilterCards.forEach(card => {
         }
     });
 });
-adminCreateForm?.addEventListener("submit", event => {
-    event.preventDefault();
-    const name = document.querySelector("#admin-create-name")?.value.trim();
-    const userId = document.querySelector("#admin-create-user-id")?.value.trim();
-    const ward = adminCreateWard?.value;
-    const errors = {
-        "admin-create-name-error": name ? "" : "이름을 입력해주세요.",
-        "admin-create-user-id-error": userId ? "" : "아이디를 입력해주세요.",
-        "admin-create-ward-error": ward ? "" : "담당 병동을 선택해주세요."
-    };
-    Object.entries(errors).forEach(([id, message]) => {
-        document.querySelector(`#${id}`).textContent = message;
-    });
-    if (Object.values(errors).some(Boolean)) {
-        return;
-    }
-    const temporaryPassword = `Care${Math.random().toString(36).slice(2, 8)}!`;
-    const selectedWard = adminWards.find(item => String(item.wardId) === String(ward));
-    adminUsers.unshift({
-        userId,
-        name,
-        status: "APPROVED",
-        wardId: selectedWard?.wardId ?? null,
-        ward: selectedWard?.wardName ?? ward
-    });
-    if (adminHistoryRows) {
-        const now = new Date();
-        const time = now.toISOString().slice(0, 16).replace("T", " ");
-        const row = document.createElement("tr");
-        row.dataset.historyAction = "계정 생성";
-        row.innerHTML = `<td>${time}</td><td>${currentAdminId}</td><td>${userId}</td><td>${selectedWard?.wardName ?? ward}</td><td>계정 생성</td><td class="history-actions"><button class="history-edit" aria-label="계정 생성 이력 수정">✎</button><button class="history-delete" aria-label="계정 생성 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td>`;
-        adminHistoryRows.prepend(row);
-    }
-    adminCreateDialog.close();
-    renderAdminUsers();
-    document.querySelector("#complete-account-name").textContent = name;
-    document.querySelector("#complete-account-user-id").textContent = userId;
-    document.querySelector("#complete-account-ward").textContent = selectedWard?.wardName ?? ward;
-    document.querySelector("#complete-account-password").textContent = temporaryPassword;
-    adminCreateCompleteDialog.showModal();
-});
+"use strict";
 
 /**
  * 관리자 화면 현재 시각 표시
@@ -668,11 +655,12 @@ adminCreateForm?.addEventListener("submit", event => {
 function updateAdminClock() {
     const now = new Date();
 
-    const parts = new Intl.DateTimeFormat("en-GB", {
+    const parts = new Intl.DateTimeFormat("ko-KR", {
         timeZone: "Asia/Seoul",
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
+        weekday: "short",
         hour: "2-digit",
         minute: "2-digit",
         hourCycle: "h23"
@@ -683,8 +671,9 @@ function updateAdminClock() {
     );
 
     adminClock.dateTime = now.toISOString();
+    // [09.13]수정내용: 관리자 화면 날짜에 한국어 요일을 함께 표시한다.
     adminClock.textContent =
-        `${values.year}년 ${values.month}월 ${values.day}일 `
+        `${values.year}년 ${values.month}월 ${values.day}일 (${values.weekday}) `
         + `${values.hour}:${values.minute}`;
 }
 
@@ -695,3 +684,5 @@ setInterval(updateAdminClock, 30000);
 loadAdminData().catch(() => {
     // 오류 메시지는 loadAdminData에서 표시한다.
 });
+
+

@@ -109,7 +109,7 @@ public class SignupController {
                 "계정이 생성되었습니다. 로그인해 주세요."
         );
 
-        return "redirect:/login";
+        return "redirect:/login?role=USER";
     }
 
     // 사용자 아이디 중복확인
@@ -124,3 +124,4 @@ public class SignupController {
         return Map.of("available", available);
     }
 }
+

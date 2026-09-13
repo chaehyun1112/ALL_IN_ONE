@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CareGuard · 설정</title>
-  <link rel="stylesheet" href="../static/css/settings.css" th:href="@{/css/settings.css}">
+  <link rel="stylesheet" href="../../../static/css/settings/settings.css" th:href="@{/css/settings/settings.css}">
   <!-- [수정완료] 카드 잘림을 방지하고 메모 입력 영역을 구성합니다. -->
-  <link rel="stylesheet" href="../static/css/settings-layout.css" th:href="@{/css/settings-layout.css}">
+  <link rel="stylesheet" href="../../../static/css/settings/layout.css" th:href="@{/css/settings/layout.css}">
 </head>
 <body>
   <!-- [수정완료] 참고 이미지처럼 프로필과 설정 정보를 분리한 화면으로 구성합니다. -->
   <header class="settings-header">
-    <a class="back-link" href="dashboard.html" th:href="@{/dashboard}">← 대시보드로 돌아가기</a>
+    <a class="back-link" href="../dashboard/dashboard.html" th:href="@{/dashboard}">← 대시보드로 돌아가기</a>
     <strong>CareGuard</strong>
   </header>
 
@@ -52,7 +52,7 @@
         <section class="settings-card password-row" aria-labelledby="password-title">
           <div class="card-heading"><span class="card-icon">▣</span><div><h2 id="password-title">비밀번호 변경</h2><p>계정 보안을 위해 주기적으로 비밀번호를 변경해주세요.</p></div></div>
           <!-- [수정완료] 비밀번호 변경 화면으로 이동하는 버튼을 배치합니다. -->
-          <a class="settings-action" href="auth/password-change.html" th:href="@{/user/password}">비밀번호 변경　›</a>
+          <a class="settings-action" href="password-change.html" th:href="@{/user/password}">비밀번호 변경　›</a>
         </section>
 
         <!-- [수정완료] 계정 관리 영역에 마지막 로그인 시간, 상태, 로그아웃을 배치합니다. -->
@@ -70,3 +70,7 @@
   </main>
 </body>
 </html>
+
+
+
+

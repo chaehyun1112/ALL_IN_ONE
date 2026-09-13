@@ -53,7 +53,8 @@ public class UserPasswordController {
             // 빈 DTO를 넣어야 HTML의 th:object="${passwordChangeForm}"이 정상 동작한다.
             model.addAttribute("passwordChangeForm", new PasswordChangeForm());
         }
-        return "html/auth/password-change";
+        // [09.13]수정내용: 비밀번호 변경 화면을 settings 폴더의 파일로 연결합니다.
+            return "html/settings/password-change";
     }
 
     /**
@@ -79,7 +80,8 @@ public class UserPasswordController {
         if (bindingResult.hasErrors()) {
             // 검증 실패 화면의 HTML에 사용자가 입력한 PW가 다시 포함되지 않도록 비운다.
             clearPasswordFields(form);
-            return "html/auth/password-change";
+            // [09.13]수정내용: 비밀번호 변경 화면을 settings 폴더의 파일로 연결합니다.
+            return "html/settings/password-change";
         }
 
         // Authentication#getName()에는 로그인에 사용한 직원 ID가 들어 있다.
@@ -88,7 +90,8 @@ public class UserPasswordController {
         if (!(authentication.getPrincipal() instanceof HospitalUserDetails userDetails)) {
             model.addAttribute("userError", "병원 로그인 정보가 없습니다. 다시 로그인해 주세요.");
             clearPasswordFields(form);
-            return "html/auth/password-change";
+            // [09.13]수정내용: 비밀번호 변경 화면을 settings 폴더의 파일로 연결합니다.
+            return "html/settings/password-change";
         }
 
         PasswordChangeResult result = userService.changePassword(
@@ -99,13 +102,15 @@ public class UserPasswordController {
             // password-change.html의 th:errors="*{currentPassword}"에서 출력된다.
             bindingResult.rejectValue("currentPassword", "mismatch", "현재 비밀번호가 일치하지 않습니다.");
             clearPasswordFields(form);
-            return "html/auth/password-change";
+            // [09.13]수정내용: 비밀번호 변경 화면을 settings 폴더의 파일로 연결합니다.
+            return "html/settings/password-change";
         }
         if (result == PasswordChangeResult.USER_NOT_FOUND) {
             // 특정 필드 오류가 아니라 계정 전체 오류이므로 Model에 메시지를 넣는다.
             model.addAttribute("userError", "사용자 정보를 확인할 수 없습니다.");
             clearPasswordFields(form);
-            return "html/auth/password-change";
+            // [09.13]수정내용: 비밀번호 변경 화면을 settings 폴더의 파일로 연결합니다.
+            return "html/settings/password-change";
         }
 
         String hospitalId = userDetails.getHospitalId();
@@ -119,7 +124,7 @@ public class UserPasswordController {
         );
 
         // 성공 여부만 쿼리 파라미터로 전달해 로그인 화면에서 변경 완료 안내를 표시한다.
-        return "redirect:/login?passwordChanged";
+        return "redirect:/login?role=USER&passwordChanged";
     }
 
     /** 비밀번호 원문이 응답 HTML에 남지 않도록 DTO의 세 입력값을 제거한다. */
@@ -130,3 +135,7 @@ public class UserPasswordController {
         form.setPasswordConfirm(null);
     }
 }
+
+
+
+

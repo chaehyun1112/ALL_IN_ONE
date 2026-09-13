@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>접속 유형 선택 | 요양병원 안전 모니터링</title>
+    <link rel="stylesheet" th:href="@{/css/auth/role.css}" href="../../../static/css/auth/role.css">
+</head>
+<body><main class="role-page"><section class="role-content" aria-labelledby="role-title">
+    <p class="role-eyebrow">AI 영상 기반</p><h1 id="role-title">요양병원 안전 모니터링</h1>
+    <p class="role-description">접속 유형을 선택해 주세요.</p>
+    <!-- [09.13]추가내용: 관리자와 간호사가 자신의 업무 화면으로 이동할 접속 유형 카드를 제공한다. -->
+    <div class="role-card" role="group" aria-label="접속 유형">
+        <!-- [09.13]수정내용: 관리자 역할 설명을 사용자 계정과 관리 이력 확인 기능에 맞게 변경한다. -->
+        <!-- [09.13]수정내용: 관리자 카드의 접속 안내 문구를 관리자 계정 접속으로 변경한다. -->
+        <!-- [09.13]수정내용: 관리자 접속 안내의 큰 화살표를 작은 꺾쇠로 변경해 카드 문구를 간결하게 표시한다. -->
+        <!-- [09.13]수정내용: 관리자 카드에 사용자 계정을 상징하는 단색 사람 아이콘을 적용한다. -->
+        <a class="role-option role-admin" href="/login?role=ADMIN" th:href="@{/login(role='ADMIN')}"><span class="role-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg></span><strong>관리자</strong><span>사용자 계정과 관리 이력을 확인합니다.</span><em>관리자 계정 접속 <b aria-hidden="true">›</b></em></a>
+        <!-- [09.13]수정내용: 간호사 역할 설명을 환자 안전 모니터링과 대응 이력 관리 기능에 맞게 변경한다. -->
+        <!-- [09.13]수정내용: 간호사 카드의 접속 안내 문구를 간호사 계정 접속으로 변경한다. -->
+        <!-- [09.13]수정내용: 간호사 접속 안내의 큰 화살표를 작은 꺾쇠로 변경해 카드 문구를 간결하게 표시한다. -->
+        <!-- [09.13]수정내용: 간호사 카드에 의료 업무를 상징하는 단색 십자가 아이콘을 적용한다. -->
+        <a class="role-option role-user" href="/login?role=USER" th:href="@{/login(role='USER')}"><span class="role-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z"/></svg></span><strong>간호사</strong><span>환자 안전 상태를 모니터링하고 대응 이력을 관리합니다.</span><em>간호사 계정 접속 <b aria-hidden="true">›</b></em></a>
+    </div>
+</section></main></body>
+</html>
+
+
