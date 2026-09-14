@@ -44,7 +44,9 @@
         ORDER BY ward_id
     </select>
 
-    <!-- 사용자 계정 생성: 계정 상태와 생성 일시는 DB 기본값을 사용한다. -->
+    <!-- 사용자 계정 생성: 계정 상태와 생성 일시는 DB 기본값을 사용한다.
+         실제 DB에는 email 컬럼이 없고(마이그레이션으로 삭제됨), auth_st 기본값이
+         'APPROVED'로 되어 있어 이 두 컬럼은 INSERT에서 생략한다. -->
     <insert id="insertUser">
         INSERT INTO tb_emp (
             emp_id,
@@ -52,9 +54,7 @@
             hosp_div_id,
             ward_id,
             emp_nm,
-            email,
-            role_cd,
-            auth_st
+            role_cd
         )
         VALUES (
             #{userId},
@@ -62,9 +62,7 @@
             #{hospDivId},
             #{wardId,jdbcType=BIGINT},
             #{userName},
-            #{email},
-            'USER',
-            'PENDING'
+            'USER'
         )
     </insert>
 
