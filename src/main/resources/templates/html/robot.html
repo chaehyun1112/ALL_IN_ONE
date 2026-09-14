@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CareGuard · 로봇 위치</title>
+
+  <!-- 대시보드와 같은 기본 디자인(헤더·평면도·카드)을 재사용합니다. -->
+  <link rel="stylesheet" href="./dashboard.css" th:href="@{/css/dashboard.css}">
+  <link rel="stylesheet" href="./robot.css" th:href="@{/css/robot.css}">
+</head>
+
+<body>
+  <!-- 상단 헤더: 대시보드와 동일한 브랜드 영역을 사용합니다. -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">+</div>
+      <strong>CareGuard</strong>
+      <span>순찰 로봇 관제</span>
+    </div>
+
+    <div class="header-actions">
+      <time id="clock"></time>
+
+      <div class="header-menu">
+        <button
+          type="button"
+          class="menu-toggle"
+          id="menu-toggle"
+          aria-label="더보기"
+          aria-expanded="false"
+          aria-controls="header-menu-list"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <path d="M5 6h14"></path>
+            <path d="M5 12h14"></path>
+            <path d="M5 18h14"></path>
+          </svg>
+        </button>
+
+        <nav class="header-menu-list" id="header-menu-list" aria-label="메뉴" hidden>
+          <a href="" th:href="@{/dashboard}">메인 대시보드</a>
+          <a href="" th:href="@{/Record}">조치기록</a>
+          <button type="button" id="logout-open">로그아웃</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 로봇 현재 상태 요약 -->
+    <div class="page-heading">
+      <section class="panel summary robot-summary">
+        <h2>순찰 로봇 현황</h2>
+
+        <div class="counts robot-counts">
+          <div class="count" id="robot-mode-card">
+            <span>상태</span>
+            <b id="robot-mode-label">순찰 중</b>
+          </div>
+          <div class="count">
+            <span>현재 위치</span>
+            <b id="robot-location-label">-</b>
+          </div>
+          <div class="count">
+            <span>목적지</span>
+            <b id="robot-target-label">-</b>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="layout">
+      <!-- 병동 평면도 + 로봇 위치 -->
+      <section class="panel floor-panel">
+        <div class="panel-heading">
+          <h2>병동 평면도 · 로봇 위치</h2>
+
+          <div class="legend">
+            <span>정상</span>
+            <span class="caution">주의</span>
+            <span class="urgent">긴급</span>
+          </div>
+        </div>
+
+        <div class="floor" id="robot-floor">
+          <!-- 위쪽 병실은 JS로 생성됩니다 (읽기 전용) -->
+          <div class="room-row" id="upper-rooms"></div>
+
+          <div class="corridor">
+            <span>←</span>
+            <span>중앙 복도</span>
+            <span>→</span>
+          </div>
+
+          <!-- 아래쪽 병실은 JS로 생성됩니다 (읽기 전용) -->
+          <div class="room-row bottom" id="lower-rooms"></div>
+
+          <!-- 로봇 위치 표시(JS가 위치를 갱신합니다) -->
+          <div class="robot-marker" id="robot-marker" aria-hidden="true">🤖</div>
+        </div>
+
+        <div class="floor-footer">
+          <div class="robot-status" id="robot-status">
+            <span class="robot-status-dot" aria-hidden="true"></span>
+            <span id="robot-status-text">병동 순찰 중입니다.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 로봇 대응 이력 -->
+      <aside class="side">
+        <section class="panel alerts-panel">
+          <div class="alert-heading">
+            <h2>로봇 대응 이력</h2>
+            <span class="alert-total" id="robot-log-total">0건</span>
+          </div>
+
+          <!-- JS가 최근 순서로 이벤트 카드를 추가합니다 -->
+          <div id="robot-log-list" class="robot-log-list"></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script src="./robot.js" th:src="@{/JS/robot.js}"></script>
+</body>
+</html>
