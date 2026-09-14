@@ -107,6 +107,24 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
     detail.textContent="병실을 선택해 주세요.";
   });
+  function renderRoomHistory(){
+    const room=rooms.get(selected);
+    if(!room){detail.textContent="병실을 선택해 주세요.";return;}
+    const counts=window.CareGuardRoomStatus.todayCounts(room.number);
+    const title=document.createElement("strong");
+    title.textContent=`${room.number}호 · 오늘의 기록`;
+    const summary=document.createElement("span");
+    if(counts.urgent+counts.caution){
+      summary.className="room-history-counts";
+      for(const [type,label] of [["urgent","낙상"],["caution","침대 이탈"]]){
+        if(summary.childNodes.length)summary.append(" · ");
+        const item=document.createElement("span");item.className=`room-history-${type}`;
+        const number=document.createElement("b");number.textContent=counts[type];
+        item.append(`${label} `,number,"건");summary.append(item);
+      }
+    }else summary.textContent="오늘 감지된 이벤트가 없습니다.";
+    detail.replaceChildren(title,summary);
+  }
   function render(){
     const counts={all:rooms.size,normal:0,caution:0,urgent:0};
     for(const room of rooms.values()){
@@ -125,12 +143,12 @@ document.addEventListener("DOMContentLoaded", () => {
     responseOpen.style.visibility=chosen&&chosen.status!=="normal"?"visible":"hidden";
     responseOpen.disabled=!chosen||chosen.status==="normal";
     responseOpen.textContent=chosen?`${chosen.number}호 대응 등록`:"대응 등록";
-    if(chosen)detail.textContent=`${chosen.number}호 · ${labels[chosen.status]}`;
+    renderRoomHistory();
     alertPanel.querySelectorAll(".alert-card").forEach(el=>el.remove());
     for(const room of rooms.values()){
       if(room.status==="normal")continue;
       const card=document.createElement("article");card.className="alert-card"+(room.status==="caution"?" caution":"");
-      card.innerHTML=`<div class="alert-top"><strong>● ${room.status==="urgent"?"긴급":"주의"}</strong></div><h3>${room.number}호 <span class="event-label">${labels[room.status]}</span></h3><p>${room.acknowledged?"대응 중입니다.":"병실을 확인해 주세요."}</p><button type="button" class="locate-room">위치 확인 →</button>`;
+      card.innerHTML=`<div class="alert-top"><strong>● ${room.status==="urgent"?"긴급":"주의"}</strong></div><h3>${room.number}호 <span class="event-label">${labels[room.status]}</span></h3><p>병실을 확인해주세요.</p><button type="button" class="locate-room">위치 확인 →</button>`;
       /* [추가] 현재 선택 병실의 위치 확인 버튼에 연한 선택 색상을 표시합니다. */
       card.querySelector("button").setAttribute("aria-pressed",String(selected===room.number));
       card.querySelector("button").classList.toggle("hover-suppressed",suppressedHoverRoom===room.number);
@@ -148,10 +166,16 @@ document.addEventListener("DOMContentLoaded", () => {
      동일 경보 ID 재수신은 무시합니다. 저장·통신 API는 이 파일에 포함하지 않습니다. */
   window.CareGuard={receiveFallEvent(event){
     if(!event||event.id==null||!String(event.id).trim()||!rooms.has(Number(event.room)))return false;
-    const id=String(event.id);if(seenEvents.has(id))return false;seenEvents.add(id);
+    const id=String(event.id);if(seenEvents.has(id)||!window.CareGuardRoomStatus.addEvent({...event,type:"urgent"}))return false;seenEvents.add(id);
     const number=Number(event.room);cancelAudio(number);
     Object.assign(rooms.get(number),{status:"urgent",acknowledged:false, eventId:id});
     {const job={number,count:0,cancelled:false};jobs.set(number,job);queue.push(job);pump();}
+    render();return true;
+  },receiveBedExitEvent(event){
+    if(!event||!window.CareGuardRoomStatus.addEvent({...event,type:"caution"}))return false;
+    const room=rooms.get(Number(event.room));
+    // 같은 병실의 미해결 낙상 경보를 주의 상태로 낮추지 않습니다.
+    if(room.status!=="urgent")Object.assign(room,{status:"caution",acknowledged:false,eventId:String(event.id)});
     render();return true;
   }};
 
@@ -177,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const completed=new FormData(form).get("response-status")==="complete";
     // 실제 적용 시 이 위치에서 서버 저장 성공을 확인한 후 상태를 변경하세요.
     if(completed){room.status="normal";room.acknowledged=false;cancelAudio(room.number);}
-    dialog.close();render();detail.textContent=`${room.number}호 · ${completed?"조치 완료":"확인 중"} (화면 반영 · 서버 미저장)`;
+    dialog.close();render();
   });
   const toggle=document.getElementById("profile-toggle"),menu=document.getElementById("header-menu-list");
   /* [수정완료] 사용자 프로필의 ▿ 버튼으로 조치기록·설정·로그아웃 메뉴를 엽니다. */
@@ -187,7 +211,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
   // [09.13]수정내용: 날짜 표시 설정에 현재 연도를 추가하여 대시보드에 연도와 날짜, 시간을 함께 표시한다.
   const updateClock=()=>{document.getElementById("clock").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());};
-  updateClock();setInterval(updateClock,1000);render();
+  let historyDay=window.CareGuardRoomStatus.dayKey(Date.now());
+  updateClock();setInterval(()=>{
+    updateClock();
+    const today=window.CareGuardRoomStatus.dayKey(Date.now());
+    if(today!==historyDay){historyDay=today;renderRoomHistory();}
+  },1000);render();
   window.addEventListener("pagehide",()=>{audioAllowed=false;for(const n of [...jobs.keys()])cancelAudio(n);audio.pause();});
 });
 
