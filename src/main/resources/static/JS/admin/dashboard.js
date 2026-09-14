@@ -4,6 +4,7 @@ let adminUsers = [];
 let adminWards = [];
 let adminActiveStatus = "ALL";
 let adminSearchQuery = "";
+let adminHistoryFilter = "전체";
 let adminSelectedUser = null;
 let adminAction = "";
 let adminToastTimer = null;
@@ -224,6 +225,7 @@ function renderAdminCounts() {
  * 선택한 승인 상태와 검색어에 맞는 목록을 출력한다.
  */
 function renderAdminUsers() {
+    filterHistory(adminHistoryFilter);
     renderAdminCounts();
 
     const visibleUsers = adminUsers.filter(user => {
@@ -509,11 +511,16 @@ for (const tab of adminTabs) {
     });
 }
 
-/* 사용자 검색 */
+/* 현재 화면의 관리 이력 검색 */
 adminSearchForm.addEventListener("submit", event => {
     event.preventDefault();
 
     adminSearchQuery = adminSearchInput.value.trim().toLowerCase();
+    renderAdminUsers();
+});
+
+adminSearchForm.addEventListener("reset", () => {
+    adminSearchQuery = "";
     renderAdminUsers();
 });
 
@@ -585,6 +592,55 @@ document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", a
         cancelButton.disabled = false;
     }
 });
+// 상세 이력의 대상 직원을 실제 병동 변경 기능에 연결합니다.
+document.querySelector("#admin-event-ward-change")?.addEventListener("click", async event => {
+    const button = event.currentTarget;
+    if (button.disabled) return;
+    const userId = document.querySelector("#event-target").textContent.trim();
+    button.disabled = true;
+    adminSelectedUser = null;
+    adminAction = "ASSIGN";
+    adminDialogTitle.textContent = "담당 병동 변경";
+    adminDialogDescription.textContent = `${userId}님의 병동 목록을 불러오고 있습니다.`;
+    adminWardField.hidden = false;
+    adminWardSelect.required = true;
+    adminWardSelect.disabled = true;
+    adminWardSelect.replaceChildren(new Option("병동 목록을 불러오는 중…", ""));
+    adminDialogConfirm.textContent = "변경하기";
+    adminDialogConfirm.disabled = true;
+    adminHistoryEventDialog.close();
+    adminDialog.showModal();
+    try {
+        await loadAdminData(true);
+        if (!adminDialog.open) return;
+        const user = adminUsers.find(item => item.userId === userId);
+        if (!user || user.status !== "APPROVED") {
+            adminDialogDescription.textContent = "활성화된 직원 계정의 병동만 변경할 수 있습니다.";
+            adminWardSelect.replaceChildren(new Option("변경 가능한 직원 정보가 없습니다.", ""));
+            return;
+        }
+        adminWardSelect.replaceChildren(new Option("변경할 병동을 선택해주세요", ""));
+        for (const ward of adminWards) {
+            adminWardSelect.add(new Option(ward.wardName, String(ward.wardId)));
+        }
+        if (!adminWards.length) {
+            adminDialogDescription.textContent = "등록된 병동이 없어 변경할 수 없습니다.";
+            return;
+        }
+        adminSelectedUser = user;
+        adminAction = "ASSIGN";
+        adminDialogDescription.textContent = `${user.name} (${user.userId}) · 현재 병동: ${user.ward || "미배정"}`;
+        adminWardSelect.disabled = false;
+        adminDialogConfirm.disabled = false;
+        adminWardSelect.focus();
+    } catch (error) {
+        if (!adminDialog.open) return;
+        adminDialogDescription.textContent = error.message || "병동 정보를 불러오지 못했습니다. 창을 닫고 다시 시도해주세요.";
+        adminWardSelect.replaceChildren(new Option("병동 목록을 불러오지 못했습니다.", ""));
+    } finally {
+        button.disabled = false;
+    }
+});
 document.querySelector("#admin-event-change")?.addEventListener("click", () => {
     const userId = document.querySelector("#event-target").textContent;
     const temporaryPassword = `Care${Math.random().toString(36).slice(2, 8)}!`;
@@ -612,10 +668,24 @@ document.querySelector("#copy-account-password")?.addEventListener("click", asyn
 });
 
 function filterHistory(action) {
+    adminHistoryFilter = action;
     historyFilterCards.forEach(card => card.classList.toggle("active", card.dataset.historyFilter === action));
-    document.querySelectorAll("#admin-history-rows tr").forEach(row => {
-        row.hidden = action !== "전체" && row.dataset.historyAction !== action;
-    });
+    const usersById = new Map(adminUsers.map(user => [user.userId, user.name]));
+    const rows = [...document.querySelectorAll("#admin-history-rows tr")];
+    let visible = 0;
+    for (const row of rows) {
+        const cells = row.querySelectorAll("td");
+        const userId = cells[2]?.textContent.trim() ?? "";
+        const ward = cells[3]?.textContent.trim() ?? "";
+        const searchable = `${userId} ${usersById.get(userId) ?? ""} ${ward}`.toLowerCase();
+        const matchesType = action === "전체" || row.dataset.historyAction === action;
+        row.hidden = !matchesType || !searchable.includes(adminSearchQuery);
+        if (!row.hidden) visible++;
+    }
+    const result = document.querySelector("#admin-search-result");
+    if (result) result.textContent = `관리 이력 ${visible}건 / 전체 ${rows.length}건`;
+    const empty = document.querySelector("#admin-history-empty");
+    if (empty) empty.hidden = visible !== 0;
 }
 
 adminHistoryRows?.addEventListener("click", event => {
@@ -676,6 +746,15 @@ function updateAdminClock() {
         `${values.year}년 ${values.month}월 ${values.day}일 (${values.weekday}) `
         + `${values.hour}:${values.minute}`;
 }
+
+// 계정 생성이나 이력 변경 후에도 현재 검색과 처리 유형 조건을 유지합니다.
+if (adminHistoryRows) {
+    new MutationObserver(() => filterHistory(adminHistoryFilter)).observe(adminHistoryRows, {
+        childList: true, subtree: true, characterData: true,
+        attributes: true, attributeFilter: ["data-history-action"]
+    });
+}
+filterHistory(adminHistoryFilter);
 
 /* 초기 실행 */
 updateAdminClock();

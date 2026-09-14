@@ -98,7 +98,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-row-actions .admin-icon-button:hover { background: #f8f9f5; border-color: currentColor; }
 .admin-empty { text-align: center; color: var(--admin-muted); padding: 60px 16px; }
 .admin-history-panel { margin-top: 0; padding: 24px 0 0; border: 0; border-top: 1px solid var(--admin-border); border-radius: 0; background: transparent; box-shadow: none; }
-.admin-panel > .admin-toolbar, .admin-panel > #admin-list { display: none; }
+.admin-panel > #admin-list { display: none; }
 .admin-panel > .admin-history-panel { padding-top: 0; border-top: 0; }
 .admin-panel > .admin-history-panel > header { display: none; }
 /* [09.13]수정내용: 관리 이력이 많아져도 페이지 전체가 늘어나지 않도록 목록 영역에 세로 스크롤을 적용한다. */
@@ -187,3 +187,32 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-inactive-management-link:hover { border-color: var(--admin-green); background: #f5f8f3; }
 .admin-inactive-management-link:focus-visible { outline: 2px solid var(--admin-green); outline-offset: 3px; }
 
+
+/* 직원 계정 관리 검색창과 결과 안내 */
+#admin-management-page .admin-search { flex-wrap: wrap; }
+#admin-management-page .admin-search-field { flex: 1; min-width: 180px; }
+#admin-management-page .admin-search input { width: 100%; min-width: 240px; font-size: 12px; }
+#admin-management-page .admin-search-button { min-height: 44px; }
+.admin-search-result { margin: 0; color: #687b6d; font-size: 12px; }
+
+/* 관리 이력 제목 옆에 검색 기능을 배치합니다. */
+#admin-management-page .admin-management-heading {
+  display: grid;
+  grid-template-columns: auto minmax(360px, 440px) auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+#admin-management-page .admin-management-heading .admin-account-actions { justify-content: flex-end; }
+#admin-management-page .admin-management-heading .admin-search { margin: 0; position: relative; top: 10px; }
+#admin-management-page .admin-management-heading .admin-search input { min-width: 0; }
+@media (max-width: 1200px) {
+  #admin-management-page .admin-management-heading { grid-template-columns: 1fr auto; }
+  #admin-management-page .admin-management-heading .admin-search { grid-column: 1 / -1; grid-row: 2; max-width: 520px; }
+}
+@media (max-width: 700px) {
+  #admin-management-page .admin-management-heading { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  #admin-management-page .admin-management-heading .admin-account-actions { justify-content: flex-start; }
+  #admin-management-page .admin-management-heading .admin-search { max-width: none; }
+}
