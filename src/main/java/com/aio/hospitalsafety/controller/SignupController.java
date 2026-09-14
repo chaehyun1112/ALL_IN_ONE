@@ -46,7 +46,7 @@ public class SignupController {
 
         model.addAttribute(
                 "signup",
-                new Signup(null, null, null, null, null)
+                new Signup(null, null, null, null, null, null)
         );
 
         model.addAttribute(
@@ -54,7 +54,7 @@ public class SignupController {
                 signupService.getWardsByHospital(hospitalDomain)
         );
 
-        return "html/auth/signup";
+        return "html/signup";
     }
 
     // 회원가입 처리
@@ -82,7 +82,7 @@ public class SignupController {
                     signupService.getWardsByHospital(hospitalDomain)
             );
 
-            return "html/auth/signup";
+            return "html/signup";
         }
 
         try {
@@ -101,7 +101,7 @@ public class SignupController {
                     signupService.getWardsByHospital(hospitalDomain)
             );
 
-            return "html/auth/signup";
+            return "html/signup";
         }
 
         redirectAttributes.addFlashAttribute(

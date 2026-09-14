@@ -1,5 +1,6 @@
 package com.aio.hospitalsafety.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -24,6 +25,12 @@ public record Signup(
         @NotBlank(message = "이름을 입력해 주세요.")
         @Size(max = 20, message = "이름은 20자 이하여야 합니다.")
         String userName,
+
+        // 아이디 찾기에서 본인 확인 및 인증코드 수신에 사용한다.
+        @NotBlank(message = "이메일을 입력해 주세요.")
+        @Email(message = "올바른 이메일 형식이 아닙니다.")
+        @Size(max = 100, message = "이메일은 100자 이하여야 합니다.")
+        String email,
 
         @Positive(message = "올바른 병동을 선택해 주세요.")
         Long wardId

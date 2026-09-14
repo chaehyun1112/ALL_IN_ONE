@@ -52,7 +52,9 @@
             hosp_div_id,
             ward_id,
             emp_nm,
-            role_cd
+            email,
+            role_cd,
+            auth_st
         )
         VALUES (
             #{userId},
@@ -60,7 +62,9 @@
             #{hospDivId},
             #{wardId,jdbcType=BIGINT},
             #{userName},
-            'USER'
+            #{email},
+            'USER',
+            'PENDING'
         )
     </insert>
 

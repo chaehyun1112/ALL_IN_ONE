@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- PGH -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aio.hospitalsafety.mapper.HospitalMapper">
+    <!-- 실제 DB에서 확인한 TB_HOSPITAL의 두 컬럼을 Hospital record로 변환한다. -->
+    <resultMap id="hospitalMap" type="com.aio.hospitalsafety.domain.Hospital">
+        <constructor>
+            <idArg column="HOSP_DIV_ID" javaType="java.lang.String"/>
+            <arg column="HOSP_NM" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findByHospitalId" resultMap="hospitalMap">
+        SELECT HOSP_DIV_ID, HOSP_NM
+        FROM TB_HOSPITAL
+        WHERE HOSP_DIV_ID = #{hospitalId}
+    </select>
+</mapper>

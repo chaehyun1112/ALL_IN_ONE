@@ -57,6 +57,7 @@ public class SignupService {
 
         String userId = signup.userId().trim();
         String userName = signup.userName().trim();
+        String email = signup.email().trim();
 
         // 현재 접속한 병원이 실제로 존재하는지 확인
         if (!signupMapper.existsHospital(hospDivId)) {
@@ -111,6 +112,7 @@ public class SignupService {
                 userId,
                 encodedPassword,
                 userName,
+                email,
                 hospDivId,
                 signup.wardId()
         );

@@ -5,8 +5,6 @@ import com.aio.hospitalsafety.domain.User;
 import com.aio.hospitalsafety.mapper.UserMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,7 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -49,20 +46,19 @@ public class SecurityConfig {
         http
                 // authorizeHttpRequests: URL별 접근 권한을 설정한다.
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인 화면과 정적 파일은 로그인하지 않아도 접근할 수 있다.
-                        .requestMatchers( 
-                                "/", "/domain", "/role", "/login", "/login/user",
-                                "/signup", "/api/users/check-user-id",
-                                "/css/**", "/JS/**", "/image/**", "/error"
-                        ).permitAll()
+                        // 로그인 화면, 재설정 화면, 정적 파일은 로그인하지 않아도 접근할 수 있다.
+                        // 병합 메모(park + chae): 회원가입 진입 전 병원 도메인 선택(/, /domain, /access-type)과
+                        // 회원가입 자체(/signup, 아이디 중복확인 API)도 비로그인 상태에서 접근 가능해야 한다.
+                        .requestMatchers("/login", "/login/hospital", "/login/user",
+                                "/password/reset", "/password/reset/**", "/id/find", "/id/find/**",
+                                "/css/**", "/JS/**", "/js/**", "/image/**", "/error",
+                                "/", "/domain", "/access-type", "/signup", "/api/users/check-user-id").permitAll()
+                        // 병합 메모(tae + yejin): 관리자 승인 화면은 ADMIN 권한을 가진 계정만 접근할 수 있다.
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                         // authenticated()는 역할과 관계없이 "로그인 완료 여부"만 검사한다.
                         // 위에서 허용하지 않은 나머지 URL은 로그인한 사용자만 접근할 수 있다.
                         // TODO(화면 URL 확정 필요): 관제 URL이 정해지면 해당 URL에는
                         // hasAuthority("STATUS_APPROVED") 조건을 별도로 먼저 추가해야 한다.
-
-                        .requestMatchers("/admin/**", "/api/admin/**")
-                        .hasRole("ADMIN")
-
                         .anyRequest().authenticated())
                 // formLogin: 직원 ID/PW를 사용하는 세션 기반 로그인을 설정한다.
                 .formLogin(form -> form
@@ -74,34 +70,9 @@ public class SecurityConfig {
                         // userLoginKey는 "병원 구분 ID|직원 ID" 형식의 내부 인증용 값이다.
                         .usernameParameter("userLoginKey")
                         // 두 번째 인자 true는 로그인 전에 접근하려던 URL보다 대시보드를 우선한다는 뜻이다.
-                        // [수정완료] 인증 성공 후 입력한 표시 이름을 현재 로그인 세션에 보관합니다.
-                        .successHandler((request, response, authentication) -> {
-                            String displayName = request.getParameter("displayName");
-                            displayName = displayName == null ? "" : displayName.strip();
-                            request.getSession().setAttribute(UserDisplaySession.DISPLAY_NAME,
-                                    displayName.substring(0, Math.min(displayName.length(), 50)));
-                            // [수정완료] 새로고침 시 바뀌지 않는 실제 로그인 성공 시각을 기록합니다.
-                            request.getSession().setAttribute(UserDisplaySession.LOGIN_TIME,
-                                    java.time.ZonedDateTime.now(java.time.ZoneId.of("Asia/Seoul"))
-                                            .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                            response.sendRedirect(request.getContextPath() + "/dashboard");
-                        })
-                        // 인증 결과로 확인된 실패 원인만 화면에 전달한다.
-                        .failureHandler((request, response, exception) -> {
-                            String error = switch (exception) {
-                                case UsernameNotFoundException ignored -> "userId";
-                                case BadCredentialsException ignored -> "password";
-                                case DisabledException ignored -> "disabled";
-                                default -> "unavailable";
-                            };
-                            // [09.13]수정내용: 관리자·간호사 로그인 실패 모두 선택한 유형을 유지한 채 로그인 화면으로 돌아간다.
-                            String requestedRole = request.getParameter("role");
-                            String role = "ADMIN".equalsIgnoreCase(requestedRole)
-                                    ? "&role=ADMIN"
-                                    : "&role=USER";
-                            new SimpleUrlAuthenticationFailureHandler("/login?error=" + error + role)
-                                    .onAuthenticationFailure(request, response, exception);
-                        })
+                        .defaultSuccessUrl("/dashboard", true)
+                        // 로그인 실패 시 error 쿼리 파라미터를 붙여 화면에 오류를 표시한다.
+                        .failureUrl("/login/user?error")
                         // 로그인 처리와 관련된 URL은 비로그인 상태에서도 접근 가능해야 한다.
                         .permitAll())
                 // 로그아웃 요청 역시 Spring Security가 처리한다.

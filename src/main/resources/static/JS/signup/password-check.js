@@ -1,3 +1,4 @@
+// PGH
  const password = document.getElementById("password");
   const confirmation = document.getElementById("passwordConfirm");
 

@@ -36,6 +36,7 @@ public interface SignupMapper {
             @Param("userId") String userId,
             @Param("encodedPassword") String encodedPassword,
             @Param("userName") String userName,
+            @Param("email") String email,
             @Param("hospDivId") String hospDivId,
             @Param("wardId") Long wardId
     );
