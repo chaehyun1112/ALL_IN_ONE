@@ -8,6 +8,6 @@ public class RobotController {
 
     @GetMapping("/robot")
     public String robot() {
-        return "html/robot";
+        return "html/robot/robot";
     }
 }
