@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
      실제 로봇 위치 연동 전까지는 화면 시연용 시뮬레이션입니다.
      --------------------------------------------------------- */
   const ROBOT_PATH = [301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 317, 316, 315, 314, 313, 312, 311];
-  const LEG_MS = 900;
+  const LEG_MS = 1800;
   const floorEl = document.getElementById("robot-floor");
   const corridorEl = document.querySelector("#robot-floor .corridor");
   const robotMarker = document.getElementById("robot-marker");
@@ -230,7 +230,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setRobotStatus("patrol", `병동 순찰 중입니다 · ${ROBOT_PATH[0]}호 인근`, "순찰 중");
   renderLog();
   checkDispatch();
-  setInterval(patrolStep, 4500);
+  /* [수정] 다음 구간 이동을 이전 이동이 끝나는 시점(LEG_MS)에 맞춰 바로 이어서
+     시작합니다. 간격을 이동 시간보다 길게 두면 중간에 멈췄다 가는 것처럼 보입니다. */
+  setInterval(patrolStep, LEG_MS);
 
   window.addEventListener("resize", () => {
     positionRobotAt(robotMode === "patrol" ? ROBOT_PATH[robotPatrolIndex] : robotDispatchRoom);
