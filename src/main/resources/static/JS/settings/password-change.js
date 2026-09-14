@@ -1,4 +1,5 @@
-   const password = document.getElementById("newPassword");
+    // 비밀번호 변경 화면의 입력 조건과 표시 버튼을 처리한다.
+    const password = document.getElementById("newPassword");
     const confirmation = document.getElementById("passwordConfirm");
 
     const letterRule = document.getElementById("rule-letter");

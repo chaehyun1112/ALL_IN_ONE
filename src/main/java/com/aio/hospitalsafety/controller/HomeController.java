@@ -25,6 +25,16 @@ public class HomeController {
         return "html/auth/index";
     }
 
+    // 기존 유형 선택 주소로 접근해도 공통 로그인 화면으로 이동합니다.
+    @GetMapping("/role")
+    public String roleSelection(HttpSession session) {
+        // 병원 도메인을 먼저 확인합니다.
+        if (session.getAttribute(SessionConstants.HOSPITAL_DOMAIN) == null) {
+            return "redirect:/";
+        }
+        return "redirect:/login";
+    }
+
     @PostMapping("/domain")
     public String selectHospital(@RequestParam(defaultValue = "") String hospitalDomain,
                                  HttpSession session, Model model) {
@@ -41,6 +51,7 @@ public class HomeController {
                 return "html/auth/index";
             }
             session.setAttribute(SessionConstants.HOSPITAL_DOMAIN, hospital.hospitalDomain());
+            // 도메인 확인 후 공통 로그인 화면으로 바로 이동합니다.
             return "redirect:/login";
         } catch (DataAccessException exception) {
             model.addAttribute("domainError", "병원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.");
@@ -51,6 +62,7 @@ public class HomeController {
     @GetMapping("/login")
     public String login(HttpSession session, Model model) {
         String hospitalDomain = (String) session.getAttribute(SessionConstants.HOSPITAL_DOMAIN);
+        if (hospitalDomain == null || hospitalDomain.isBlank()) return "redirect:/";
         try {
             HospitalDto hospital = hospitalService.findHospitalByDomain(hospitalDomain);
             if (hospital != null) {

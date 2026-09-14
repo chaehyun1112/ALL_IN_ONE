@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>요양병원 안전 모니터링</title>
-    <link rel="stylesheet" th:href="@{/css/auth/domain.css}" href="../../static/css/auth/domain.css">
+    <link rel="stylesheet" th:href="@{/css/auth/domain.css}" href="../../../static/css/auth/domain.css">
 </head>
 <body>
     <main class="domain-page">
@@ -12,17 +12,20 @@
             <header class="domain-heading">
                 <p class="domain-eyebrow">AI 영상 기반</p>
                 <h1 id="domain-title">요양병원 안전 모니터링</h1>
-                <p class="domain-description">이용 하실 요양병원의 도메인을 입력해주세요.</p>
+                <!-- [09.13]수정내용: 도메인 입력 목적을 명확하게 안내하도록 문구를 변경한다. -->
+                <p class="domain-description">접속할 병원의 도메인을 입력해 주세요.</p>
             </header>
 
             <form class="domain-card" action="/domain" th:action="@{/domain}" method="post">
-                <label for="hospital-domain">병원 도메인</label>
+                <!-- [09.13]수정내용: 입력값의 의미를 명확히 전달하도록 병원 도메인을 병원 도메인 주소로 변경한다. -->
+                <label for="hospital-domain">병원 도메인 주소</label>
+                <!-- [09.13]수정내용: 병원 도메인 주소 placeholder를 작은 글씨로 표시한다. -->
                 <input
                     id="hospital-domain"
                     name="hospitalDomain"
                     th:value="${hospitalDomain}"
                     type="text"
-                    placeholder="도메인을 입력해주세요."
+                    placeholder="병원 도메인 주소를 입력해 주세요."
                     autocomplete="off"
                     autocapitalize="none"
                     spellcheck="false"
@@ -33,8 +36,8 @@
                 <p id="domain-error" class="domain-error" role="alert"
                    th:if="${domainError != null}" th:text="${domainError}"></p>
                 <button type="submit">
+                    <!-- [09.13]수정내용: 접속 버튼에서 불필요한 화살표를 제거한다. -->
                     <span>접속하기</span>
-                    <span class="button-arrow" aria-hidden="true">→</span>
                 </button>
                 <p class="domain-help">도메인을 모르는 경우 관리자에게 문의해 주세요.</p>
             </form>

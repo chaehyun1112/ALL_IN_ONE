@@ -50,7 +50,17 @@ h1 { margin-top: 8px; font-size: 36px; line-height: 48px; font-weight: 700; }
   font-size: 13px;
 }
 .field input::placeholder { color: #8a9490; opacity: 1; }
+/* [09.13]수정내용: 자동완성된 아이디가 브라우저 기본 파란색으로 변하지 않도록 로그인 입력칸 색상을 유지한다. */
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #1f2933;
+  -webkit-box-shadow: 0 0 0 1000px var(--field-background) inset;
+  box-shadow: 0 0 0 1000px var(--field-background) inset;
+  caret-color: #1f2933;
+}
 .password-field { margin-top: 18px; }
+/* [수정완료] 이름 입력칸과 아이디 입력칸 사이에 여백을 둡니다. */
 a { color: #527361; text-decoration: none; }
 a:hover { text-decoration: underline; }
 .forgot-password, .login-card > a { display: block; margin-top: 6px; text-align: right; font-size: 11px; font-weight: 700; line-height: 13px; }
@@ -135,22 +145,8 @@ input:focus-visible, button:focus-visible, a:focus-visible {
   margin-top: 22px;
 }
 
-/* 아이디 찾기 + 비밀번호 재설정 두 링크를 한 줄에 나란히 오른쪽 정렬한다. */
-.login-card .recovery-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 6px;
-}
-
-.login-card .recovery-row a {
-  display: inline;
-  width: auto;
-  margin-top: 0;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 13px;
-  color: #527361;
+.login-card .admin-contact {
+  line-height: 18px;
 }
 
 [hidden] { 
