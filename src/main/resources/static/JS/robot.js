@@ -47,7 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
      실제 로봇 위치 연동 전까지는 화면 시연용 시뮬레이션입니다.
      --------------------------------------------------------- */
   const ROBOT_PATH = [301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 317, 316, 315, 314, 313, 312, 311];
-  const LEG_MS = 1800;
+  /* 구간마다 병실 간 거리가 달라서(예: 화장실·빈 칸 구간은 2~3배 더 멂) 이동 시간을
+     고정값으로 두면 구간별로 속도가 들쑥날쑥해집니다. 대신 px당 이동 속도를 고정해두고
+     구간 거리에 비례해 이동 시간을 계산하면 항상 같은 속도로 이동합니다. */
+  const ROBOT_SPEED = 0.03; // px/ms (느릴수록 값이 작아집니다)
+  const FALLBACK_LEG_MS = 1800;
   const floorEl = document.getElementById("robot-floor");
   const corridorEl = document.querySelector("#robot-floor .corridor");
   const robotMarker = document.getElementById("robot-marker");
@@ -63,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let robotPatrolIndex = 0;
   let robotMode = "patrol";
   let robotDispatchRoom = null;
-  let robotArriveTimer = null;
   let robotResolveTimer = null;
   let currentX = 0, currentY = 0, travelId = 0;
   const logs = [];
@@ -110,26 +113,30 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /* 복도를 따라서만 좌우로 이동합니다(병실 안으로는 들어가지 않습니다). */
+  /* 복도를 따라서만 좌우로 이동합니다(병실 안으로는 들어가지 않습니다).
+     구간 거리를 재서 ROBOT_SPEED에 맞는 이동 시간을 구하고, 그 시간만큼만
+     CSS transition-duration을 적용해 거리와 무관하게 항상 같은 속도로 움직입니다. */
   async function travelViaCorridor(number) {
     const point = corridorPoint(number);
     if (!point || !robotMarker) {
       positionRobotAt(number);
-      return;
+      return FALLBACK_LEG_MS;
     }
     const myTravelId = ++travelId;
-    const moveTo = (x, y) => {
-      robotMarker.style.left = `${x}px`;
-      robotMarker.style.top = `${y}px`;
-      currentX = x;
-      currentY = y;
-    };
+    const distance = Math.hypot(point.x - currentX, point.y - currentY);
+    const duration = distance > 0 ? distance / ROBOT_SPEED : FALLBACK_LEG_MS;
 
-    moveTo(point.x, point.y);
-    await wait(LEG_MS);
-    if (myTravelId !== travelId) return;
+    robotMarker.style.transitionDuration = `${duration}ms`;
+    robotMarker.style.left = `${point.x}px`;
+    robotMarker.style.top = `${point.y}px`;
+    currentX = point.x;
+    currentY = point.y;
+
+    await wait(duration);
+    if (myTravelId !== travelId) return duration;
 
     if (locationLabel) locationLabel.textContent = `${number}호 인근`;
+    return duration;
   }
 
   function addLog(text, kind) {
@@ -171,49 +178,56 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modeLabel) modeLabel.textContent = modeText;
   }
 
+  /* 다음 구간 이동을 이전 이동이 끝나는 시점(그 구간의 실제 이동 시간)에 맞춰
+     바로 이어서 시작합니다. 구간마다 이동 시간이 다르므로 고정 간격 대신
+     travelViaCorridor가 알려주는 시간만큼만 기다렸다가 다음 걸음을 옮깁니다. */
   function patrolStep() {
     if (robotMode !== "patrol") return;
     robotPatrolIndex = (robotPatrolIndex + 1) % ROBOT_PATH.length;
     const number = ROBOT_PATH[robotPatrolIndex];
-    travelViaCorridor(number);
     setRobotStatus("patrol", `병동 순찰 중입니다 · ${number}호 인근`, "순찰 중");
     if (targetLabel) targetLabel.textContent = "-";
+    /* travelViaCorridor가 이미 이동 시간만큼 기다린 뒤에 끝나므로, 여기서 또 기다리지
+       않고 바로 다음 걸음으로 이어가야 구간 사이에 멈추지 않습니다. */
+    travelViaCorridor(number).then(() => {
+      if (robotMode === "patrol") patrolStep();
+    });
   }
 
-  function dispatchRobotTo(number) {
+  async function dispatchRobotTo(number) {
     if (robotDispatchRoom === number) return;
     robotDispatchRoom = number;
-    clearTimeout(robotArriveTimer);
     clearTimeout(robotResolveTimer);
-    travelViaCorridor(number);
     setRobotStatus("dispatch", `🚨 ${number}호로 긴급 이동 중입니다`, "출동 중");
     if (targetLabel) targetLabel.textContent = `${number}호`;
     addLog(`${number}호 낙상 감지 신호 수신 → 로봇 출동 시작`, "dispatch");
-    robotArriveTimer = setTimeout(() => {
-      setRobotStatus("arrived", `✅ ${number}호에 도착해 확인 중입니다`, "도착");
-      addLog(`${number}호 도착 · 현장 확인 중`, "arrived");
-      /* [무한루프] 도착 후 잠시 확인하는 시늉을 한 뒤, 병실을 정상으로 되돌리고
-         다시 순찰로 복귀시킵니다. 실제 연동 시엔 "대응 완료" 처리 시점에 맞춰 호출하세요. */
-      robotResolveTimer = setTimeout(() => {
-        const room = rooms.get(number);
-        if (room) room.status = "normal";
-        const node = nodes.get(number);
-        if (node) {
-          node.classList.remove("urgent", "caution");
-          node.querySelector("small").textContent = labels.normal;
-        }
-        addLog(`${number}호 확인 완료 · 정상으로 전환`, "arrived");
-        checkDispatch();
-      }, 4000);
-    }, 2200);
+
+    await travelViaCorridor(number);
+    if (robotDispatchRoom !== number) return; // 이동 중 다른 출동/순찰 복귀로 바뀐 경우
+
+    setRobotStatus("arrived", `✅ ${number}호에 도착해 확인 중입니다`, "도착");
+    addLog(`${number}호 도착 · 현장 확인 중`, "arrived");
+    /* [무한루프] 도착 후 잠시 확인하는 시늉을 한 뒤, 병실을 정상으로 되돌리고
+       다시 순찰로 복귀시킵니다. 실제 연동 시엔 "대응 완료" 처리 시점에 맞춰 호출하세요. */
+    robotResolveTimer = setTimeout(() => {
+      const room = rooms.get(number);
+      if (room) room.status = "normal";
+      const node = nodes.get(number);
+      if (node) {
+        node.classList.remove("urgent", "caution");
+        node.querySelector("small").textContent = labels.normal;
+      }
+      addLog(`${number}호 확인 완료 · 정상으로 전환`, "arrived");
+      checkDispatch();
+    }, 4000);
   }
 
   function resumeRobotPatrol() {
     robotDispatchRoom = null;
-    clearTimeout(robotArriveTimer);
     clearTimeout(robotResolveTimer);
     setRobotStatus("patrol", `병동 순찰 중입니다 · ${ROBOT_PATH[robotPatrolIndex]}호 인근`, "순찰 중");
     if (targetLabel) targetLabel.textContent = "-";
+    patrolStep();
   }
 
   /* 긴급 병실이 있으면 즉시 그쪽으로 출동시키고, 없어지면 순찰로 복귀합니다. */
@@ -230,9 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setRobotStatus("patrol", `병동 순찰 중입니다 · ${ROBOT_PATH[0]}호 인근`, "순찰 중");
   renderLog();
   checkDispatch();
-  /* [수정] 다음 구간 이동을 이전 이동이 끝나는 시점(LEG_MS)에 맞춰 바로 이어서
-     시작합니다. 간격을 이동 시간보다 길게 두면 중간에 멈췄다 가는 것처럼 보입니다. */
-  setInterval(patrolStep, LEG_MS);
+  if (robotMode === "patrol") patrolStep();
 
   window.addEventListener("resize", () => {
     positionRobotAt(robotMode === "patrol" ? ROBOT_PATH[robotPatrolIndex] : robotDispatchRoom);
