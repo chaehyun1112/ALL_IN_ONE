@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* [참고] 병실 상태는 대시보드 화면과 같은 예시 데이터입니다.
      실제 연동 시에는 서버에서 같은 병실 상태를 함께 받아와 이 화면에도 반영하세요. */
   const rooms = new Map(Array.from({ length: 17 }, (_, i) => [301 + i, {
-    number: 301 + i, status: i === 4 ? "urgent" : i === 11 ? "caution" : "normal"
+    number: 301 + i, status: "normal"
   }]));
   const labels = { normal: "안전 정상", caution: "침대 이탈", urgent: "낙상 감지" };
 
@@ -47,7 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
      실제 로봇 위치 연동 전까지는 화면 시연용 시뮬레이션입니다.
      --------------------------------------------------------- */
   const ROBOT_PATH = [301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 317, 316, 315, 314, 313, 312, 311];
+  const LEG_MS = 900;
   const floorEl = document.getElementById("robot-floor");
+  const corridorEl = document.querySelector("#robot-floor .corridor");
   const robotMarker = document.getElementById("robot-marker");
   const robotStatusEl = document.getElementById("robot-status");
   const robotStatusText = document.getElementById("robot-status-text");
@@ -62,15 +64,71 @@ document.addEventListener("DOMContentLoaded", () => {
   let robotMode = "patrol";
   let robotDispatchRoom = null;
   let robotArriveTimer = null;
+  let robotResolveTimer = null;
+  let currentX = 0, currentY = 0, travelId = 0;
   const logs = [];
 
-  function positionRobotAt(number) {
-    const node = nodes.get(number);
-    if (!node || !floorEl || !robotMarker) return;
+  /* .floor 기준 상대 좌표(중심점)를 구합니다. */
+  function relativeCenter(el) {
     const floorRect = floorEl.getBoundingClientRect();
-    const nodeRect = node.getBoundingClientRect();
-    robotMarker.style.left = `${nodeRect.left - floorRect.left + nodeRect.width / 2}px`;
-    robotMarker.style.top = `${nodeRect.top - floorRect.top + nodeRect.height / 2}px`;
+    const rect = el.getBoundingClientRect();
+    return {
+      x: rect.left - floorRect.left + rect.width / 2,
+      y: rect.top - floorRect.top + rect.height / 2
+    };
+  }
+  function roomCenter(number) {
+    const node = nodes.get(number);
+    return node ? relativeCenter(node) : null;
+  }
+  function corridorY() {
+    return corridorEl ? relativeCenter(corridorEl).y : null;
+  }
+
+  /* 로봇은 병실 안으로 들어가지 않고 항상 중앙 복도 위에서만 좌우로 움직입니다.
+     특정 병실의 x좌표까지만 이동하고, y는 항상 복도 높이로 고정합니다. */
+  function corridorPoint(number) {
+    const room = roomCenter(number);
+    const cy = corridorY();
+    if (!room || cy == null) return null;
+    return { x: room.x, y: cy };
+  }
+
+  /* 로봇 마커를 중간 애니메이션 없이 즉시 특정 병실 앞 복도 위치로 놓습니다(초기 배치·화면 크기 변경용). */
+  function positionRobotAt(number) {
+    if (!floorEl || !robotMarker) return;
+    const point = corridorPoint(number);
+    if (!point) return;
+    robotMarker.style.left = `${point.x}px`;
+    robotMarker.style.top = `${point.y}px`;
+    currentX = point.x;
+    currentY = point.y;
+    if (locationLabel) locationLabel.textContent = `${number}호 인근`;
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /* 복도를 따라서만 좌우로 이동합니다(병실 안으로는 들어가지 않습니다). */
+  async function travelViaCorridor(number) {
+    const point = corridorPoint(number);
+    if (!point || !robotMarker) {
+      positionRobotAt(number);
+      return;
+    }
+    const myTravelId = ++travelId;
+    const moveTo = (x, y) => {
+      robotMarker.style.left = `${x}px`;
+      robotMarker.style.top = `${y}px`;
+      currentX = x;
+      currentY = y;
+    };
+
+    moveTo(point.x, point.y);
+    await wait(LEG_MS);
+    if (myTravelId !== travelId) return;
+
     if (locationLabel) locationLabel.textContent = `${number}호 인근`;
   }
 
@@ -117,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (robotMode !== "patrol") return;
     robotPatrolIndex = (robotPatrolIndex + 1) % ROBOT_PATH.length;
     const number = ROBOT_PATH[robotPatrolIndex];
-    positionRobotAt(number);
+    travelViaCorridor(number);
     setRobotStatus("patrol", `병동 순찰 중입니다 · ${number}호 인근`, "순찰 중");
     if (targetLabel) targetLabel.textContent = "-";
   }
@@ -126,19 +184,34 @@ document.addEventListener("DOMContentLoaded", () => {
     if (robotDispatchRoom === number) return;
     robotDispatchRoom = number;
     clearTimeout(robotArriveTimer);
-    positionRobotAt(number);
+    clearTimeout(robotResolveTimer);
+    travelViaCorridor(number);
     setRobotStatus("dispatch", `🚨 ${number}호로 긴급 이동 중입니다`, "출동 중");
     if (targetLabel) targetLabel.textContent = `${number}호`;
     addLog(`${number}호 낙상 감지 신호 수신 → 로봇 출동 시작`, "dispatch");
     robotArriveTimer = setTimeout(() => {
       setRobotStatus("arrived", `✅ ${number}호에 도착해 확인 중입니다`, "도착");
       addLog(`${number}호 도착 · 현장 확인 중`, "arrived");
+      /* [무한루프] 도착 후 잠시 확인하는 시늉을 한 뒤, 병실을 정상으로 되돌리고
+         다시 순찰로 복귀시킵니다. 실제 연동 시엔 "대응 완료" 처리 시점에 맞춰 호출하세요. */
+      robotResolveTimer = setTimeout(() => {
+        const room = rooms.get(number);
+        if (room) room.status = "normal";
+        const node = nodes.get(number);
+        if (node) {
+          node.classList.remove("urgent", "caution");
+          node.querySelector("small").textContent = labels.normal;
+        }
+        addLog(`${number}호 확인 완료 · 정상으로 전환`, "arrived");
+        checkDispatch();
+      }, 4000);
     }, 2200);
   }
 
   function resumeRobotPatrol() {
     robotDispatchRoom = null;
     clearTimeout(robotArriveTimer);
+    clearTimeout(robotResolveTimer);
     setRobotStatus("patrol", `병동 순찰 중입니다 · ${ROBOT_PATH[robotPatrolIndex]}호 인근`, "순찰 중");
     if (targetLabel) targetLabel.textContent = "-";
   }
@@ -157,7 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setRobotStatus("patrol", `병동 순찰 중입니다 · ${ROBOT_PATH[0]}호 인근`, "순찰 중");
   renderLog();
   checkDispatch();
-  setInterval(patrolStep, 3000);
+  setInterval(patrolStep, 4500);
+
   window.addEventListener("resize", () => {
     positionRobotAt(robotMode === "patrol" ? ROBOT_PATH[robotPatrolIndex] : robotDispatchRoom);
   });
