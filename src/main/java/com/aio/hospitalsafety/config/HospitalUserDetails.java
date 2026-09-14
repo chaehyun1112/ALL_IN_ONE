@@ -9,11 +9,17 @@ import com.aio.hospitalsafety.domain.ApprovalStatus;
 public class HospitalUserDetails extends org.springframework.security.core.userdetails.User {
     private static final long serialVersionUID = 1L;
     private final String hospitalId;
+    private final String userName;
 
     public HospitalUserDetails(User user) {
         super(user.userId(), user.passwordHash(), user.approvalStatus() == ApprovalStatus.APPROVED, true, true, true, AuthorityUtils.createAuthorityList(
                 "ROLE_" + user.role().name(), "STATUS_" + user.approvalStatus().name()));
         this.hospitalId = user.hospitalId();
+        this.userName = user.userName();
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     public String getHospitalId() {

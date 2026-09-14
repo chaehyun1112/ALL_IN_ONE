@@ -1699,5 +1699,5 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #room-detail > span { color: #68776e; font-size: 13px; }
 /* 오늘의 기록은 경보 유형별 글자 색과 굵은 건수로 구분합니다. */
 #room-detail .room-history-urgent { color: #8f3028; }
-#room-detail .room-history-caution { color: #8a692f; }
+#room-detail .room-history-caution { color: #222; }
 #room-detail .room-history-counts b { font-weight: 700; }

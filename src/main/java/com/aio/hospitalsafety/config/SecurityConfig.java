@@ -74,10 +74,12 @@ public class SecurityConfig {
                         // userLoginKey는 "병원 구분 ID|직원 ID" 형식의 내부 인증용 값이다.
                         .usernameParameter("userLoginKey")
                         // 두 번째 인자 true는 로그인 전에 접근하려던 URL보다 대시보드를 우선한다는 뜻이다.
-                        // [수정완료] 인증 성공 후 입력한 표시 이름을 현재 로그인 세션에 보관합니다.
+                        // 표시 이름은 로그인 입력값이 아닌 인증된 계정에서 가져옵니다.
                         .successHandler((request, response, authentication) -> {
-                            String displayName = request.getParameter("displayName");
-                            displayName = displayName == null ? "" : displayName.strip();
+                            String displayName = authentication.getPrincipal() instanceof HospitalUserDetails userDetails
+                                    ? userDetails.getUserName() : authentication.getName();
+                            displayName = displayName == null || displayName.isBlank()
+                                    ? authentication.getName() : displayName.strip();
                             request.getSession().setAttribute(UserDisplaySession.DISPLAY_NAME,
                                     displayName.substring(0, Math.min(displayName.length(), 50)));
                             // [수정완료] 새로고침 시 바뀌지 않는 실제 로그인 성공 시각을 기록합니다.
@@ -94,12 +96,7 @@ public class SecurityConfig {
                                 case DisabledException ignored -> "disabled";
                                 default -> "unavailable";
                             };
-                            // [09.13]수정내용: 관리자·간호사 로그인 실패 모두 선택한 유형을 유지한 채 로그인 화면으로 돌아간다.
-                            String requestedRole = request.getParameter("role");
-                            String role = "ADMIN".equalsIgnoreCase(requestedRole)
-                                    ? "&role=ADMIN"
-                                    : "&role=USER";
-                            new SimpleUrlAuthenticationFailureHandler("/login?error=" + error + role)
+                            new SimpleUrlAuthenticationFailureHandler("/login?error=" + error)
                                     .onAuthenticationFailure(request, response, exception);
                         })
                         // 로그인 처리와 관련된 URL은 비로그인 상태에서도 접근 가능해야 한다.
