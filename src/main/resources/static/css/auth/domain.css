@@ -115,6 +115,8 @@ input {
 
 .domain-card input::placeholder {
     color: #a3a8a5;
+    /* [09.13]수정내용: 긴 병원 도메인 주소 안내가 부담스럽지 않도록 placeholder 글씨를 줄인다. */
+    font-size: 13px;
 }
 
 .domain-card input:focus {

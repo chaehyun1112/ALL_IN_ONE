@@ -8,7 +8,7 @@
 
   <link rel="stylesheet"
         th:href="@{/css/auth/login.css}"
-        href="../../static/css/auth/login.css">
+        href="../../../static/css/auth/login.css">
 </head>
 
 <body>
@@ -33,13 +33,6 @@
         비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.
       </p>
 
-      <!-- 로그인 실패 메시지 -->
-      <p class="status error"
-         th:if="${param.error}"
-         role="alert">
-        직원 ID 또는 비밀번호가 올바르지 않습니다.
-      </p>
-
       <!-- Spring Security 로그인 처리 -->
       <form id="userLoginForm"
             class="login-card"
@@ -51,6 +44,15 @@
                name="userLoginKey"
                type="hidden"
                th:value="${hospitalId + '|'}">
+        <!-- [09.13]추가내용: 로그인 실패 후에도 선택한 관리자·간호사 유형을 유지한다. -->
+        <!-- [09.13]수정내용: 간호사 로그인에서도 유형 값이 항상 전달되도록 USER 기본값을 지정합니다. -->
+        <input id="loginRole" name="role" type="hidden" value="USER" th:value="${loginRole ?: 'USER'}">
+
+        <!-- [09.13]수정내용: 간호사 로그인에만 이름 입력을 표시하고 관리자 로그인에서는 숨긴다. -->
+        <div class="field" id="displayNameField" th:if="${loginRole != 'ADMIN'}">
+          <label for="displayName">이름</label>
+          <input id="displayName" name="displayName" type="text" placeholder="이름을 입력해 주세요." autocomplete="name" maxlength="50" required>
+        </div>
 
         <div class="field">
           <label for="userId">아이디</label>
@@ -59,6 +61,7 @@
                  type="text"
                  placeholder="아이디를 입력해 주세요."
                  autocomplete="username"
+                 aria-describedby="passwordError"
                  maxlength="20"
                  autofocus
                  required>
@@ -71,39 +74,37 @@
                  type="password"
                  placeholder="비밀번호를 입력해 주세요."
                  autocomplete="current-password"
+                 aria-describedby="passwordError"
                  required>
-        </div>
-
-        <div class="recovery-row">
-          <a href="/id/find"
-            th:href="@{/id/find}">
-            아이디 찾기
-          </a>
-
-          <a href="/password/reset"
-            th:href="@{/password/reset}">
-            비밀번호 재설정
-          </a>
+          <!-- [09.13]수정내용: 입력칸별 오류 문구를 제거하고 어떤 입력값이 잘못되었는지 비밀번호 입력칸 아래에서 통합 안내한다. -->
+          <p id="passwordError" class="status error" th:if="${param.error != null}" role="alert">
+            <span th:if="${param.error[0] == 'userId'}">아이디가 올바르지 않습니다.</span>
+            <span th:if="${param.error[0] == 'password'}">비밀번호가 올바르지 않습니다.</span>
+            <span th:if="${param.error[0] == 'disabled'}">로그인할 수 없는 계정입니다. 관리자에게 문의해 주세요.</span>
+            <span th:if="${param.error[0] == 'unavailable'}">로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.</span>
+          </p>
         </div>
 
         <button class="login-button" type="submit">로그인</button>
 
-        <p class="signup-row">
-          계정이 없으신가요?
-          <a href="/signup" th:href="@{/signup}">회원가입</a>
+        <!-- [09.13]수정내용: 비밀번호 문의 안내는 간호사 로그인에서만 표시하고 관리자 로그인에서는 숨긴다. -->
+        <p class="admin-contact" id="adminContact" th:if="${loginRole != 'ADMIN'}">
+          비밀번호를 잊으셨다면 관리자에게 문의해 주세요.
         </p>
       </form>
     </section>
   </main>
 
   <!-- 병원 ID와 직원 ID 조합 -->
-  <script src="../../static/JS/login/login.js"
+  <script src="../../../static/JS/login/login.js"
           th:src="@{/JS/login/login.js}"
           defer></script>
 
   <!-- 회원가입 완료 알림 -->
-  <script src="../../static/JS/signup/signup-success.js"
+  <script src="../../../static/JS/signup/signup-success.js"
           th:src="@{/JS/signup/signup-success.js}"
           defer></script>
 </body>
 </html>
+
+

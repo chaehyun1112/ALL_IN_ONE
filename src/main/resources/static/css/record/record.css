@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 @charset "UTF-8";
 
 /* ==================================================
@@ -1064,4 +1065,20 @@ select:focus-visible,
   line-height: 1.7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* 비활성화 관리 화면 기준으로 돌아가기 링크의 글꼴과 hover 효과를 통일합니다. */
+.page-header .dashboard-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin: 0; padding: 8px 10px; border-radius: 7px;
+  font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 12px; font-weight: 400; line-height: normal;
+  color: #e1e9df; background: transparent;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+}
+.page-header .dashboard-link:hover { color: #fff; background: transparent; text-decoration: none; }
+.page-header .dashboard-link:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.page-header .dashboard-link svg { flex-shrink: 0; width: 16px; height: 16px; stroke-width: 1.8; }
+@media (max-width: 800px) {
+  .page-header .dashboard-link { padding: 4px 0; font-size: 11px; }
 }

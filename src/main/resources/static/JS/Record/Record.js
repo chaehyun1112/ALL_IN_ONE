@@ -582,29 +582,7 @@ function initializePage() {
 
   /* 병실·상태·이름 조건을 확인합니다. */
   function matchesConditions(record, conditions) {
-    let names = "";
-
-    if (conditions.target === "patient") {
-      names = record.patient;
-    } else if (conditions.target === "staff") {
-      names = record.staff;
-    } else {
-      names = `${record.patient} ${record.staff}`;
-    }
-
-    return (
-      (
-        conditions.room === "all" ||
-        record.room === conditions.room
-      ) &&
-      (
-        conditions.status === "all" ||
-        record.status === conditions.status
-      ) &&
-      names
-        .toLocaleLowerCase()
-        .includes(conditions.keyword)
-    );
+    return window.CareGuardRecordFilter.matchesConditions(record, conditions);
   }
 
   /*
@@ -871,13 +849,7 @@ function initializePage() {
 
   /* CSV 특수문자 처리 */
   function escapeCsv(value) {
-    let text = String(value ?? "");
-
-    if (/^\s*[=+@-]/.test(text)) {
-      text = `'${text}`;
-    }
-
-    return `"${text.replaceAll('"', '""')}"`;
+    return window.CareGuardRecordExport.escapeCsv(value);
   }
 
   /* [수정] Excel·CSV·PDF 공통 데이터에 아이콘 대신 실제 기록 내용을 포함합니다. */

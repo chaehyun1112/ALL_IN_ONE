@@ -11,23 +11,23 @@
     <title>비활성화 사용자 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/admin.css"
-          th:href="@{/css/admin/admin.css}">
+          href="../../../static/css/admin/dashboard.css"
+          th:href="@{/css/admin/dashboard.css}">
 
-    <link rel="stylesheet" href="../../../static/css/admin/admin_de.css" th:href="@{/css/admin/admin_de.css}">
+    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css" th:href="@{/css/admin/inactive-users.css}">
 
-    <script src="../../../static/JS/admin/admin_de.js"
-            th:src="@{/JS/admin/admin_de.js}"
+    <script src="../../../static/JS/admin/inactive-users.js"
+            th:src="@{/JS/admin/inactive-users.js}"
             defer></script>
 </head>
 
 <body>
 <header class="admin-topbar">
     <div class="admin-brand">
-        <strong>병동 통합 관제</strong>
+        <!-- [09.13]수정내용: 상단 복귀 링크를 관리자 대시보드로 돌아가기로 변경하여 이동할 화면을 안내한다. -->
         <a class="admin-back-button" id="admin-settings-back" href="admin.html?status=APPROVED" th:href="@{/admin(status='APPROVED')}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
-            사용자 관리로 돌아가기
+            관리자 대시보드로 돌아가기
         </a>
     </div>
 
@@ -38,12 +38,7 @@
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
         </form>
 
-        <a class="admin-settings" id="admin-settings" href="admin_de.html" th:href="@{/admin/admin_de}" aria-label="설정" title="설정" aria-current="page">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M9.67 4.14a2.34 2.34 0 0 1 4.66 0 2.34 2.34 0 0 0 3.32 1.92 2.34 2.34 0 0 1 2.33 4.03 2.34 2.34 0 0 0 0 3.82 2.34 2.34 0 0 1-2.33 4.03 2.34 2.34 0 0 0-3.32 1.92 2.34 2.34 0 0 1-4.66 0 2.34 2.34 0 0 0-3.32-1.92 2.34 2.34 0 0 1-2.33-4.03 2.34 2.34 0 0 0 0-3.82 2.34 2.34 0 0 1 2.33-4.03 2.34 2.34 0 0 0 3.32-1.92"/>
-                <circle cx="12" cy="12" r="3"/>
-            </svg>
-        </a>
+        <!-- [09.13]수정내용: 비활성화 관리 화면의 로그아웃 옆 설정 아이콘을 삭제한다. -->
 
     </div>
 </header>
@@ -53,26 +48,29 @@
         <p class="admin-settings-eyebrow">관리자 설정 / 계정 관리</p>
         <h1 id="admin-settings-title" tabindex="-1">비활성화 사용자</h1>
         <p>사용자의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
-    </header>
-    <div class="admin-inactive-overview">
-        <section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title">
-            <span class="admin-inactive-symbol" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21v-2a7 7 0 0 1 10-6M17 15v6M21 15v6"/></svg>
-            </span>
-            <div><h2 id="admin-inactive-stat-title">비활성화 사용자</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
-        </section>
+        <!-- [수정] 계정 상태 관리 안내를 설명문 아래의 가로형 영역으로 배치 -->
         <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title">
             <div class="admin-guide-heading">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg>
                 <strong id="admin-account-guide-title">계정 상태 관리</strong>
             </div>
-            <p>비활성화된 계정은 서비스에 로그인할 수 없습니다.<br>서비스 이용을 재개할 사용자는 <strong>활성화</strong>로 변경해 주세요.</p>
+            <p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 사용자는 <strong>활성화</strong>로 변경해 주세요.</p>
         </aside>
+    </header>
+    <div class="admin-inactive-overview">
+        <section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title">
+            <!-- [09.13]수정내용: 비활성화 사용자 아이콘에서 부가 표시를 제거하고 사람 모양만 표시한다. -->
+            <span class="admin-inactive-symbol" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+            </span>
+            <div><h2 id="admin-inactive-stat-title">비활성화 사용자</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
+        </section>
     </div>
     <section class="admin-panel admin-inactive-panel" aria-labelledby="admin-inactive-list-title">
         <header class="admin-panel-heading admin-inactive-panel-heading">
-            <div><h2 id="admin-inactive-list-title">사용자 목록</h2><p>계정 정보와 이전 배정 병동을 확인한 후 상태를 변경해 주세요.</p></div>
-            <span class="admin-inactive-label">관리자 전용</span>
+            <!-- [09.13]수정내용: 사용자 목록 안내의 이전 배정 병동을 병동으로 표시한다. -->
+            <div><h2 id="admin-inactive-list-title">사용자 목록</h2><p>계정 정보와 병동을 확인한 후 상태를 변경해 주세요.</p></div>
+            <!-- [09.13]수정내용: 사용자 목록 상단의 관리자 전용 표시를 삭제한다. -->
         </header>
         <div class="admin-inactive-toolbar">
             <form id="admin-inactive-search-form" class="admin-search" role="search" aria-label="비활성화 사용자 검색">
@@ -84,21 +82,22 @@
                 <button type="submit" class="admin-search-button">검색</button>
             </form>
             <div class="admin-inactive-filter">
-                <label for="admin-inactive-ward">이전 배정 병동</label>
-                <select id="admin-inactive-ward">
+                <!-- [09.13]수정내용: 검색 영역의 병동 표시 문구를 제거하고 선택칸 자체로 기능을 안내한다. -->
+                <select id="admin-inactive-ward" aria-label="병동 선택">
                     <option value="">전체 병동</option>
                 </select>
             </div>
-        </div>
-        <p class="admin-inactive-result" id="admin-inactive-result" role="status">사용자 목록을 불러오는 중입니다.</p>
-        <div class="admin-bulk-actions" role="group" aria-label="선택 사용자 일괄 관리">
-            <span id="admin-bulk-count" role="status">현재 목록에서 0명 선택</span>
-            <div class="admin-bulk-buttons">
-                <button type="button" data-bulk-status="ACTIVATE" disabled>선택 활성화</button>
-                <button type="button" data-bulk-status="INACTIVE" disabled>선택 비활성화</button>
-                <button type="button" data-bulk-status="DELETE" class="admin-bulk-delete" disabled>선택 삭제</button>
+            <!-- [09.13]수정내용: 선택 일괄 작업을 검색·필터 영역 옆에 배치해 목록 확인과 바로 이어지도록 한다. -->
+            <div class="admin-bulk-actions" role="group" aria-label="선택 사용자 일괄 관리">
+                <span id="admin-bulk-count" role="status">현재 목록에서 0명 선택</span>
+                <div class="admin-bulk-buttons">
+                    <!-- [09.13]수정내용: 비활성화 사용자 일괄 작업 버튼을 계정 활성화·계정 삭제로 간결하게 표시한다. -->
+                    <button type="button" data-bulk-status="ACTIVATE" disabled>계정 활성화</button>
+                    <button type="button" data-bulk-status="DELETE" class="admin-bulk-delete" disabled>계정 삭제</button>
+                </div>
             </div>
         </div>
+        <p class="admin-inactive-result" id="admin-inactive-result" role="status">사용자 목록을 불러오는 중입니다.</p>
         <div id="admin-inactive-error" role="alert" hidden>
             <p id="admin-inactive-error-message"></p>
             <button type="button" id="admin-inactive-retry">다시 불러오기</button>
@@ -106,7 +105,7 @@
         <div class="admin-table-wrap" id="admin-inactive-list" aria-busy="true">
             <table class="admin-table admin-inactive-table">
                 <caption class="visually-hidden">비활성화 사용자 목록</caption>
-                <thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><th scope="col">로그인 아이디</th><th scope="col">이전 배정 병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead>
+                <thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><!-- [09.13]수정내용: 비활성화 사용자 목록의 열 제목을 로그인 아이디에서 아이디로 간결하게 표시한다. --><th scope="col">아이디</th><!-- [09.13]수정내용: 병동 열 제목을 이전 배정 병동에서 병동으로 변경한다. --><th scope="col">병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead>
                 <tbody id="admin-inactive-rows"></tbody>
             </table>
             <div class="admin-inactive-empty" id="admin-inactive-empty" hidden>
@@ -144,3 +143,8 @@
         th:src="@{/JS/auth/session-history.js}"></script>
 </body>
 </html>
+
+
+
+
+
