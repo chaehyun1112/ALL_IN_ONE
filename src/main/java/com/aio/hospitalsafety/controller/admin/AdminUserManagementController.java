@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,13 +79,16 @@ public class AdminUserManagementController {
     public ResponseEntity<Map<String, String>> changeUserWard(
             @PathVariable("userId") String userId,
             @Valid @RequestBody ChangeUserWardRequest request,
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
             HttpSession session
     ) {
         String hospitalDomain = requireHospitalDomain(session);
+        String adminId = requireAdminId(loginAdmin);
 
         try {
             adminUserManagementService.changeUserWard(
                     hospitalDomain,
+                    adminId,
                     userId,
                     request.wardId()
             );
@@ -109,14 +113,17 @@ public class AdminUserManagementController {
     @PostMapping("/users/{userId}/reset-password")
     public ResponseEntity<?> resetUserPassword(
             @PathVariable("userId") String userId,
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
             HttpSession session
     ) {
         String hospitalDomain = requireHospitalDomain(session);
+        String adminId = requireAdminId(loginAdmin);
 
         try {
             ResetUserPasswordResponse result =
                     adminPasswordService.resetPassword(
                             hospitalDomain,
+                            adminId,
                             userId
                     );
 
@@ -153,14 +160,17 @@ public class AdminUserManagementController {
     @PatchMapping("/users/{userId}/deactivate")
     public ResponseEntity<Map<String, String>> deactivateUser(
             @PathVariable("userId") String userId,
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
             HttpSession session
     ) {
         String hospitalDomain = requireHospitalDomain(session);
+        String adminId = requireAdminId(loginAdmin);
 
         try {
             // DB 상태를 INACTIVE로 변경한다.
             adminUserManagementService.deactivateUser(
                     hospitalDomain,
+                    adminId,
                     userId
             );
 
@@ -186,6 +196,7 @@ public class AdminUserManagementController {
         }
     }
 
+    // 비활성화된 사용자 목록 조회
     @GetMapping("/users/inactive")
     public List<InactiveUserResponse> getInactiveUsers(
             HttpSession session
@@ -195,16 +206,20 @@ public class AdminUserManagementController {
         );
     }
 
+    // 비활성화된 사용자 계정 재활성화
     @PatchMapping("/users/{userId}/activate")
     public ResponseEntity<Map<String, String>> activateUser(
             @PathVariable String userId,
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
             HttpSession session
     ) {
         String hospitalDomain = requireHospitalDomain(session);
+        String adminId = requireAdminId(loginAdmin);
 
         try {
             adminUserManagementService.activateUser(
                     hospitalDomain,
+                    adminId,
                     userId
             );
 
@@ -225,16 +240,20 @@ public class AdminUserManagementController {
         }
     }
 
+    // 비활성화된 사용자 계정 영구 삭제
     @DeleteMapping("/users/{userId}/inactive")
     public ResponseEntity<Map<String, String>> deleteInactiveUser(
             @PathVariable String userId,
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
             HttpSession session
     ) {
         String hospitalDomain = requireHospitalDomain(session);
+        String adminId = requireAdminId(loginAdmin);
 
         try {
             adminUserManagementService.deleteInactiveUser(
                     hospitalDomain,
+                    adminId,
                     userId
             );
 
@@ -266,6 +285,35 @@ public class AdminUserManagementController {
                             )
                     );
         }
+    }
+
+    // 인증된 관리자 ID를 가져온다.
+    private String requireAdminId(
+            HospitalUserDetails loginAdmin
+    ) {
+        if (loginAdmin == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "관리자 로그인 정보가 없습니다."
+            );
+        }
+
+        boolean isAdmin = loginAdmin.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        "ROLE_ADMIN".equals(
+                                authority.getAuthority()
+                        )
+                );
+
+        if (!isAdmin) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "병원 관리자만 사용할 수 있습니다."
+            );
+        }
+
+        return loginAdmin.getUsername();
     }
 
     // 접속 병원과 인증된 관리자의 소속 병원이 같아야 한다.

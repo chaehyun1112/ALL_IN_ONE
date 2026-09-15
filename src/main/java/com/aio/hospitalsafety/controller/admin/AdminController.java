@@ -13,6 +13,6 @@ public class AdminController {
 
     @GetMapping({"/admin/admin_de", "/admin/admin_de/"})
     public String adminDeactivatedUsers() {
-        return "html/admin/admin_de";
+        return "html/admin/admin-inactive-users";
     }
 }

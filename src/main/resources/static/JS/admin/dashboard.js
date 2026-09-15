@@ -50,7 +50,6 @@ const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content 
 async function requestAdminApi(url, options = {}) {
     const method = (options.method ?? "GET").toUpperCase();
     const headers = new Headers(options.headers ?? {});
-
     headers.set("Accept", "application/json");
 
     if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken) {
@@ -60,10 +59,12 @@ async function requestAdminApi(url, options = {}) {
     const response = await fetch(url, {
         ...options,
         method,
-        headers
+        headers,
+        credentials: "same-origin",
+        cache: "no-store"
     });
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.redirected) {
         window.location.href = "/login";
         throw new Error("로그인이 만료되었습니다.");
     }
@@ -77,10 +78,7 @@ async function requestAdminApi(url, options = {}) {
 
         try {
             const errorBody = await response.json();
-
-            if (errorBody.message) {
-                message = errorBody.message;
-            }
+            if (errorBody.message) message = errorBody.message;
         } catch (error) {
             // JSON 응답이 아니면 기본 오류 메시지를 사용한다.
         }
@@ -88,8 +86,12 @@ async function requestAdminApi(url, options = {}) {
         throw new Error(message);
     }
 
-    if (response.status === 204) {
-        return null;
+    if (response.status === 204) return null;
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (!contentType.includes("application/json")) {
+        throw new Error("서버에서 올바른 JSON 응답을 받지 못했습니다.");
     }
 
     const responseText = await response.text();
@@ -168,14 +170,35 @@ async function loadAdminData(silent = false) {
 /**
  * DB에서 불러온 병동을 선택란에 추가한다.
  */
+/**
+ * DB의 1~6병동을 화면에서 A~F병동으로 표시한다.
+ * DB에 이미 A병동처럼 저장돼 있거나 다른 이름이면 원래 이름을 유지한다.
+ */
+function formatAdminWardName(wardName) {
+    const name = String(wardName ?? "").trim();
+    const numberedWard = /^([1-6])\s*병동$/.exec(name);
+
+    return numberedWard
+        ? `${"ABCDEF"[Number(numberedWard[1]) - 1]}병동`
+        : name;
+}
+
+/**
+ * DB에서 불러온 병동을 선택란에 추가한다.
+ * 서버로 전송되는 값은 실제 DB의 숫자 wardId를 사용한다.
+ */
 function renderAdminWardOptions() {
     adminWardSelect.replaceChildren();
-    if (adminCreateWard) adminCreateWard.replaceChildren();
+
+    if (adminCreateWard) {
+        adminCreateWard.replaceChildren();
+    }
 
     const emptyOption = document.createElement("option");
     emptyOption.value = "";
     emptyOption.textContent = "병동을 선택해주세요";
     adminWardSelect.append(emptyOption);
+
     if (adminCreateWard) {
         const createEmpty = emptyOption.cloneNode(true);
         createEmpty.textContent = "담당 병동을 선택해주세요";
@@ -184,20 +207,15 @@ function renderAdminWardOptions() {
 
     for (const ward of adminWards) {
         const option = document.createElement("option");
-        option.value = String(ward.wardId);
-        option.textContent = ward.wardName;
-        adminWardSelect.append(option);
-        if (adminCreateWard) adminCreateWard.append(option.cloneNode(true));
-    }
 
-    const additionalWards = ["A병동", "B병동", "C병동", "D병동", "E병동", "F병동"];
-    for (const [index, wardName] of additionalWards.entries()) {
-        if (adminWards.some(ward => ward.wardName === wardName)) continue;
-        const option = document.createElement("option");
-        option.value = String(wardName);
-        option.textContent = wardName;
+        option.value = String(ward.wardId);
+        option.textContent = formatAdminWardName(ward.wardName);
+
         adminWardSelect.append(option);
-        if (adminCreateWard) adminCreateWard.append(option.cloneNode(true));
+
+        if (adminCreateWard) {
+            adminCreateWard.append(option.cloneNode(true));
+        }
     }
 }
 
@@ -778,23 +796,62 @@ document.querySelector("#copy-reset-password")?.addEventListener("click", async 
 
 function filterHistory(action) {
     adminHistoryFilter = action;
-    historyFilterCards.forEach(card => card.classList.toggle("active", card.dataset.historyFilter === action));
-    const usersById = new Map(adminUsers.map(user => [user.userId, user.name]));
-    const rows = [...document.querySelectorAll("#admin-history-rows tr")];
+
+    historyFilterCards.forEach(card => {
+        card.classList.toggle(
+            "active",
+            card.dataset.historyFilter === action
+        );
+    });
+
+    const usersById = new Map(
+        adminUsers.map(user => [user.userId, user.name])
+    );
+
+    const rows = [
+        ...document.querySelectorAll("#admin-history-rows tr")
+    ];
+
     let visible = 0;
+
     for (const row of rows) {
         const cells = row.querySelectorAll("td");
         const userId = cells[2]?.textContent.trim() ?? "";
         const ward = cells[3]?.textContent.trim() ?? "";
-        const searchable = `${userId} ${usersById.get(userId) ?? ""} ${ward}`.toLowerCase();
-        const matchesType = action === "전체" || row.dataset.historyAction === action;
-        row.hidden = !matchesType || !searchable.includes(adminSearchQuery);
-        if (!row.hidden) visible++;
+
+        const userName =
+            row.dataset.userName
+            || usersById.get(userId)
+            || "";
+
+        const searchable =
+            `${userId} ${userName} ${ward}`.toLowerCase();
+
+        const matchesType =
+            action === "전체"
+            || row.dataset.historyAction === action;
+
+        row.hidden =
+            !matchesType
+            || !searchable.includes(adminSearchQuery);
+
+        if (!row.hidden) {
+            visible++;
+        }
     }
+
     const result = document.querySelector("#admin-search-result");
-    if (result) result.textContent = `관리 이력 ${visible}건 / 전체 ${rows.length}건`;
+
+    if (result) {
+        result.textContent =
+            `관리 이력 ${visible}건 / 전체 ${rows.length}건`;
+    }
+
     const empty = document.querySelector("#admin-history-empty");
-    if (empty) empty.hidden = visible !== 0;
+
+    if (empty) {
+        empty.hidden = visible !== 0;
+    }
 }
 
 adminHistoryRows?.addEventListener("click", event => {

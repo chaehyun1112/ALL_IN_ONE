@@ -19,6 +19,9 @@
     <script src="../../../static/JS/admin/dashboard.js"
             th:src="@{/JS/admin/dashboard.js}"
             defer></script>
+    <script src="../../../static/JS/admin/admin-history.js"
+        th:src="@{/JS/admin/admin-history.js}"
+        defer></script>
     <script src="../../../static/JS/admin/account-create.js"
             th:src="@{/JS/admin/account-create.js}"
             defer></script>
@@ -51,11 +54,55 @@
     </header>
 
     <section class="admin-history-summary" aria-label="관리 이력 처리 내용별 현황">
-        <article class="history-filter-card active" data-history-filter="전체" tabindex="0"><span class="history-card-icon all">⌕</span><div><small>전체</small><strong>4건</strong></div></article>
-        <article class="history-filter-card active" data-history-filter="계정 생성" tabindex="0"><span class="history-card-icon create">+</span><div><small>계정 생성</small><strong>1건</strong></div></article>
-        <article class="history-filter-card" data-history-filter="병동 변경" tabindex="0"><span class="history-card-icon ward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21h16M6 21V7l6-3 6 3v14M9 10h1M14 10h1M9 14h1M14 14h1M10 21v-3h4v3"/></svg></span><div><small>병동 변경</small><strong>1건</strong></div></article>
-        <article class="history-filter-card" data-history-filter="비밀번호 초기화" tabindex="0"><span class="history-card-icon password"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><div><small>비밀번호 초기화</small><strong>1건</strong></div></article>
-        <article class="history-filter-card" data-history-filter="계정 비활성화" tabindex="0"><span class="history-card-icon disable">×</span><div><small>계정 비활성화</small><strong>1건</strong></div></article>
+        <article class="history-filter-card active"
+                data-history-filter="전체"
+                tabindex="0">
+            <span class="history-card-icon all">⌕</span>
+            <div><small>전체</small><strong>0건</strong></div>
+        </article>
+
+        <article class="history-filter-card"
+                data-history-filter="계정 생성"
+                tabindex="0">
+            <span class="history-card-icon create">+</span>
+            <div><small>계정 생성</small><strong>0건</strong></div>
+        </article>
+
+        <article class="history-filter-card"
+                data-history-filter="병동 변경"
+                tabindex="0">
+            <span class="history-card-icon ward">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 21h16M6 21V7l6-3 6 3v14M9 10h1M14 10h1M9 14h1M14 14h1M10 21v-3h4v3"/>
+                </svg>
+            </span>
+            <div><small>병동 변경</small><strong>0건</strong></div>
+        </article>
+
+        <article class="history-filter-card"
+                data-history-filter="비밀번호 초기화"
+                tabindex="0">
+            <span class="history-card-icon password">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="10" width="14" height="10" rx="2"/>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+                </svg>
+            </span>
+            <div>
+                <small>비밀번호 초기화</small>
+                <strong>0건</strong>
+            </div>
+        </article>
+
+        <article class="history-filter-card"
+                data-history-filter="계정 비활성화"
+                tabindex="0">
+            <span class="history-card-icon disable">×</span>
+            <div>
+                <small>계정 비활성화</small>
+                <strong>0건</strong>
+            </div>
+        </article>
     </section>
 
     <section class="admin-panel" aria-labelledby="admin-list-title">
@@ -140,11 +187,7 @@
                     <th scope="col">관리</th>
                 </tr>
                 </thead>
-                <tbody id="admin-history-rows">
-                <tr data-history-action="계정 생성"><td>2026-09-12 10:20</td><td>admin01</td><td>user102</td><td>A병동</td><td>계정 생성</td><td class="history-actions"><button class="history-edit" aria-label="계정 생성 이력 수정">✎</button><button class="history-delete" aria-label="계정 생성 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td></tr>
-                <tr data-history-action="병동 변경"><td>2026-09-12 11:05</td><td>admin01</td><td>user102</td><td>F병동</td><td>병동 변경</td><td class="history-actions"><button class="history-edit" aria-label="병동 변경 이력 수정">✎</button><button class="history-delete" aria-label="병동 변경 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td></tr>
-                <tr data-history-action="계정 비활성화"><td>2026-09-13 09:00</td><td>admin01</td><td>user102</td><td>E병동</td><td>계정 비활성화</td><td class="history-actions"><button class="history-edit" aria-label="계정 비활성화 이력 수정">✎</button><button class="history-delete" aria-label="계정 비활성화 이력 삭제"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></button></td></tr>
-                </tbody>
+                <tbody id="admin-history-rows"></tbody>
             </table>
             <p id="admin-history-empty" class="admin-empty" hidden>검색 조건에 맞는 관리 이력이 없습니다.</p>
         </div>
