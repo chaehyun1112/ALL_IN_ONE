@@ -57,6 +57,10 @@
         <!-- [9.15] 수정내용: 화면 역할에 맞는 제목과 안내 문구를 표시한다. -->
         <h1 id="admin-title" th:text="${pageMode == 'history'} ? '관리 이력' : '직원 관리'">직원 관리</h1>
         <p th:text="${pageMode == 'history'} ? '관리자가 처리한 계정 및 병동 변경 내역을 조회합니다.' : '직원 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.'">직원 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
+        <div class="admin-account-actions">
+            <a class="admin-inactive-management-link" id="admin-settings" href="admin-inactive-users.html" th:href="@{/admin/admin_de}">비활성화 사용자 관리</a>
+            <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
+        </div>
     </header>
 
     <section class="admin-history-summary" aria-label="관리 이력 처리 내용별 현황">
@@ -135,11 +139,6 @@
                 <button type="submit" class="admin-search-button">검색</button>
                 <button type="reset" class="admin-search-button">초기화</button>
             </form>
-            <!-- [09.13]수정내용: 계정 관리 버튼을 함께 배치하고 기존 이동 연결을 유지한다. -->
-            <div class="admin-account-actions">
-                <a class="admin-inactive-management-link" id="admin-settings" href="admin-inactive-users.html" th:href="@{/admin/admin_de}">비활성화 사용자 관리</a>
-                <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
-            </div>
         </header>
 
 
@@ -243,6 +242,10 @@
     <form id="admin-action-form">
         <h2 id="admin-dialog-title">사용자 관리</h2>
         <p id="admin-dialog-description"></p>
+        <ul id="admin-deactivate-details" class="admin-deactivate-details" hidden>
+            <li>이 계정으로 로그인할 수 없습니다.</li>
+            <li>기존 활동 및 업무 처리 기록은 유지됩니다.</li>
+        </ul>
 
         <div id="admin-ward-field" hidden>
             <label for="admin-ward-select">변경할 병동</label>

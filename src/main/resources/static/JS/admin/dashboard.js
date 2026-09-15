@@ -494,6 +494,8 @@ function selectAdminTab(tab) {
 function openAdminAction(user, action) {
     adminSelectedUser = user;
     adminAction = action;
+    adminDialog.classList.toggle("is-deactivate-action", action === "DEACTIVATE");
+    document.getElementById("admin-deactivate-details").hidden = action !== "DEACTIVATE";
 
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
@@ -537,9 +539,7 @@ function openAdminAction(user, action) {
     if (action === "DEACTIVATE") {
         adminDialogTitle.textContent = "계정 비활성화";
         adminDialogDescription.textContent =
-            `${user.name} 계정을 비활성화하시겠습니까? `
-            + "비활성화하면 해당 계정으로 로그인할 수 없습니다. "
-            + "기존 활동 및 업무 처리 기록은 유지됩니다.";
+            `${user.name} (${user.userId})\n계정을 비활성화하시겠습니까?`;
         adminDialogConfirm.textContent = "비활성화";
     }
 
