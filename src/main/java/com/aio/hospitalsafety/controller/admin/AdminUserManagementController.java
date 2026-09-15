@@ -3,14 +3,15 @@ package com.aio.hospitalsafety.controller.admin;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +24,10 @@ import com.aio.hospitalsafety.dto.WardOption;
 import com.aio.hospitalsafety.dto.admin.ApprovedUserResponse;
 import com.aio.hospitalsafety.dto.admin.ChangeUserWardRequest;
 import com.aio.hospitalsafety.dto.admin.InactiveUserResponse;
+import com.aio.hospitalsafety.dto.admin.ResetUserPasswordResponse;
+import com.aio.hospitalsafety.exception.UserNotFoundException;
 import com.aio.hospitalsafety.service.UserSessionService;
+import com.aio.hospitalsafety.service.admin.AdminPasswordService;
 import com.aio.hospitalsafety.service.admin.AdminUserManagementService;
 
 import jakarta.servlet.http.HttpSession;
@@ -34,13 +38,16 @@ import jakarta.validation.Valid;
 public class AdminUserManagementController {
 
     private final AdminUserManagementService adminUserManagementService;
+    private final AdminPasswordService adminPasswordService;
     private final UserSessionService userSessionService;
 
     public AdminUserManagementController(
             AdminUserManagementService adminUserManagementService,
+            AdminPasswordService adminPasswordService,
             UserSessionService userSessionService
     ) {
         this.adminUserManagementService = adminUserManagementService;
+        this.adminPasswordService = adminPasswordService;
         this.userSessionService = userSessionService;
     }
 
@@ -98,6 +105,50 @@ public class AdminUserManagementController {
         }
     }
 
+    // 관리자 비밀번호 초기화: 새 임시 비밀번호를 생성하고 기존 로그인 세션을 만료
+    @PostMapping("/users/{userId}/reset-password")
+    public ResponseEntity<?> resetUserPassword(
+            @PathVariable("userId") String userId,
+            HttpSession session
+    ) {
+        String hospitalDomain = requireHospitalDomain(session);
+
+        try {
+            ResetUserPasswordResponse result =
+                    adminPasswordService.resetPassword(
+                            hospitalDomain,
+                            userId
+                    );
+
+            // 비밀번호가 변경된 뒤 해당 직원의 기존 로그인 세션을 만료시킨다.
+            userSessionService.expireUserSessions(
+                    hospitalDomain,
+                    userId
+            );
+
+            // 임시 비밀번호가 브라우저나 중간 캐시에 저장되지 않도록 한다.
+            return ResponseEntity.ok()
+                    .header("Cache-Control", "no-store")
+                    .body(result);
+        } catch (UserNotFoundException exception) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    exception.getMessage()
+                            )
+                    );
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest()
+                    .body(
+                            Map.of(
+                                    "message",
+                                    exception.getMessage()
+                            )
+                    );
+        }
+    }
+
     // 계정 비활성화: APPROVED에서 INACTIVE로 변경하고 기존 세션 만료
     @PatchMapping("/users/{userId}/deactivate")
     public ResponseEntity<Map<String, String>> deactivateUser(
@@ -136,33 +187,84 @@ public class AdminUserManagementController {
     }
 
     @GetMapping("/users/inactive")
-    public List<InactiveUserResponse> getInactiveUsers(HttpSession session) {
-        return adminUserManagementService.getInactiveUsers(requireHospitalDomain(session));
+    public List<InactiveUserResponse> getInactiveUsers(
+            HttpSession session
+    ) {
+        return adminUserManagementService.getInactiveUsers(
+                requireHospitalDomain(session)
+        );
     }
 
     @PatchMapping("/users/{userId}/activate")
-    public ResponseEntity<Map<String, String>> activateUser(@PathVariable String userId, HttpSession session) {
+    public ResponseEntity<Map<String, String>> activateUser(
+            @PathVariable String userId,
+            HttpSession session
+    ) {
         String hospitalDomain = requireHospitalDomain(session);
+
         try {
-            adminUserManagementService.activateUser(hospitalDomain, userId);
-            return ResponseEntity.ok(Map.of("message", "계정이 활성화되어 승인완료 목록으로 이동했습니다."));
+            adminUserManagementService.activateUser(
+                    hospitalDomain,
+                    userId
+            );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message",
+                            "계정이 활성화되어 승인완료 목록으로 이동했습니다."
+                    )
+            );
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", exception.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    exception.getMessage()
+                            )
+                    );
         }
     }
 
     @DeleteMapping("/users/{userId}/inactive")
-    public ResponseEntity<Map<String, String>> deleteInactiveUser(@PathVariable String userId, HttpSession session) {
+    public ResponseEntity<Map<String, String>> deleteInactiveUser(
+            @PathVariable String userId,
+            HttpSession session
+    ) {
         String hospitalDomain = requireHospitalDomain(session);
+
         try {
-            adminUserManagementService.deleteInactiveUser(hospitalDomain, userId);
-            userSessionService.expireUserSessions(hospitalDomain, userId);
-            return ResponseEntity.ok(Map.of("message", "계정이 삭제되었습니다."));
+            adminUserManagementService.deleteInactiveUser(
+                    hospitalDomain,
+                    userId
+            );
+
+            userSessionService.expireUserSessions(
+                    hospitalDomain,
+                    userId
+            );
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "message",
+                            "계정이 삭제되었습니다."
+                    )
+            );
         } catch (IllegalArgumentException exception) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", exception.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(
+                            Map.of(
+                                    "message",
+                                    exception.getMessage()
+                            )
+                    );
         } catch (DataIntegrityViolationException exception) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "연결된 업무 기록으로 인해 삭제할 수 없습니다. 관련 기록을 확인해 주세요."));
+                    .body(
+                            Map.of(
+                                    "message",
+                                    "연결된 업무 기록으로 인해 삭제할 수 없습니다. 관련 기록을 확인해 주세요."
+                            )
+                    );
         }
     }
 
@@ -179,10 +281,19 @@ public class AdminUserManagementController {
             );
         }
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!(principal instanceof HospitalUserDetails admin) || !hospitalDomain.equals(admin.getHospitalId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "로그인한 관리자의 병원만 관리할 수 있습니다.");
+        Object principal = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!(principal instanceof HospitalUserDetails admin)
+                || !hospitalDomain.equals(admin.getHospitalId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "로그인한 관리자의 병원만 관리할 수 있습니다."
+            );
         }
+
         return hospitalDomain;
     }
 }

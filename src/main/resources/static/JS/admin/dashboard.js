@@ -592,6 +592,7 @@ document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", a
         cancelButton.disabled = false;
     }
 });
+
 // 상세 이력의 대상 직원을 실제 병동 변경 기능에 연결합니다.
 document.querySelector("#admin-event-ward-change")?.addEventListener("click", async event => {
     const button = event.currentTarget;
@@ -641,30 +642,138 @@ document.querySelector("#admin-event-ward-change")?.addEventListener("click", as
         button.disabled = false;
     }
 });
-document.querySelector("#admin-event-change")?.addEventListener("click", () => {
-    const userId = document.querySelector("#event-target").textContent;
-    const temporaryPassword = `Care${Math.random().toString(36).slice(2, 8)}!`;
-    if (pendingEventRow) {
-        const processedAt = new Date().toISOString().slice(0, 16).replace("T", " ");
-        pendingEventRow.querySelectorAll("td")[0].textContent = processedAt;
-        pendingEventRow.dataset.historyAction = "비밀번호 초기화";
-        pendingEventRow.querySelectorAll("td")[4].textContent = "비밀번호 초기화";
+
+/* 관리자 비밀번호 초기화 요청이 중복으로 실행되지 않도록 처리 상태를 보관한다. */
+let adminPasswordResetPending = false;
+
+/* 초기화 처리 중에는 상세 팝업이 ESC 키로 닫히지 않도록 한다. */
+adminHistoryEventDialog?.addEventListener("cancel", event => {
+    if (adminPasswordResetPending) {
+        event.preventDefault();
     }
-    document.querySelector("#reset-account-user-id").textContent = userId;
-    document.querySelector("#reset-account-password").textContent = temporaryPassword;
-    adminHistoryEventDialog.close();
-    adminPasswordResetDialog.showModal();
 });
+
+/* 브라우저에서 비밀번호를 만들지 않고 서버의 비밀번호 초기화 API를 호출한다. */
+document.querySelector("#admin-event-change")?.addEventListener("click", async event => {
+    if (adminPasswordResetPending) {
+        return;
+    }
+
+    const userId = document.querySelector("#event-target")
+        ?.textContent
+        .trim();
+
+    if (!userId) {
+        showAdminFeedback(
+            "초기화할 직원 아이디를 확인할 수 없습니다."
+        );
+        return;
+    }
+
+    const resetButton = event.currentTarget;
+    const closeButton = document.querySelector(
+        "#admin-history-event-close"
+    );
+
+    adminPasswordResetPending = true;
+    resetButton.disabled = true;
+
+    if (closeButton) {
+        closeButton.disabled = true;
+    }
+
+    try {
+        const result = await requestAdminApi(
+            `/api/admin/users/${encodeURIComponent(userId)}/reset-password`,
+            {
+                method: "POST"
+            }
+        );
+
+        if (
+            result?.userId !== userId
+            || !result.temporaryPassword
+            || result.mustChangePassword !== true
+        ) {
+            throw new Error(
+                "서버의 초기화 결과를 확인할 수 없습니다."
+            );
+        }
+
+        document.querySelector(
+            "#reset-account-user-id"
+        ).textContent = result.userId;
+
+        document.querySelector(
+            "#reset-account-password"
+        ).textContent = result.temporaryPassword;
+
+        adminHistoryEventDialog.close();
+        adminPasswordResetDialog.showModal();
+    } catch (error) {
+        showAdminFeedback(
+            error.message
+            || "비밀번호 초기화에 실패했습니다."
+        );
+    } finally {
+        adminPasswordResetPending = false;
+        resetButton.disabled = false;
+
+        if (closeButton) {
+            closeButton.disabled = false;
+        }
+    }
+});
+
+/* 임시 비밀번호 팝업을 닫으면 화면에서 비밀번호 원문을 제거한다. */
+adminPasswordResetDialog?.addEventListener("close", () => {
+    const passwordElement = document.querySelector(
+        "#reset-account-password"
+    );
+
+    const copyButton = document.querySelector(
+        "#copy-reset-password"
+    );
+
+    if (passwordElement) {
+        passwordElement.textContent = "";
+    }
+
+    if (copyButton) {
+        copyButton.textContent = "복사하기";
+    }
+});
+
+/* 서버가 한 번 반환한 임시 비밀번호를 클립보드에 복사한다. */
 document.querySelector("#copy-reset-password")?.addEventListener("click", async event => {
-    await navigator.clipboard.writeText(document.querySelector("#reset-account-password").textContent);
-    event.currentTarget.textContent = "복사됨";
-    setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
-});
-document.querySelector("#copy-account-password")?.addEventListener("click", async event => {
-    const password = document.querySelector("#complete-account-password").textContent;
-    await navigator.clipboard.writeText(password);
-    event.currentTarget.textContent = "복사됨";
-    setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
+    const copyButton = event.currentTarget;
+
+    const temporaryPassword = document.querySelector(
+        "#reset-account-password"
+    )?.textContent;
+
+    if (!temporaryPassword) {
+        showAdminFeedback(
+            "복사할 임시 비밀번호가 없습니다."
+        );
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(
+            temporaryPassword
+        );
+
+        copyButton.textContent = "복사됨";
+
+        setTimeout(() => {
+            copyButton.textContent = "복사하기";
+        }, 1600);
+    } catch (error) {
+        showAdminFeedback(
+            "자동 복사가 불가능합니다. 표시된 비밀번호를 직접 복사해 주세요."
+        );
+    }
 });
 
 function filterHistory(action) {

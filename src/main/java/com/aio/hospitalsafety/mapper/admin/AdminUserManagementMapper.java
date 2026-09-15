@@ -36,15 +36,33 @@ public interface AdminUserManagementMapper {
             @Param("wardId") Long wardId
     );
 
-    List<InactiveUserResponse> findInactiveUsers(@Param("hospitalDomain") String hospitalDomain);
+    // 비활성화된 일반 사용자 목록 조회
+    List<InactiveUserResponse> findInactiveUsers(
+            @Param("hospitalDomain") String hospitalDomain
+    );
 
-    int activateUser(@Param("hospitalDomain") String hospitalDomain, @Param("userId") String userId);
+    // 비활성화된 일반 사용자 계정 재활성화
+    int activateUser(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId
+    );
 
-    int deleteInactiveUser(@Param("hospitalDomain") String hospitalDomain, @Param("userId") String userId);
+    // 비활성화된 일반 사용자 계정 영구 삭제
+    int deleteInactiveUser(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId
+    );
 
     // 계정 비활성화: APPROVED에서 INACTIVE로 변경
     int deactivateUser(
             @Param("hospitalDomain") String hospitalDomain,
             @Param("userId") String userId
+    );
+
+    // 활성 직원의 비밀번호를 임시 비밀번호로 초기화하고 최초 변경 필요 상태로 변경
+    int resetUserPassword(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId,
+            @Param("passwordHash") String passwordHash
     );
 }
