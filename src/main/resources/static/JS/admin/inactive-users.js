@@ -86,22 +86,15 @@ function showAdminError(message) {
     adminError.hidden = false;
 }
 
-// [09.13]추가내용: 저장된 1~6병동 이름을 화면에서 A~F병동으로 표시하며 기존 영문 병동 이름은 유지한다.
-function formatAdminWardName(wardName) {
-    const name = String(wardName ?? "").trim();
-    const numberedWard = /^([1-6])\s*병동$/.exec(name);
-    return numberedWard ? `${"ABCDEF"[Number(numberedWard[1]) - 1]}병동` : name;
-}
-
 function getAdminVisibleUsers() {
     const query = adminInactiveSearch.value.trim().toLowerCase();
-    // [09.13]수정내용: A~F병동 표시 이름으로 목록을 필터링하고 미배정은 병동 ID 유무로 구분한다.
-    const wardName = adminInactiveWard.value;
+    // 병동 이름이 같아도 DB의 병동 ID로 정확히 구분한다.
+    const wardId = adminInactiveWard.value;
     return adminInactiveUsers.filter(user =>
         (user.userName + " " + user.userId).toLowerCase().includes(query)
-        && (!wardName || (wardName === "UNASSIGNED"
+        && (!wardId || (wardId === "UNASSIGNED"
             ? user.wardId == null
-            : user.wardId != null && user.wardName === wardName)));
+            : user.wardId != null && String(user.wardId) === wardId)));
 }
 
 function getAdminSelectedUsers() {
@@ -122,7 +115,7 @@ function updateAdminInactiveSelection() {
     }
     for (const input of adminRows.querySelectorAll("input, select")) input.disabled = disabled;
     adminInactiveSearch.disabled = adminBusy || adminLoading;
-    adminInactiveWard.disabled = adminBusy || adminLoading;
+    adminInactiveWard.disabled = adminBusy || adminLoading || adminLoadFailed;
     document.querySelector("#admin-inactive-retry").disabled = adminBusy || adminLoading;
     adminList.setAttribute("aria-busy", String(adminBusy || adminLoading));
 }
@@ -213,17 +206,18 @@ async function loadAdminInactiveData() {
             requestAdminInactiveApi("/api/admin/wards")
         ]);
         if (!Array.isArray(users) || !Array.isArray(wards)) throw new Error("목록 응답 형식이 올바르지 않습니다.");
-        // [09.13]수정내용: 목록과 필터가 같은 병동 이름을 사용하도록 조회 결과의 표시 이름만 변환한다.
+        // 현재 병원 DB에서 조회한 병동 이름을 목록과 필터에 그대로 표시한다.
         const wardNames = new Map(wards.map(ward => [String(ward.wardId), ward.wardName]));
         adminInactiveUsers = users.filter(user => user.authStatus === "INACTIVE").map(user => ({
             ...user,
-            wardName: formatAdminWardName(wardNames.get(String(user.wardId)) ?? user.wardName)
+            wardName: wardNames.get(String(user.wardId)) ?? user.wardName
         }));
         const previousWard = adminInactiveWard.value;
         adminInactiveWard.replaceChildren();
         for (const [value, text] of [
-            // [09.13]수정내용: 병동 필터에 A~F병동을 순서대로 표시한다.
-            ["", "전체 병동"], ...Array.from("ABCDEF", letter => [`${letter}병동`, `${letter}병동`]), ["UNASSIGNED", "미배정"]
+            ["", "전체 병동"],
+            ...wards.map(ward => [String(ward.wardId), ward.wardName]),
+            ["UNASSIGNED", "미배정"]
         ]) {
             const option = document.createElement("option");
             option.value = value;
