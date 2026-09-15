@@ -50,7 +50,6 @@ const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content 
 async function requestAdminApi(url, options = {}) {
     const method = (options.method ?? "GET").toUpperCase();
     const headers = new Headers(options.headers ?? {});
-
     headers.set("Accept", "application/json");
 
     if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken) {
@@ -60,10 +59,12 @@ async function requestAdminApi(url, options = {}) {
     const response = await fetch(url, {
         ...options,
         method,
-        headers
+        headers,
+        credentials: "same-origin",
+        cache: "no-store"
     });
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.redirected) {
         window.location.href = "/login";
         throw new Error("로그인이 만료되었습니다.");
     }
@@ -77,10 +78,7 @@ async function requestAdminApi(url, options = {}) {
 
         try {
             const errorBody = await response.json();
-
-            if (errorBody.message) {
-                message = errorBody.message;
-            }
+            if (errorBody.message) message = errorBody.message;
         } catch (error) {
             // JSON 응답이 아니면 기본 오류 메시지를 사용한다.
         }
@@ -88,8 +86,12 @@ async function requestAdminApi(url, options = {}) {
         throw new Error(message);
     }
 
-    if (response.status === 204) {
-        return null;
+    if (response.status === 204) return null;
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (!contentType.includes("application/json")) {
+        throw new Error("서버에서 올바른 JSON 응답을 받지 못했습니다.");
     }
 
     const responseText = await response.text();
@@ -168,9 +170,29 @@ async function loadAdminData(silent = false) {
 /**
  * DB에서 불러온 병동을 선택란에 추가한다.
  */
+/**
+ * DB의 1~6병동을 화면에서 A~F병동으로 표시한다.
+ * DB에 이미 A병동처럼 저장돼 있거나 다른 이름이면 원래 이름을 유지한다.
+ */
+function formatAdminWardName(wardName) {
+    const name = String(wardName ?? "").trim();
+    const numberedWard = /^([1-6])\s*병동$/.exec(name);
+
+    return numberedWard
+        ? `${"ABCDEF"[Number(numberedWard[1]) - 1]}병동`
+        : name;
+}
+
+/**
+ * DB에서 불러온 병동을 선택란에 추가한다.
+ * 서버로 전송되는 값은 실제 DB의 숫자 wardId를 사용한다.
+ */
 function renderAdminWardOptions() {
     adminWardSelect.replaceChildren();
-    if (adminCreateWard) adminCreateWard.replaceChildren();
+
+    if (adminCreateWard) {
+        adminCreateWard.replaceChildren();
+    }
 
     const emptyOption = document.createElement("option");
     emptyOption.value = "";
@@ -184,20 +206,15 @@ function renderAdminWardOptions() {
 
     for (const ward of adminWards) {
         const option = document.createElement("option");
-        option.value = String(ward.wardId);
-        option.textContent = ward.wardName;
-        adminWardSelect.append(option);
-        if (adminCreateWard) adminCreateWard.append(option.cloneNode(true));
-    }
 
-    const additionalWards = ["A병동", "B병동", "C병동", "D병동", "E병동", "F병동"];
-    for (const [index, wardName] of additionalWards.entries()) {
-        if (adminWards.some(ward => ward.wardName === wardName)) continue;
-        const option = document.createElement("option");
-        option.value = String(wardName);
-        option.textContent = wardName;
+        option.value = String(ward.wardId);
+        option.textContent = formatAdminWardName(ward.wardName);
+
         adminWardSelect.append(option);
-        if (adminCreateWard) adminCreateWard.append(option.cloneNode(true));
+
+        if (adminCreateWard) {
+            adminCreateWard.append(option.cloneNode(true));
+        }
     }
 }
 
@@ -641,51 +658,198 @@ document.querySelector("#admin-event-ward-change")?.addEventListener("click", as
         button.disabled = false;
     }
 });
-document.querySelector("#admin-event-change")?.addEventListener("click", () => {
-    const userId = document.querySelector("#event-target").textContent;
-    const temporaryPassword = `Care${Math.random().toString(36).slice(2, 8)}!`;
-    if (pendingEventRow) {
-        const processedAt = new Date().toISOString().slice(0, 16).replace("T", " ");
-        pendingEventRow.querySelectorAll("td")[0].textContent = processedAt;
-        pendingEventRow.dataset.historyAction = "비밀번호 초기화";
-        pendingEventRow.querySelectorAll("td")[4].textContent = "비밀번호 초기화";
+
+/* 관리자 비밀번호 초기화 요청이 중복으로 실행되지 않도록 처리 상태를 보관한다. */
+let adminPasswordResetPending = false;
+
+/* 초기화 처리 중에는 상세 팝업이 ESC 키로 닫히지 않도록 한다. */
+adminHistoryEventDialog?.addEventListener("cancel", event => {
+    if (adminPasswordResetPending) {
+        event.preventDefault();
     }
-    document.querySelector("#reset-account-user-id").textContent = userId;
-    document.querySelector("#reset-account-password").textContent = temporaryPassword;
-    adminHistoryEventDialog.close();
-    adminPasswordResetDialog.showModal();
 });
+
+/* 브라우저에서 비밀번호를 만들지 않고 서버의 비밀번호 초기화 API를 호출한다. */
+document.querySelector("#admin-event-change")?.addEventListener("click", async event => {
+    if (adminPasswordResetPending) {
+        return;
+    }
+
+    const userId = document.querySelector("#event-target")
+        ?.textContent
+        .trim();
+
+    if (!userId) {
+        showAdminFeedback(
+            "초기화할 직원 아이디를 확인할 수 없습니다."
+        );
+        return;
+    }
+
+    const resetButton = event.currentTarget;
+    const closeButton = document.querySelector(
+        "#admin-history-event-close"
+    );
+
+    adminPasswordResetPending = true;
+    resetButton.disabled = true;
+
+    if (closeButton) {
+        closeButton.disabled = true;
+    }
+
+    try {
+        const result = await requestAdminApi(
+            `/api/admin/users/${encodeURIComponent(userId)}/reset-password`,
+            {
+                method: "POST"
+            }
+        );
+
+        if (
+            result?.userId !== userId
+            || !result.temporaryPassword
+            || result.mustChangePassword !== true
+        ) {
+            throw new Error(
+                "서버의 초기화 결과를 확인할 수 없습니다."
+            );
+        }
+
+        document.querySelector(
+            "#reset-account-user-id"
+        ).textContent = result.userId;
+
+        document.querySelector(
+            "#reset-account-password"
+        ).textContent = result.temporaryPassword;
+
+        adminHistoryEventDialog.close();
+        adminPasswordResetDialog.showModal();
+    } catch (error) {
+        showAdminFeedback(
+            error.message
+            || "비밀번호 초기화에 실패했습니다."
+        );
+    } finally {
+        adminPasswordResetPending = false;
+        resetButton.disabled = false;
+
+        if (closeButton) {
+            closeButton.disabled = false;
+        }
+    }
+});
+
+/* 임시 비밀번호 팝업을 닫으면 화면에서 비밀번호 원문을 제거한다. */
+adminPasswordResetDialog?.addEventListener("close", () => {
+    const passwordElement = document.querySelector(
+        "#reset-account-password"
+    );
+
+    const copyButton = document.querySelector(
+        "#copy-reset-password"
+    );
+
+    if (passwordElement) {
+        passwordElement.textContent = "";
+    }
+
+    if (copyButton) {
+        copyButton.textContent = "복사하기";
+    }
+});
+
+/* 서버가 한 번 반환한 임시 비밀번호를 클립보드에 복사한다. */
 document.querySelector("#copy-reset-password")?.addEventListener("click", async event => {
-    await navigator.clipboard.writeText(document.querySelector("#reset-account-password").textContent);
-    event.currentTarget.textContent = "복사됨";
-    setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
-});
-document.querySelector("#copy-account-password")?.addEventListener("click", async event => {
-    const password = document.querySelector("#complete-account-password").textContent;
-    await navigator.clipboard.writeText(password);
-    event.currentTarget.textContent = "복사됨";
-    setTimeout(() => { event.currentTarget.textContent = "복사하기"; }, 1600);
+    const copyButton = event.currentTarget;
+
+    const temporaryPassword = document.querySelector(
+        "#reset-account-password"
+    )?.textContent;
+
+    if (!temporaryPassword) {
+        showAdminFeedback(
+            "복사할 임시 비밀번호가 없습니다."
+        );
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(
+            temporaryPassword
+        );
+
+        copyButton.textContent = "복사됨";
+
+        setTimeout(() => {
+            copyButton.textContent = "복사하기";
+        }, 1600);
+    } catch (error) {
+        showAdminFeedback(
+            "자동 복사가 불가능합니다. 표시된 비밀번호를 직접 복사해 주세요."
+        );
+    }
 });
 
 function filterHistory(action) {
     adminHistoryFilter = action;
-    historyFilterCards.forEach(card => card.classList.toggle("active", card.dataset.historyFilter === action));
-    const usersById = new Map(adminUsers.map(user => [user.userId, user.name]));
-    const rows = [...document.querySelectorAll("#admin-history-rows tr")];
+
+    historyFilterCards.forEach(card => {
+        card.classList.toggle(
+            "active",
+            card.dataset.historyFilter === action
+        );
+    });
+
+    const usersById = new Map(
+        adminUsers.map(user => [user.userId, user.name])
+    );
+
+    const rows = [
+        ...document.querySelectorAll("#admin-history-rows tr")
+    ];
+
     let visible = 0;
+
     for (const row of rows) {
         const cells = row.querySelectorAll("td");
         const userId = cells[2]?.textContent.trim() ?? "";
         const ward = cells[3]?.textContent.trim() ?? "";
-        const searchable = `${userId} ${usersById.get(userId) ?? ""} ${ward}`.toLowerCase();
-        const matchesType = action === "전체" || row.dataset.historyAction === action;
-        row.hidden = !matchesType || !searchable.includes(adminSearchQuery);
-        if (!row.hidden) visible++;
+
+        const userName =
+            row.dataset.userName
+            || usersById.get(userId)
+            || "";
+
+        const searchable =
+            `${userId} ${userName} ${ward}`.toLowerCase();
+
+        const matchesType =
+            action === "전체"
+            || row.dataset.historyAction === action;
+
+        row.hidden =
+            !matchesType
+            || !searchable.includes(adminSearchQuery);
+
+        if (!row.hidden) {
+            visible++;
+        }
     }
+
     const result = document.querySelector("#admin-search-result");
-    if (result) result.textContent = `관리 이력 ${visible}건 / 전체 ${rows.length}건`;
+
+    if (result) {
+        result.textContent =
+            `관리 이력 ${visible}건 / 전체 ${rows.length}건`;
+    }
+
     const empty = document.querySelector("#admin-history-empty");
-    if (empty) empty.hidden = visible !== 0;
+
+    if (empty) {
+        empty.hidden = visible !== 0;
+    }
 }
 
 adminHistoryRows?.addEventListener("click", event => {

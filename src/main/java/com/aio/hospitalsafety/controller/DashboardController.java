@@ -48,7 +48,3 @@ public class DashboardController {
         return "html/settings/settings";
     }
 }
-
-
-
-

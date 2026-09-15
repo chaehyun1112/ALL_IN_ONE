@@ -17,6 +17,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
 
 /**
  * 비밀번호 관련 화면 요청을 처리하는 MVC Controller다.
@@ -40,6 +44,19 @@ public class UserPasswordController {
         this.userService = userService;
     }
 
+    @PostMapping("/user/password/verify")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> verifyInitialPassword(
+            Authentication authentication, @RequestParam String initialPassword) {
+        if (authentication == null
+                || !(authentication.getPrincipal() instanceof HospitalUserDetails loginUser)) {
+            return ResponseEntity.status(401).header("Cache-Control", "no-store").build();
+        }
+        boolean matches = userService.verifyInitialPassword(
+                loginUser.getHospitalId(), loginUser.getUsername(), initialPassword);
+        return ResponseEntity.ok().header("Cache-Control", "no-store").body(Map.of("matches", matches));
+    }
+
     /**
      * GET /user/password 요청으로 비밀번호 변경 폼을 보여준다.
      * SecurityConfig의 anyRequest().authenticated() 규칙 때문에 로그인 사용자만 접근할 수 있다.
@@ -47,7 +64,8 @@ public class UserPasswordController {
      * @param model PasswordChangeForm을 HTML에 전달할 Model
      */
     @GetMapping("/user/password")
-    public String changePage(Model model) {
+    public String changePage(Model model, Authentication authentication) {
+        model.addAttribute("initialPasswordChange", isInitialPasswordChange(authentication));
         // redirect 후 FlashAttribute로 전달된 객체가 있다면 덮어쓰지 않는다.
         if (!model.containsAttribute("passwordChangeForm")) {
             // 빈 DTO를 넣어야 HTML의 th:object="${passwordChangeForm}"이 정상 동작한다.
@@ -76,6 +94,8 @@ public class UserPasswordController {
             Model model,
             HttpServletRequest request,
             HttpServletResponse response) {
+        boolean initialUserPassword = isInitialPasswordChange(authentication);
+        model.addAttribute("initialPasswordChange", initialUserPassword);
         // Bean Validation에서 하나라도 실패했다면 Service와 DB를 호출하지 않는다.
         if (bindingResult.hasErrors()) {
             // 검증 실패 화면의 HTML에 사용자가 입력한 PW가 다시 포함되지 않도록 비운다.
@@ -97,10 +117,17 @@ public class UserPasswordController {
         PasswordChangeResult result = userService.changePassword(
                 userDetails.getHospitalId(), authentication.getName(), form.getCurrentPassword(), form.getNewPassword());
 
+        if (result == PasswordChangeResult.SAME_PASSWORD) {
+            bindingResult.rejectValue("newPassword", "same",
+                    (initialUserPassword ? "초기" : "현재") + " 비밀번호와 다른 비밀번호를 입력해주세요.");
+            clearPasswordFields(form);
+            return "html/settings/password-change";
+        }
+
         if (result == PasswordChangeResult.CURRENT_PASSWORD_MISMATCH) {
             // rejectValue는 특정 DTO 필드에 서버 측 오류 메시지를 추가한다.
             // password-change.html의 th:errors="*{currentPassword}"에서 출력된다.
-            bindingResult.rejectValue("currentPassword", "mismatch", "현재 비밀번호가 일치하지 않습니다.");
+            bindingResult.rejectValue("currentPassword", "mismatch", "비밀번호가 일치하지않습니다");
             clearPasswordFields(form);
             // [09.13]수정내용: 비밀번호 변경 화면을 settings 폴더의 파일로 연결합니다.
             return "html/settings/password-change";
@@ -111,6 +138,12 @@ public class UserPasswordController {
             clearPasswordFields(form);
             // [09.13]수정내용: 비밀번호 변경 화면을 settings 폴더의 파일로 연결합니다.
             return "html/settings/password-change";
+        }
+
+        if (initialUserPassword) {
+            clearPasswordFields(form);
+            request.changeSessionId();
+            return "redirect:/dashboard";
         }
 
         String hospitalId = userDetails.getHospitalId();
@@ -125,6 +158,13 @@ public class UserPasswordController {
 
         // 성공 여부만 쿼리 파라미터로 전달해 로그인 화면에서 변경 완료 안내를 표시한다.
         return "redirect:/login?role=USER&passwordChanged";
+    }
+
+    private boolean isInitialPasswordChange(Authentication authentication) {
+        return authentication != null
+                && authentication.getPrincipal() instanceof HospitalUserDetails loginUser
+                && loginUser.getAuthorities().stream().anyMatch(a -> "ROLE_USER".equals(a.getAuthority()))
+                && userService.isInitialUserPassword(loginUser.getHospitalId(), loginUser.getUsername());
     }
 
     /** 비밀번호 원문이 응답 HTML에 남지 않도록 DTO의 세 입력값을 제거한다. */
