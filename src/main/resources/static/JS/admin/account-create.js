@@ -180,6 +180,31 @@ createCompleteDialog?.addEventListener("close", () => {
     if (copyButton) copyButton.textContent = "복사하기";
 });
 
+document.querySelector("#copy-account-password")?.addEventListener("click", async event => {
+    const copyButton = event.currentTarget;
+    const temporaryPassword = document.querySelector(
+        "#complete-account-password"
+    )?.textContent;
+
+    if (!temporaryPassword) {
+        showCreateError("복사할 임시 비밀번호가 없습니다.");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(temporaryPassword);
+        copyButton.textContent = "복사됨";
+
+        setTimeout(() => {
+            copyButton.textContent = "복사하기";
+        }, 1600);
+    } catch {
+        showCreateError(
+            "자동 복사가 불가능합니다. 표시된 비밀번호를 직접 복사해 주세요."
+        );
+    }
+});
+
 createForm?.addEventListener("submit", async event => {
     event.preventDefault();
     if (createPending) return;
