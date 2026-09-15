@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
 import java.util.Map;
 
@@ -92,6 +93,7 @@ public class UserPasswordController {
             @Valid @ModelAttribute("passwordChangeForm") PasswordChangeForm form, // HTML 폼 입력값을 담은 DTO
             BindingResult bindingResult,
             Model model,
+            RedirectAttributes redirectAttributes,
             HttpServletRequest request,
             HttpServletResponse response) {
         boolean initialUserPassword = isInitialPasswordChange(authentication);
@@ -143,7 +145,8 @@ public class UserPasswordController {
         if (initialUserPassword) {
             clearPasswordFields(form);
             request.changeSessionId();
-            return "redirect:/dashboard";
+            redirectAttributes.addFlashAttribute("passwordChanged", true);
+            return "redirect:/user/password";
         }
 
         String hospitalId = userDetails.getHospitalId();
