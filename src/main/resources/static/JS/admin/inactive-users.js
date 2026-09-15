@@ -40,7 +40,7 @@ function updateAdminClock() {
         + `${values.hour}:${values.minute}`;
 }
 
-/* INACTIVE 사용자만 DB에서 읽고, 변경 성공 후 목록을 다시 조회한다. */
+/* INACTIVE 직원만 DB에서 읽고, 변경 성공 후 목록을 다시 조회한다. */
 const adminInactiveSearch = document.querySelector("#admin-inactive-search");
 const adminInactiveWard = document.querySelector("#admin-inactive-ward");
 const adminInactiveSelectAll = document.querySelector("#admin-inactive-select-all");
@@ -180,16 +180,16 @@ function renderAdminInactiveUsers() {
     document.querySelector("#admin-inactive-count").innerHTML = adminLoadFailed
         ? "—<span>명</span>" : adminInactiveUsers.length + "<span>명</span>";
     document.querySelector("#admin-inactive-result").textContent = adminLoading
-        ? "사용자 목록을 불러오는 중입니다."
+        ? "직원 목록을 불러오는 중입니다."
         : adminLoadFailed ? "목록을 불러오지 못했습니다." : "검색 결과 " + users.length + "명";
     const empty = document.querySelector("#admin-inactive-empty");
     empty.hidden = adminLoading || adminLoadFailed || users.length > 0;
     const filtered = Boolean(adminInactiveSearch.value.trim() || adminInactiveWard.value);
     document.querySelector("#admin-inactive-empty-title").textContent = filtered
-        ? "검색 결과가 없습니다" : "비활성화 사용자가 없습니다";
+        ? "검색 결과가 없습니다" : "비활성화 직원이 없습니다";
     document.querySelector("#admin-inactive-empty-description").textContent = filtered
         ? "이름, 아이디 또는 병동 조건을 다시 확인해 주세요."
-        : "승인완료 목록에서 비활성화한 사용자가 여기에 표시됩니다.";
+        : "승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.";
     document.querySelector("#admin-inactive-reset").hidden = !filtered;
     updateAdminInactiveSelection();
 }
@@ -243,12 +243,12 @@ async function loadAdminInactiveData() {
 function openAdminStatusChange(users, nextStatus, trigger, bulk = false) {
     if (!users.length || adminBusy || adminLoading || adminLoadFailed) return;
     if (nextStatus === "INACTIVE") {
-        showAdminFeedback("선택한 사용자는 이미 비활성화 상태입니다.");
+        showAdminFeedback("선택한 직원은 이미 비활성화 상태입니다.");
         return;
     }
     if (!["ACTIVATE", "DELETE"].includes(nextStatus)) return;
     const isDelete = nextStatus === "DELETE";
-    const subject = bulk ? "선택한 사용자 " + users.length + "명" : users[0].userName + "님";
+    const subject = bulk ? "선택한 직원 " + users.length + "명" : users[0].userName + "님";
     adminPendingStatusChange = { users: [...users], nextStatus, trigger, subject };
     // [09.13]수정내용: 계정 삭제 버튼과 확인창의 표현을 일치시켜 삭제 대상을 명확하게 안내한다.
     document.querySelector("#admin-status-dialog-title").textContent = isDelete ? "계정 삭제" : "상태 변경";
