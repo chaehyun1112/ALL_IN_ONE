@@ -84,6 +84,7 @@ function initializePage() {
   const recordList = document.querySelector("#record-list");
   const resultMessage = document.querySelector("#result-message");
   const tableScroll = document.querySelector(".table-scroll");
+  const recordPagination = document.querySelector("#record-pagination");
   const periodFilter = document.querySelector("#period-filter");
 
   /* 기간 달력 */
@@ -110,6 +111,10 @@ function initializePage() {
   /* 전체 기록과 현재 검색 결과 */
   let allRecords = [];
   let filteredRecords = [];
+
+  /* [9.15] 수정내용: 조치 기록은 한 페이지에 최대 10건씩 표시합니다. */
+  const recordsPerPage = 10;
+  let currentPage = 1;
 
   /* 조회 상태 */
   let isLoading = false;
@@ -510,17 +515,53 @@ function initializePage() {
   }
 
   /* 검색 결과를 표에 표시합니다. */
+  function renderPagination(totalPages) {
+    recordPagination.replaceChildren();
+
+    if (totalPages <= 1) {
+      return;
+    }
+
+    for (let page = 1; page <= totalPages; page++) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = page;
+      button.setAttribute("aria-label", `${page}페이지`);
+
+      if (page === currentPage) {
+        button.setAttribute("aria-current", "page");
+      }
+
+      button.addEventListener("click", () => {
+        currentPage = page;
+        renderRecords(filteredRecords);
+        tableScroll.scrollTop = 0;
+      });
+
+      recordPagination.append(button);
+    }
+  }
+
   function renderRecords(records) {
     if (records.length === 0) {
       showTableMessage(
         "검색 조건에 맞는 조치 기록이 없습니다."
       );
+      recordPagination.replaceChildren();
       return;
     }
 
+    const totalPages = Math.ceil(records.length / recordsPerPage);
+    currentPage = Math.min(currentPage, totalPages);
+    const firstIndex = (currentPage - 1) * recordsPerPage;
+    const pageRecords = records.slice(
+      firstIndex,
+      firstIndex + recordsPerPage
+    );
+
     const rows = document.createDocumentFragment();
 
-    records.forEach(record => {
+    pageRecords.forEach(record => {
       const row = document.createElement("tr");
 
       if (record.status === "완료") {
@@ -557,6 +598,7 @@ function initializePage() {
     });
 
     recordList.replaceChildren(rows);
+    renderPagination(totalPages);
 
     resultMessage.textContent =
       `총 ${records.length}건의 조치 기록이 검색되었습니다.`;
@@ -639,6 +681,8 @@ function initializePage() {
       );
     });
 
+    /* [9.15] 추가내용: 새 검색 결과는 항상 첫 페이지부터 표시합니다. */
+    currentPage = 1;
     renderRecords(filteredRecords);
 
     /* 검색 후 스크롤을 맨 위로 이동합니다. */

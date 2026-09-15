@@ -1697,7 +1697,26 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #room-detail { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; line-height: 1.6; }
 #room-detail strong { color: #293e34; font-size: 13px; font-weight: 600; }
 #room-detail > span { color: #68776e; font-size: 13px; }
-/* 오늘의 기록은 경보 유형별 글자 색과 굵은 건수로 구분합니다. */
+/* [9.15] 수정내용: 오늘의 기록은 알림 유형·단위와 숫자 색을 구분합니다. */
 #room-detail .room-history-urgent { color: #8f3028; }
-#room-detail .room-history-caution { color: #222; }
-#room-detail .room-history-counts b { font-weight: 700; }
+#room-detail .room-history-caution { color: #a97423; }
+#room-detail .room-history-number { color: #222; font-weight: 700; }
+#room-detail .room-history-unit { color: inherit; }
+
+/* [9.15] 수정내용: 대시보드 알림 영역의 내부 스크롤을 제거하고 알림 목록 전체를 표시합니다. */
+@media (min-width: 701px) {
+  main {
+    height: auto;
+    min-height: calc(100dvh - 72px);
+  }
+
+  .layout {
+    flex: 0 0 auto;
+  }
+
+  .side,
+  .alerts-panel {
+    max-height: none;
+    overflow: visible;
+  }
+}

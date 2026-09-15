@@ -8,6 +8,10 @@ let adminHistoryFilter = "전체";
 let adminSelectedUser = null;
 let adminAction = "";
 let adminToastTimer = null;
+// [9.15] 추가내용: 직원 목록은 한 화면에 10명씩 보여 주도록 현재 페이지를 관리한다.
+let adminUserPage = 1;
+let adminHistoryPage = 1;
+const ADMIN_LIST_PAGE_SIZE = 10;
 
 const adminRows = document.querySelector("#admin-user-rows");
 const adminTabs = Array.from(document.querySelectorAll("[data-status]"));
@@ -34,14 +38,60 @@ const adminCreateCompleteDialog = document.querySelector("#admin-create-complete
 const adminHistoryEventDialog = document.querySelector("#admin-history-event-dialog");
 const adminPasswordResetDialog = document.querySelector("#admin-password-reset-dialog");
 const adminDeactivateDialog = document.querySelector("#admin-deactivate-dialog");
+const adminManagementChoiceDialog = document.querySelector("#admin-management-choice-dialog");
+const adminManagementChoiceDescription = document.querySelector("#admin-management-choice-description");
+const adminManagementOptions = Array.from(document.querySelectorAll(".admin-management-option"));
+const adminManagementChoiceConfirm = document.querySelector("#admin-management-choice-confirm");
+const adminPage = document.querySelector("#admin-management-page");
+let adminManagementChoiceAction = "";
+let adminModalScrollPosition = 0;
 let pendingDeactivateRow = null;
 let pendingEventRow = null;
 const adminHistoryRows = document.querySelector("#admin-history-rows");
+const adminUserPagination = document.querySelector("#admin-user-pagination");
+const adminHistoryPagination = document.querySelector("#admin-history-pagination");
 const currentAdminId = document.querySelector("#admin-management-page")?.dataset.adminId || "admin01";
 const historyFilterCards = [...document.querySelectorAll(".history-filter-card")];
 
 const csrfToken = document.querySelector('meta[name="_csrf"]')?.content ?? "";
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content ?? "X-CSRF-TOKEN";
+
+/* [9.15] 추가내용: 목록 화면에서 공통으로 사용하는 페이지 번호 버튼을 만든다. */
+function renderAdminPagination(container, currentPage, totalPages, onPageChange) {
+    if (!container) return;
+
+    container.replaceChildren();
+
+    if (totalPages <= 1) {
+        container.hidden = true;
+        return;
+    }
+
+    container.hidden = false;
+
+    const createButton = (label, page, disabled = false, current = false) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.disabled = disabled;
+
+        if (current) {
+            button.setAttribute("aria-current", "page");
+        } else if (!disabled) {
+            button.addEventListener("click", () => onPageChange(page));
+        }
+
+        return button;
+    };
+
+    container.append(createButton("‹", currentPage - 1, currentPage === 1));
+
+    for (let page = 1; page <= totalPages; page++) {
+        container.append(createButton(String(page), page, false, page === currentPage));
+    }
+
+    container.append(createButton("›", currentPage + 1, currentPage === totalPages));
+}
 
 /**
  * 관리자 API 요청
@@ -253,9 +303,16 @@ function renderAdminUsers() {
         return sameStatus && matchesSearch;
     });
 
+    const totalPages = Math.max(1, Math.ceil(visibleUsers.length / ADMIN_LIST_PAGE_SIZE));
+    adminUserPage = Math.min(adminUserPage, totalPages);
+    const pageUsers = visibleUsers.slice(
+        (adminUserPage - 1) * ADMIN_LIST_PAGE_SIZE,
+        adminUserPage * ADMIN_LIST_PAGE_SIZE
+    );
+
     adminRows.replaceChildren();
 
-    for (const user of visibleUsers) {
+    for (const user of pageUsers) {
         const row = document.createElement("tr");
 
         for (const value of [user.name, user.userId, user.ward || "미배정"]) {
@@ -268,15 +325,35 @@ function renderAdminUsers() {
         const actions = document.createElement("div");
         actions.className = "admin-row-actions";
 
-        const userActions = user.status === "PENDING"
-            ? [
-                ["APPROVE", "✓ 승인", "admin-approve", ""],
-                ["REJECT", "× 반려", "admin-reject", ""]
-            ]
-            : [
-                ["ASSIGN", "병동 변경", "admin-approve", "building"],
-                ["DEACTIVATE", "비활성화", "admin-reject", "trash"]
-            ];
+        // [9.15] 수정내용: 연필 아이콘을 누르면 중앙 팝업에서 필요한 관리 기능을 선택하도록 구성한다.
+        if (user.status !== "PENDING") {
+            const editButton = document.createElement("button");
+
+            editButton.type = "button";
+            editButton.className = "admin-icon-button admin-edit-button";
+            editButton.innerHTML = `
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m4 16.5-.7 3.2 3.2-.7L18.4 7.1 15.9 4.6 4 16.5Z" />
+                    <path d="m14.6 5.9 2.5 2.5" />
+                </svg>`;
+            editButton.title = "직원 관리 기능 열기";
+            editButton.setAttribute("aria-label", `${user.name} 관리 기능 열기`);
+
+            editButton.addEventListener("click", () => {
+                openAdminManagementChoice(user);
+            });
+
+            actions.append(editButton);
+            actionsCell.append(actions);
+            row.append(actionsCell);
+            adminRows.append(row);
+            continue;
+        }
+
+        const userActions = [
+            ["APPROVE", "✓ 승인", "admin-approve", ""],
+            ["REJECT", "× 반려", "admin-reject", ""]
+        ];
 
         for (const [action, label, className, icon] of userActions) {
             const button = document.createElement("button");
@@ -286,16 +363,24 @@ function renderAdminUsers() {
                 ? `${className} admin-icon-button`
                 : className;
 
-            if (icon === "building") {
+            if (icon === "bed") {
                 button.innerHTML = `
                     <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 21h16M6 21V7l6-3 6 3v14M9 10h1M14 10h1M9 14h1M14 14h1M10 21v-3h4v3" />
+                        <path d="M3 18v-5M21 18v-5M3 15h18v4M6 15v-5h5a3 3 0 0 1 3 3v2M6 10V7h5v3" />
                     </svg>`;
                 button.title = label;
-            } else if (icon === "trash") {
+            } else if (icon === "key") {
                 button.innerHTML = `
                     <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6" />
+                        <circle cx="8" cy="15" r="3" />
+                        <path d="M10.2 12.8 18 5m-2 0h2v2m-4.2 2.2L16 11.5" />
+                    </svg>`;
+                button.title = label;
+            } else if (icon === "user-block") {
+                button.innerHTML = `
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="8" r="3" />
+                        <path d="M6.5 20a5.5 5.5 0 0 1 7.7-5M17 17l4 4m0-4-4 4" />
                     </svg>`;
                 button.title = label;
             } else {
@@ -308,6 +393,11 @@ function renderAdminUsers() {
             );
 
             button.addEventListener("click", () => {
+                if (action === "RESET_PASSWORD") {
+                    resetUserPassword(user.userId, button);
+                    return;
+                }
+
                 openAdminAction(user, action);
             });
 
@@ -320,7 +410,66 @@ function renderAdminUsers() {
     }
 
     adminEmpty.hidden = visibleUsers.length > 0;
+    renderAdminPagination(adminUserPagination, adminUserPage, totalPages, page => {
+        adminUserPage = page;
+        renderAdminUsers();
+    });
 }
+
+/* [9.15] 추가내용: 직원별 관리 기능을 중앙 선택 팝업에서 고른 뒤 실행한다. */
+function openAdminManagementChoice(user) {
+    adminSelectedUser = user;
+    adminManagementChoiceAction = "";
+    adminManagementChoiceDescription.textContent = `${user.name} (${user.userId})님에게 적용할 관리 작업을 선택해주세요.`;
+    adminManagementChoiceConfirm.disabled = true;
+
+    for (const option of adminManagementOptions) {
+        option.classList.remove("is-selected");
+        option.setAttribute("aria-checked", "false");
+    }
+
+    adminModalScrollPosition = adminPage?.scrollTop ?? 0;
+    document.body.classList.add("admin-modal-open");
+    adminManagementChoiceDialog.showModal();
+}
+
+/* [9.15] 추가내용: 팝업을 닫으면 고정했던 배경 화면을 기존 위치로 되돌린다. */
+adminManagementChoiceDialog?.addEventListener("close", () => {
+    document.body.classList.remove("admin-modal-open");
+    if (adminPage) adminPage.scrollTop = adminModalScrollPosition;
+});
+
+for (const option of adminManagementOptions) {
+    option.addEventListener("click", () => {
+        adminManagementChoiceAction = option.dataset.adminAction;
+        adminManagementChoiceConfirm.disabled = false;
+
+        for (const item of adminManagementOptions) {
+            const selected = item === option;
+            item.classList.toggle("is-selected", selected);
+            item.setAttribute("aria-checked", String(selected));
+        }
+    });
+}
+
+document.querySelector("#admin-management-choice-cancel")?.addEventListener("click", () => {
+    adminManagementChoiceDialog.close();
+});
+
+adminManagementChoiceConfirm?.addEventListener("click", () => {
+    if (!adminSelectedUser || !adminManagementChoiceAction) return;
+
+    const selectedUser = adminSelectedUser;
+    const selectedAction = adminManagementChoiceAction;
+    adminManagementChoiceDialog.close();
+
+    if (selectedAction === "RESET_PASSWORD") {
+        resetUserPassword(selectedUser.userId, adminManagementChoiceConfirm);
+        return;
+    }
+
+    openAdminAction(selectedUser, selectedAction);
+});
 
 /**
  * 승인 상태 탭을 변경한다.
@@ -533,18 +682,33 @@ adminSearchForm.addEventListener("submit", event => {
     event.preventDefault();
 
     adminSearchQuery = adminSearchInput.value.trim().toLowerCase();
+    // [9.15] 추가내용: 새 검색 결과는 각 목록의 첫 페이지부터 표시한다.
+    adminUserPage = 1;
+    adminHistoryPage = 1;
     renderAdminUsers();
+    // [9.15] 수정내용: 관리 이력 화면에서는 같은 검색어로 이력 목록도 함께 갱신한다.
+    filterHistory(adminHistoryFilter);
 });
 
 adminSearchForm.addEventListener("reset", () => {
     adminSearchQuery = "";
+    // [9.15] 추가내용: 검색 초기화 시 각 목록의 페이지도 첫 페이지로 되돌린다.
+    adminUserPage = 1;
+    adminHistoryPage = 1;
     renderAdminUsers();
+    // [9.15] 수정내용: 검색 초기화 시 관리 이력의 필터 결과도 전체 목록으로 되돌린다.
+    filterHistory(adminHistoryFilter);
 });
 
 adminSearchInput.addEventListener("input", event => {
     if (!event.target.value) {
         adminSearchQuery = "";
+        // [9.15] 추가내용: 검색어를 지우면 목록을 첫 페이지부터 다시 표시한다.
+        adminUserPage = 1;
+        adminHistoryPage = 1;
         renderAdminUsers();
+        // [9.15] 수정내용: 검색어를 지우면 관리 이력도 현재 유형 필터 기준으로 다시 표시한다.
+        filterHistory(adminHistoryFilter);
     }
 });
 
@@ -669,15 +833,11 @@ adminHistoryEventDialog?.addEventListener("cancel", event => {
     }
 });
 
-/* 브라우저에서 비밀번호를 만들지 않고 서버의 비밀번호 초기화 API를 호출한다. */
-document.querySelector("#admin-event-change")?.addEventListener("click", async event => {
+/* [9.15] 수정내용: 직원 목록과 관리 이력 상세에서 같은 비밀번호 초기화 처리를 사용한다. */
+async function resetUserPassword(userId, resetButton, closeHistoryDialog = false) {
     if (adminPasswordResetPending) {
         return;
     }
-
-    const userId = document.querySelector("#event-target")
-        ?.textContent
-        .trim();
 
     if (!userId) {
         showAdminFeedback(
@@ -686,7 +846,6 @@ document.querySelector("#admin-event-change")?.addEventListener("click", async e
         return;
     }
 
-    const resetButton = event.currentTarget;
     const closeButton = document.querySelector(
         "#admin-history-event-close"
     );
@@ -724,7 +883,9 @@ document.querySelector("#admin-event-change")?.addEventListener("click", async e
             "#reset-account-password"
         ).textContent = result.temporaryPassword;
 
-        adminHistoryEventDialog.close();
+        if (closeHistoryDialog) {
+            adminHistoryEventDialog.close();
+        }
         adminPasswordResetDialog.showModal();
     } catch (error) {
         showAdminFeedback(
@@ -739,6 +900,15 @@ document.querySelector("#admin-event-change")?.addEventListener("click", async e
             closeButton.disabled = false;
         }
     }
+}
+
+/* [9.15] 수정내용: 관리 이력 상세의 초기화 버튼도 공통 비밀번호 초기화 기능으로 연결한다. */
+document.querySelector("#admin-event-change")?.addEventListener("click", event => {
+    const userId = document.querySelector("#event-target")
+        ?.textContent
+        .trim();
+
+    resetUserPassword(userId, event.currentTarget, true);
 });
 
 /* 임시 비밀번호 팝업을 닫으면 화면에서 비밀번호 원문을 제거한다. */
@@ -792,8 +962,12 @@ document.querySelector("#copy-reset-password")?.addEventListener("click", async 
     }
 });
 
-function filterHistory(action) {
+function filterHistory(action, resetPage = false) {
     adminHistoryFilter = action;
+
+    if (resetPage) {
+        adminHistoryPage = 1;
+    }
 
     historyFilterCards.forEach(card => {
         card.classList.toggle(
@@ -810,7 +984,7 @@ function filterHistory(action) {
         ...document.querySelectorAll("#admin-history-rows tr")
     ];
 
-    let visible = 0;
+    const matchedRows = [];
 
     for (const row of rows) {
         const cells = row.querySelectorAll("td");
@@ -829,26 +1003,40 @@ function filterHistory(action) {
             action === "전체"
             || row.dataset.historyAction === action;
 
-        row.hidden =
-            !matchesType
-            || !searchable.includes(adminSearchQuery);
-
-        if (!row.hidden) {
-            visible++;
+        if (matchesType && searchable.includes(adminSearchQuery)) {
+            matchedRows.push(row);
         }
     }
+
+    // [9.15] 추가내용: 필터링된 관리 이력은 10건 단위로 나누어 표시한다.
+    const totalPages = Math.max(1, Math.ceil(matchedRows.length / ADMIN_LIST_PAGE_SIZE));
+    adminHistoryPage = Math.min(adminHistoryPage, totalPages);
+    const firstIndex = (adminHistoryPage - 1) * ADMIN_LIST_PAGE_SIZE;
+
+    rows.forEach(row => {
+        row.hidden = !matchedRows.includes(row);
+    });
+
+    matchedRows.forEach((row, index) => {
+        row.hidden = index < firstIndex || index >= firstIndex + ADMIN_LIST_PAGE_SIZE;
+    });
+
+    renderAdminPagination(adminHistoryPagination, adminHistoryPage, totalPages, page => {
+        adminHistoryPage = page;
+        filterHistory(action);
+    });
 
     const result = document.querySelector("#admin-search-result");
 
     if (result) {
         result.textContent =
-            `관리 이력 ${visible}건 / 전체 ${rows.length}건`;
+            `관리 이력 ${matchedRows.length}건 / 전체 ${rows.length}건`;
     }
 
     const empty = document.querySelector("#admin-history-empty");
 
     if (empty) {
-        empty.hidden = visible !== 0;
+        empty.hidden = matchedRows.length !== 0;
     }
 }
 
@@ -873,11 +1061,11 @@ adminHistoryRows?.addEventListener("click", event => {
 });
 
 historyFilterCards.forEach(card => {
-    card.addEventListener("click", () => filterHistory(card.dataset.historyFilter));
+    card.addEventListener("click", () => filterHistory(card.dataset.historyFilter, true));
     card.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            filterHistory(card.dataset.historyFilter);
+            filterHistory(card.dataset.historyFilter, true);
         }
     });
 });
