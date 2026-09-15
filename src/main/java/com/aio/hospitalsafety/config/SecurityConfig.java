@@ -128,9 +128,31 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            var oldSession = request.getSession(false);
+                            String hospitalDomain = oldSession == null
+                                    ? null
+                                    : (String) oldSession.getAttribute(
+                                            com.aio.hospitalsafety.common.SessionConstants.HOSPITAL_DOMAIN
+                                    );
+
+                            if (oldSession != null) {
+                                oldSession.invalidate();
+                            }
+
+                            if (hospitalDomain != null && !hospitalDomain.isBlank()) {
+                                request.getSession(true).setAttribute(
+                                        com.aio.hospitalsafety.common.SessionConstants.HOSPITAL_DOMAIN,
+                                        hospitalDomain
+                                );
+                                response.sendRedirect(request.getContextPath() + "/login");
+                                return;
+                            }
+
+                            response.sendRedirect(request.getContextPath() + "/");
+                        })
+                        .invalidateHttpSession(false)
+                        .clearAuthentication(true)
                 )
                 .sessionManagement(session -> session
                         .maximumSessions(-1)
