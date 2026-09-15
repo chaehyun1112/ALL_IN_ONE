@@ -27,6 +27,9 @@ public class UserProvisioningController {
         this.userProvisioningService = userProvisioningService;
     }
 
+    /**
+     * 관리자가 현재 병원에 직원 계정을 생성한다.
+     */
     @PostMapping("/users")
     public ResponseEntity<CreateUserResponse> createUser(
             @AuthenticationPrincipal HospitalUserDetails loginAdmin,
@@ -37,6 +40,7 @@ public class UserProvisioningController {
         CreateUserResponse response =
                 userProvisioningService.createUser(
                         admin.getHospitalId(),
+                        admin.getUsername(),
                         request
                 );
 
@@ -46,6 +50,9 @@ public class UserProvisioningController {
                 .body(response);
     }
 
+    /**
+     * 현재 로그인 계정이 관리자인지 확인한다.
+     */
     private HospitalUserDetails requireAdmin(
             HospitalUserDetails loginAdmin
     ) {

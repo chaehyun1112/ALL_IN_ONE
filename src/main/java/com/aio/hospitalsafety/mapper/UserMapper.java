@@ -18,6 +18,13 @@ import java.util.Optional;
 public interface UserMapper {
 
     /**
+     * 최초 로그인 비밀번호 변경이 필요한 계정인지 조회한다.
+     */
+    Boolean isInitialUserPassword(
+            @Param("hospitalId") String hospitalId,
+            @Param("userId") String userId);
+
+    /**
      * 로그인 또는 계정 확인 시 HOSP_DIV_ID와 EMP_ID가 모두 일치하는 직원 한 명을 조회한다.
      * XML 연결: &lt;select id="findByHospitalIdAndUserId"&gt;
      * Optional은 조회 결과가 없을 수 있다는 사실을 반환 타입으로 표현한다.
@@ -28,8 +35,9 @@ public interface UserMapper {
 
     /**
      * EMP_ID가 일치하는 직원의 EMP_PW와 UPD_DT를 변경한다.
-     * @Param 이름은 XML 안의 #{userId}, #{passwordHash}와 연결된다.
-     * 반환값은 UPDATE된 행의 개수이며 정상적으로 한 명이 수정되면 1이다.
+     * 비밀번호 변경이 완료되면 MUST_CHANGE_PASSWORD를 FALSE로 변경한다.
      */
-    int updatePassword(@Param("userId") String userId, @Param("passwordHash") String passwordHash);
+    int updatePassword(
+            @Param("userId") String userId,
+            @Param("passwordHash") String passwordHash);
 }

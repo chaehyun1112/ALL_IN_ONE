@@ -123,6 +123,8 @@ select:focus-visible,
   padding: 18.36px 19px 16px;
 }
 
+/* [9.15] 수정내용: 조치 기록은 본문 전용 스크롤을 사용하지 않고 화면 전체 스크롤을 사용합니다. */
+
 /* 패널 공통 스타일 */
 .page-intro,
 .search-form,
@@ -135,7 +137,8 @@ select:focus-visible,
 /* 제목 영역 */
 .page-intro {
   height: 73.42px;
-  padding: 11.7px 18.59px;
+  /* [9.15] 수정내용: 조치 기록 제목과 설명이 위쪽에 붙어 보이지 않도록 아래로 내립니다. */
+  padding: 15px 18.59px 8.4px;
 }
 
 /* 화면 제목 */
@@ -416,14 +419,19 @@ select:focus-visible,
 
 /* 기록 패널 */
 .record-panel {
-  height: 551px;
+  /* [9.15] 수정내용: 기록 수에 따라 목록 영역이 아래로 자연스럽게 늘어나도록 합니다. */
+  height: auto;
+  min-height: 360px;
   margin-top: 17.7px;
   padding: 10px 13.08px 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 표 제목 */
 .record-title {
-  margin: 0 0 3px;
+  /* [9.15] 수정내용: 제목과 조치 기록 목록 사이의 간격을 넓힙니다. */
+  margin: 0 0 10px;
   color: #2d3c34;
   font-size: 11.01px;
   line-height: 14px;
@@ -433,11 +441,39 @@ select:focus-visible,
 
 /* 기록 스크롤 영역 */
 .table-scroll {
-  height: calc(100% - 17px);
-  overflow: auto;
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding-right: 6px;
-  scrollbar-width: thin;
-  scrollbar-color: #a09988 #e4e0d4;
+}
+
+/* [9.15] 추가내용: 조치 기록 목록을 스크롤 대신 페이지 버튼으로 이동합니다. */
+.record-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding-top: 8px;
+}
+
+.record-pagination button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #d6d0c2;
+  border-radius: 5px;
+  background: #fff;
+  color: #666b61;
+  font-size: 10px;
+}
+
+.record-pagination button:hover,
+.record-pagination button[aria-current="page"] {
+  border-color: #527563;
+  background: #527563;
+  color: #fff;
 }
 
 /* 표 */
@@ -1021,7 +1057,8 @@ select:focus-visible,
 
 /* 팝업 뒤 배경 */
 .record-content-dialog::backdrop {
-  background: rgb(15 23 42 / 40%);
+  /* [9.15] 수정내용: 모달은 돋보이되 뒤 화면은 아주 옅게만 흐리게 표시합니다. */
+  background: rgb(15 23 42 / 12%);
 }
 
 .record-content-header {

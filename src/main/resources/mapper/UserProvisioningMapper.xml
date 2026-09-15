@@ -21,8 +21,6 @@
         )
     </select>
 
-    <!-- 실제 DB에는 email 컬럼이 없고 auth_st 기본값이 'APPROVED'라서
-         (SignupMapper.xml과 동일하게) 두 컬럼은 INSERT에서 생략한다. -->
     <insert id="insertUser">
         INSERT INTO tb_emp (
             emp_id,
@@ -30,7 +28,9 @@
             hosp_div_id,
             ward_id,
             emp_nm,
-            role_cd
+            role_cd,
+            auth_st,
+            must_change_password
         )
         VALUES (
             #{userId},
@@ -38,7 +38,9 @@
             #{hospitalId},
             #{wardId},
             #{userName},
-            'USER'
+            'USER',
+            'APPROVED',
+            TRUE
         )
     </insert>
 

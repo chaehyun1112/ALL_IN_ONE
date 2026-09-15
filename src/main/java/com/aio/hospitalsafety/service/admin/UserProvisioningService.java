@@ -17,25 +17,40 @@ public class UserProvisioningService {
     private final UserProvisioningMapper userProvisioningMapper;
     private final TemporaryPasswordGenerator temporaryPasswordGenerator;
     private final PasswordEncoder passwordEncoder;
+    private final AdminHistoryService adminHistoryService;
 
     public UserProvisioningService(
             UserProvisioningMapper userProvisioningMapper,
             TemporaryPasswordGenerator temporaryPasswordGenerator,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            AdminHistoryService adminHistoryService
     ) {
         this.userProvisioningMapper = userProvisioningMapper;
         this.temporaryPasswordGenerator = temporaryPasswordGenerator;
         this.passwordEncoder = passwordEncoder;
+        this.adminHistoryService = adminHistoryService;
     }
 
+    /**
+     * 관리자가 현재 병원에 직원 계정을 생성한다.
+     *
+     * 계정 생성과 감사 로그 저장은 같은 트랜잭션에서 처리한다.
+     * 감사 로그 저장에 실패하면 계정 생성도 함께 취소된다.
+     */
     @Transactional
     public CreateUserResponse createUser(
             String hospitalId,
+            String adminId,
             CreateUserRequest request
     ) {
         String normalizedHospitalId = requireText(
                 hospitalId,
                 "병원 정보가 없습니다."
+        );
+
+        String normalizedAdminId = requireText(
+                adminId,
+                "작업 관리자 정보가 없습니다."
         );
 
         String normalizedUserId = requireText(
@@ -88,6 +103,14 @@ public class UserProvisioningService {
                     "이미 사용 중인 직원 아이디입니다."
             );
         }
+
+        // 직원 계정 생성에 성공한 경우에만 CREATE 감사 로그를 저장한다.
+        adminHistoryService.record(
+                normalizedHospitalId,
+                normalizedAdminId,
+                normalizedUserId,
+                AdminHistoryService.CREATE
+        );
 
         return new CreateUserResponse(
                 normalizedUserId,

@@ -1,6 +1,7 @@
 // PGH
 package com.aio.hospitalsafety.controller;
 
+import com.aio.hospitalsafety.common.SessionConstants;
 import com.aio.hospitalsafety.dto.NewPasswordForm;
 import com.aio.hospitalsafety.dto.PasswordChangeForm;
 import com.aio.hospitalsafety.config.HospitalUserDetails;
@@ -18,6 +19,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
 
 /**
  * 비밀번호 관련 화면 요청을 처리하는 MVC Controller다.
@@ -40,6 +46,19 @@ public class UserPasswordController {
         this.userService = userService;
     }
 
+    @PostMapping("/user/password/verify")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> verifyInitialPassword(
+            Authentication authentication, @RequestParam String initialPassword) {
+        if (authentication == null
+                || !(authentication.getPrincipal() instanceof HospitalUserDetails loginUser)) {
+            return ResponseEntity.status(401).header("Cache-Control", "no-store").build();
+        }
+        boolean matches = userService.verifyInitialPassword(
+                loginUser.getHospitalId(), loginUser.getUsername(), initialPassword);
+        return ResponseEntity.ok().header("Cache-Control", "no-store").body(Map.of("matches", matches));
+    }
+
     /**
      * 로그아웃 상태에서 접근하는 비밀번호 재설정 화면이다.
      *
@@ -47,7 +66,7 @@ public class UserPasswordController {
      */
     @GetMapping("/password/reset")
     public String resetGuide(HttpSession session, Model model) {
-        if (session.getAttribute(AuthController.LOGIN_HOSPITAL_ID) == null) {
+        if (session.getAttribute(SessionConstants.HOSPITAL_DOMAIN) == null) {
             return "redirect:/login";
         }
         if (!model.containsAttribute("newPasswordForm")) {
@@ -64,7 +83,8 @@ public class UserPasswordController {
      * @param model PasswordChangeForm을 HTML에 전달할 Model
      */
     @GetMapping("/user/password")
-    public String changePage(Model model) {
+    public String changePage(Model model, Authentication authentication) {
+        model.addAttribute("initialPasswordChange", isInitialPasswordChange(authentication));
         // redirect 후 FlashAttribute로 전달된 객체가 있다면 덮어쓰지 않는다.
         if (!model.containsAttribute("passwordChangeForm")) {
             // 빈 DTO를 넣어야 HTML의 th:object="${passwordChangeForm}"이 정상 동작한다.
@@ -90,8 +110,11 @@ public class UserPasswordController {
             @Valid @ModelAttribute("passwordChangeForm") PasswordChangeForm form, // HTML 폼 입력값을 담은 DTO
             BindingResult bindingResult,
             Model model,
+            RedirectAttributes redirectAttributes,
             HttpServletRequest request,
             HttpServletResponse response) {
+        boolean initialUserPassword = isInitialPasswordChange(authentication);
+        model.addAttribute("initialPasswordChange", initialUserPassword);
         // Bean Validation에서 하나라도 실패했다면 Service와 DB를 호출하지 않는다.
         if (bindingResult.hasErrors()) {
             // 검증 실패 화면의 HTML에 사용자가 입력한 PW가 다시 포함되지 않도록 비운다.
@@ -111,10 +134,17 @@ public class UserPasswordController {
         PasswordChangeResult result = userService.changePassword(
                 userDetails.getHospitalId(), authentication.getName(), form.getCurrentPassword(), form.getNewPassword());
 
+        if (result == PasswordChangeResult.SAME_PASSWORD) {
+            bindingResult.rejectValue("newPassword", "same",
+                    (initialUserPassword ? "초기" : "현재") + " 비밀번호와 다른 비밀번호를 입력해주세요.");
+            clearPasswordFields(form);
+            return "html/settings/password-change";
+        }
+
         if (result == PasswordChangeResult.CURRENT_PASSWORD_MISMATCH) {
             // rejectValue는 특정 DTO 필드에 서버 측 오류 메시지를 추가한다.
             // password-change.html의 th:errors="*{currentPassword}"에서 출력된다.
-            bindingResult.rejectValue("currentPassword", "mismatch", "현재 비밀번호가 일치하지 않습니다.");
+            bindingResult.rejectValue("currentPassword", "mismatch", "비밀번호가 일치하지않습니다");
             clearPasswordFields(form);
             return "html/password-change";
         }
@@ -125,10 +155,24 @@ public class UserPasswordController {
             return "html/password-change";
         }
 
+        if (initialUserPassword) {
+            clearPasswordFields(form);
+            request.changeSessionId();
+            redirectAttributes.addFlashAttribute("passwordChanged", true);
+            return "redirect:/user/password";
+        }
+
         // 변경 성공 후 인증 정보와 기존 세션을 제거하고 새 비밀번호로 다시 로그인한다.
         new SecurityContextLogoutHandler().logout(request, response, authentication);
         // 성공 여부만 쿼리 파라미터로 전달해 로그인 화면에서 변경 완료 안내를 표시한다.
         return "redirect:/login?passwordChanged";
+    }
+
+    private boolean isInitialPasswordChange(Authentication authentication) {
+        return authentication != null
+                && authentication.getPrincipal() instanceof HospitalUserDetails loginUser
+                && loginUser.getAuthorities().stream().anyMatch(a -> "ROLE_USER".equals(a.getAuthority()))
+                && userService.isInitialUserPassword(loginUser.getHospitalId(), loginUser.getUsername());
     }
 
     /** 비밀번호 원문이 응답 HTML에 남지 않도록 DTO의 세 입력값을 제거한다. */

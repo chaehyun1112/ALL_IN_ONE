@@ -119,8 +119,10 @@ document.addEventListener("DOMContentLoaded", () => {
       for(const [type,label] of [["urgent","낙상"],["caution","침대 이탈"]]){
         if(summary.childNodes.length)summary.append(" · ");
         const item=document.createElement("span");item.className=`room-history-${type}`;
-        const number=document.createElement("b");number.textContent=counts[type];
-        item.append(`${label} `,number,"건");summary.append(item);
+        const number=document.createElement("b");number.className="room-history-number";number.textContent=counts[type];
+        const unit=document.createElement("span");unit.className="room-history-unit";unit.textContent="건";
+        /* [9.15] 수정내용: 알림 유형·건은 유형 색, 숫자는 검정색으로 구분합니다. */
+        item.append(`${label} `,number,unit);summary.append(item);
       }
     }else summary.textContent="오늘 감지된 이벤트가 없습니다.";
     detail.replaceChildren(title,summary);

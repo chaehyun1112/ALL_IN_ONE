@@ -11,12 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * 병합 메모(park + chae): GET /login은 AuthController(park)가 소유한다.
- * 원래 chae 브랜치에는 이 Controller에도 GET /login(1단계 로그인 화면)이 있었지만,
- * park의 2단계 로그인(AuthController)이 실제 인증까지 연결된 유일한 구현이라 그쪽으로 통일했다.
- * 이 Controller는 회원가입 진입 전 "병원 도메인 선택"(/, /domain)만 담당한다.
- */
 @Controller
 public class HomeController {
 
@@ -29,6 +23,16 @@ public class HomeController {
     @GetMapping("/")
     public String home() {
         return "html/index";
+    }
+
+    // 기존 유형 선택 주소로 접근해도 공통 로그인 화면으로 이동합니다.
+    @GetMapping("/role")
+    public String roleSelection(HttpSession session) {
+        // 병원 도메인을 먼저 확인합니다.
+        if (session.getAttribute(SessionConstants.HOSPITAL_DOMAIN) == null) {
+            return "redirect:/";
+        }
+        return "redirect:/login";
     }
 
     @PostMapping("/domain")
@@ -47,10 +51,30 @@ public class HomeController {
                 return "html/index";
             }
             session.setAttribute(SessionConstants.HOSPITAL_DOMAIN, hospital.hospitalDomain());
-            return "redirect:/access-type";
+            // 도메인 확인 후 공통 로그인 화면으로 바로 이동합니다.
+            return "redirect:/login";
         } catch (DataAccessException exception) {
             model.addAttribute("domainError", "병원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.");
             return "html/index";
         }
+    }
+
+    @GetMapping("/login")
+    public String login(HttpSession session, Model model) {
+        String hospitalDomain = (String) session.getAttribute(SessionConstants.HOSPITAL_DOMAIN);
+        if (hospitalDomain == null || hospitalDomain.isBlank()) return "redirect:/";
+        try {
+            HospitalDto hospital = hospitalService.findHospitalByDomain(hospitalDomain);
+            if (hospital != null) {
+                model.addAttribute("hospitalName", hospital.hospitalName());
+                model.addAttribute("hospitalId", hospital.hospitalDomain());
+                return "html/auth/login";
+            }
+        } catch (DataAccessException exception) {
+            model.addAttribute("domainError", "병원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+            return "html/index";
+        }
+        session.removeAttribute(SessionConstants.HOSPITAL_DOMAIN);
+        return "redirect:/";
     }
 }
