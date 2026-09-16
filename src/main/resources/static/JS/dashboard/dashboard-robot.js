@@ -34,6 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let robotDispatchRoom = null;
   let robotResolveTimer = null;
   let currentX = 0, currentY = 0, travelId = 0;
+  /* 같은 경보(eventId)는 한 번 확인하러 다녀오면 다시 출동하지 않는다.
+     이게 없으면 실제 대시보드 경보는 관리자가 "대응 등록"으로 완료 처리하기
+     전까지 계속 urgent 상태라서, 로봇이 도착한 자리에 영원히 멈춰 서 있게 된다. */
+  let lastHandledEventId = null;
 
   function relativeCenter(el) {
     const floorRect = floorEl.getBoundingClientRect();
@@ -84,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function dispatchRobotTo(number) {
+  async function dispatchRobotTo(number, eventId) {
     if (robotDispatchRoom === number) return;
     robotDispatchRoom = number;
     clearTimeout(robotResolveTimer);
@@ -92,9 +96,14 @@ document.addEventListener("DOMContentLoaded", () => {
     await travelViaCorridor(number);
     if (robotDispatchRoom !== number) return;
     setRobotMode("arrived");
-    /* [참고] 실제 대응 완료 처리와는 별개로, 화면 시연용으로 잠시 후 순찰로 복귀한다.
-       병실 상태 자체는 dashboard.js의 대응 등록 흐름이 바꾸므로 여기서는 건드리지 않는다. */
-    robotResolveTimer = setTimeout(checkDispatch, 4000);
+    /* [참고] 실제 대응 완료 처리와는 별개로, 화면 시연용으로 잠시 확인하는 시늉을 한 뒤
+       순찰로 복귀한다. 병실 상태 자체는 dashboard.js의 대응 등록 흐름이 바꾸므로
+       여기서는 건드리지 않되, 이 경보는 "확인 완료"로 표시해서 로봇이 계속 멈춰
+       서 있지 않고 순찰을 이어가게 한다(같은 경보로는 다시 출동하지 않음). */
+    robotResolveTimer = setTimeout(() => {
+      lastHandledEventId = eventId ?? lastHandledEventId;
+      resumeRobotPatrol();
+    }, 4000);
   }
 
   function resumeRobotPatrol() {
@@ -107,7 +116,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function checkDispatch() {
     const urgentRoom = [...rooms.values()].find((room) => room.status === "urgent");
     if (urgentRoom) {
-      if (robotDispatchRoom !== urgentRoom.number) dispatchRobotTo(urgentRoom.number);
+      if (robotDispatchRoom === urgentRoom.number) return;
+      if (urgentRoom.eventId != null && urgentRoom.eventId === lastHandledEventId) return;
+      dispatchRobotTo(urgentRoom.number, urgentRoom.eventId);
     } else if (robotDispatchRoom !== null) {
       resumeRobotPatrol();
     }
