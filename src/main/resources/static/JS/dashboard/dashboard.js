@@ -43,7 +43,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const alertPanel=document.querySelector(".alerts-panel");
   const corridorNode=document.getElementById("central-corridor");
   // [2026.09.16] 추가한 내용: 환자를 특정하지 않아도 위치만으로 표시할 수 있는 복도 낙상 경보 예시입니다.
-  const corridorAlert={location:"중앙 복도",cameraId:"C-02",cameraLocation:"305호 앞",status:"urgent",acknowledged:false,eventId:"corridor-fall-001",occurredAt:"2026-09-16T14:33:00+09:00"};
+  // [2026.09.16] 고친 내용: 복도 감지 위치를 화면 방향 대신 고정 방위 표기인 서·화장실 앞으로 표시합니다.
+  const corridorAlert={location:"중앙 복도",cameraId:"C-02",cameraLocation:"서·화장실 앞",status:"urgent",acknowledged:false,eventId:"corridor-fall-001",occurredAt:"2026-09-16T14:33:00+09:00"};
   let selected=null, corridorSelected=false, filter="all";
   /* [추가] 전체 화면 상태와 ‘전체’ 카드의 선택 테두리를 분리해 관리합니다. */
   let cardSelected=false;
@@ -207,7 +208,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if(corridorAlert.status!=="normal"){
       const card=document.createElement("article");card.className="alert-card corridor-alert";
-      card.innerHTML=`<div class="alert-top"><strong>● 긴급</strong></div><h3>${corridorAlert.location} <span class="event-label">낙상 감지</span></h3><p>감지 위치 · ${corridorAlert.cameraLocation}</p><button type="button" class="locate-room">위치 확인 →</button>`;
+      // [2026.09.16] 고친 내용: 복도 알림에서는 넓은 구역명보다 실제 발생 위치를 제목으로 크게 표시합니다.
+      card.innerHTML=`<div class="alert-top"><strong>● 긴급</strong></div><h3>${corridorAlert.cameraLocation} <span class="event-label">낙상 감지</span></h3><p>발생 구역 · ${corridorAlert.location}</p><button type="button" class="locate-room">위치 확인 →</button>`;
       card.querySelector("button").setAttribute("aria-pressed",String(corridorSelected));
       card.querySelector("button").addEventListener("click",chooseCorridor);alertPanel.append(card);
     }

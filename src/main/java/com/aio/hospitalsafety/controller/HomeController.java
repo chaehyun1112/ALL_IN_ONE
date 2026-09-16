@@ -28,11 +28,7 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String home(
-            Authentication authentication,
-            HttpSession session,
-            HttpServletRequest request
-    ) {
+    public String home(Authentication authentication) {
         // [2026.09.16] 고친 내용: 로그인된 사용자가 루트 주소를 새로고침해도 도메인 입력 화면으로 돌아가지 않게 합니다.
         if (authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
@@ -44,11 +40,7 @@ public class HomeController {
             return "redirect:/dashboard";
         }
 
-        // [2026.09.16] 추가한 내용: 서버 재시작으로 세션이 사라져도 선택한 병원 도메인은 복원해 로그인 화면으로 이동합니다.
-        if (restoreHospitalDomainFromCookie(session, request)) {
-            return "redirect:/login";
-        }
-
+        // [2026.09.16] 고친 내용: 루트 주소는 저장된 도메인 쿠키와 관계없이 항상 병원 도메인 입력 화면을 표시합니다.
         return "html/auth/index";
     }
 
