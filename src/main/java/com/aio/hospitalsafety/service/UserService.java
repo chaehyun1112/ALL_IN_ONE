@@ -1,4 +1,4 @@
-// PGH
+// PGH 
 package com.aio.hospitalsafety.service;
 
 import com.aio.hospitalsafety.domain.User;
@@ -36,10 +36,6 @@ public class UserService {
                 || initialPassword.getBytes(
                         java.nio.charset.StandardCharsets.UTF_8
                 ).length > 72) {
-            return false;
-        }
-
-        if (!isInitialUserPassword(hospitalId, userId)) {
             return false;
         }
 
