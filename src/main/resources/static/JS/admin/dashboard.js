@@ -1026,13 +1026,6 @@ function filterHistory(action, resetPage = false) {
         filterHistory(action);
     });
 
-    const result = document.querySelector("#admin-search-result");
-
-    if (result) {
-        result.textContent =
-            `관리 이력 ${matchedRows.length}건 / 전체 ${rows.length}건`;
-    }
-
     const empty = document.querySelector("#admin-history-empty");
 
     if (empty) {

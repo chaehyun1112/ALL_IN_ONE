@@ -69,6 +69,30 @@ header {
   font-size:12px;
   font-variant-numeric:tabular-nums;
   color:#dbe6df}
+/* [2026.09.16] 추가한 내용: 전체화면 버튼의 스타일과 진입·해제 아이콘 표시를 설정합니다. */
+.fullscreen-toggle {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:36px;
+  padding:7px 10px;
+  border:1px solid #ffffff50;
+  border-radius:8px;
+  background:transparent;
+  color:#fff;
+  font-size:12px;
+  white-space:nowrap;
+  flex-shrink:0}
+.fullscreen-toggle:hover {background:#ffffff18}
+.fullscreen-toggle:focus-visible {outline:2px solid #d3e3d7;outline-offset:3px}
+.fullscreen-toggle:disabled {opacity:.55;cursor:default}
+.fullscreen-exit,
+.fullscreen-toggle[aria-pressed="true"] .fullscreen-enter {display:none}
+.fullscreen-toggle[aria-pressed="true"] .fullscreen-exit {display:initial}
+/* [2026.09.16] 추가한 내용: 좁은 화면에서는 전체화면 버튼의 아이콘만 표시합니다. */
+@media(max-width:700px) {
+  #fullscreen-label {display:none}
+}
 .demo {
   font-size:11px;
   padding:5px 9px;
@@ -1633,12 +1657,14 @@ main{height:auto;min-height:calc(100dvh - 72px)}
   outline:none;
 }
 
-/* [수정] 선택된 상단 현황 카드의 외곽선을 연한 회색으로 변경합니다. */
+/* [2026.09.16] 고친 내용: 선택된 오늘의 안전 현황 카드는 예시처럼 얇은 초록 테두리와 연한 바깥 강조선으로 표시합니다. */
 .counts .count[aria-pressed="true"]{
-  outline:2px solid #b8b8b8;
-  outline-offset:2px;
-  box-shadow:none;
+  border-color:#6f9275 !important;
+  outline:none !important;
+  box-shadow:0 0 0 2px #6f927580 !important;
 }
+.counts .count:focus,
+.counts .count:focus-visible { outline:none !important; }
 
 
 /* [수정] 조치 기록 등록 버튼을 연한 회색 계열로 변경합니다. */
@@ -1682,6 +1708,12 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #response-dialog .response-actions button:hover {
   border-color: #bfc3c7;
 }
+/* [2026.09.16] 고친 내용: 조치 기록 등록 버튼은 기본 회색을 유지하고 마우스를 올렸을 때만 초록색으로 강조합니다. */
+#response-dialog .response-actions button[type="submit"]:hover {
+  background: #385b4d;
+  border-color: #385b4d;
+  color: #fff;
+}
 #response-dialog .response-actions button:focus-visible {
   outline: 2px solid #bfc3c7;
   outline-offset: 2px;
@@ -1703,20 +1735,133 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #room-detail .room-history-number { color: #222; font-weight: 700; }
 #room-detail .room-history-unit { color: inherit; }
 
-/* [9.15] 수정내용: 대시보드 알림 영역의 내부 스크롤을 제거하고 알림 목록 전체를 표시합니다. */
-@media (min-width: 701px) {
-  main {
-    height: auto;
-    min-height: calc(100dvh - 72px);
+/* [2026.09.16] 고친 내용: 데스크톱·노트북에서 화면 높이에 맞춰 여백과 평면도를 조절합니다.
+   글자나 화면 전체를 확대·축소하지 않고 실제 사용 가능한 CSS 화면 크기를 기준으로 배치합니다. */
+@media (min-width: 1000px) {
+  :root {
+    --dashboard-header-height: clamp(56px, 8dvh, 72px);
+    --dashboard-gap: clamp(12px, 1.8dvh, 20px);
+    --dashboard-padding: clamp(12px, 1.5vw, 28px);
   }
-
-  .layout {
+  body > header {
+    height: var(--dashboard-header-height);
+    padding-inline: var(--dashboard-padding);
+  }
+  body > main {
+    height: calc(100dvh - var(--dashboard-header-height));
+    min-height: 510px;
+    padding: var(--dashboard-gap) var(--dashboard-padding);
+    gap: var(--dashboard-gap);
+  }
+  /* [2026.09.16] 고친 내용: 전체화면에서는 본문 상단 여백을 조금 늘려 화면 요소가 위에 몰리지 않게 합니다. */
+  html:fullscreen body > main {
+    padding-top: clamp(22px, 3dvh, 34px);
+  }
+  .page-heading { flex: 0 0 auto; }
+  .page-heading .summary {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: clamp(16px, 2vw, 32px);
+    padding: clamp(10px, 1.5dvh, 18px) var(--dashboard-padding);
+  }
+  .page-heading .summary h2 {
     flex: 0 0 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: clamp(14px, 1.05vw, 18px);
+    white-space: nowrap;
   }
-
-  .side,
-  .alerts-panel {
-    max-height: none;
-    overflow: visible;
+  .page-heading .counts { min-width: 0; flex: 1; gap: clamp(8px, 1vw, 14px); }
+  .page-heading .counts .count {
+    height: clamp(48px, 7dvh, 64px);
+    min-height: 48px;
+    padding: 8px clamp(10px, 1vw, 16px);
   }
+  /* [2026.09.16] 고친 내용: 좌우 영역을 약 72:28 비율로 유지하고 고정 너비로 인한 배치 변화를 줄입니다. */
+  main > .layout {
+    flex: 0 0 auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 72fr) minmax(260px, 28fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--dashboard-gap);
+  }
+  .layout > .floor-panel {
+    min-width: 0;
+    min-height: 0;
+    padding: clamp(12px, 1.5dvh, 20px);
+  }
+  /* [2026.09.16] 고친 내용: 대응 등록 버튼을 상태 범례 아래에 오른쪽 정렬하고 제목은 상단에 맞춥니다. */
+  .layout > .floor-panel > .panel-heading { align-items: flex-start; gap: 12px; }
+  .floor-panel > .panel-heading h2 {
+    font-size: clamp(14px, 1.05vw, 18px);
+    white-space: nowrap;
+  }
+  .layout > .floor-panel > .panel-heading .room-heading-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .floor-panel > .panel-heading .legend { gap: 10px; }
+  .floor-panel > .panel-heading .legend-response { min-height: 30px; }
+  .floor-panel > .panel-heading .response-open { min-width: 80px; }
+  /* [2026.09.16] 고친 내용: 병실을 화면 높이만큼 늘리지 않고 원래 평면도의 가로세로 비율을 유지합니다. */
+  .layout > .floor-panel > .floor {
+    flex: 0 0 auto;
+    min-height: 0;
+    margin-top: var(--dashboard-gap);
+    padding: clamp(12px, 2dvh, 24px) clamp(10px, 1vw, 18px);
+    grid-template-rows: auto auto auto;
+  }
+  .floor .room-row { gap: clamp(3px, .4vw, 6px); aspect-ratio: 7.6 / 1; min-height: 90px; }
+  .floor .corridor { aspect-ratio: 12 / 1; min-height: 48px; }
+  .floor .room { min-width: 0; padding-inline: clamp(3px, .4vw, 6px); }
+  .floor .room strong { font-size: clamp(11px, .85vw, 14px); white-space: nowrap; }
+  .floor .room small { font-size: clamp(10px, .75vw, 12px); white-space: nowrap; }
+  .floor-panel > .floor-footer {
+    min-height: 42px;
+    margin-top: var(--dashboard-gap);
+    padding: 8px 12px;
+  }
+  /* [2026.09.16] 고친 내용: 알림이 늘어나도 전체 화면 비율은 유지하고 알림 목록 안에서 스크롤합니다. */
+  .layout > .side { display: flex; min-width: 0; min-height: 0; overflow: hidden; }
+  .layout > .side > .alerts-panel {
+    position: static;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    padding: clamp(12px, 1.2vw, 20px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: auto;
+  }
+  .alerts-panel .alert-heading { top: -12px; margin-bottom: 0; padding-block: 8px; }
+  .alerts-panel .alert-heading h2 { font-size: clamp(14px, 1.05vw, 18px); }
+  .alerts-panel .alert-card { padding: clamp(10px, 1vw, 16px); }
+  .alerts-panel .alert-card h3 { flex-wrap: wrap; font-size: clamp(17px, 1.3vw, 23px); }
+  .alerts-panel .alert-card p { overflow-wrap: anywhere; }
+}
+/* [2026.09.16] 고친 내용: 하단 전체 너비의 가로형 카드에 병실명·두 종류의 건수·최근 기록을 배치합니다. */
+.dashboard-history-card { flex: 0 0 auto; min-width: 0; padding: 18px 24px; }
+.dashboard-history-card #room-detail { display:grid; grid-template-columns:1.2fr 1fr 1fr 1.4fr; gap:20px; align-items:center; min-height:88px; }
+#room-detail .history-heading, #room-detail .history-recent { display:flex; flex-direction:column; gap:6px; min-width:0; }
+#room-detail .history-heading > strong { font-size:18px; }
+#room-detail .history-heading > span, #room-detail .history-recent > span, #room-detail .history-recent time { color:var(--muted); font-size:12px; }
+#room-detail .history-metric { border-left:1px solid var(--border); padding-left:24px; }
+#room-detail .history-metric > span { font-size:13px; }
+#room-detail .history-metric > div { display:flex; align-items:baseline; gap:6px; }
+#room-detail .history-metric strong { font-size:30px; line-height:1.3; font-variant-numeric:tabular-nums; }
+#room-detail .history-metric > div > span { color:var(--muted); font-size:12px; }
+#room-detail .history-recent { border-left:1px solid var(--border); padding-left:24px; }
+/* [2026.09.16] 추가한 내용: 좁은 창에서는 카드 내용을 두 줄로 나누어 글씨 겹침을 방지합니다. */
+@media(max-width:999px) {
+  .dashboard-history-card #room-detail { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #room-detail .history-heading { grid-column:1 / -1; }
+  #room-detail .history-metric { border:0; padding-left:0; }
+  #room-detail .history-recent { grid-column:1 / -1; border-left:0; border-top:1px solid var(--border); padding:12px 0 0; }
+}
+/* [2026.09.16] 추가한 내용: 작은 창에서는 글씨를 과도하게 줄이지 않고 세로 배치와 스크롤로 내용을 보존합니다. */
+@media (max-width: 999px) {
+  .layout > .side { display: flex; }
+  .layout > .side > .alerts-panel { max-height: 480px; overflow-y: auto; }
 }

@@ -1,5 +1,38 @@
 "use strict";
 document.addEventListener("DOMContentLoaded", () => {
+  /* [2026.09.16] 추가한 내용: 버튼으로 전체화면을 전환하고 Esc 해제 시에도 버튼 상태를 동기화합니다. */
+  const fullscreenToggle = document.getElementById("fullscreen-toggle");
+  const fullscreenLabel = document.getElementById("fullscreen-label");
+  function syncFullscreenButton() {
+    const isFullscreen = Boolean(document.fullscreenElement);
+    const label = isFullscreen ? "전체화면 해제" : "전체화면";
+    fullscreenToggle.setAttribute("aria-pressed", String(isFullscreen));
+    fullscreenToggle.setAttribute("aria-label", label);
+    fullscreenToggle.title = label;
+    fullscreenLabel.textContent = label;
+  }
+  document.addEventListener("fullscreenchange", syncFullscreenButton);
+  syncFullscreenButton();
+  if (!document.fullscreenEnabled) {
+    fullscreenToggle.disabled = true;
+    fullscreenToggle.title = "이 브라우저에서는 전체화면을 사용할 수 없습니다.";
+  }
+  fullscreenToggle.addEventListener("click", async () => {
+    fullscreenToggle.disabled = true;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch {
+      window.alert("전체화면 전환에 실패했습니다. 브라우저의 전체화면 권한을 확인해 주세요.");
+    } finally {
+      fullscreenToggle.disabled = !document.fullscreenEnabled;
+      syncFullscreenButton();
+    }
+  });
+
   /* [수정] 화면 예시 상태입니다. 실제 서버 조회 결과로 교체하세요.
      페이지를 열 때 조회한 이전 경보에는 음성을 재생하지 않습니다. */
   const rooms = window.CareGuardRoomStatus.rooms;
@@ -26,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const gap=document.createElement("div");gap.setAttribute("aria-hidden","true");lower.append(gap);
   for(let n=314;n<=317;n++)addRoom(n,lower);lower.append(facility());
 
-  /* [추가] 현황 카드를 키보드로도 선택할 수 있는 버튼으로 변경합니다. */
+  /* [2026.09.16] 고친 내용: 현황 카드를 전체·낙상·침대 이탈·정상 순서로 표시해도 기존 상태 필터와 연결합니다. */
   const cards=[];
   document.querySelectorAll(".counts .count").forEach(old=>{
     const button=document.createElement("button");button.type="button";button.className=old.className;
@@ -98,37 +131,37 @@ document.addEventListener("DOMContentLoaded", () => {
   /* [추가] 빈 배경 클릭 시 병실 선택을 해제합니다.
      버튼·입력칸·등록 창 조작은 선택을 유지합니다. 경보 상태는 변경하지 않습니다. */
   document.addEventListener("click",event=>{
-    if(event.target.closest("button,a,input,select,textarea,label,dialog,[role='button']"))return;
+    if(event.target.closest("button,a,input,select,textarea,label,dialog,[role='button'],.dashboard-history-card"))return;
     /* [수정] 상단 카드 선택도 빈 화면 클릭 시 함께 해제합니다. */
     if(selected===null && filter==="all")return;
     selected=null;
     filter="all";
     cardSelected=false;
     render();
-    detail.textContent="병실을 선택해 주세요.";
   });
   function renderRoomHistory(){
     const room=rooms.get(selected);
-    if(!room){detail.textContent="병실을 선택해 주세요.";return;}
-    const counts=window.CareGuardRoomStatus.todayCounts(room.number);
-    const title=document.createElement("strong");
-    title.textContent=`${room.number}호 · 오늘의 기록`;
-    const summary=document.createElement("span");
-    if(counts.urgent+counts.caution){
-      summary.className="room-history-counts";
-      for(const [type,label] of [["urgent","낙상"],["caution","침대 이탈"]]){
-        if(summary.childNodes.length)summary.append(" · ");
-        const item=document.createElement("span");item.className=`room-history-${type}`;
-        const number=document.createElement("b");number.className="room-history-number";number.textContent=counts[type];
-        const unit=document.createElement("span");unit.className="room-history-unit";unit.textContent="건";
-        /* [9.15] 수정내용: 알림 유형·건은 유형 색, 숫자는 검정색으로 구분합니다. */
-        item.append(`${label} `,number,unit);summary.append(item);
-      }
-    }else summary.textContent="오늘 감지된 이벤트가 없습니다.";
-    detail.replaceChildren(title,summary);
+    // [2026.09.16] 고친 내용: 가로형 기록 카드에 병실·건수·최근 발생 시각을 표시하며 미선택 상태는 대시로 구분합니다.
+    const now=Date.now();
+    const counts=room ? window.CareGuardRoomStatus.todayCounts(room.number,now) : null;
+    const latest=room ? window.CareGuardRoomStatus.latestTodayEvent(room.number,now) : null;
+    detail.innerHTML='<div class="history-heading"><strong class="history-room"></strong><span>오늘의 기록</span></div>'+
+      '<div class="history-metric"><span class="room-history-urgent">낙상 감지</span><div><strong class="history-fall"></strong><span>건</span></div></div>'+
+      '<div class="history-metric"><span class="room-history-caution">침대 이탈</span><div><strong class="history-exit"></strong><span>건</span></div></div>'+
+      '<div class="history-recent"><span>최근 기록</span><strong class="history-event"></strong><time></time></div>';
+    detail.querySelector('.history-room').textContent=room ? `${room.number}호` : '병실을 선택해 주세요';
+    detail.querySelector('.history-fall').textContent=counts ? counts.urgent : '—';
+    detail.querySelector('.history-exit').textContent=counts ? counts.caution : '—';
+    detail.querySelector('.history-event').textContent=latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 병실의 기록을 표시합니다.';
+    const time=detail.querySelector('time');
+    if(latest){
+      time.dateTime=new Date(latest.occurredAt).toISOString();
+      time.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(latest.occurredAt));
+    }else time.hidden=true;
   }
   function render(){
     const counts={all:rooms.size,normal:0,caution:0,urgent:0};
+    // [2026.09.16] 고친 내용: 하단 카드는 renderRoomHistory에서 선택 병실의 오늘 기록만 표시합니다.
     for(const room of rooms.values()){
       counts[room.status]++;const node=nodes.get(room.number);
       node.classList.toggle("urgent",room.status==="urgent");node.classList.toggle("caution",room.status==="caution");
@@ -140,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       node.setAttribute("aria-pressed",String(selected===room.number));
     }
     cards.forEach(card=>{card.querySelector("b").textContent=counts[card.dataset.filter];card.setAttribute("aria-pressed",String(cardSelected&&filter===card.dataset.filter));});
-    filterInfo.querySelector("span").textContent=filter==="all"?"전체 병실 표시 중":`${{normal:"정상 병실",caution:"주의",urgent:"긴급"}[filter]} 강조 중 · 긴급 병실은 항상 표시`;
+    filterInfo.querySelector("span").textContent=filter==="all"?"전체 병실 표시 중":`${{normal:"정상 병실",caution:"침대 이탈",urgent:"낙상"}[filter]} 강조 중 · 낙상 병실은 항상 표시`;
     const chosen=rooms.get(selected);
     responseOpen.style.visibility=chosen&&chosen.status!=="normal"?"visible":"hidden";
     responseOpen.disabled=!chosen||chosen.status==="normal";
@@ -217,7 +250,8 @@ document.addEventListener("DOMContentLoaded", () => {
   updateClock();setInterval(()=>{
     updateClock();
     const today=window.CareGuardRoomStatus.dayKey(Date.now());
-    if(today!==historyDay){historyDay=today;renderRoomHistory();}
+    // [2026.09.16] 고친 내용: 날짜가 바뀌면 하단의 오늘 누적 카드도 함께 갱신합니다.
+    if(today!==historyDay){historyDay=today;render();}
   },1000);render();
   window.addEventListener("pagehide",()=>{audioAllowed=false;for(const n of [...jobs.keys()])cancelAudio(n);audio.pause();});
 });

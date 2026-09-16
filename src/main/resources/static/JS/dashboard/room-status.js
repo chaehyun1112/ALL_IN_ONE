@@ -35,6 +35,16 @@ window.CareGuardRoomStatus = {
     }
     return counts;
   };
+  // [2026.09.16] 추가한 내용: 선택 병실의 오늘 기록 중 실제 발생 시각이 가장 최근인 이벤트를 조회합니다.
+  state.latestTodayEvent = (number, now = Date.now()) => {
+    let latest = null;
+    const today = state.dayKey(now);
+    for (const event of events.values()) {
+      if (event.room === Number(number) && state.dayKey(event.occurredAt) === today &&
+          event.occurredAt <= now && (!latest || event.occurredAt > latest.occurredAt)) latest = event;
+    }
+    return latest ? {...latest} : null;
+  };
   // 기존 화면 예시 경보만 오늘의 예시 이력으로 초기화합니다. 새로고침하면 예시 상태로 돌아갑니다.
   for (const room of state.rooms.values()) {
     if (room.status === "normal") continue;

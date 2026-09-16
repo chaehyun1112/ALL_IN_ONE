@@ -290,7 +290,8 @@ async function submitAdminStatusChange(event) {
         adminPendingStatusChange = null;
         adminStatusDialog.close();
         if (!failures.length && change.nextStatus === "ACTIVATE") {
-            window.location.assign(document.querySelector("#admin-settings-back").href);
+            // [2026.09.16] 고친 내용: 삭제한 복귀 링크 대신 활성화 완료 후 관리자 직원 관리 화면으로 이동합니다.
+            window.location.assign("/admin?status=APPROVED");
             return;
         }
         const loaded = await loadAdminInactiveData();

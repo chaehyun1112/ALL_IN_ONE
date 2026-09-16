@@ -44,8 +44,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-heading { padding: 0 12px; margin-bottom: 20px; }
 .admin-heading h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.35; letter-spacing: -1px; }
 .admin-heading p { margin: 0; font-size: 13px; color: var(--admin-muted); }
-.admin-history-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
+/* [2026.09.16] 고친 내용: 계정 생성 요약 카드를 제거하고 남은 네 카드의 너비·높이·내용 정렬을 동일하게 맞춥니다. */
+.admin-history-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
 .admin-history-summary article { display: flex; align-items: center; gap: 12px; min-height: 88px; padding: 17px; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
+.admin-history-summary article > div { display: flex; min-width: 0; min-height: 48px; flex: 1; flex-direction: column; justify-content: center; }
 .history-filter-card { cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
 .history-filter-card:hover, .history-filter-card:focus-visible { border-color: #7d9b87; box-shadow: 0 0 0 3px #6f92751f; outline: 0; transform: translateY(-1px); }
 .history-filter-card:focus { outline: 0; }
@@ -160,6 +162,11 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-page.is-history-page #admin-user-pagination { display: none; }
 .admin-panel > .admin-history-panel { padding-top: 0; border-top: 0; }
 .admin-panel > .admin-history-panel > header { display: none; }
+/* [2026.09.16] 고친 내용: 관리 이력 화면은 본문 바깥 스크롤을 없애고 이력 표 영역에만 스크롤을 남깁니다. */
+#admin-management-page.is-history-page { overflow-y: hidden; }
+#admin-management-page.is-history-page .admin-panel { display: flex; min-height: 0; flex-direction: column; }
+#admin-management-page.is-history-page .admin-history-panel { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+#admin-management-page.is-history-page .admin-history-wrap { min-height: 0; max-height: none; flex: 1 1 auto; }
 /* [09.13]수정내용: 관리 이력이 많아져도 페이지 전체가 늘어나지 않도록 목록 영역에 세로 스크롤을 적용한다. */
 .admin-history-wrap { max-height: 360px; overflow: auto; margin-top: 18px; margin-right: -14px; padding-right: 14px; scrollbar-width: thin; scrollbar-color: #9aaba0 #f0f1eb; }
 .admin-history-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -186,8 +193,8 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .history-actions button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .history-actions button:hover { background: transparent; opacity: .7; }
 .admin-dialog { width: min(420px, calc(100% - 32px)); padding: 28px; border: 1px solid var(--admin-border); border-radius: 14px; color: var(--admin-text); background: var(--admin-surface); }
-/* [2026-09-16 변경] 공통 팝업 너비 규칙보다 뒤에서 직원 관리 선택 창의 가로 너비를 넓게 적용한다. */
-#admin-management-choice-dialog.admin-management-choice-dialog { width: min(580px, calc(100% - 32px)); }
+/* [2026.09.16] 고친 내용: 직원 관리 작업 선택 카드의 가로 폭을 40px 늘려 항목 사이 여백을 자연스럽게 맞춥니다. */
+#admin-management-choice-dialog.admin-management-choice-dialog { width: min(620px, calc(100% - 32px)); }
 /* [2026-09-16 변경] 관리 작업 선택 창의 취소·선택 버튼을 조금 넓혀 누르기 쉽게 만든다. */
 #admin-management-choice-cancel, #admin-management-choice-confirm { min-width: 72px; }
 .admin-dialog::backdrop { background: #1c302666; }
@@ -267,6 +274,9 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
     .admin-search input, .admin-tabs { width: 100%; }
     .admin-table { min-width: 620px; }
     .admin-history-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* [2026.09.16] 고친 내용: 작은 화면에서는 내용이 잘리지 않도록 페이지 스크롤을 사용합니다. */
+    #admin-management-page.is-history-page { overflow-y: auto; }
+    #admin-management-page.is-history-page .admin-history-wrap { max-height: 360px; flex: none; }
     .admin-panel-heading { align-items: stretch; flex-direction: column; }
     .admin-create-account { align-self: flex-start; }
     .admin-create-grid { grid-template-columns: 1fr; }
