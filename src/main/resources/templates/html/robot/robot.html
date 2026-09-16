@@ -3,126 +3,347 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CareGuard · 로봇 위치</title>
+  <title>CareGuard · 병동 통합 관제</title>
 
-  <!-- 대시보드와 같은 디자인(헤더·평면도·카드)을 쓰지만, 대시보드 CSS 파일을
-       직접 참조하지 않도록 필요한 스타일만 robot.css에 옮겨 담았습니다. -->
-  <link rel="stylesheet" href="./robot.css" th:href="@{/css/robot/robot.css}">
+  <!-- CSS 파일 연결 -->
+  <!-- [추가] 메인 대시보드 화면을 그대로 복사한 화면이라 같은 CSS를 그대로 쓴다. -->
+  <link
+    rel="stylesheet"
+    href="../../../static/css/dashboard/dashboard.css" th:href="@{/css/dashboard/dashboard.css}"
+  >
+  <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
+  <link rel="stylesheet" href="../../../static/css/dashboard/room-selection.css" th:href="@{/css/dashboard/room-selection.css}">
 </head>
 
 <body>
-  <!-- 상단 헤더: 대시보드와 동일한 브랜드 영역을 사용합니다. -->
+  <!-- 상단 헤더 -->
   <header>
     <div class="brand">
       <div class="brand-icon" aria-hidden="true">+</div>
       <strong>CareGuard</strong>
-      <span>순찰 로봇 관제</span>
+      <span>병동 통합 관제</span>
     </div>
 
     <div class="header-actions">
+      <!-- 현재 시간 -->
       <time id="clock"></time>
 
       <div class="header-menu">
         <button
           type="button"
-          class="menu-toggle"
-          id="menu-toggle"
-          aria-label="더보기"
+          class="profile-toggle"
+          id="profile-toggle"
+          aria-label="사용자 메뉴"
           aria-expanded="false"
           aria-controls="header-menu-list"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
-            <path d="M5 6h14"></path>
-            <path d="M5 12h14"></path>
-            <path d="M5 18h14"></path>
-          </svg>
+          <span class="profile-avatar" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+              <circle cx="12" cy="8" r="3.5"/>
+              <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+            </svg>
+          </span>
+          <span class="profile-copy"><strong th:text="${displayName + ' 간호사'}">이름 간호사</strong><small>A병동</small></span>
+          <span class="profile-chevron" aria-hidden="true">▿</span>
         </button>
 
-        <nav class="header-menu-list" id="header-menu-list" aria-label="메뉴" hidden>
+        <nav
+          class="header-menu-list"
+          id="header-menu-list"
+          aria-label="대시보드 메뉴"
+          hidden
+        >
+          <a href="auth/Record.html"
+             th:href="@{/Record}">조치기록</a>
           <a href="" th:href="@{/dashboard}">메인 대시보드</a>
-          <a href="" th:href="@{/Record}">조치기록</a>
-          <button type="button" id="logout-open">로그아웃</button>
+          <a href="settings/settings.html" th:href="@{/settings}" id="settings-open">설정</a>
+          <button
+            type="submit"
+            id="logout-open"
+            form="logout-form"
+          >
+            로그아웃
+          </button>
         </nav>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- 로봇 현재 상태 요약 -->
-    <div class="page-heading">
-      <section class="panel summary robot-summary">
-        <h2>순찰 로봇 현황</h2>
+  <form id="logout-form" action="auth/index.html" th:action="@{/logout}"
+        method="get" th:method="post" hidden></form>
 
-        <div class="counts robot-counts">
-          <div class="count" id="robot-mode-card">
-            <span>상태</span>
-            <b id="robot-mode-label">순찰 중</b>
-          </div>
+  <main>
+    <!-- 오늘의 안전 현황 -->
+    <div class="page-heading">
+      <section class="panel summary">
+        <h2>오늘의 안전 현황</h2>
+
+        <div class="counts">
+          <div class="count all"><span>전체</span><b id="all-count">17</b></div>
           <div class="count">
-            <span>현재 위치</span>
-            <b id="robot-location-label">-</b>
+            <span>정상</span>
+            <b id="normal-count">15</b>
           </div>
-          <div class="count">
-            <span>목적지</span>
-            <b id="robot-target-label">-</b>
+
+          <div class="count caution">
+            <span>주의</span>
+            <b id="caution-count">1</b>
+          </div>
+
+          <div class="count urgent">
+            <span>긴급</span>
+            <b id="urgent-count">1</b>
           </div>
         </div>
       </section>
     </div>
 
     <div class="layout">
-      <!-- 병동 평면도 + 로봇 위치 -->
+      <!-- 병동 평면도 (여기 위에 로봇 마커가 순찰합니다) -->
       <section class="panel floor-panel">
         <div class="panel-heading">
-          <h2>병동 평면도 · 로봇 위치</h2>
+          <h2>병실별 안전 상태</h2>
 
+          <div class="room-heading-actions">
           <div class="legend">
             <span>정상</span>
             <span class="caution">주의</span>
             <span class="urgent">긴급</span>
           </div>
+          <div class="legend-response">
+            <button type="button" id="response-open" class="response-open" style="visibility: hidden" disabled>대응 등록</button>
+          </div>
+          </div>
         </div>
 
-        <div class="floor" id="robot-floor">
-          <!-- 위쪽 병실은 JS로 생성됩니다 (읽기 전용) -->
-          <div class="room-row" id="upper-rooms"></div>
+        <div class="floor">
+          <!-- 위쪽 병실은 JS로 생성됩니다 -->
+          <div
+            class="room-row"
+            id="upper-rooms"
+          ></div>
 
+          <!-- 중앙 복도 -->
           <div class="corridor">
             <span>←</span>
             <span>중앙 복도</span>
             <span>→</span>
           </div>
 
-          <!-- 아래쪽 병실은 JS로 생성됩니다 (읽기 전용) -->
-          <div class="room-row bottom" id="lower-rooms"></div>
-
-          <!-- 로봇 위치 표시(JS가 위치를 갱신합니다) -->
-          <div class="robot-marker" id="robot-marker" aria-hidden="true">🤖</div>
+          <!-- 아래쪽 병실은 JS로 생성됩니다 -->
+          <div
+            class="room-row bottom"
+            id="lower-rooms"
+          ></div>
         </div>
 
+        <!-- 병실 선택 결과 -->
         <div class="floor-footer">
-          <div class="robot-status" id="robot-status">
-            <span class="robot-status-dot" aria-hidden="true"></span>
-            <span id="robot-status-text">병동 순찰 중입니다.</span>
-          </div>
+          <span
+            id="room-detail"
+            class="selection"
+            role="status"
+          >
+            병실을 선택해 주세요.
+          </span>
         </div>
       </section>
 
-      <!-- 로봇 대응 이력 -->
+      <!-- 확인이 필요한 알림 -->
       <aside class="side">
         <section class="panel alerts-panel">
           <div class="alert-heading">
-            <h2>로봇 대응 이력</h2>
-            <span class="alert-total" id="robot-log-total">0건</span>
+            <h2>확인이 필요한 알림</h2>
+            <span
+              class="alert-total"
+              id="alert-total"
+            >
+              2건
+            </span>
           </div>
 
-          <!-- JS가 최근 순서로 이벤트 카드를 추가합니다 -->
-          <div id="robot-log-list" class="robot-log-list"></div>
+          <!-- 낙상 감지 알림 -->
+          <article
+            class="alert-card"
+            data-alert-room="305"
+          >
+            <div class="alert-top">
+              <strong>● 긴급</strong>
+              <time>14:28</time>
+            </div>
+
+            <h3>
+              305호
+              <span class="event-label">낙상 감지</span>
+            </h3>
+
+            <p>즉시 확인해 주세요.</p>
+
+            <button
+              type="button"
+              class="locate-room"
+              data-locate="305"
+            >
+              위치 확인 →
+            </button>
+          </article>
+
+          <!-- 침대 이탈 알림 -->
+          <article
+            class="alert-card caution"
+            data-alert-room="312"
+          >
+            <div class="alert-top">
+              <strong>● 주의</strong>
+              <time>14:31</time>
+            </div>
+
+            <h3>
+              312호
+              <span class="event-label">침대 이탈</span>
+            </h3>
+
+            <p>병실을 확인해주세요.</p>
+
+            <button
+              type="button"
+              class="locate-room"
+              data-locate="312"
+            >
+              위치 확인 →
+            </button>
+          </article>
         </section>
       </aside>
     </div>
   </main>
 
-  <script src="./robot.js" th:src="@{/JS/robot/robot.js}"></script>
+  <!-- 설정 창 -->
+  <dialog
+    class="settings-dialog"
+    id="settings-dialog"
+  >
+    <h2>설정</h2>
+
+    <p id="settings-filter">현재 필터: 전체 병실</p>
+    <p id="settings-summary">전체 병실을 표시하고 있습니다.</p>
+
+    <form method="dialog">
+      <button type="submit">
+        닫기
+      </button>
+    </form>
+  </dialog>
+
+  <!-- 대응 등록 창 -->
+  <dialog
+    id="response-dialog"
+    class="response-dialog"
+    aria-labelledby="response-title"
+  >
+    <form id="response-form">
+      <h2 id="response-title">
+        경보 대응 등록
+      </h2>
+
+      <p>
+        현장 확인 후 대응 정보를 등록해 주세요.
+      </p>
+
+      <div
+        id="response-event"
+        class="response-event"
+      ></div>
+
+      <label
+        class="field"
+        for="response-patient"
+      >
+        환자 이름
+      </label>
+
+      <input
+        id="response-patient"
+        type="text"
+        required
+        maxlength="50"
+        placeholder="환자 이름을 입력하세요."
+      >
+
+      <label
+        class="field"
+        for="response-nurse"
+      >
+        간호사 이름
+      </label>
+
+      <input
+        id="response-nurse"
+        type="text"
+        required
+        maxlength="50"
+        placeholder="간호사 이름을 입력하세요."
+      >
+
+      <fieldset>
+        <legend>조치 상태</legend>
+
+        <div class="response-options">
+          <label>
+            <input
+              type="radio"
+              name="response-status"
+              value="checking"
+              checked
+            >
+            확인 중
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="response-status"
+              value="complete"
+            >
+            조치 완료
+          </label>
+        </div>
+      </fieldset>
+
+      <label
+        class="field"
+        for="response-note"
+      >
+        조치 내용
+      </label>
+
+      <textarea
+        id="response-note"
+        maxlength="1000"
+        required
+        placeholder="확인한 상태와 조치 내용을 입력하세요."
+      ></textarea>
+
+      <div class="response-actions">
+        <button
+          type="button"
+          id="response-cancel"
+        >
+          취소
+        </button>
+
+        <button type="submit">
+          조치 기록 등록
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
+  <script src="../../../static/JS/dashboard/room-status.js" th:src="@{/JS/dashboard/room-status.js}"></script>
+  <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js" th:src="@{/JS/dashboard/dashboard.js}"></script>
+  <!-- [추가] 메인 대시보드와 다른 유일한 부분: 평면도 위에 순찰 로봇 마커를 띄운다. -->
+  <script src="../../../static/JS/dashboard/dashboard-robot.js" th:src="@{/JS/dashboard/dashboard-robot.js}"></script>
 </body>
 </html>

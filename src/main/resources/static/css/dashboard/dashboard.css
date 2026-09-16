@@ -1720,3 +1720,43 @@ main{height:auto;min-height:calc(100dvh - 72px)}
     overflow: visible;
   }
 }
+
+/* =========================================================
+   순찰 로봇 마커 (/robot 화면에서만 쓰임 — 메인 대시보드 화면을
+   그대로 복사한 그 화면 위에만 로봇이 움직인다)
+   ========================================================= */
+.robot-marker{
+  position:absolute;
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  font-size:16px;
+  line-height:1;
+  background:#385b4d;
+  color:#fff;
+  border-radius:50%;
+  border:2px solid #fff;
+  box-shadow:0 3px 10px #1c2f2650,0 0 0 3px #385b4d30;
+  transform:translate(-50%,-50%);
+  transition:left 1.8s linear,top 1.8s linear;
+  z-index:5;
+  pointer-events:none;
+}
+.robot-marker.dispatch{
+  background:#a93630;
+  box-shadow:0 3px 10px #1c2f2650,0 0 0 4px #bc494540;
+  animation:dashboard-robot-pulse 1s ease-in-out infinite;
+}
+.robot-marker.arrived{
+  background:#a97423;
+  box-shadow:0 3px 10px #1c2f2650,0 0 0 4px #a9742340;
+}
+@keyframes dashboard-robot-pulse{
+  0%,100%{box-shadow:0 3px 10px #1c2f2650,0 0 0 4px #bc494540}
+  50%{box-shadow:0 3px 10px #1c2f2650,0 0 0 9px #bc494515}
+}
+@media(prefers-reduced-motion:reduce){
+  .robot-marker{transition:none}
+  .robot-marker.dispatch{animation:none}
+}
