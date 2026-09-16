@@ -151,7 +151,8 @@ select:focus-visible,
 
 /* 제목 아래 설명 */
 .page-description {
-  margin: 3.4px 0 0;
+  /* [2026.09.16] 고친 내용: 조치 기록 제목과 안내 문구 사이의 세로 간격을 넓힙니다. */
+  margin: 8px 0 0;
   color: #666b61;
   font-size: 8.95px;
   line-height: 14px;
