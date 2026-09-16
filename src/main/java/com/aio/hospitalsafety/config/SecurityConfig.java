@@ -100,10 +100,11 @@ public class SecurityConfig {
                         })
                         .failureHandler((request, response, exception) -> {
                             String error = switch (exception) {
+                                // [2026-09-16 변경] 아이디·비밀번호 중 어느 값이 틀렸는지 노출하지 않고 공통 오류로 안내한다.
                                 case UsernameNotFoundException ignored ->
-                                        "userId";
+                                        "credentials";
                                 case BadCredentialsException ignored ->
-                                        "password";
+                                        "credentials";
                                 case DisabledException ignored ->
                                         "disabled";
                                 default ->
