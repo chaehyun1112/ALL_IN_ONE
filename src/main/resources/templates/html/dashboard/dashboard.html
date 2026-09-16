@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="../../../static/css/dashboard/room-selection.css" th:href="@{/css/dashboard/room-selection.css}">
 </head>
 
-<body>
+<body th:attr="data-session-url=@{/api/dashboard/session}">
   <!-- 상단 헤더 -->
   <header>
     <div class="brand">
@@ -67,10 +67,10 @@
           aria-label="대시보드 메뉴"
           hidden
         >
-          <a href="auth/Record.html"
+          <a href="../record/record.html"
              th:href="@{/Record}">조치기록</a>
           <!-- [수정완료] 프로필 메뉴에서 설정 화면으로 이동합니다. -->
-          <a href="settings/settings.html" th:href="@{/settings}" id="settings-open">설정</a>
+          <a href="../settings/settings.html" th:href="@{/settings}" id="settings-open">설정</a>
           <!-- [수정완료] 프로필 메뉴의 마지막에 로그아웃을 배치합니다. -->
           <button
             type="submit"
@@ -84,7 +84,7 @@
     </div>
   </header>
 
-  <form id="logout-form" action="auth/index.html" th:action="@{/logout}"
+  <form id="logout-form" action="../auth/index.html" th:action="@{/logout}"
         method="get" th:method="post" hidden></form>
 
   <main>
@@ -359,6 +359,7 @@
   </dialog>
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
+  <script src="../../../static/JS/dashboard/session.js" th:src="@{/JS/dashboard/session.js}"></script>
   <script src="../../../static/JS/dashboard/room-status.js" th:src="@{/JS/dashboard/room-status.js}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <script src="../../../static/JS/dashboard/dashboard.js" th:src="@{/JS/dashboard/dashboard.js}"></script>
