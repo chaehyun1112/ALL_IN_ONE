@@ -36,31 +36,38 @@
           AND EMP_ID = #{userId}
     </select>
 
+    <!-- 비밀번호가 바뀌면(본인이 맞다는 게 증명됐으므로) 실패 카운트/잠금도 함께 초기화한다. -->
     <update id="updatePassword">
         UPDATE TB_EMP
         SET EMP_PW = #{passwordHash},
             MUST_CHANGE_PASSWORD = FALSE,
+            FAILED_LOGIN_COUNT = 0,
+            LOCKED_UNTIL = NULL,
             UPD_DT = CURRENT_TIMESTAMP
         WHERE EMP_ID = #{userId}
     </update>
 
     <!--
         로그인 브루트포스 방어: 실패할 때마다 카운트를 올리고, 5회 단위로 걸릴 때마다
-        15분씩 잠금을 새로 건다(이미 잠긴 상태에서 또 틀려도 잠금 시간이 계속 늘어난다).
+        1분씩 잠금을 새로 건다(이미 잠긴 상태에서 또 틀려도 잠금 시간이 계속 늘어난다).
         WHERE 절에 HOSP_DIV_ID까지 포함해 병원 간 계정 혼동을 막는다.
+        RETURNING으로 갱신된 FAILED_LOGIN_COUNT를 돌려줘서, 이번 실패가 잠금을 새로
+        발생시켰는지(5의 배수) UserService가 판단해 로그인 이력에 남길 수 있게 한다.
+        대상 계정이 없으면(도메인/아이디 불일치) 결과 없이 반환된다.
     -->
-    <update id="registerFailedLogin">
+    <select id="registerFailedLogin" resultType="java.lang.Integer">
         UPDATE TB_EMP
         SET FAILED_LOGIN_COUNT = FAILED_LOGIN_COUNT + 1,
             LOCKED_UNTIL = CASE
                 WHEN (FAILED_LOGIN_COUNT + 1) % 5 = 0
-                    THEN CURRENT_TIMESTAMP + INTERVAL '15 minutes'
+                    THEN CURRENT_TIMESTAMP + INTERVAL '1 minute'
                 ELSE LOCKED_UNTIL
             END,
             UPD_DT = CURRENT_TIMESTAMP
         WHERE HOSP_DIV_ID = #{hospitalId}
           AND EMP_ID = #{userId}
-    </update>
+        RETURNING FAILED_LOGIN_COUNT
+    </select>
 
     <update id="resetFailedLogin">
         UPDATE TB_EMP
@@ -71,4 +78,18 @@
           AND EMP_ID = #{userId}
           AND (FAILED_LOGIN_COUNT != 0 OR LOCKED_UNTIL IS NOT NULL)
     </update>
+
+    <!-- 로그인 실패(FAIL) 또는 그 실패로 인한 잠금 발생(LOCKED)을 이력으로 남긴다. -->
+    <insert id="recordLoginHistory">
+        INSERT INTO TB_LOGIN_HISTORY (
+            HOSP_DIV_ID,
+            EMP_ID,
+            EVENT_CD
+        )
+        VALUES (
+            #{hospitalId},
+            #{userId},
+            #{eventCode}
+        )
+    </insert>
 </mapper>

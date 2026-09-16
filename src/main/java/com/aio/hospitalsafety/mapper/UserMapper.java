@@ -43,9 +43,11 @@ public interface UserMapper {
 
     /**
      * 로그인 실패 시 FAILED_LOGIN_COUNT를 1 올리고, 5회 단위로 걸릴 때마다
-     * LOCKED_UNTIL을 현재로부터 15분 뒤로 새로 건다(브루트포스 방어).
+     * LOCKED_UNTIL을 현재로부터 1분 뒤로 새로 건다(브루트포스 방어).
+     *
+     * @return 갱신된 FAILED_LOGIN_COUNT. 대상 계정이 없으면(도메인/아이디 불일치) null.
      */
-    int registerFailedLogin(
+    Integer registerFailedLogin(
             @Param("hospitalId") String hospitalId,
             @Param("userId") String userId);
 
@@ -55,4 +57,12 @@ public interface UserMapper {
     int resetFailedLogin(
             @Param("hospitalId") String hospitalId,
             @Param("userId") String userId);
+
+    /**
+     * 로그인 실패(FAIL) 또는 그로 인한 잠금 발생(LOCKED)을 이력에 남긴다.
+     */
+    void recordLoginHistory(
+            @Param("hospitalId") String hospitalId,
+            @Param("userId") String userId,
+            @Param("eventCode") String eventCode);
 }

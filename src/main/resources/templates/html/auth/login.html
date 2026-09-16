@@ -71,7 +71,7 @@
             <!-- 아이디가 없는 경우와 비밀번호가 틀린 경우를 구분해서 보여주지 않는다.
                  구분해서 보여주면 어떤 아이디가 실제 존재하는지 공격자가 알아낼 수 있다. -->
             <span th:if="${param.error[0] == 'invalid'}">아이디 또는 비밀번호가 올바르지 않습니다.</span>
-            <span th:if="${param.error[0] == 'locked'}">로그인 시도 횟수를 초과했습니다. 15분 후 다시 시도해 주세요.</span>
+            <span th:if="${param.error[0] == 'locked'}">로그인 시도 횟수를 초과했습니다. 1분 후 다시 시도해 주세요.</span>
             <span th:if="${param.error[0] == 'disabled'}">로그인할 수 없는 계정입니다. 관리자에게 문의해 주세요.</span>
             <span th:if="${param.error[0] == 'unavailable'}">로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.</span>
           </p>

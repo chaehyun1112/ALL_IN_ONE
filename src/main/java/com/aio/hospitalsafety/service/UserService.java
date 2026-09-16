@@ -9,6 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
+    private static final String LOGIN_HISTORY_FAIL = "FAIL";
+    private static final String LOGIN_HISTORY_LOCKED = "LOCKED";
+    private static final int LOCKOUT_THRESHOLD = 5;
+
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -27,11 +31,20 @@ public class UserService {
 
     /**
      * 로그인 브루트포스 방어: 비밀번호를 틀릴 때마다 호출해 실패 횟수를 올리고,
-     * 5회 단위로 걸릴 때마다 15분 잠금을 새로 건다.
+     * 5회 단위로 걸릴 때마다 1분 잠금을 새로 건다. 이번 실패로 잠금이 새로 걸렸는지에
+     * 따라 로그인 이력에 FAIL 또는 LOCKED로 기록한다.
      */
     @Transactional
     public void registerFailedLogin(String hospitalId, String userId) {
-        userMapper.registerFailedLogin(hospitalId, userId);
+        Integer failedLoginCount = userMapper.registerFailedLogin(hospitalId, userId);
+        if (failedLoginCount == null) {
+            return;
+        }
+
+        String eventCode = failedLoginCount % LOCKOUT_THRESHOLD == 0
+                ? LOGIN_HISTORY_LOCKED
+                : LOGIN_HISTORY_FAIL;
+        userMapper.recordLoginHistory(hospitalId, userId, eventCode);
     }
 
     /** 로그인에 성공하면 실패 횟수와 잠금을 초기화한다. */
