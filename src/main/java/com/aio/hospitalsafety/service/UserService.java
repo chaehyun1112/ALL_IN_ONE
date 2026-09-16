@@ -39,10 +39,6 @@ public class UserService {
             return false;
         }
 
-        if (!isInitialUserPassword(hospitalId, userId)) {
-            return false;
-        }
-
         return userMapper.findByHospitalIdAndUserId(hospitalId, userId)
                 .map(user -> passwordEncoder.matches(
                         initialPassword,
