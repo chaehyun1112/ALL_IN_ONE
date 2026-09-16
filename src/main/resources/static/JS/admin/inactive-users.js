@@ -1,5 +1,48 @@
 "use strict";
 
+// [2026.09.16] 고친 내용: 직원 관리 화면 안에서도 비활성화 직원 기능을 함께 실행할 수 있도록 변수 범위를 분리합니다.
+(() => {
+
+// [2026.09.16] 추가한 내용: 비활성화 직원관리 상단 버튼으로 전체화면 진입·해제 상태를 동기화합니다.
+(() => {
+    if (window.__adminFullscreenInitialized) return;
+    window.__adminFullscreenInitialized = true;
+    const toggle = document.querySelector("#admin-fullscreen-toggle");
+    const label = document.querySelector("#admin-fullscreen-label");
+    if (!toggle || !label) return;
+
+    const syncFullscreenButton = () => {
+        const isFullscreen = Boolean(document.fullscreenElement);
+        const text = isFullscreen ? "전체화면 해제" : "전체화면";
+        toggle.setAttribute("aria-pressed", String(isFullscreen));
+        toggle.setAttribute("aria-label", text);
+        toggle.title = text;
+        label.textContent = text;
+    };
+
+    document.addEventListener("fullscreenchange", syncFullscreenButton);
+    syncFullscreenButton();
+    if (!document.fullscreenEnabled) {
+        toggle.disabled = true;
+        toggle.title = "이 브라우저에서는 전체화면을 사용할 수 없습니다.";
+    }
+    toggle.addEventListener("click", async () => {
+        toggle.disabled = true;
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            } else {
+                await document.documentElement.requestFullscreen();
+            }
+        } catch {
+            window.alert("전체화면 전환에 실패했습니다. 브라우저의 전체화면 권한을 확인해 주세요.");
+        } finally {
+            toggle.disabled = !document.fullscreenEnabled;
+            syncFullscreenButton();
+        }
+    });
+})();
+
 const adminFeedback = document.querySelector("#admin-feedback");
 const adminClock = document.querySelector("#admin-clock");
 let adminToastTimer = null;
@@ -352,3 +395,5 @@ document.querySelector("#admin-inactive-retry").addEventListener("click", loadAd
 updateAdminClock();
 setInterval(updateAdminClock, 30000);
 loadAdminInactiveData();
+
+})();

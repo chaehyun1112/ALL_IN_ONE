@@ -1,5 +1,45 @@
 "use strict";
 
+// [2026.09.16] 추가한 내용: 관리자 상단 버튼으로 전체화면 진입·해제 상태를 동기화합니다.
+(() => {
+    if (window.__adminFullscreenInitialized) return;
+    window.__adminFullscreenInitialized = true;
+    const toggle = document.querySelector("#admin-fullscreen-toggle");
+    const label = document.querySelector("#admin-fullscreen-label");
+    if (!toggle || !label) return;
+
+    const syncFullscreenButton = () => {
+        const isFullscreen = Boolean(document.fullscreenElement);
+        const text = isFullscreen ? "전체화면 해제" : "전체화면";
+        toggle.setAttribute("aria-pressed", String(isFullscreen));
+        toggle.setAttribute("aria-label", text);
+        toggle.title = text;
+        label.textContent = text;
+    };
+
+    document.addEventListener("fullscreenchange", syncFullscreenButton);
+    syncFullscreenButton();
+    if (!document.fullscreenEnabled) {
+        toggle.disabled = true;
+        toggle.title = "이 브라우저에서는 전체화면을 사용할 수 없습니다.";
+    }
+    toggle.addEventListener("click", async () => {
+        toggle.disabled = true;
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            } else {
+                await document.documentElement.requestFullscreen();
+            }
+        } catch {
+            window.alert("전체화면 전환에 실패했습니다. 브라우저의 전체화면 권한을 확인해 주세요.");
+        } finally {
+            toggle.disabled = !document.fullscreenEnabled;
+            syncFullscreenButton();
+        }
+    });
+})();
+
 let adminUsers = [];
 let adminWards = [];
 let adminActiveStatus = "ALL";
@@ -1107,6 +1147,40 @@ setInterval(updateAdminClock, 30000);
 
 loadAdminData().catch(() => {
     // 오류 메시지는 loadAdminData에서 표시한다.
+});
+
+// [2026.09.16] 추가한 내용: 관리자 메뉴는 문서를 새로 열지 않고 본문만 바꿔 전체화면을 유지합니다.
+const adminInactiveView = document.querySelector("#admin-inactive-view");
+const adminViewLinks = Array.from(document.querySelectorAll("[data-admin-view]"));
+function setAdminView(view, updateAddress = true) {
+    const isInactive = view === "inactive";
+    adminInactiveView.hidden = !isInactive;
+    adminPage.hidden = isInactive;
+    if (!isInactive) {
+        adminPage.classList.toggle("is-history-page", view === "history");
+        adminPage.classList.toggle("is-staff-page", view !== "history");
+        filterHistory(adminHistoryFilter);
+    }
+    adminViewLinks.forEach(link => {
+        const active = link.dataset.adminView === view;
+        link.classList.toggle("active", active);
+        link.toggleAttribute("aria-current", active);
+    });
+    document.title = view === "history" ? "관리 이력 | 병동 통합 관제"
+        : view === "inactive" ? "비활성화 직원관리 | 병동 통합 관제"
+        : "직원 관리 | 병동 통합 관제";
+    if (updateAddress) {
+        const path = view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : "/admin";
+        window.history.pushState({ adminView: view }, "", path);
+    }
+}
+adminViewLinks.forEach(link => link.addEventListener("click", event => {
+    event.preventDefault();
+    setAdminView(link.dataset.adminView);
+}));
+window.addEventListener("popstate", () => {
+    const path = window.location.pathname;
+    setAdminView(path.endsWith("/history") ? "history" : path.endsWith("/admin_de") ? "inactive" : "staff", false);
 });
 
 

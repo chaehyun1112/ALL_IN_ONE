@@ -31,6 +31,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-logout { padding: 0 16px; font-size: 11px; white-space: nowrap; }
 .admin-settings:hover, .admin-logout:hover { background: #607c6c; border-color: #a1b4a7; }
 .admin-settings:focus-visible, .admin-logout:focus-visible { outline-color: #f1f4ed; }
+/* [2026.09.16] 추가한 내용: 관리자 공통 전체화면 버튼의 크기·아이콘·진입 상태를 상단 메뉴와 맞춥니다. */
+.admin-fullscreen-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:36px; padding:0 12px; border:1px solid #74887b; border-radius:7px; background:#536d60; color:#f3f5ee; font-size:11px; white-space:nowrap; }
+.admin-fullscreen-toggle svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.admin-fullscreen-toggle:hover { background:#607c6c; border-color:#a1b4a7; }
+.admin-fullscreen-toggle:focus-visible { outline:2px solid #f1f4ed; outline-offset:3px; }
+.admin-fullscreen-toggle:disabled { opacity:.55; cursor:default; }
+.admin-fullscreen-exit, .admin-fullscreen-toggle[aria-pressed="true"] .admin-fullscreen-enter { display:none; }
+.admin-fullscreen-toggle[aria-pressed="true"] .admin-fullscreen-exit { display:initial; }
 .admin-page { display: flex; flex-direction: column; height: calc(100vh - 68px); min-height: 0; max-width: 1800px; margin: 0 auto; padding: 24px 24px 36px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: #8ba091 #eeede5; }
 /* [9.15] 추가내용: 본문 스크롤 바는 상단 바 아래에서만 보이도록 스타일을 적용한다. */
 .admin-page::-webkit-scrollbar { width: 10px; }

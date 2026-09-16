@@ -14,7 +14,8 @@
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css"
           th:href="@{/css/admin/dashboard.css}">
-        <link rel="stylesheet" href="../../../static/css/admin/account-create.css" th:href="@{/css/admin/account-create.css}">
+    <link rel="stylesheet" href="../../../static/css/admin/account-create.css" th:href="@{/css/admin/account-create.css}">
+    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css" th:href="@{/css/admin/inactive-users.css}">
 
     <script src="../../../static/JS/admin/dashboard.js"
             th:src="@{/JS/admin/dashboard.js}"
@@ -25,6 +26,9 @@
     <script src="../../../static/JS/admin/account-create.js"
             th:src="@{/JS/admin/account-create.js}"
             defer></script>
+    <script src="../../../static/JS/admin/inactive-users.js"
+            th:src="@{/JS/admin/inactive-users.js}"
+            defer></script>
 </head>
 
 <body>
@@ -34,14 +38,23 @@
         <span>병동 통합 관제</span>
         <!-- [9.15] 추가내용: 직원 관리와 관리 이력 화면을 서로 이동할 수 있는 메뉴를 제공한다. -->
         <nav class="admin-page-nav" aria-label="계정 관리 메뉴">
-            <a href="/admin" th:href="@{/admin}" th:classappend="${pageMode == 'staff'} ? ' active'">직원 관리</a>
-            <a href="/admin/history" th:href="@{/admin/history}" th:classappend="${pageMode == 'history'} ? ' active'">관리 이력</a>
-            <a id="admin-settings" href="admin-inactive-users.html" th:href="@{/admin/admin_de}">비활성화 직원관리</a>
+            <a href="/admin" th:href="@{/admin}" data-admin-view="staff" th:classappend="${pageMode == 'staff'} ? ' active'">직원 관리</a>
+            <a href="/admin/history" th:href="@{/admin/history}" data-admin-view="history" th:classappend="${pageMode == 'history'} ? ' active'">관리 이력</a>
+            <a id="admin-settings" href="admin-inactive-users.html" th:href="@{/admin/admin_de}" data-admin-view="inactive">비활성화 직원관리</a>
         </nav>
     </div>
 
     <div class="admin-topbar-actions">
         <time id="admin-clock"></time>
+        <!-- [2026.09.16] 추가한 내용: 관리자 화면에서도 시간 옆 버튼으로 전체화면을 전환합니다. -->
+        <button type="button" class="admin-fullscreen-toggle" id="admin-fullscreen-toggle"
+                aria-label="전체화면" aria-pressed="false" title="전체화면">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path class="admin-fullscreen-enter" d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>
+                <path class="admin-fullscreen-exit" d="M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3"/>
+            </svg>
+            <span id="admin-fullscreen-label">전체화면</span>
+        </button>
 
         <form action="/logout" th:action="@{/logout}" method="post">
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
@@ -196,6 +209,30 @@
     </div>
     </section>
 </main>
+
+<!-- [2026.09.16] 추가한 내용: 전체화면을 해제하지 않고 본문만 전환할 수 있도록 비활성화 직원관리 화면을 같은 관리자 문서에 둡니다. -->
+<section class="admin-page admin-settings-page" id="admin-inactive-view" aria-labelledby="admin-settings-title" hidden>
+    <header class="admin-heading admin-settings-heading">
+        <h1 id="admin-settings-title" tabindex="-1">비활성화 직원관리</h1>
+        <p>직원의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
+        <div class="admin-inactive-overview"><section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title"><span class="admin-inactive-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><div><h2 id="admin-inactive-stat-title">비활성화 직원</h2><strong id="admin-inactive-count">—<span>명</span></strong></div></section></div>
+        <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title"><div class="admin-guide-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><strong id="admin-account-guide-title">계정 상태 관리</strong></div><p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 직원은 <strong>활성화</strong>로 변경해 주세요.</p></aside>
+    </header>
+    <section class="admin-panel admin-inactive-panel" aria-labelledby="admin-inactive-list-title">
+        <header class="admin-panel-heading admin-inactive-panel-heading"><div><h2 id="admin-inactive-list-title">직원 목록</h2><p>계정 정보와 병동을 확인한 후 상태를 변경해 주세요.</p></div></header>
+        <div class="admin-inactive-toolbar">
+            <form id="admin-inactive-search-form" class="admin-search" role="search" aria-label="비활성화 직원 검색"><div class="admin-search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><label class="visually-hidden" for="admin-inactive-search">이름 또는 아이디 검색</label><input type="search" id="admin-inactive-search" placeholder="이름 또는 아이디 검색" autocomplete="off"></div><button type="submit" class="admin-search-button">검색</button></form>
+            <div class="admin-inactive-filter"><select id="admin-inactive-ward" aria-label="병동 선택"><option value="">전체 병동</option></select></div>
+            <div class="admin-bulk-actions" role="group" aria-label="선택 직원 일괄 관리"><span id="admin-bulk-count" role="status">현재 목록에서 0명 선택</span><div class="admin-bulk-buttons"><button type="button" data-bulk-status="ACTIVATE" disabled>계정 활성화</button><button type="button" data-bulk-status="DELETE" class="admin-bulk-delete" disabled>계정 삭제</button></div></div>
+        </div>
+        <p class="admin-inactive-result" id="admin-inactive-result" role="status">직원 목록을 불러오는 중입니다.</p>
+        <div id="admin-inactive-error" role="alert" hidden><p id="admin-inactive-error-message"></p><button type="button" id="admin-inactive-retry">다시 불러오기</button></div>
+        <div class="admin-table-wrap" id="admin-inactive-list" aria-busy="true"><table class="admin-table admin-inactive-table"><caption class="visually-hidden">비활성화 직원 목록</caption><thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><th scope="col">아이디</th><th scope="col">병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead><tbody id="admin-inactive-rows"></tbody></table><div class="admin-inactive-empty" id="admin-inactive-empty" hidden><strong id="admin-inactive-empty-title">비활성화 직원이 없습니다</strong><p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.</p><button type="button" id="admin-inactive-reset">검색 조건 초기화</button></div></div>
+    </section>
+    <footer class="admin-inactive-footer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>일괄 작업은 현재 검색된 목록에서 선택한 직원에게만 적용됩니다.</footer>
+</section>
+
+<dialog id="admin-status-dialog" class="admin-dialog" aria-labelledby="admin-status-dialog-title" aria-describedby="admin-status-dialog-description"><form id="admin-status-form"><h2 id="admin-status-dialog-title">상태 변경</h2><p id="admin-status-dialog-description"></p><p id="admin-status-dialog-note"></p><div class="admin-dialog-actions"><button type="button" id="admin-status-cancel" autofocus>취소</button><button type="submit" id="admin-status-confirm" class="admin-primary">확인</button></div></form></dialog>
 
 <!-- [9.15] 추가내용: 직원별 관리 작업을 중앙 팝업에서 선택한다. -->
 <dialog id="admin-management-choice-dialog" class="admin-dialog admin-management-choice-dialog" aria-labelledby="admin-management-choice-title">

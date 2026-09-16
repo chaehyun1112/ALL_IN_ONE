@@ -37,6 +37,15 @@
 
     <div class="admin-topbar-actions">
         <time id="admin-clock"></time>
+        <!-- [2026.09.16] 추가한 내용: 비활성화 직원관리에서도 시간 옆 버튼으로 전체화면을 전환합니다. -->
+        <button type="button" class="admin-fullscreen-toggle" id="admin-fullscreen-toggle"
+                aria-label="전체화면" aria-pressed="false" title="전체화면">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path class="admin-fullscreen-enter" d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>
+                <path class="admin-fullscreen-exit" d="M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3"/>
+            </svg>
+            <span id="admin-fullscreen-label">전체화면</span>
+        </button>
 
         <form action="/logout" th:action="@{/logout}" method="post">
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
