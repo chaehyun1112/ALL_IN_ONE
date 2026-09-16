@@ -1725,6 +1725,17 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #response-dialog .response-options label:has(input:checked) {
   background: transparent;
 }
+/* [2026.09.16] 고친 내용: 복도 전체를 칠하지 않고 사람이 찾기 쉬운 위치명 지점만 연한 원으로 점멸시킵니다. */
+.corridor { font:inherit; cursor:pointer; }
+.corridor.urgent[aria-pressed="true"] { outline:2px solid #7d9b87; outline-offset:3px; }
+.corridor-alert-marker { display:none; position:absolute; z-index:2; left:59%; top:50%; width:16px; height:16px; border-radius:50%; transform:translate(-50%,-50%); background:#e99388; box-shadow:0 0 0 5px #e9938830; }
+.corridor-alert-marker::after { content:var(--camera-label); position:absolute; left:50%; bottom:calc(100% + 6px); transform:translateX(-50%); padding:3px 6px; border-radius:5px; background:#8f3028; color:#fff; font-size:10px; font-style:normal; font-weight:700; letter-spacing:0; white-space:nowrap; }
+.corridor.urgent .corridor-alert-marker { display:block; animation:corridor-alert-pulse 1.5s ease-in-out infinite; }
+@keyframes corridor-alert-pulse { 0%,100% { opacity:.55; transform:translate(-50%,-50%) scale(.9); box-shadow:0 0 0 4px #e9938830; } 50% { opacity:1; transform:translate(-50%,-50%) scale(1.1); box-shadow:0 0 0 10px #e9938840; } }
+@media (prefers-reduced-motion:reduce) { .corridor.urgent .corridor-alert-marker { animation:none; opacity:1; } }
+.alert-card.corridor-alert { background:linear-gradient(110deg,#fff1ee,#ffe4df); border-color:#df9b91; border-left-color:#b94339; }
+.alert-card.corridor-alert .alert-top, .alert-card.corridor-alert h3 { color:#8f3028; }
+.alert-card.corridor-alert .event-label, .alert-card.corridor-alert p { color:#75453f; }
 /* 선택 병실의 오늘 이벤트 요약을 좁은 화면에서도 자연스럽게 줄바꿈합니다. */
 #room-detail { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; line-height: 1.6; }
 #room-detail strong { color: #293e34; font-size: 13px; font-weight: 600; }

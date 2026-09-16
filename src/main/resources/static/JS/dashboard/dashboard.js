@@ -41,7 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const detail=document.getElementById("room-detail"), responseOpen=document.getElementById("response-open");
   const dialog=document.getElementById("response-dialog"), form=document.getElementById("response-form");
   const alertPanel=document.querySelector(".alerts-panel");
-  let selected=null, filter="all";
+  const corridorNode=document.getElementById("central-corridor");
+  // [2026.09.16] 추가한 내용: 환자를 특정하지 않아도 위치만으로 표시할 수 있는 복도 낙상 경보 예시입니다.
+  const corridorAlert={location:"중앙 복도",cameraId:"C-02",cameraLocation:"305호 앞",status:"urgent",acknowledged:false,eventId:"corridor-fall-001",occurredAt:"2026-09-16T14:33:00+09:00"};
+  let selected=null, corridorSelected=false, filter="all";
   /* [추가] 전체 화면 상태와 ‘전체’ 카드의 선택 테두리를 분리해 관리합니다. */
   let cardSelected=false;
   /* [추가] 클릭 직후에는 커서를 빼기 전까지 버튼 hover 강조를 표시하지 않습니다. */
@@ -119,7 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("keydown",resumeAudio);
 
   // [09.13]수정내용: 병실 선택 처리를 전용 모듈에 위임하고 현재 화면 상태만 전달합니다.
-  function choose(number){window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);}
+  function choose(number){corridorSelected=false;window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);}
+  function chooseCorridor(){selected=null;corridorSelected=true;render();corridorNode.focus({preventScroll:true});}
+  corridorNode.addEventListener("click",chooseCorridor);
   /* [추가] 전체/상태 카드가 아닌 화면을 클릭하면 카드 선택 테두리를 제거합니다. */
   document.addEventListener("click", event => {
     if (event.target.closest(".counts .count")) return;
@@ -133,8 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click",event=>{
     if(event.target.closest("button,a,input,select,textarea,label,dialog,[role='button'],.dashboard-history-card"))return;
     /* [수정] 상단 카드 선택도 빈 화면 클릭 시 함께 해제합니다. */
-    if(selected===null && filter==="all")return;
+    if(selected===null && !corridorSelected && filter==="all")return;
     selected=null;
+    corridorSelected=false;
     filter="all";
     cardSelected=false;
     render();
@@ -149,18 +155,19 @@ document.addEventListener("DOMContentLoaded", () => {
       '<div class="history-metric"><span class="room-history-urgent">낙상 감지</span><div><strong class="history-fall"></strong><span>건</span></div></div>'+
       '<div class="history-metric"><span class="room-history-caution">침대 이탈</span><div><strong class="history-exit"></strong><span>건</span></div></div>'+
       '<div class="history-recent"><span>최근 기록</span><strong class="history-event"></strong><time></time></div>';
-    detail.querySelector('.history-room').textContent=room ? `${room.number}호` : '병실을 선택해 주세요';
-    detail.querySelector('.history-fall').textContent=counts ? counts.urgent : '—';
-    detail.querySelector('.history-exit').textContent=counts ? counts.caution : '—';
-    detail.querySelector('.history-event').textContent=latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 병실의 기록을 표시합니다.';
+    detail.querySelector('.history-room').textContent=corridorSelected ? corridorAlert.location : room ? `${room.number}호` : '병실 또는 복도를 선택해 주세요';
+    detail.querySelector('.history-fall').textContent=corridorSelected ? '1' : counts ? counts.urgent : '—';
+    detail.querySelector('.history-exit').textContent=corridorSelected ? '0' : counts ? counts.caution : '—';
+    detail.querySelector('.history-event').textContent=corridorSelected ? `낙상 감지 · ${corridorAlert.cameraLocation}` : latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 위치의 기록을 표시합니다.';
     const time=detail.querySelector('time');
-    if(latest){
-      time.dateTime=new Date(latest.occurredAt).toISOString();
-      time.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(latest.occurredAt));
+    const occurredAt=corridorSelected ? corridorAlert.occurredAt : latest?.occurredAt;
+    if(occurredAt){
+      time.dateTime=new Date(occurredAt).toISOString();
+      time.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(occurredAt));
     }else time.hidden=true;
   }
   function render(){
-    const counts={all:rooms.size,normal:0,caution:0,urgent:0};
+    const counts={all:rooms.size+1,normal:0,caution:0,urgent:0};
     // [2026.09.16] 고친 내용: 하단 카드는 renderRoomHistory에서 선택 병실의 오늘 기록만 표시합니다.
     for(const room of rooms.values()){
       counts[room.status]++;const node=nodes.get(room.number);
@@ -172,12 +179,17 @@ document.addEventListener("DOMContentLoaded", () => {
       node.setAttribute("aria-label",`${room.number}호 · ${node.querySelector("small").textContent}`);
       node.setAttribute("aria-pressed",String(selected===room.number));
     }
+    counts[corridorAlert.status]++;
+    corridorNode.classList.toggle("urgent",corridorAlert.status==="urgent");
+    corridorNode.style.setProperty("--camera-label", `"${corridorAlert.cameraLocation}"`);
+    corridorNode.classList.toggle("acknowledged",corridorAlert.acknowledged);
+    corridorNode.setAttribute("aria-pressed",String(corridorSelected));
     cards.forEach(card=>{card.querySelector("b").textContent=counts[card.dataset.filter];card.setAttribute("aria-pressed",String(cardSelected&&filter===card.dataset.filter));});
     filterInfo.querySelector("span").textContent=filter==="all"?"전체 병실 표시 중":`${{normal:"정상 병실",caution:"침대 이탈",urgent:"낙상"}[filter]} 강조 중 · 낙상 병실은 항상 표시`;
-    const chosen=rooms.get(selected);
+    const chosen=corridorSelected ? corridorAlert : rooms.get(selected);
     responseOpen.style.visibility=chosen&&chosen.status!=="normal"?"visible":"hidden";
     responseOpen.disabled=!chosen||chosen.status==="normal";
-    responseOpen.textContent=chosen?`${chosen.number}호 대응 등록`:"대응 등록";
+    responseOpen.textContent=chosen?`${chosen.location ?? `${chosen.number}호`} 대응 등록`:"대응 등록";
     renderRoomHistory();
     alertPanel.querySelectorAll(".alert-card").forEach(el=>el.remove());
     for(const room of rooms.values()){
@@ -192,6 +204,12 @@ document.addEventListener("DOMContentLoaded", () => {
         event.currentTarget.classList.remove("hover-suppressed");
       });
       card.querySelector("button").addEventListener("click",()=>{suppressedHoverRoom=room.number;choose(room.number);nodes.get(room.number).focus({preventScroll:true});});alertPanel.append(card);
+    }
+    if(corridorAlert.status!=="normal"){
+      const card=document.createElement("article");card.className="alert-card corridor-alert";
+      card.innerHTML=`<div class="alert-top"><strong>● 긴급</strong></div><h3>${corridorAlert.location} <span class="event-label">낙상 감지</span></h3><p>감지 위치 · ${corridorAlert.cameraLocation}</p><button type="button" class="locate-room">위치 확인 →</button>`;
+      card.querySelector("button").setAttribute("aria-pressed",String(corridorSelected));
+      card.querySelector("button").addEventListener("click",chooseCorridor);alertPanel.append(card);
     }
     document.getElementById("alert-total").textContent=`${counts.urgent+counts.caution}건`;
   }
@@ -216,12 +234,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let registrationRoom=null, registrationEvent=null;
   responseOpen.addEventListener("click",()=>{
-    const room=rooms.get(selected);if(!room||room.status==="normal")return;
-    registrationRoom=selected;registrationEvent=room.eventId;room.acknowledged=true;cancelAudio(selected);
-    soundInfo.textContent=`${selected}호 대응 시작 · 음성과 남은 반복 중지`;
+    const room=corridorSelected ? corridorAlert : rooms.get(selected);if(!room||room.status==="normal")return;
+    registrationRoom=corridorSelected ? "corridor" : selected;registrationEvent=room.eventId;room.acknowledged=true;
+    if(corridorSelected){soundInfo.textContent="중앙 복도 낙상 대응 시작";}else{cancelAudio(selected);soundInfo.textContent=`${selected}호 대응 시작 · 음성과 남은 반복 중지`;}
     form.reset();document.getElementById("response-title").textContent=`${labels[room.status]} 대응 등록`;
     const eventBox=document.getElementById("response-event");
-    eventBox.textContent=`${selected}호 · ${labels[room.status]}`;
+    eventBox.textContent=`${room.location ?? `${selected}호`} · ${labels[room.status]}`;
     /* [추가] 침대 이탈 등록 창은 주의 색상 클래스를 적용합니다. */
     eventBox.classList.toggle("caution-event",room.status==="caution");
     eventBox.classList.toggle("urgent-event",room.status==="urgent");
@@ -230,12 +248,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("response-cancel").addEventListener("click",()=>dialog.close());
   /* [수정] 대응 내용을 서버에 저장할 위치입니다. 현재는 화면에만 반영됩니다. */
   form.addEventListener("submit",event=>{
-    event.preventDefault();const room=rooms.get(registrationRoom);if(!room)return;
+    event.preventDefault();const room=registrationRoom==="corridor" ? corridorAlert : rooms.get(registrationRoom);if(!room)return;
     /* [추가] 등록 창을 연 뒤 같은 병실에 새 경보가 오면 이전 등록으로 해제하지 않습니다. */
     if(room.eventId!==registrationEvent){dialog.close();detail.textContent="새 낙상이 발생했습니다. 해당 병실의 대응 등록을 다시 열어주세요.";return;}
     const completed=new FormData(form).get("response-status")==="complete";
     // 실제 적용 시 이 위치에서 서버 저장 성공을 확인한 후 상태를 변경하세요.
-    if(completed){room.status="normal";room.acknowledged=false;cancelAudio(room.number);}
+    if(completed){room.status="normal";room.acknowledged=false;if(registrationRoom!=="corridor")cancelAudio(room.number);}
     dialog.close();render();
   });
   const toggle=document.getElementById("profile-toggle"),menu=document.getElementById("header-menu-list");
