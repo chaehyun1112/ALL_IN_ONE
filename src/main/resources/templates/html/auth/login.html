@@ -66,11 +66,27 @@
                  autocomplete="current-password"
                  aria-describedby="passwordError"
                  required>
-          <!-- [2026-09-16 변경] 아이디 또는 비밀번호 오류는 하나의 공통 문구로 안내한다. -->
-          <p id="passwordError" class="status error" th:if="${param.error != null}" role="alert">
-            <span th:if="${param.error[0] == 'credentials'}">아이디 또는 비밀번호가 일치하지 않습니다.</span>
-            <span th:if="${param.error[0] == 'disabled'}">로그인할 수 없는 계정입니다. 관리자에게 문의해 주세요.</span>
-            <span th:if="${param.error[0] == 'unavailable'}">로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.</span>
+          <!-- 아이디 또는 비밀번호 오류는 하나의 공통 문구로 안내한다. -->
+          <p id="passwordError"
+            class="status error"
+            th:if="${param.error != null}"
+            role="alert">
+
+            <span th:if="${param.error[0] == 'credentials'}">
+              아이디 또는 비밀번호가 일치하지 않습니다.
+            </span>
+
+            <span th:if="${param.error[0] == 'locked'}">
+              로그인 시도 횟수를 초과했습니다. 15분 후 다시 시도해 주세요.
+            </span>
+
+            <span th:if="${param.error[0] == 'disabled'}">
+              로그인할 수 없는 계정입니다. 관리자에게 문의해 주세요.
+            </span>
+
+            <span th:if="${param.error[0] == 'unavailable'}">
+              로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.
+            </span>
           </p>
         </div>
 

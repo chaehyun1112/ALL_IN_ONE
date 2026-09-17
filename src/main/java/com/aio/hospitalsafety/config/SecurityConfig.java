@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -99,16 +100,23 @@ public class SecurityConfig {
                             );
                         })
                         .failureHandler((request, response, exception) -> {
+                            // 아이디가 없는 경우와 비밀번호가 틀린 경우를 구분해서 보여주면
+                            // 공격자가 어떤 아이디가 실제로 존재하는지 알아낼 수 있다(사용자 열거).
+                            // 그래서 두 경우 모두 같은 "invalid" 코드로 합쳐서 화면에 같은
+                            // 문구("아이디 또는 비밀번호가 올바르지 않습니다")만 보여준다.
+                            
+                            // 아이디·비밀번호 중 어느 값이 틀렸는지 노출하지 않고 공통 오류로 안내한다.
                             String error = switch (exception) {
-                                // [2026-09-16 변경] 아이디·비밀번호 중 어느 값이 틀렸는지 노출하지 않고 공통 오류로 안내한다.
-                                case UsernameNotFoundException ignored ->
-                                        "credentials";
-                                case BadCredentialsException ignored ->
-                                        "credentials";
-                                case DisabledException ignored ->
-                                        "disabled";
-                                default ->
-                                        "unavailable";
+                            case UsernameNotFoundException ignored ->
+                                    "credentials";
+                            case BadCredentialsException ignored ->
+                                    "credentials";
+                            case LockedException ignored ->
+                                    "locked";
+                            case DisabledException ignored ->
+                                    "disabled";
+                            default ->
+                                    "unavailable";
                             };
 
                             new SimpleUrlAuthenticationFailureHandler(

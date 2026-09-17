@@ -25,6 +25,21 @@ public class UserService {
         );
     }
 
+    /**
+     * 로그인 브루트포스 방어: 비밀번호를 틀릴 때마다 호출해 실패 횟수를 올리고,
+     * 5회 단위로 걸릴 때마다 15분 잠금을 새로 건다.
+     */
+    @Transactional
+    public void registerFailedLogin(String hospitalId, String userId) {
+        userMapper.registerFailedLogin(hospitalId, userId);
+    }
+
+    /** 로그인에 성공하면 실패 횟수와 잠금을 초기화한다. */
+    @Transactional
+    public void resetFailedLogin(String hospitalId, String userId) {
+        userMapper.resetFailedLogin(hospitalId, userId);
+    }
+
     /** 로그인한 계정의 임시 비밀번호와 사용자가 입력한 값이 일치하는지 확인한다. */
     @Transactional(readOnly = true)
     public boolean verifyInitialPassword(

@@ -14,6 +14,8 @@
             <arg column="AUTH_ST" javaType="com.aio.hospitalsafety.domain.ApprovalStatus"/>
             <arg column="CRT_DT" javaType="java.time.Instant"/>
             <arg column="UPD_DT" javaType="java.time.Instant"/>
+            <arg column="FAILED_LOGIN_COUNT" javaType="java.lang.Integer"/>
+            <arg column="LOCKED_UNTIL" javaType="java.time.Instant"/>
         </constructor>
     </resultMap>
 
@@ -27,7 +29,8 @@
 
     <select id="findByHospitalIdAndUserId" resultMap="userMap">
         SELECT EMP_ID, EMP_PW, HOSP_DIV_ID, WARD_ID, EMP_NM,
-               ROLE_CD, AUTH_ST, CRT_DT, UPD_DT
+               ROLE_CD, AUTH_ST, CRT_DT, UPD_DT,
+               FAILED_LOGIN_COUNT, LOCKED_UNTIL
         FROM TB_EMP
         WHERE HOSP_DIV_ID = #{hospitalId}
           AND EMP_ID = #{userId}
@@ -39,5 +42,33 @@
             MUST_CHANGE_PASSWORD = FALSE,
             UPD_DT = CURRENT_TIMESTAMP
         WHERE EMP_ID = #{userId}
+    </update>
+
+    <!--
+        로그인 브루트포스 방어: 실패할 때마다 카운트를 올리고, 5회 단위로 걸릴 때마다
+        15분씩 잠금을 새로 건다(이미 잠긴 상태에서 또 틀려도 잠금 시간이 계속 늘어난다).
+        WHERE 절에 HOSP_DIV_ID까지 포함해 병원 간 계정 혼동을 막는다.
+    -->
+    <update id="registerFailedLogin">
+        UPDATE TB_EMP
+        SET FAILED_LOGIN_COUNT = FAILED_LOGIN_COUNT + 1,
+            LOCKED_UNTIL = CASE
+                WHEN (FAILED_LOGIN_COUNT + 1) % 5 = 0
+                    THEN CURRENT_TIMESTAMP + INTERVAL '15 minutes'
+                ELSE LOCKED_UNTIL
+            END,
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE HOSP_DIV_ID = #{hospitalId}
+          AND EMP_ID = #{userId}
+    </update>
+
+    <update id="resetFailedLogin">
+        UPDATE TB_EMP
+        SET FAILED_LOGIN_COUNT = 0,
+            LOCKED_UNTIL = NULL,
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE HOSP_DIV_ID = #{hospitalId}
+          AND EMP_ID = #{userId}
+          AND (FAILED_LOGIN_COUNT != 0 OR LOCKED_UNTIL IS NOT NULL)
     </update>
 </mapper>

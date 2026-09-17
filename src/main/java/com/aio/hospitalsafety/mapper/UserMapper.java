@@ -40,4 +40,19 @@ public interface UserMapper {
     int updatePassword(
             @Param("userId") String userId,
             @Param("passwordHash") String passwordHash);
+
+    /**
+     * 로그인 실패 시 FAILED_LOGIN_COUNT를 1 올리고, 5회 단위로 걸릴 때마다
+     * LOCKED_UNTIL을 현재로부터 15분 뒤로 새로 건다(브루트포스 방어).
+     */
+    int registerFailedLogin(
+            @Param("hospitalId") String hospitalId,
+            @Param("userId") String userId);
+
+    /**
+     * 로그인 성공 시 실패 카운트와 잠금을 초기화한다.
+     */
+    int resetFailedLogin(
+            @Param("hospitalId") String hospitalId,
+            @Param("userId") String userId);
 }
