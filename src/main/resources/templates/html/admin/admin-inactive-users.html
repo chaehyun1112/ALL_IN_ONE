@@ -8,7 +8,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
-    <title>비활성화 사용자 | 병동 통합 관제</title>
+    <title>비활성화 직원관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css"
@@ -29,6 +29,11 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
             관리자 대시보드로 돌아가기
         </a>
+        <nav class="admin-page-nav" aria-label="계정 관리 메뉴">
+            <a href="admin.html" th:href="@{/admin}">직원 관리</a>
+            <a href="/admin/history" th:href="@{/admin/history}">관리 이력</a>
+            <a href="admin-inactive-users.html" th:href="@{/admin/admin_de}" class="active" aria-current="page">비활성화 직원관리</a>
+        </nav>
     </div>
 
     <div class="admin-topbar-actions">
@@ -46,34 +51,34 @@
 <main class="admin-page admin-settings-page" id="admin-settings-page" aria-labelledby="admin-settings-title">
     <header class="admin-heading admin-settings-heading">
         <p class="admin-settings-eyebrow">관리자 설정 / 계정 관리</p>
-        <h1 id="admin-settings-title" tabindex="-1">비활성화 사용자</h1>
-        <p>사용자의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
+        <h1 id="admin-settings-title" tabindex="-1">비활성화 직원관리</h1>
+        <p>직원의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
         <!-- [수정] 계정 상태 관리 안내를 설명문 아래의 가로형 영역으로 배치 -->
         <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title">
             <div class="admin-guide-heading">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg>
                 <strong id="admin-account-guide-title">계정 상태 관리</strong>
             </div>
-            <p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 사용자는 <strong>활성화</strong>로 변경해 주세요.</p>
+            <p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 직원은 <strong>활성화</strong>로 변경해 주세요.</p>
         </aside>
     </header>
     <div class="admin-inactive-overview">
         <section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title">
-            <!-- [09.13]수정내용: 비활성화 사용자 아이콘에서 부가 표시를 제거하고 사람 모양만 표시한다. -->
+            <!-- [09.13]수정내용: 비활성화 직원 아이콘에서 부가 표시를 제거하고 사람 모양만 표시한다. -->
             <span class="admin-inactive-symbol" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
             </span>
-            <div><h2 id="admin-inactive-stat-title">비활성화 사용자</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
+            <div><h2 id="admin-inactive-stat-title">비활성화 직원</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
         </section>
     </div>
     <section class="admin-panel admin-inactive-panel" aria-labelledby="admin-inactive-list-title">
         <header class="admin-panel-heading admin-inactive-panel-heading">
-            <!-- [09.13]수정내용: 사용자 목록 안내의 이전 배정 병동을 병동으로 표시한다. -->
-            <div><h2 id="admin-inactive-list-title">사용자 목록</h2><p>계정 정보와 병동을 확인한 후 상태를 변경해 주세요.</p></div>
-            <!-- [09.13]수정내용: 사용자 목록 상단의 관리자 전용 표시를 삭제한다. -->
+            <!-- [09.13]수정내용: 직원 목록 안내의 이전 배정 병동을 병동으로 표시한다. -->
+            <div><h2 id="admin-inactive-list-title">직원 목록</h2><p>계정 정보와 병동을 확인한 후 상태를 변경해 주세요.</p></div>
+            <!-- [09.13]수정내용: 직원 목록 상단의 관리자 전용 표시를 삭제한다. -->
         </header>
         <div class="admin-inactive-toolbar">
-            <form id="admin-inactive-search-form" class="admin-search" role="search" aria-label="비활성화 사용자 검색">
+            <form id="admin-inactive-search-form" class="admin-search" role="search" aria-label="비활성화 직원 검색">
                 <div class="admin-search-field">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
                     <label class="visually-hidden" for="admin-inactive-search">이름 또는 아이디 검색</label>
@@ -88,36 +93,36 @@
                 </select>
             </div>
             <!-- [09.13]수정내용: 선택 일괄 작업을 검색·필터 영역 옆에 배치해 목록 확인과 바로 이어지도록 한다. -->
-            <div class="admin-bulk-actions" role="group" aria-label="선택 사용자 일괄 관리">
+            <div class="admin-bulk-actions" role="group" aria-label="선택 직원 일괄 관리">
                 <span id="admin-bulk-count" role="status">현재 목록에서 0명 선택</span>
                 <div class="admin-bulk-buttons">
-                    <!-- [09.13]수정내용: 비활성화 사용자 일괄 작업 버튼을 계정 활성화·계정 삭제로 간결하게 표시한다. -->
+                    <!-- [09.13]수정내용: 비활성화 직원 일괄 작업 버튼을 계정 활성화·계정 삭제로 간결하게 표시한다. -->
                     <button type="button" data-bulk-status="ACTIVATE" disabled>계정 활성화</button>
                     <button type="button" data-bulk-status="DELETE" class="admin-bulk-delete" disabled>계정 삭제</button>
                 </div>
             </div>
         </div>
-        <p class="admin-inactive-result" id="admin-inactive-result" role="status">사용자 목록을 불러오는 중입니다.</p>
+        <p class="admin-inactive-result" id="admin-inactive-result" role="status">직원 목록을 불러오는 중입니다.</p>
         <div id="admin-inactive-error" role="alert" hidden>
             <p id="admin-inactive-error-message"></p>
             <button type="button" id="admin-inactive-retry">다시 불러오기</button>
         </div>
         <div class="admin-table-wrap" id="admin-inactive-list" aria-busy="true">
             <table class="admin-table admin-inactive-table">
-                <caption class="visually-hidden">비활성화 사용자 목록</caption>
-                <thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><!-- [09.13]수정내용: 비활성화 사용자 목록의 열 제목을 로그인 아이디에서 아이디로 간결하게 표시한다. --><th scope="col">아이디</th><!-- [09.13]수정내용: 병동 열 제목을 이전 배정 병동에서 병동으로 변경한다. --><th scope="col">병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead>
+                <caption class="visually-hidden">비활성화 직원 목록</caption>
+                <thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><!-- [09.13]수정내용: 비활성화 직원 목록의 열 제목을 로그인 아이디에서 아이디로 간결하게 표시한다. --><th scope="col">아이디</th><!-- [09.13]수정내용: 병동 열 제목을 이전 배정 병동에서 병동으로 변경한다. --><th scope="col">병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead>
                 <tbody id="admin-inactive-rows"></tbody>
             </table>
             <div class="admin-inactive-empty" id="admin-inactive-empty" hidden>
-                <strong id="admin-inactive-empty-title">비활성화 사용자가 없습니다</strong>
-                <p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 사용자가 여기에 표시됩니다.</p>
+                <strong id="admin-inactive-empty-title">비활성화 직원이 없습니다</strong>
+                <p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.</p>
                 <button type="button" id="admin-inactive-reset">검색 조건 초기화</button>
             </div>
         </div>
     </section>
     <footer class="admin-inactive-footer">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>
-        일괄 작업은 현재 검색된 목록에서 선택한 사용자에게만 적용됩니다.
+        일괄 작업은 현재 검색된 목록에서 선택한 직원에게만 적용됩니다.
     </footer>
 </main>
 
