@@ -1,5 +1,8 @@
 package com.aio.hospitalsafety.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +20,7 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Authentication authentication, Model model) {
+    public String dashboard(Authentication authentication, Model model, HttpServletResponse response) {
 
         boolean admin = authentication.getAuthorities().stream()
                 .anyMatch(authority ->
@@ -28,6 +31,8 @@ public class DashboardController {
             return "redirect:/admin";
         }
 
+        response.setHeader("Cache-Control", "no-store");
+
         boolean approved = authentication.getAuthorities().stream()
                 .anyMatch(authority ->
                         authority.getAuthority().equals("STATUS_APPROVED"));
@@ -37,6 +42,29 @@ public class DashboardController {
 
         // [09.13]수정내용: 이동한 대시보드 HTML 경로를 반환하도록 경로를 갱신했습니다.
         return "html/dashboard/dashboard";
+    }
+
+    @GetMapping("/Record")
+    public String record(Authentication authentication, Model model, HttpServletResponse response) {
+        boolean admin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        if (admin) {
+            return "redirect:/admin";
+        }
+        // [2026.09.17] 추가한 내용: 새로고침해도 간호사 대시보드 공통 상단 바 안에서 조치기록을 표시합니다.
+        response.setHeader("Cache-Control", "no-store");
+        boolean approved = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("STATUS_APPROVED"));
+        model.addAttribute("userId", authentication.getName());
+        model.addAttribute("approved", approved);
+        model.addAttribute("recordMode", "records");
+        return "html/dashboard/dashboard";
+    }
+
+    // 대시보드를 열어 둔 동안의 요청으로 기존 인증 세션의 유휴 시간을 갱신합니다.
+    @GetMapping("/api/dashboard/session")
+    public ResponseEntity<Void> keepDashboardSession() {
+        return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
     }
 
     // [수정완료] 대시보드 메뉴에서 설정 HTML 화면으로 연결합니다.

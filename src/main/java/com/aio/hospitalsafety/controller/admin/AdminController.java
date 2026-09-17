@@ -30,5 +30,21 @@ public class AdminController {
     public String adminDeactivatedUsers() {
         return "html/admin/admin-inactive-users";
     }
+
+    @GetMapping({"/admin/records", "/admin/records/"})
+    public String adminActionRecords(Authentication authentication, Model model) {
+        // [2026.09.17] 고친 내용: 새로고침해도 관리자 공통 상단 바와 전체화면 전환 구조를 유지합니다.
+        String adminId = authentication == null ? "admin01" : authentication.getName();
+        model.addAttribute("adminId", adminId);
+        model.addAttribute("pageMode", "records");
+        return "html/admin/admin";
+    }
+
+    @GetMapping("/admin/records/content")
+    public String adminActionRecordsContent(Model model) {
+        // [2026.09.17] 추가한 내용: 관리자 화면 내부에 표시할 조치기록 본문을 별도 주소로 제공합니다.
+        model.addAttribute("adminRecordPage", true);
+        return "html/record/record";
+    }
 }
 

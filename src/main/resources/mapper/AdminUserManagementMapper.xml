@@ -126,12 +126,17 @@
           AND auth_st = 'APPROVED'
     </update>
 
-    <!-- 관리자 비밀번호 초기화: 활성 직원의 비밀번호를 바꾸고 최초 변경 필요 상태로 변경 -->
+    <!--
+        관리자 비밀번호 초기화: 활성 직원의 비밀번호를 바꾸고 최초 변경 필요 상태로 변경.
+        비밀번호가 초기화되면 실패 카운트/잠금도 함께 초기화한다.
+    -->
     <update id="resetUserPassword">
 
         UPDATE tb_emp
         SET emp_pw = #{passwordHash},
             must_change_password = TRUE,
+            failed_login_count = 0,
+            locked_until = NULL,
             upd_dt = NOW()
         WHERE hosp_div_id = #{hospitalDomain}
           AND emp_id = #{userId}

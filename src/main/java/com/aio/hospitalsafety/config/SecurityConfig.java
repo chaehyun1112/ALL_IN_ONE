@@ -8,16 +8,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
@@ -28,33 +30,67 @@ public class SecurityConfig {
             HttpSecurity http,
             SessionRegistry sessionRegistry,
             UserService userService) throws Exception {
+
         http
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인 화면과 정적 파일은 로그인하지 않아도 접근할 수 있다.
-                        .requestMatchers( 
-                                "/", "/domain", "/role", "/login", "/login/user",
-                                "/signup", "/api/users/check-user-id",
-                                "/css/**", "/JS/**", "/image/**", "/error"
+                        .requestMatchers(
+                                "/",
+                                "/domain",
+                                "/role",
+                                "/login",
+                                "/login/user",
+                                "/css/**",
+                                "/JS/**",
+                                "/image/**",
+                                "/error"
                         ).permitAll()
                         .requestMatchers(
                                 "/admin/**",
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/session").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login/user")
                         .usernameParameter("userLoginKey")
-                        .successHandler((request, response, authentication) -> {
-                            String displayName =
+
+                        .successHandler((
+                                request,
+                                response,
+                                authentication) -> {
+
+                            HospitalUserDetails loginUser =
                                     authentication.getPrincipal()
-                                            instanceof HospitalUserDetails userDetails
-                                            ? userDetails.getUserName()
+                                            instanceof HospitalUserDetails details
+                                            ? details
+                                            : null;
+
+                            /*
+                             * 정상 로그인에 성공하면 계정 실패 횟수와
+                             * 존재하지 않는 아이디의 세션 실패 횟수를
+                             * 모두 초기화한다.
+                             */
+                            if (loginUser != null) {
+                                userService.resetFailedLogin(
+                                        loginUser.getHospitalId(),
+                                        loginUser.getUsername()
+                                );
+                            }
+
+                            UserLoginSessionLimiter.reset(
+                                    request.getSession(false)
+                            );
+
+                            String displayName =
+                                    loginUser != null
+                                            ? loginUser.getUserName()
                                             : authentication.getName();
 
                             displayName =
-                                    displayName == null || displayName.isBlank()
+                                    displayName == null
+                                            || displayName.isBlank()
                                             ? authentication.getName()
                                             : displayName.strip();
 
@@ -62,57 +98,148 @@ public class SecurityConfig {
                                     UserDisplaySession.DISPLAY_NAME,
                                     displayName.substring(
                                             0,
-                                            Math.min(displayName.length(), 50)
+                                            Math.min(
+                                                    displayName.length(),
+                                                    50
+                                            )
                                     )
                             );
 
                             request.getSession().setAttribute(
                                     UserDisplaySession.LOGIN_TIME,
                                     java.time.ZonedDateTime.now(
-                                            java.time.ZoneId.of("Asia/Seoul")
-                                    ).format(
-                                            java.time.format.DateTimeFormatter.ofPattern(
-                                                    "yyyy-MM-dd HH:mm:ss"
+                                            java.time.ZoneId.of(
+                                                    "Asia/Seoul"
                                             )
+                                    ).format(
+                                            java.time.format
+                                                    .DateTimeFormatter
+                                                    .ofPattern(
+                                                            "yyyy-MM-dd HH:mm:ss"
+                                                    )
                                     )
                             );
 
                             boolean initialUserPassword =
-                                    authentication.getPrincipal()
-                                            instanceof HospitalUserDetails loginUser
+                                    loginUser != null
                                     && authentication.getAuthorities()
                                             .stream()
                                             .anyMatch(authority ->
                                                     "ROLE_USER".equals(
-                                                            authority.getAuthority()
-                                                    ))
+                                                            authority
+                                                                    .getAuthority()
+                                                    )
+                                            )
                                     && userService.isInitialUserPassword(
-                                          loginUser.getHospitalId(),
+                                            loginUser.getHospitalId(),
                                             loginUser.getUsername()
                                     );
 
                             response.sendRedirect(
                                     request.getContextPath()
-                                            + (initialUserPassword
-                                            ? "/user/password"
-                                            : "/dashboard")
+                                            + (
+                                                initialUserPassword
+                                                    ? "/user/password"
+                                                    : "/dashboard"
+                                            )
                             );
                         })
-                        .failureHandler((request, response, exception) -> {
-                            String error = switch (exception) {
-                                // [2026-09-16 변경] 아이디·비밀번호 중 어느 값이 틀렸는지 노출하지 않고 공통 오류로 안내한다.
-                                case UsernameNotFoundException ignored ->
-                                        "credentials";
-                                case BadCredentialsException ignored ->
-                                        "credentials";
-                                case DisabledException ignored ->
-                                        "disabled";
-                                default ->
-                                        "unavailable";
-                            };
+
+                        .failureHandler((
+                                request,
+                                response,
+                                exception) -> {
+
+                            String[] loginKeyParts =
+                                    parseUserLoginKey(
+                                            request.getParameter(
+                                                    "userLoginKey"
+                                            )
+                                    );
+
+                            String error;
+                            long unlockAt = 0L;
+
+                            /*
+                             * 존재하지 않는 아이디는 특정 계정을 잠글 수
+                             * 없으므로 현재 브라우저 세션에 실패 횟수를
+                             * 누적한다.
+                             */
+                            if (exception
+                                    instanceof UsernameNotFoundException) {
+
+                                unlockAt =
+                                        UserLoginSessionLimiter
+                                                .registerUnknownUserFailure(
+                                                        request.getSession(true)
+                                                );
+
+                                error = unlockAt > 0
+                                        ? "locked"
+                                        : "credentials";
+
+                            /*
+                             * 존재하는 계정에서 비밀번호가 틀렸다면
+                             * TB_EMP의 실패 횟수를 증가시킨다.
+                             */
+                            } else if (exception
+                                    instanceof BadCredentialsException) {
+
+                                if (loginKeyParts != null) {
+                                    unlockAt =
+                                            userService.registerFailedLogin(
+                                                    loginKeyParts[0],
+                                                    loginKeyParts[1]
+                                            );
+                                }
+
+                                error = unlockAt > 0
+                                        ? "locked"
+                                        : "credentials";
+
+                            /*
+                             * 이미 잠긴 계정으로 로그인한 경우 DB에 저장된
+                             * 잠금 종료 시각을 화면으로 전달한다.
+                             */
+                            } else if (exception
+                                    instanceof LockedException) {
+
+                                if (loginKeyParts != null) {
+                                    unlockAt =
+                                            userService
+                                                    .getLockedUntilEpochMillis(
+                                                            loginKeyParts[0],
+                                                            loginKeyParts[1]
+                                                    );
+                                }
+
+                                error = "locked";
+
+                            } else if (exception
+                                    instanceof DisabledException) {
+                                error = "disabled";
+
+                            } else {
+                                error = "unavailable";
+                            }
+
+                            String failureUrl =
+                                    "/login?error=" + error;
+
+                            if ("locked".equals(error)) {
+                                if (unlockAt
+                                        <= System.currentTimeMillis()) {
+                                    unlockAt =
+                                            System.currentTimeMillis()
+                                                    + 1000L;
+                                }
+
+                                failureUrl +=
+                                        "&unlockAt=" + unlockAt;
+                            }
 
                             new SimpleUrlAuthenticationFailureHandler(
-                                    "/login?error=" + error
+                                    failureUrl
                             ).onAuthenticationFailure(
                                     request,
                                     response,
@@ -122,28 +249,49 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            var oldSession = request.getSession(false);
-                            String hospitalDomain = oldSession == null
-                                    ? null
-                                    : (String) oldSession.getAttribute(
-                                            com.aio.hospitalsafety.common.SessionConstants.HOSPITAL_DOMAIN
-                                    );
+                        .logoutSuccessHandler((
+                                request,
+                                response,
+                                authentication) -> {
+
+                            var oldSession =
+                                    request.getSession(false);
+
+                            String hospitalDomain =
+                                    oldSession == null
+                                            ? null
+                                            : (String) oldSession.getAttribute(
+                                                    com.aio.hospitalsafety
+                                                            .common
+                                                            .SessionConstants
+                                                            .HOSPITAL_DOMAIN
+                                            );
 
                             if (oldSession != null) {
                                 oldSession.invalidate();
                             }
 
-                            if (hospitalDomain != null && !hospitalDomain.isBlank()) {
+                            if (hospitalDomain != null
+                                    && !hospitalDomain.isBlank()) {
+
                                 request.getSession(true).setAttribute(
-                                        com.aio.hospitalsafety.common.SessionConstants.HOSPITAL_DOMAIN,
+                                        com.aio.hospitalsafety
+                                                .common
+                                                .SessionConstants
+                                                .HOSPITAL_DOMAIN,
                                         hospitalDomain
                                 );
-                                response.sendRedirect(request.getContextPath() + "/login");
+
+                                response.sendRedirect(
+                                        request.getContextPath()
+                                                + "/login"
+                                );
                                 return;
                             }
 
-                            response.sendRedirect(request.getContextPath() + "/");
+                            response.sendRedirect(
+                                    request.getContextPath() + "/"
+                            );
                         })
                         .invalidateHttpSession(false)
                         .clearAuthentication(true)
@@ -154,18 +302,35 @@ public class SecurityConfig {
                         .sessionRegistry(sessionRegistry)
                 );
 
+        /*
+         * 세션이 잠긴 상태에서는 올바른 계정을 입력하더라도
+         * 인증 처리 전에 로그인 요청을 차단한다.
+         */
+        http.addFilterBefore(
+                new UserLoginSessionThrottleFilter(),
+                UsernamePasswordAuthenticationFilter.class
+        );
+        // [2026.09.17] 추가한 내용: 관리자 문서 안에서 같은 사이트의 조치기록 화면을 표시해도 전체화면이 유지되게 합니다.
+        http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
+
         http.addFilterAfter(
                 new UserInitialPasswordFilter(userService),
-                org.springframework.security.web.access.intercept.AuthorizationFilter.class
+                org.springframework.security.web
+                        .access
+                        .intercept
+                        .AuthorizationFilter.class
         );
 
         return http.build();
     }
 
     @Bean
-    UserDetailsService userDetailsService(UserMapper userMapper) {
+    UserDetailsService userDetailsService(
+            UserMapper userMapper) {
+
         return userLoginKey -> {
-            String[] parts = userLoginKey.split("\\|", 2);
+            String[] parts =
+                    userLoginKey.split("\\|", 2);
 
             if (parts.length != 2
                     || parts[0].isBlank()
@@ -175,8 +340,11 @@ public class SecurityConfig {
                 );
             }
 
-            String hospitalId = parts[0].trim();
-            String userId = parts[1].trim();
+            String hospitalId =
+                    parts[0].trim();
+
+            String userId =
+                    parts[1].trim();
 
             if (hospitalId.length() > 30
                     || userId.length() > 20) {
@@ -185,30 +353,41 @@ public class SecurityConfig {
                 );
             }
 
-            User user = userMapper.findByHospitalIdAndUserId(
-                    hospitalId,
-                    userId
-            ).orElseThrow(() ->
-                    new UsernameNotFoundException(
-                            "사용자를 찾을 수 없습니다."
-                    )
-            );
+            User user =
+                    userMapper.findByHospitalIdAndUserId(
+                            hospitalId,
+                            userId
+                    ).orElseThrow(() ->
+                            new UsernameNotFoundException(
+                                    "사용자를 찾을 수 없습니다."
+                            )
+                    );
 
             return new HospitalUserDetails(user);
         };
     }
 
     @Bean
-    DaoAuthenticationProvider userAuthenticationProvider(UserDetailsService userDetailsService,
-                                                        PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+    DaoAuthenticationProvider userAuthenticationProvider(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider(
+                        userDetailsService
+                );
+
         provider.setPasswordEncoder(passwordEncoder);
-        // 아이디 조회 실패와 해당 계정의 비밀번호 불일치를 구분한다.
+
+        /*
+         * 내부에서는 존재하지 않는 아이디와 잘못된 비밀번호를
+         * 구분하되, 화면에는 같은 문구를 표시한다.
+         */
         provider.setHideUserNotFoundExceptions(false);
+
         return provider;
     }
 
-    /** 비밀번호를 BCrypt로 해시하고 입력값과 저장된 해시의 일치 여부를 검증한다. */
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -222,5 +401,31 @@ public class SecurityConfig {
     @Bean
     HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
+    }
+
+    /**
+     * hidden input에 들어 있는 "병원ID|직원ID" 값을 분리한다.
+     */
+    private static String[] parseUserLoginKey(
+            String userLoginKey) {
+
+        if (userLoginKey == null
+                || userLoginKey.isBlank()) {
+            return null;
+        }
+
+        String[] parts =
+                userLoginKey.split("\\|", 2);
+
+        if (parts.length != 2
+                || parts[0].isBlank()
+                || parts[1].isBlank()) {
+            return null;
+        }
+
+        return new String[]{
+                parts[0].trim(),
+                parts[1].trim()
+        };
     }
 }
