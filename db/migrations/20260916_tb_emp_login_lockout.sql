@@ -14,5 +14,5 @@ ALTER TABLE public.tb_emp
 COMMENT ON COLUMN public.tb_emp.failed_login_count IS
     '로그인 연속 실패 횟수. 성공 시 0으로 초기화된다.';
 COMMENT ON COLUMN public.tb_emp.locked_until IS
-    '이 시각까지 로그인이 잠긴다(NULL이면 잠기지 않음). 실패 5회마다 15분씩 연장된다.';
+    '이 시각까지 로그인이 잠긴다(NULL이면 잠기지 않음). 연속 5회 실패 시 1분간 잠긴다.';
 COMMIT;
