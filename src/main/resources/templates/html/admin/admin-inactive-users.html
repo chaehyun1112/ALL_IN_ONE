@@ -33,6 +33,8 @@
             <a href="admin.html" th:href="@{/admin}">직원 관리</a>
             <a href="/admin/history" th:href="@{/admin/history}">관리 이력</a>
             <a href="admin-inactive-users.html" th:href="@{/admin/admin_de}" class="active" aria-current="page">비활성화 직원관리</a>
+            <!-- [2026.09.17] 추가한 내용: 모든 관리자 화면에서 조치기록 메뉴를 같은 위치로 제공합니다. -->
+            <a href="../record/record.html" th:href="@{/admin/records}">조치기록</a>
         </nav>
     </div>
 
