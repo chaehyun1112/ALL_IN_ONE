@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CareGuard · 병동 통합 관제</title>
 
-  <!-- [2026.09.16] 고친 내용: 선택 카드 테두리 변경이 이전 브라우저 캐시에 남지 않도록 새 CSS 버전을 불러옵니다. -->
+  <!-- [2026.09.17] 고친 내용: 화면 최상단 알림 배너 위치가 반영되도록 CSS 캐시 버전을 갱신합니다. -->
   <link
     rel="stylesheet"
-    href="../../../static/css/dashboard/dashboard.css?v=20260916-2" th:href="@{/css/dashboard/dashboard.css(v='20260916-2')}"
+    href="../../../static/css/dashboard/dashboard.css?v=20260917-password-compact" th:href="@{/css/dashboard/dashboard.css(v='20260917-password-compact')}"
   >
   <!-- [09.13]추가내용: 병실 상태와 선택 표시를 기능별 CSS 파일로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
@@ -19,8 +19,8 @@
   <!-- 상단 헤더 -->
   <header>
     <!-- [2026.09.17] 고친 내용: 조치기록에서 대시보드로 돌아가는 버튼을 왼쪽 상단에 배치합니다. -->
-    <a class="dashboard-back-link" href="/dashboard" th:href="@{/dashboard}"
-       onclick="event.preventDefault();document.getElementById('dashboard-record-view').hidden=true;document.getElementById('dashboard-main').hidden=false;document.body.dataset.dashboardView='dashboard';history.pushState({dashboardView:'dashboard'},'',this.href);">← 대시보드로 가기</a>
+    <!-- [2026.09.17] 고친 내용: 공통 화면 전환 함수가 상단 감지 알림의 표시 여부도 함께 처리합니다. -->
+    <a class="dashboard-back-link" href="dashboard.html" th:href="@{/dashboard}">← 대시보드로 가기</a>
     <div class="brand">
       <div class="brand-icon" aria-hidden="true">+</div>
       <strong>CareGuard</strong>
@@ -72,7 +72,6 @@
         >
           <!-- [2026.09.17] 고친 내용: 메뉴 클릭 즉시 대시보드 안의 조치기록 본문으로 전환해 전체화면을 유지합니다. -->
           <a href="../record/record.html" id="record-open"
-             onclick="event.preventDefault();event.stopPropagation();document.getElementById('dashboard-main').hidden=true;document.getElementById('dashboard-record-view').hidden=false;const frame=document.getElementById('dashboard-record-frame');if(!frame.dataset.loaded){frame.src=frame.dataset.src;frame.dataset.loaded='true';}document.body.dataset.dashboardView='records';history.pushState({dashboardView:'records'},'',this.href);"
              th:href="@{/Record}">조치기록</a>
           <!-- [2026.09.17] 고친 내용: 프로필 메뉴의 설정 항목을 바로 비밀번호 변경 화면으로 교체합니다. -->
           <a href="../settings/password-change.html" th:href="@{/user/password}" id="password-change-open">비밀번호 변경</a>
@@ -89,10 +88,33 @@
     </div>
   </header>
 
+  <!-- [2026.09.17] 추가한 내용: 대시보드 이외의 공통 화면에서만 새 감지 알림을 내려서 표시합니다. -->
+  <aside id="cross-page-alert" class="cross-page-alert" hidden aria-label="새 감지 알림">
+    <div class="cross-page-alert-heading">
+      <!-- [2026.09.17] 고친 내용: 알림이 접혀 있어도 건수 제목을 눌러 대시보드로 이동합니다. -->
+      <button type="button" id="cross-page-alert-summary" aria-live="polite" title="대시보드로 이동"></button>
+      <button type="button" id="cross-page-alert-toggle" aria-expanded="true" aria-controls="cross-page-alert-items">접기</button>
+    </div>
+    <div id="cross-page-alert-items"></div>
+  </aside>
+
   <form id="logout-form" action="../auth/index.html" th:action="@{/logout}"
         method="get" th:method="post" hidden></form>
 
   <main id="dashboard-main" th:hidden="${recordMode == 'records'}">
+    <!-- [2026.09.17] 추가한 내용: testAlerts=1일 때만 표시하며 DB에 저장하지 않는 감지 테스트 패널입니다. -->
+    <section id="alert-test-panel" class="panel alert-test-panel" hidden aria-label="알림 테스트">
+      <strong>알림 테스트 · DB 저장 없음</strong>
+      <label>발생 위치 <select id="alert-test-location"></select></label>
+      <label>감지 종류 <select id="alert-test-type"><option value="urgent">낙상</option><option value="caution">침대 이탈</option></select></label>
+      <button type="button" id="alert-test-run">테스트 알림 발생</button>
+      <!-- [2026.09.17] 추가한 내용: 다른 화면으로 이동한 뒤 감지 배너를 확인할 수 있도록 5초 후 테스트를 예약합니다. -->
+      <button type="button" id="alert-test-delayed">5초 후 알림 발생</button>
+      <button type="button" id="alert-test-reset">테스트 초기화</button>
+      <p>복도는 한 위치씩 테스트합니다. 다른 화장실 앞을 선택하면 이전 복도 테스트가 교체됩니다.</p>
+      <output id="alert-test-result" aria-live="polite">위치와 감지 종류를 선택해 주세요.</output>
+      <div id="alert-test-audio-status" role="status" aria-live="polite"></div>
+    </section>
     <!-- 오늘의 안전 현황 -->
     <div class="page-heading">
       <section class="panel summary">
@@ -240,6 +262,15 @@
     <iframe id="dashboard-record-frame" title="조치기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/Record/content}"></iframe>
   </section>
 
+  <!-- [2026.09.17] 추가한 내용: 기존 비밀번호 변경 화면을 팝업 안에 열어 현재 페이지와 음성 상태를 유지합니다. -->
+  <dialog id="password-change-dialog" class="password-change-dialog" aria-labelledby="password-popup-title">
+    <div class="password-popup-heading">
+      <h2 id="password-popup-title">비밀번호 변경</h2>
+      <button type="button" id="password-popup-close" aria-label="비밀번호 변경 닫기">✕</button>
+    </div>
+    <iframe id="password-change-frame" title="비밀번호 변경 입력" src="about:blank"></iframe>
+  </dialog>
+
   <!-- 설정 창 -->
   <dialog
     class="settings-dialog"
@@ -371,7 +402,8 @@
   <script src="../../../static/JS/dashboard/session.js" th:src="@{/JS/dashboard/session.js}"></script>
   <script src="../../../static/JS/dashboard/room-status.js" th:src="@{/JS/dashboard/room-status.js}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
-  <script src="../../../static/JS/dashboard/dashboard.js" th:src="@{/JS/dashboard/dashboard.js}"></script>
+  <!-- [2026.09.17] 고친 내용: 대응 등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
+  <script src="../../../static/JS/dashboard/dashboard.js?v=20260917-banner-click-2" th:src="@{/JS/dashboard/dashboard.js(v='20260917-banner-click-2')}"></script>
 </body>
 </html>
 
