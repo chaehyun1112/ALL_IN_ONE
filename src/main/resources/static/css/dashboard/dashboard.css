@@ -1749,9 +1749,9 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 .corridor-alert-marker { display:none; position:absolute; z-index:2; left:13%; top:50%; width:16px; height:16px; border-radius:50%; transform:translate(-50%,-50%); background:#cf5f53; box-shadow:0 0 0 5px #cf5f5350; }
 .corridor-alert-marker::after { content:var(--camera-label); position:absolute; left:50%; bottom:calc(100% + 6px); transform:translateX(-50%); padding:3px 6px; border-radius:5px; background:#8f3028; color:#fff; font-size:10px; font-style:normal; font-weight:700; letter-spacing:0; white-space:nowrap; }
 .corridor.urgent[aria-pressed="true"] .corridor-alert-marker::before { content:""; position:absolute; inset:-5px; border:2px solid #4f8061; border-radius:50%; }
-.corridor.urgent .corridor-alert-marker { display:block; animation:corridor-alert-pulse 1.5s ease-in-out infinite; }
-/* [2026.09.17] 고친 내용: 복도 감지 지점의 점멸과 위치 확인 테두리를 더 진하게 표시합니다. */
-@keyframes corridor-alert-pulse { 0%,100% { opacity:.7; transform:translate(-50%,-50%) scale(.9); box-shadow:0 0 0 4px #cf5f5350; } 50% { opacity:1; transform:translate(-50%,-50%) scale(1.1); box-shadow:0 0 0 10px #cf5f5366; } }
+.corridor.urgent .corridor-alert-marker { display:block; animation:corridor-alert-pulse 1.15s ease-in-out infinite; }
+/* [2026.09.17] 고친 내용: 복도 감지 위치가 눈에 띄되 과하지 않도록 점멸과 확장 원 효과를 완화합니다. */
+@keyframes corridor-alert-pulse { 0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.85); background:#c9564b; box-shadow:0 0 0 4px #cf5f5344,0 0 6px 1px #cf5f5355; } 50% { opacity:1; transform:translate(-50%,-50%) scale(1.18); background:#df6a5e; box-shadow:0 0 0 10px #df6a5e45,0 0 10px 2px #df6a5e77; } }
 @media (prefers-reduced-motion:reduce) { .corridor.urgent .corridor-alert-marker { animation:none; opacity:1; } }
 .alert-card.corridor-alert { background:linear-gradient(110deg,#fff1ee,#ffe4df); border-color:#df9b91; border-left-color:#b94339; }
 .alert-card.corridor-alert .alert-top, .alert-card.corridor-alert h3 { color:#8f3028; }
