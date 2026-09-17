@@ -1,6 +1,7 @@
 @charset "UTF-8";
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-:root { color-scheme: light; --admin-background: #f4f1e8; --admin-surface: #fbfaf5; --admin-border: #e2e2d7; --admin-green: #405c4f; --admin-text: #42483e; --admin-muted: #8b9083; }
+/* [2026.09.17] 고친 내용: 전체화면에서 상단 영역의 비율을 안정적으로 유지할 수 있도록 공통 높이를 정의합니다. */
+:root { color-scheme: light; --admin-background: #f4f1e8; --admin-surface: #fbfaf5; --admin-border: #e2e2d7; --admin-green: #405c4f; --admin-text: #42483e; --admin-muted: #8b9083; --admin-topbar-height: 88px; }
 * { box-sizing: border-box; }
 /* [9.15] 수정내용: 페이지 전체가 아닌 상단 바 아래의 본문 영역만 스크롤하도록 구성한다. */
 html:has(#admin-management-page), body:has(#admin-management-page) { height: 100%; overflow: hidden; background: var(--admin-background); }
@@ -11,7 +12,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 [hidden] { display: none !important; }
 /* [9.15] 수정내용: 상단 바는 콘텐츠 너비를 유지하고 우측 여백 색상은 html 배경에서 처리한다. */
 /* [9.15] 수정내용: 가운데 메뉴를 화면 기준으로 정렬할 수 있도록 상단 바를 기준 영역으로 설정한다. */
-.admin-topbar { position: relative; width: 100%; height: 68px; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; gap: 24px; background: var(--admin-green); color: #f1f4ed; }
+.admin-topbar { position: relative; width: 100%; height: var(--admin-topbar-height); padding: 0 24px; display: flex; justify-content: space-between; align-items: center; gap: 24px; background: var(--admin-green); color: #f1f4ed; }
 /* [09.13]수정내용: 상단 공통 정렬과 각 영역의 간격을 분리하여 간격 덮어쓰기를 제거한다. */
 .admin-brand, .admin-topbar-actions { display: flex; align-items: center; }
 .admin-brand { gap: 32px; }
@@ -39,7 +40,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-fullscreen-toggle:disabled { opacity:.55; cursor:default; }
 .admin-fullscreen-exit, .admin-fullscreen-toggle[aria-pressed="true"] .admin-fullscreen-enter { display:none; }
 .admin-fullscreen-toggle[aria-pressed="true"] .admin-fullscreen-exit { display:initial; }
-.admin-page { display: flex; flex-direction: column; height: calc(100vh - 68px); min-height: 0; max-width: 1800px; margin: 0 auto; padding: 24px 24px 36px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: #8ba091 #eeede5; }
+.admin-page { display: flex; flex-direction: column; height: calc(100vh - var(--admin-topbar-height)); min-height: 0; max-width: 1800px; margin: 0 auto; padding: 24px 24px 36px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: #8ba091 #eeede5; }
+/* [2026.09.17] 추가한 내용: 전체화면을 유지하는 조치기록 내부 화면이 상단 바 아래 영역을 모두 사용하게 합니다. */
+.admin-record-view { height: calc(100vh - var(--admin-topbar-height)); background: #f4f6f2; }
+.admin-record-view iframe { display: block; width: 100%; height: 100%; border: 0; background: #f4f6f2; }
 /* [9.15] 추가내용: 본문 스크롤 바는 상단 바 아래에서만 보이도록 스타일을 적용한다. */
 .admin-page::-webkit-scrollbar { width: 10px; }
 .admin-page::-webkit-scrollbar-track { margin: 6px 0; border-radius: 999px; background: #eeede5; }

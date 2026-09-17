@@ -1151,12 +1151,21 @@ loadAdminData().catch(() => {
 
 // [2026.09.16] 추가한 내용: 관리자 메뉴는 문서를 새로 열지 않고 본문만 바꿔 전체화면을 유지합니다.
 const adminInactiveView = document.querySelector("#admin-inactive-view");
+const adminRecordView = document.querySelector("#admin-record-view");
+const adminRecordFrame = document.querySelector("#admin-record-frame");
 const adminViewLinks = Array.from(document.querySelectorAll("[data-admin-view]"));
 function setAdminView(view, updateAddress = true) {
     const isInactive = view === "inactive";
+    const isRecords = view === "records";
     adminInactiveView.hidden = !isInactive;
-    adminPage.hidden = isInactive;
-    if (!isInactive) {
+    adminRecordView.hidden = !isRecords;
+    adminPage.hidden = isInactive || isRecords;
+    // [2026.09.17] 추가한 내용: 전체화면 중에도 문서를 이동하지 않도록 조치기록을 내부 화면으로 한 번만 불러옵니다.
+    if (isRecords && !adminRecordFrame.dataset.loaded) {
+        adminRecordFrame.src = adminRecordFrame.dataset.src;
+        adminRecordFrame.dataset.loaded = "true";
+    }
+    if (!isInactive && !isRecords) {
         adminPage.classList.toggle("is-history-page", view === "history");
         adminPage.classList.toggle("is-staff-page", view !== "history");
         filterHistory(adminHistoryFilter);
@@ -1166,11 +1175,12 @@ function setAdminView(view, updateAddress = true) {
         link.classList.toggle("active", active);
         link.toggleAttribute("aria-current", active);
     });
-    document.title = view === "history" ? "관리 이력 | 병동 통합 관제"
+    document.title = view === "records" ? "관리자 조치기록 | 병동 통합 관제"
+        : view === "history" ? "관리 이력 | 병동 통합 관제"
         : view === "inactive" ? "비활성화 직원관리 | 병동 통합 관제"
         : "직원 관리 | 병동 통합 관제";
     if (updateAddress) {
-        const path = view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : "/admin";
+        const path = view === "records" ? "/admin/records" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : "/admin";
         window.history.pushState({ adminView: view }, "", path);
     }
 }
@@ -1180,7 +1190,11 @@ adminViewLinks.forEach(link => link.addEventListener("click", event => {
 }));
 window.addEventListener("popstate", () => {
     const path = window.location.pathname;
-    setAdminView(path.endsWith("/history") ? "history" : path.endsWith("/admin_de") ? "inactive" : "staff", false);
+    setAdminView(path.endsWith("/records") ? "records" : path.endsWith("/history") ? "history" : path.endsWith("/admin_de") ? "inactive" : "staff", false);
 });
+
+// [2026.09.17] 추가한 내용: /admin/records를 새로고침해도 조치기록을 관리자 공통 화면 안에서 다시 표시합니다.
+const initialAdminPath = window.location.pathname;
+setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") ? "history" : initialAdminPath.endsWith("/admin_de") ? "inactive" : "staff", false);
 
 

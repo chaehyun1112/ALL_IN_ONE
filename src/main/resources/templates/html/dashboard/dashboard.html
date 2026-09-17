@@ -15,9 +15,12 @@
   <link rel="stylesheet" href="../../../static/css/dashboard/room-selection.css" th:href="@{/css/dashboard/room-selection.css}">
 </head>
 
-<body th:attr="data-session-url=@{/api/dashboard/session}">
+<body th:attr="data-session-url=@{/api/dashboard/session},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
   <!-- 상단 헤더 -->
   <header>
+    <!-- [2026.09.17] 고친 내용: 조치기록에서 대시보드로 돌아가는 버튼을 왼쪽 상단에 배치합니다. -->
+    <a class="dashboard-back-link" href="/dashboard" th:href="@{/dashboard}"
+       onclick="event.preventDefault();document.getElementById('dashboard-record-view').hidden=true;document.getElementById('dashboard-main').hidden=false;document.body.dataset.dashboardView='dashboard';history.pushState({dashboardView:'dashboard'},'',this.href);">← 대시보드로 가기</a>
     <div class="brand">
       <div class="brand-icon" aria-hidden="true">+</div>
       <strong>CareGuard</strong>
@@ -67,10 +70,12 @@
           aria-label="대시보드 메뉴"
           hidden
         >
-          <a href="../record/record.html"
+          <!-- [2026.09.17] 고친 내용: 메뉴 클릭 즉시 대시보드 안의 조치기록 본문으로 전환해 전체화면을 유지합니다. -->
+          <a href="../record/record.html" id="record-open"
+             onclick="event.preventDefault();event.stopPropagation();document.getElementById('dashboard-main').hidden=true;document.getElementById('dashboard-record-view').hidden=false;const frame=document.getElementById('dashboard-record-frame');if(!frame.dataset.loaded){frame.src=frame.dataset.src;frame.dataset.loaded='true';}document.body.dataset.dashboardView='records';history.pushState({dashboardView:'records'},'',this.href);"
              th:href="@{/Record}">조치기록</a>
-          <!-- [수정완료] 프로필 메뉴에서 설정 화면으로 이동합니다. -->
-          <a href="../settings/settings.html" th:href="@{/settings}" id="settings-open">설정</a>
+          <!-- [2026.09.17] 고친 내용: 프로필 메뉴의 설정 항목을 바로 비밀번호 변경 화면으로 교체합니다. -->
+          <a href="../settings/password-change.html" th:href="@{/user/password}" id="password-change-open">비밀번호 변경</a>
           <!-- [수정완료] 프로필 메뉴의 마지막에 로그아웃을 배치합니다. -->
           <button
             type="submit"
@@ -87,7 +92,7 @@
   <form id="logout-form" action="../auth/index.html" th:action="@{/logout}"
         method="get" th:method="post" hidden></form>
 
-  <main>
+  <main id="dashboard-main" th:hidden="${recordMode == 'records'}">
     <!-- 오늘의 안전 현황 -->
     <div class="page-heading">
       <section class="panel summary">
@@ -124,10 +129,6 @@
             <span>정상</span>
             <span class="caution">주의</span>
             <span class="urgent">긴급</span>
-          </div>
-          <!-- [09.13]수정내용: 대응 등록 버튼을 병실 범례의 정상·주의·긴급 표시 바로 아래에 배치합니다. -->
-          <div class="legend-response">
-            <button type="button" id="response-open" class="response-open" style="visibility: hidden" disabled>대응 등록</button>
           </div>
           </div>
         </div>
@@ -196,7 +197,7 @@
               class="locate-room"
               data-locate="305"
             >
-              위치 확인 →
+              대응 등록
             </button>
           </article>
 
@@ -222,7 +223,7 @@
               class="locate-room"
               data-locate="312"
             >
-              위치 확인 →
+              대응 등록
             </button>
           </article>
         </section>
@@ -233,6 +234,11 @@
       <div id="room-detail" class="selection" role="status">병실을 선택해 주세요.</div>
     </section>
   </main>
+
+  <!-- [2026.09.17] 추가한 내용: 조치기록을 대시보드 안에서 열어 전체화면 상태를 유지합니다. -->
+  <section id="dashboard-record-view" aria-label="조치기록" hidden th:hidden="${recordMode != 'records'}">
+    <iframe id="dashboard-record-frame" title="조치기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/Record/content}"></iframe>
+  </section>
 
   <!-- 설정 창 -->
   <dialog

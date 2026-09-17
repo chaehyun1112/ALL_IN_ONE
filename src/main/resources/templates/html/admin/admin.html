@@ -9,7 +9,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <!-- [9.15] 수정내용: 직원 관리와 관리 이력 화면에서 브라우저 제목도 현재 화면에 맞게 표시한다. -->
-    <title th:text="${pageMode == 'history'} ? '관리 이력 | 병동 통합 관제' : '직원 관리 | 병동 통합 관제'">직원 관리 | 병동 통합 관제</title>
+    <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history'} ? '관리 이력 | 병동 통합 관제' : '직원 관리 | 병동 통합 관제')">직원 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css"
@@ -41,6 +41,8 @@
             <a href="/admin" th:href="@{/admin}" data-admin-view="staff" th:classappend="${pageMode == 'staff'} ? ' active'">직원 관리</a>
             <a href="/admin/history" th:href="@{/admin/history}" data-admin-view="history" th:classappend="${pageMode == 'history'} ? ' active'">관리 이력</a>
             <a id="admin-settings" href="admin-inactive-users.html" th:href="@{/admin/admin_de}" data-admin-view="inactive">비활성화 직원관리</a>
+            <!-- [2026.09.17] 추가한 내용: 비활성화 직원관리 옆에서 전체 조치기록을 조회하는 관리자 메뉴를 제공합니다. -->
+            <a href="../record/record.html" th:href="@{/admin/records}" data-admin-view="records" th:classappend="${pageMode == 'records'} ? ' active'">조치기록</a>
         </nav>
     </div>
 
@@ -65,7 +67,7 @@
 </header>
 
 <!-- [9.15] 수정내용: 주소에 따라 직원 관리 또는 관리 이력 전용 화면으로 구분한다. -->
-<main class="admin-page" id="admin-management-page" aria-labelledby="admin-title" data-admin-id="admin01" th:classappend="${pageMode == 'history'} ? ' is-history-page' : ' is-staff-page'" th:attr="data-admin-id=${adminId},data-history-only=${pageMode == 'history'}">
+<main class="admin-page" id="admin-management-page" aria-labelledby="admin-title" data-admin-id="admin01" th:classappend="${pageMode == 'history'} ? ' is-history-page' : ' is-staff-page'" th:attr="data-admin-id=${adminId},data-history-only=${pageMode == 'history'}" th:hidden="${pageMode == 'records'}">
     <header class="admin-heading">
         <!-- [9.15] 수정내용: 화면 역할에 맞는 제목과 안내 문구를 표시한다. -->
         <h1 id="admin-title" th:text="${pageMode == 'history'} ? '관리 이력' : '직원 관리'">직원 관리</h1>
@@ -209,6 +211,11 @@
     </div>
     </section>
 </main>
+
+<!-- [2026.09.17] 추가한 내용: 조치기록을 관리자 문서 안에서 열어 전체화면 상태를 유지합니다. -->
+<section class="admin-record-view" id="admin-record-view" aria-label="조치기록" hidden th:hidden="${pageMode != 'records'}">
+    <iframe id="admin-record-frame" title="조치기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/admin/records/content}"></iframe>
+</section>
 
 <!-- [2026.09.16] 추가한 내용: 전체화면을 해제하지 않고 본문만 전환할 수 있도록 비활성화 직원관리 화면을 같은 관리자 문서에 둡니다. -->
 <section class="admin-page admin-settings-page" id="admin-inactive-view" aria-labelledby="admin-settings-title" hidden>

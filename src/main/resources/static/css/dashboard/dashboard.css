@@ -93,6 +93,19 @@ header {
 @media(max-width:700px) {
   #fullscreen-label {display:none}
 }
+/* [2026.09.17] 추가한 내용: 대시보드 내부 조치기록이 상단 바 아래 화면을 온전히 사용하게 합니다. */
+#dashboard-record-view { height:calc(100dvh - 72px); background:#f4f1e8; }
+#dashboard-record-frame { display:block; width:100%; height:100%; border:0; background:#f4f1e8; }
+/* [2026.09.17] 고친 내용: 조치기록 전환 중에는 대시보드 본문이 아래에 함께 표시되지 않게 합니다. */
+#dashboard-main[hidden] { display:none !important; }
+#dashboard-record-view[hidden] { display:none !important; }
+/* [2026.09.17] 고친 내용: 조치기록 화면에서만 왼쪽 상단에 대시보드 복귀 버튼을 표시합니다. */
+.dashboard-back-link { display:none; align-items:center; flex:0 0 auto; margin-left:24px; padding:0; color:#fff; font-size:13px; font-weight:700; text-decoration:none; }
+body[data-dashboard-view="records"] .dashboard-back-link { display:inline-flex; }
+/* [2026.09.17] 고친 내용: 대시보드 복귀는 테두리 없는 텍스트 링크로 표시합니다. */
+.dashboard-back-link:hover,.dashboard-back-link:focus-visible { color:#dbe6df; text-decoration:none; outline:0; }
+/* [2026.09.17] 고친 내용: 조치기록에서는 중복되는 CareGuard 브랜드와 아이콘을 숨깁니다. */
+body[data-dashboard-view="records"] .brand { display:none; }
 .demo {
   font-size:11px;
   padding:5px 9px;
@@ -1710,10 +1723,13 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 }
 /* [2026.09.16] 고친 내용: 조치 기록 등록 버튼은 기본 회색을 유지하고 마우스를 올렸을 때만 초록색으로 강조합니다. */
 #response-dialog .response-actions button[type="submit"]:hover {
-  background: #385b4d;
+  /* [2026.09.17] 고친 내용: 조치 기록 등록 버튼은 배경을 바꾸지 않고 초록 테두리만 표시합니다. */
+  background: #eeeeee;
   border-color: #385b4d;
-  color: #fff;
+  color: #444;
 }
+/* [2026.09.17] 고친 내용: 낙상 감지와 침대 이탈 대응 등록 창의 외곽선을 진한 회색으로 통일합니다. */
+#response-dialog { border: 2px solid #5f6361; }
 #response-dialog .response-actions button:focus-visible {
   outline: 2px solid #bfc3c7;
   outline-offset: 2px;
@@ -1757,7 +1773,8 @@ main{height:auto;min-height:calc(100dvh - 72px)}
    글자나 화면 전체를 확대·축소하지 않고 실제 사용 가능한 CSS 화면 크기를 기준으로 배치합니다. */
 @media (min-width: 1000px) {
   :root {
-    --dashboard-header-height: clamp(56px, 8dvh, 72px);
+    /* [2026.09.17] 고친 내용: 관리자 화면과 같은 전체화면 비율을 위해 간호사 상단 바 높이를 늘립니다. */
+    --dashboard-header-height: 88px;
     --dashboard-gap: clamp(12px, 1.8dvh, 20px);
     --dashboard-padding: clamp(12px, 1.5vw, 28px);
   }
@@ -1768,12 +1785,15 @@ main{height:auto;min-height:calc(100dvh - 72px)}
   body > main {
     height: calc(100dvh - var(--dashboard-header-height));
     min-height: 510px;
-    padding: var(--dashboard-gap) var(--dashboard-padding);
+    /* [2026.09.17] 고친 내용: 전체화면에서 대시보드 본문을 조금 아래에 배치해 상단 여백 비율을 맞춥니다. */
+    padding: calc(var(--dashboard-gap) + 10px) var(--dashboard-padding) var(--dashboard-gap);
     gap: var(--dashboard-gap);
   }
+  #dashboard-record-view { height:calc(100dvh - var(--dashboard-header-height)); }
   /* [2026.09.16] 고친 내용: 전체화면에서는 본문 상단 여백을 조금 늘려 화면 요소가 위에 몰리지 않게 합니다. */
   html:fullscreen body > main {
-    padding-top: clamp(22px, 3dvh, 34px);
+    /* [2026.09.17] 고친 내용: 전체화면에서 안전 현황과 병실 배치가 위에 몰리지 않게 본문을 더 아래로 배치합니다. */
+    padding-top: clamp(40px, 5dvh, 56px);
   }
   .page-heading { flex: 0 0 auto; }
   .page-heading .summary {
