@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/admin/**",
                                 "/api/admin/**"
                         ).hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/session").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
