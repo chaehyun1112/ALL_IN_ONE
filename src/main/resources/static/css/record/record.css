@@ -68,7 +68,8 @@ select:focus-visible,
 
 /* 상단 메뉴 배치 */
 .page-header {
-  min-height: 67.3px;
+  /* [2026.09.17] 고친 내용: 간호사 조치기록도 전체화면에서 관리자와 같은 상단 바 비율을 사용합니다. */
+  min-height: 88px;
   display: flex;
   align-items: center;
   gap: 24px;
@@ -76,6 +77,25 @@ select:focus-visible,
   background: var(--header-background);
   color: var(--panel-background);
 }
+
+/* [2026.09.17] 고친 내용: 관리자 화면 안에서는 조치기록의 별도 상단 바를 숨기고 공통 관리자 바를 사용합니다. */
+.admin-record-page .page-header,
+.dashboard-record-page .page-header {
+  display: none;
+}
+
+/* [2026.09.17] 고친 내용: 전체화면 관리자 조치기록은 작은 원본 기준값 대신 읽기 편한 여백과 표 크기를 사용합니다. */
+.admin-record-page .page-content { padding: 24px 28px 28px; }
+.admin-record-page .page-intro { height: 84px; padding: 17px 20px 10px; }
+.admin-record-page .page-title { font-size: 21px; line-height: 26px; }
+.admin-record-page .page-description { margin-top: 9px; font-size: 10.5px; line-height: 16px; }
+.admin-record-page .search-form { min-height: 76px; margin-top: 18px; padding: 16px; }
+.admin-record-page .period-button,
+.admin-record-page .choice-button { height: 32px; min-height: 32px; font-size: 10px; }
+.admin-record-page .record-table { font-size: 10px; border-spacing: 0 6px; }
+.admin-record-page .record-table th { height: 34px; }
+.admin-record-page .record-table td { height: 40px; }
+.admin-record-page .alert-badge { width: 70px; height: 21px; font-size: 9px; }
 
 /* 대시보드 이동 */
 .dashboard-link {
@@ -151,7 +171,8 @@ select:focus-visible,
 
 /* 제목 아래 설명 */
 .page-description {
-  margin: 3.4px 0 0;
+  /* [2026.09.16] 고친 내용: 조치 기록 제목과 안내 문구 사이의 세로 간격을 넓힙니다. */
+  margin: 8px 0 0;
   color: #666b61;
   font-size: 8.95px;
   line-height: 14px;

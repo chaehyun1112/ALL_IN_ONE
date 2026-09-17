@@ -1,6 +1,7 @@
 @charset "UTF-8";
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-:root { color-scheme: light; --admin-background: #f4f1e8; --admin-surface: #fbfaf5; --admin-border: #e2e2d7; --admin-green: #405c4f; --admin-text: #42483e; --admin-muted: #8b9083; }
+/* [2026.09.17] 고친 내용: 전체화면에서 상단 영역의 비율을 안정적으로 유지할 수 있도록 공통 높이를 정의합니다. */
+:root { color-scheme: light; --admin-background: #f4f1e8; --admin-surface: #fbfaf5; --admin-border: #e2e2d7; --admin-green: #405c4f; --admin-text: #42483e; --admin-muted: #8b9083; --admin-topbar-height: 88px; }
 * { box-sizing: border-box; }
 /* [9.15] 수정내용: 페이지 전체가 아닌 상단 바 아래의 본문 영역만 스크롤하도록 구성한다. */
 html:has(#admin-management-page), body:has(#admin-management-page) { height: 100%; overflow: hidden; background: var(--admin-background); }
@@ -11,7 +12,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 [hidden] { display: none !important; }
 /* [9.15] 수정내용: 상단 바는 콘텐츠 너비를 유지하고 우측 여백 색상은 html 배경에서 처리한다. */
 /* [9.15] 수정내용: 가운데 메뉴를 화면 기준으로 정렬할 수 있도록 상단 바를 기준 영역으로 설정한다. */
-.admin-topbar { position: relative; width: 100%; height: 68px; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; gap: 24px; background: var(--admin-green); color: #f1f4ed; }
+.admin-topbar { position: relative; width: 100%; height: var(--admin-topbar-height); padding: 0 24px; display: flex; justify-content: space-between; align-items: center; gap: 24px; background: var(--admin-green); color: #f1f4ed; }
 /* [09.13]수정내용: 상단 공통 정렬과 각 영역의 간격을 분리하여 간격 덮어쓰기를 제거한다. */
 .admin-brand, .admin-topbar-actions { display: flex; align-items: center; }
 .admin-brand { gap: 32px; }
@@ -31,7 +32,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-logout { padding: 0 16px; font-size: 11px; white-space: nowrap; }
 .admin-settings:hover, .admin-logout:hover { background: #607c6c; border-color: #a1b4a7; }
 .admin-settings:focus-visible, .admin-logout:focus-visible { outline-color: #f1f4ed; }
-.admin-page { display: flex; flex-direction: column; height: calc(100vh - 68px); min-height: 0; max-width: 1800px; margin: 0 auto; padding: 24px 24px 36px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: #8ba091 #eeede5; }
+/* [2026.09.16] 추가한 내용: 관리자 공통 전체화면 버튼의 크기·아이콘·진입 상태를 상단 메뉴와 맞춥니다. */
+.admin-fullscreen-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:36px; padding:0 12px; border:1px solid #74887b; border-radius:7px; background:#536d60; color:#f3f5ee; font-size:11px; white-space:nowrap; }
+.admin-fullscreen-toggle svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.admin-fullscreen-toggle:hover { background:#607c6c; border-color:#a1b4a7; }
+.admin-fullscreen-toggle:focus-visible { outline:2px solid #f1f4ed; outline-offset:3px; }
+.admin-fullscreen-toggle:disabled { opacity:.55; cursor:default; }
+.admin-fullscreen-exit, .admin-fullscreen-toggle[aria-pressed="true"] .admin-fullscreen-enter { display:none; }
+.admin-fullscreen-toggle[aria-pressed="true"] .admin-fullscreen-exit { display:initial; }
+.admin-page { display: flex; flex-direction: column; height: calc(100vh - var(--admin-topbar-height)); min-height: 0; max-width: 1800px; margin: 0 auto; padding: 24px 24px 36px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: #8ba091 #eeede5; }
+/* [2026.09.17] 추가한 내용: 전체화면을 유지하는 조치기록 내부 화면이 상단 바 아래 영역을 모두 사용하게 합니다. */
+.admin-record-view { height: calc(100vh - var(--admin-topbar-height)); background: #f4f6f2; }
+.admin-record-view iframe { display: block; width: 100%; height: 100%; border: 0; background: #f4f6f2; }
 /* [9.15] 추가내용: 본문 스크롤 바는 상단 바 아래에서만 보이도록 스타일을 적용한다. */
 .admin-page::-webkit-scrollbar { width: 10px; }
 .admin-page::-webkit-scrollbar-track { margin: 6px 0; border-radius: 999px; background: #eeede5; }
@@ -44,8 +56,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-heading { padding: 0 12px; margin-bottom: 20px; }
 .admin-heading h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.35; letter-spacing: -1px; }
 .admin-heading p { margin: 0; font-size: 13px; color: var(--admin-muted); }
-.admin-history-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
+/* [2026.09.16] 고친 내용: 계정 생성 요약 카드를 제거하고 남은 네 카드의 너비·높이·내용 정렬을 동일하게 맞춥니다. */
+.admin-history-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
 .admin-history-summary article { display: flex; align-items: center; gap: 12px; min-height: 88px; padding: 17px; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
+.admin-history-summary article > div { display: flex; min-width: 0; min-height: 48px; flex: 1; flex-direction: column; justify-content: center; }
 .history-filter-card { cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
 .history-filter-card:hover, .history-filter-card:focus-visible { border-color: #7d9b87; box-shadow: 0 0 0 3px #6f92751f; outline: 0; transform: translateY(-1px); }
 .history-filter-card:focus { outline: 0; }
@@ -92,6 +106,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 #admin-management-page .admin-table-wrap { min-height: 220px; }
 /* [9.15] 추가내용: 직원 목록이 길어질 때 표 내부에서 스크롤하고 열 제목은 고정한다. */
 #admin-management-page.is-staff-page .admin-table-wrap { max-height: 520px; overflow: auto; margin-right: -14px; padding-right: 14px; scrollbar-width: thin; scrollbar-color: #9aaba0 #f0f1eb; }
+/* [2026-09-16 변경] 직원 관리에서는 본문 스크롤을 없애고 목록 영역만 남은 높이 안에서 스크롤한다. */
+#admin-management-page.is-staff-page { overflow-y: hidden; }
+#admin-management-page.is-staff-page .admin-panel { min-height: 0; display: flex; flex-direction: column; }
+#admin-management-page.is-staff-page .admin-table-wrap { flex: 1 1 auto; min-height: 0; max-height: none; }
 #admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
 #admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-track { border-radius: 999px; background: #f0f1eb; }
 #admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb { border: 2px solid #f0f1eb; border-radius: 999px; background: #9aaba0; }
@@ -135,6 +153,8 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-management-option-icon.admin-reject { color: #c55454; background: #fceeed; }
 .admin-management-option strong { font-size: 13px; }
 .admin-management-option small { color: #7b8274; font-size: 11px; line-height: 1.4; }
+/* [2026-09-16 변경] 설명 줄 수와 무관하게 세 관리 카드의 아이콘·제목 위치를 같게 맞춘다. */
+.admin-management-option small { display: block; min-height: 46px; }
 .admin-management-choice-dialog .admin-primary:disabled { border-color: #e1e6df; background: #e1e6df; color: #9aa69c; cursor: not-allowed; }
 .admin-empty { text-align: center; color: var(--admin-muted); padding: 60px 16px; }
 /* [9.15] 추가내용: 직원 목록과 관리 이력의 페이지 이동 버튼을 공통 스타일로 표시한다. */
@@ -154,6 +174,11 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-page.is-history-page #admin-user-pagination { display: none; }
 .admin-panel > .admin-history-panel { padding-top: 0; border-top: 0; }
 .admin-panel > .admin-history-panel > header { display: none; }
+/* [2026.09.16] 고친 내용: 관리 이력 화면은 본문 바깥 스크롤을 없애고 이력 표 영역에만 스크롤을 남깁니다. */
+#admin-management-page.is-history-page { overflow-y: hidden; }
+#admin-management-page.is-history-page .admin-panel { display: flex; min-height: 0; flex-direction: column; }
+#admin-management-page.is-history-page .admin-history-panel { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+#admin-management-page.is-history-page .admin-history-wrap { min-height: 0; max-height: none; flex: 1 1 auto; }
 /* [09.13]수정내용: 관리 이력이 많아져도 페이지 전체가 늘어나지 않도록 목록 영역에 세로 스크롤을 적용한다. */
 .admin-history-wrap { max-height: 360px; overflow: auto; margin-top: 18px; margin-right: -14px; padding-right: 14px; scrollbar-width: thin; scrollbar-color: #9aaba0 #f0f1eb; }
 .admin-history-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -180,6 +205,10 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .history-actions button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .history-actions button:hover { background: transparent; opacity: .7; }
 .admin-dialog { width: min(420px, calc(100% - 32px)); padding: 28px; border: 1px solid var(--admin-border); border-radius: 14px; color: var(--admin-text); background: var(--admin-surface); }
+/* [2026.09.16] 고친 내용: 직원 관리 작업 선택 카드의 가로 폭을 40px 늘려 항목 사이 여백을 자연스럽게 맞춥니다. */
+#admin-management-choice-dialog.admin-management-choice-dialog { width: min(620px, calc(100% - 32px)); }
+/* [2026-09-16 변경] 관리 작업 선택 창의 취소·선택 버튼을 조금 넓혀 누르기 쉽게 만든다. */
+#admin-management-choice-cancel, #admin-management-choice-confirm { min-width: 72px; }
 .admin-dialog::backdrop { background: #1c302666; }
 .admin-dialog h2 { margin: 0 0 12px; font-size: 20px; }
 .admin-dialog p { line-height: 1.7; color: #777f70; }
@@ -257,6 +286,9 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
     .admin-search input, .admin-tabs { width: 100%; }
     .admin-table { min-width: 620px; }
     .admin-history-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* [2026.09.16] 고친 내용: 작은 화면에서는 내용이 잘리지 않도록 페이지 스크롤을 사용합니다. */
+    #admin-management-page.is-history-page { overflow-y: auto; }
+    #admin-management-page.is-history-page .admin-history-wrap { max-height: 360px; flex: none; }
     .admin-panel-heading { align-items: stretch; flex-direction: column; }
     .admin-create-account { align-self: flex-start; }
     .admin-create-grid { grid-template-columns: 1fr; }

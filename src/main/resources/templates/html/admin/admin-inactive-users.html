@@ -24,20 +24,30 @@
 <body>
 <header class="admin-topbar">
     <div class="admin-brand">
-        <!-- [09.13]수정내용: 상단 복귀 링크를 관리자 대시보드로 돌아가기로 변경하여 이동할 화면을 안내한다. -->
-        <a class="admin-back-button" id="admin-settings-back" href="admin.html?status=APPROVED" th:href="@{/admin(status='APPROVED')}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
-            관리자 대시보드로 돌아가기
-        </a>
+        <!-- [2026.09.16] 고친 내용: 왼쪽 상단의 관리자 대시보드 복귀 링크를 삭제합니다. -->
+        <!-- [2026.09.16] 고친 내용: 서비스 이름을 왼쪽에, 병동 통합 관제를 오른쪽에 표시합니다. -->
+        <strong class="admin-service-name">서비스 이름</strong>
+        <span class="admin-service-placeholder">병동 통합 관제</span>
         <nav class="admin-page-nav" aria-label="계정 관리 메뉴">
             <a href="admin.html" th:href="@{/admin}">직원 관리</a>
             <a href="/admin/history" th:href="@{/admin/history}">관리 이력</a>
             <a href="admin-inactive-users.html" th:href="@{/admin/admin_de}" class="active" aria-current="page">비활성화 직원관리</a>
+            <!-- [2026.09.17] 추가한 내용: 모든 관리자 화면에서 조치기록 메뉴를 같은 위치로 제공합니다. -->
+            <a href="../record/record.html" th:href="@{/admin/records}">조치기록</a>
         </nav>
     </div>
 
     <div class="admin-topbar-actions">
         <time id="admin-clock"></time>
+        <!-- [2026.09.16] 추가한 내용: 비활성화 직원관리에서도 시간 옆 버튼으로 전체화면을 전환합니다. -->
+        <button type="button" class="admin-fullscreen-toggle" id="admin-fullscreen-toggle"
+                aria-label="전체화면" aria-pressed="false" title="전체화면">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path class="admin-fullscreen-enter" d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>
+                <path class="admin-fullscreen-exit" d="M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3"/>
+            </svg>
+            <span id="admin-fullscreen-label">전체화면</span>
+        </button>
 
         <form action="/logout" th:action="@{/logout}" method="post">
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
@@ -50,9 +60,19 @@
 
 <main class="admin-page admin-settings-page" id="admin-settings-page" aria-labelledby="admin-settings-title">
     <header class="admin-heading admin-settings-heading">
-        <p class="admin-settings-eyebrow">관리자 설정 / 계정 관리</p>
+        <!-- [2026.09.16] 고친 내용: 페이지 제목 위의 관리자 설정·계정 관리 안내 문구를 삭제합니다. -->
         <h1 id="admin-settings-title" tabindex="-1">비활성화 직원관리</h1>
         <p>직원의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
+        <!-- [2026.09.16] 고친 내용: 비활성화 직원 카드를 계정 상태 관리 안내 위로 이동합니다. -->
+        <div class="admin-inactive-overview">
+            <section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title">
+                <!-- [09.13]수정내용: 비활성화 직원 아이콘에서 부가 표시를 제거하고 사람 모양만 표시한다. -->
+                <span class="admin-inactive-symbol" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+                </span>
+                <div><h2 id="admin-inactive-stat-title">비활성화 직원</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
+            </section>
+        </div>
         <!-- [수정] 계정 상태 관리 안내를 설명문 아래의 가로형 영역으로 배치 -->
         <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title">
             <div class="admin-guide-heading">
@@ -62,15 +82,6 @@
             <p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 직원은 <strong>활성화</strong>로 변경해 주세요.</p>
         </aside>
     </header>
-    <div class="admin-inactive-overview">
-        <section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title">
-            <!-- [09.13]수정내용: 비활성화 직원 아이콘에서 부가 표시를 제거하고 사람 모양만 표시한다. -->
-            <span class="admin-inactive-symbol" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
-            </span>
-            <div><h2 id="admin-inactive-stat-title">비활성화 직원</h2><strong id="admin-inactive-count">—<span>명</span></strong></div>
-        </section>
-    </div>
     <section class="admin-panel admin-inactive-panel" aria-labelledby="admin-inactive-list-title">
         <header class="admin-panel-heading admin-inactive-panel-heading">
             <!-- [09.13]수정내용: 직원 목록 안내의 이전 배정 병동을 병동으로 표시한다. -->

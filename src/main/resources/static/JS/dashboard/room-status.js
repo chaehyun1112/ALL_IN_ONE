@@ -16,14 +16,18 @@ window.CareGuardRoomStatus = {
     timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit"
   });
   state.dayKey = value => dateFormat.format(new Date(value));
-  state.addEvent = ({id, room, type, occurredAt = Date.now()}) => {
+  // [2026.09.17] 고친 내용: 가상 감지 기록을 구분하여 테스트 초기화 시 해당 기록만 제거합니다.
+  state.addEvent = ({id, room, type, occurredAt = Date.now(), test = false}) => {
     const time = new Date(occurredAt).getTime();
     if (id == null || !String(id).trim() || !state.rooms.has(Number(room)) ||
         !["urgent", "caution"].includes(type) || !Number.isFinite(time)) return false;
     const key = String(id);
     if (events.has(key)) return false;
-    events.set(key, {room: Number(room), type, occurredAt: time});
+    events.set(key, {room: Number(room), type, occurredAt: time, test});
     return true;
+  };
+  state.clearTestEvents = () => {
+    for (const [id, event] of events) if (event.test) events.delete(id);
   };
   state.todayCounts = (number, now = Date.now()) => {
     const counts = {urgent: 0, caution: 0};
@@ -34,6 +38,16 @@ window.CareGuardRoomStatus = {
       }
     }
     return counts;
+  };
+  // [2026.09.16] 추가한 내용: 선택 병실의 오늘 기록 중 실제 발생 시각이 가장 최근인 이벤트를 조회합니다.
+  state.latestTodayEvent = (number, now = Date.now()) => {
+    let latest = null;
+    const today = state.dayKey(now);
+    for (const event of events.values()) {
+      if (event.room === Number(number) && state.dayKey(event.occurredAt) === today &&
+          event.occurredAt <= now && (!latest || event.occurredAt > latest.occurredAt)) latest = event;
+    }
+    return latest ? {...latest} : null;
   };
   // 기존 화면 예시 경보만 오늘의 예시 이력으로 초기화합니다. 새로고침하면 예시 상태로 돌아갑니다.
   for (const room of state.rooms.values()) {

@@ -6,7 +6,6 @@
         ...document.querySelectorAll(".history-filter-card")
     ];
     const historyEmpty = document.querySelector("#admin-history-empty");
-    const historyResult = document.querySelector("#admin-search-result");
 
     if (!historyRows) return;
 
@@ -242,10 +241,6 @@
                 historyEmpty.hidden = false;
                 historyEmpty.textContent =
                     "관리 이력을 불러오지 못했습니다.";
-            }
-
-            if (historyResult) {
-                historyResult.textContent = "관리 이력 조회 실패";
             }
 
             if (typeof showAdminFeedback === "function") {

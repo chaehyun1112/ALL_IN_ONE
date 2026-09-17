@@ -69,6 +69,43 @@ header {
   font-size:12px;
   font-variant-numeric:tabular-nums;
   color:#dbe6df}
+/* [2026.09.16] 추가한 내용: 전체화면 버튼의 스타일과 진입·해제 아이콘 표시를 설정합니다. */
+.fullscreen-toggle {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:36px;
+  padding:7px 10px;
+  border:1px solid #ffffff50;
+  border-radius:8px;
+  background:transparent;
+  color:#fff;
+  font-size:12px;
+  white-space:nowrap;
+  flex-shrink:0}
+.fullscreen-toggle:hover {background:#ffffff18}
+.fullscreen-toggle:focus-visible {outline:2px solid #d3e3d7;outline-offset:3px}
+.fullscreen-toggle:disabled {opacity:.55;cursor:default}
+.fullscreen-exit,
+.fullscreen-toggle[aria-pressed="true"] .fullscreen-enter {display:none}
+.fullscreen-toggle[aria-pressed="true"] .fullscreen-exit {display:initial}
+/* [2026.09.16] 추가한 내용: 좁은 화면에서는 전체화면 버튼의 아이콘만 표시합니다. */
+@media(max-width:700px) {
+  #fullscreen-label {display:none}
+}
+/* [2026.09.17] 추가한 내용: 대시보드 내부 조치기록이 상단 바 아래 화면을 온전히 사용하게 합니다. */
+#dashboard-record-view { height:calc(100dvh - 72px); background:#f4f1e8; }
+#dashboard-record-frame { display:block; width:100%; height:100%; border:0; background:#f4f1e8; }
+/* [2026.09.17] 고친 내용: 조치기록 전환 중에는 대시보드 본문이 아래에 함께 표시되지 않게 합니다. */
+#dashboard-main[hidden] { display:none !important; }
+#dashboard-record-view[hidden] { display:none !important; }
+/* [2026.09.17] 고친 내용: 조치기록 화면에서만 왼쪽 상단에 대시보드 복귀 버튼을 표시합니다. */
+.dashboard-back-link { display:none; align-items:center; flex:0 0 auto; margin-left:24px; padding:0; color:#fff; font-size:13px; font-weight:700; text-decoration:none; }
+body[data-dashboard-view="records"] .dashboard-back-link { display:inline-flex; }
+/* [2026.09.17] 고친 내용: 대시보드 복귀는 테두리 없는 텍스트 링크로 표시합니다. */
+.dashboard-back-link:hover,.dashboard-back-link:focus-visible { color:#dbe6df; text-decoration:none; outline:0; }
+/* [2026.09.17] 고친 내용: 조치기록에서는 중복되는 CareGuard 브랜드와 아이콘을 숨깁니다. */
+body[data-dashboard-view="records"] .brand { display:none; }
 .demo {
   font-size:11px;
   padding:5px 9px;
@@ -1633,12 +1670,14 @@ main{height:auto;min-height:calc(100dvh - 72px)}
   outline:none;
 }
 
-/* [수정] 선택된 상단 현황 카드의 외곽선을 연한 회색으로 변경합니다. */
+/* [2026.09.16] 고친 내용: 선택된 오늘의 안전 현황 카드는 예시처럼 얇은 초록 테두리와 연한 바깥 강조선으로 표시합니다. */
 .counts .count[aria-pressed="true"]{
-  outline:2px solid #b8b8b8;
-  outline-offset:2px;
-  box-shadow:none;
+  border-color:#6f9275 !important;
+  outline:none !important;
+  box-shadow:0 0 0 2px #6f927580 !important;
 }
+.counts .count:focus,
+.counts .count:focus-visible { outline:none !important; }
 
 
 /* [수정] 조치 기록 등록 버튼을 연한 회색 계열로 변경합니다. */
@@ -1682,6 +1721,15 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #response-dialog .response-actions button:hover {
   border-color: #bfc3c7;
 }
+/* [2026.09.16] 고친 내용: 조치 기록 등록 버튼은 기본 회색을 유지하고 마우스를 올렸을 때만 초록색으로 강조합니다. */
+#response-dialog .response-actions button[type="submit"]:hover {
+  /* [2026.09.17] 고친 내용: 조치 기록 등록 버튼은 배경을 바꾸지 않고 초록 테두리만 표시합니다. */
+  background: #eeeeee;
+  border-color: #385b4d;
+  color: #444;
+}
+/* [2026.09.17] 고친 내용: 낙상 감지와 침대 이탈 대응 등록 창의 외곽선을 진한 회색으로 통일합니다. */
+#response-dialog { border: 2px solid #5f6361; }
 #response-dialog .response-actions button:focus-visible {
   outline: 2px solid #bfc3c7;
   outline-offset: 2px;
@@ -1693,6 +1741,25 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #response-dialog .response-options label:has(input:checked) {
   background: transparent;
 }
+/* [2026.09.16] 고친 내용: 복도 전체를 칠하지 않고 사람이 찾기 쉬운 위치명 지점만 연한 원으로 점멸시킵니다. */
+.corridor { font:inherit; cursor:pointer; }
+/* [2026.09.17] 고친 내용: 위치 확인 시 복도 전체 대신 실제 감지 원에만 선택 표시를 남깁니다. */
+.corridor.urgent[aria-pressed="true"] { outline:none; }
+/* [2026.09.16] 고친 내용: 감지 지점을 중앙이 아닌 좌측 화장실 앞 구간으로 옮깁니다. */
+/* [2026.09.17] 고친 내용: 테스트한 화장실 앞 위치에 맞춰 복도 마커의 좌표를 이동합니다. */
+.corridor-alert-marker { display:none; position:absolute; z-index:2; left:var(--camera-x,13%); top:50%; width:16px; height:16px; border-radius:50%; transform:translate(-50%,-50%); background:#cf5f53; box-shadow:0 0 0 5px #cf5f5350; }
+.corridor-alert-marker::after { content:var(--camera-label); position:absolute; left:50%; bottom:calc(100% + 6px); transform:translateX(-50%); padding:3px 6px; border-radius:5px; background:#8f3028; color:#fff; font-size:10px; font-style:normal; font-weight:700; letter-spacing:0; white-space:nowrap; }
+.corridor.urgent[aria-pressed="true"] .corridor-alert-marker::before { content:""; position:absolute; inset:-5px; border:2px solid #4f8061; border-radius:50%; }
+.corridor.urgent .corridor-alert-marker { display:block; animation:corridor-alert-pulse 1.15s ease-in-out infinite; }
+/* [2026.09.17] 고친 내용: 복도 감지 위치가 눈에 띄되 과하지 않도록 점멸과 확장 원 효과를 완화합니다. */
+@keyframes corridor-alert-pulse { 0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.85); background:#c9564b; box-shadow:0 0 0 4px #cf5f5344,0 0 6px 1px #cf5f5355; } 50% { opacity:1; transform:translate(-50%,-50%) scale(1.18); background:#df6a5e; box-shadow:0 0 0 10px #df6a5e45,0 0 10px 2px #df6a5e77; } }
+@media (prefers-reduced-motion:reduce) { .corridor.urgent .corridor-alert-marker { animation:none; opacity:1; } }
+.alert-card.corridor-alert { background:linear-gradient(110deg,#fff1ee,#ffe4df); border-color:#df9b91; border-left-color:#b94339; }
+.alert-card.corridor-alert .alert-top, .alert-card.corridor-alert h3 { color:#8f3028; }
+.alert-card.corridor-alert .event-label, .alert-card.corridor-alert p { color:#75453f; }
+/* [2026.09.16] 고친 내용: 확인이 필요한 알림은 낙상 감지를 먼저, 침대 이탈을 그 아래에 표시합니다. */
+.alerts-panel .alert-card:not(.caution) { order:1; }
+.alerts-panel .alert-card.caution { order:2; }
 /* 선택 병실의 오늘 이벤트 요약을 좁은 화면에서도 자연스럽게 줄바꿈합니다. */
 #room-detail { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; line-height: 1.6; }
 #room-detail strong { color: #293e34; font-size: 13px; font-weight: 600; }
@@ -1703,22 +1770,115 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 #room-detail .room-history-number { color: #222; font-weight: 700; }
 #room-detail .room-history-unit { color: inherit; }
 
-/* [9.15] 수정내용: 대시보드 알림 영역의 내부 스크롤을 제거하고 알림 목록 전체를 표시합니다. */
-@media (min-width: 701px) {
-  main {
-    height: auto;
-    min-height: calc(100dvh - 72px);
+/* [2026.09.16] 고친 내용: 데스크톱·노트북에서 화면 높이에 맞춰 여백과 평면도를 조절합니다.
+   글자나 화면 전체를 확대·축소하지 않고 실제 사용 가능한 CSS 화면 크기를 기준으로 배치합니다. */
+@media (min-width: 1000px) {
+  :root {
+    /* [2026.09.17] 고친 내용: 관리자 화면과 같은 전체화면 비율을 위해 간호사 상단 바 높이를 늘립니다. */
+    --dashboard-header-height: 88px;
+    --dashboard-gap: clamp(12px, 1.8dvh, 20px);
+    --dashboard-padding: clamp(12px, 1.5vw, 28px);
   }
-
-  .layout {
+  body > header {
+    height: var(--dashboard-header-height);
+    padding-inline: var(--dashboard-padding);
+  }
+  body > main {
+    height: calc(100dvh - var(--dashboard-header-height));
+    min-height: 510px;
+    /* [2026.09.17] 고친 내용: 전체화면에서 대시보드 본문을 조금 아래에 배치해 상단 여백 비율을 맞춥니다. */
+    padding: calc(var(--dashboard-gap) + 10px) var(--dashboard-padding) var(--dashboard-gap);
+    gap: var(--dashboard-gap);
+  }
+  #dashboard-record-view { height:calc(100dvh - var(--dashboard-header-height)); }
+  /* [2026.09.16] 고친 내용: 전체화면에서는 본문 상단 여백을 조금 늘려 화면 요소가 위에 몰리지 않게 합니다. */
+  html:fullscreen body > main {
+    /* [2026.09.17] 고친 내용: 전체화면에서 안전 현황과 병실 배치가 위에 몰리지 않게 본문을 더 아래로 배치합니다. */
+    padding-top: clamp(40px, 5dvh, 56px);
+  }
+  .page-heading { flex: 0 0 auto; }
+  .page-heading .summary {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: clamp(16px, 2vw, 32px);
+    padding: clamp(10px, 1.5dvh, 18px) var(--dashboard-padding);
+  }
+  .page-heading .summary h2 {
     flex: 0 0 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: clamp(14px, 1.05vw, 18px);
+    white-space: nowrap;
   }
-
-  .side,
-  .alerts-panel {
-    max-height: none;
-    overflow: visible;
+  .page-heading .counts { min-width: 0; flex: 1; gap: clamp(8px, 1vw, 14px); }
+  .page-heading .counts .count {
+    height: clamp(48px, 7dvh, 64px);
+    min-height: 48px;
+    padding: 8px clamp(10px, 1vw, 16px);
   }
+  /* [2026.09.16] 고친 내용: 좌우 영역을 약 72:28 비율로 유지하고 고정 너비로 인한 배치 변화를 줄입니다. */
+  main > .layout {
+    flex: 0 0 auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 72fr) minmax(260px, 28fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--dashboard-gap);
+  }
+  .layout > .floor-panel {
+    min-width: 0;
+    min-height: 0;
+    padding: clamp(12px, 1.5dvh, 20px);
+  }
+  /* [2026.09.16] 고친 내용: 대응 등록 버튼을 상태 범례 아래에 오른쪽 정렬하고 제목은 상단에 맞춥니다. */
+  .layout > .floor-panel > .panel-heading { align-items: flex-start; gap: 12px; }
+  .floor-panel > .panel-heading h2 {
+    font-size: clamp(14px, 1.05vw, 18px);
+    white-space: nowrap;
+  }
+  .layout > .floor-panel > .panel-heading .room-heading-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .floor-panel > .panel-heading .legend { gap: 10px; }
+  .floor-panel > .panel-heading .legend-response { min-height: 30px; }
+  .floor-panel > .panel-heading .response-open { min-width: 80px; }
+  /* [2026.09.16] 고친 내용: 병실을 화면 높이만큼 늘리지 않고 원래 평면도의 가로세로 비율을 유지합니다. */
+  .layout > .floor-panel > .floor {
+    flex: 0 0 auto;
+    min-height: 0;
+    margin-top: var(--dashboard-gap);
+    padding: clamp(12px, 2dvh, 24px) clamp(10px, 1vw, 18px);
+    grid-template-rows: auto auto auto;
+  }
+  .floor .room-row { gap: clamp(3px, .4vw, 6px); aspect-ratio: 7.6 / 1; min-height: 90px; }
+  .floor .corridor { aspect-ratio: 12 / 1; min-height: 48px; }
+  .floor .room { min-width: 0; padding-inline: clamp(3px, .4vw, 6px); }
+  .floor .room strong { font-size: clamp(11px, .85vw, 14px); white-space: nowrap; }
+  .floor .room small { font-size: clamp(10px, .75vw, 12px); white-space: nowrap; }
+  .floor-panel > .floor-footer {
+    min-height: 42px;
+    margin-top: var(--dashboard-gap);
+    padding: 8px 12px;
+  }
+  /* [2026.09.16] 고친 내용: 알림이 늘어나도 전체 화면 비율은 유지하고 알림 목록 안에서 스크롤합니다. */
+  .layout > .side { display: flex; min-width: 0; min-height: 0; overflow: hidden; }
+  .layout > .side > .alerts-panel {
+    position: static;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    padding: clamp(12px, 1.2vw, 20px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: auto;
+  }
+  .alerts-panel .alert-heading { top: -12px; margin-bottom: 0; padding-block: 8px; }
+  .alerts-panel .alert-heading h2 { font-size: clamp(14px, 1.05vw, 18px); }
+  .alerts-panel .alert-card { padding: clamp(10px, 1vw, 16px); }
+  .alerts-panel .alert-card h3 { flex-wrap: wrap; font-size: clamp(17px, 1.3vw, 23px); }
+  .alerts-panel .alert-card p { overflow-wrap: anywhere; }
 }
 
 /* =========================================================
@@ -1760,3 +1920,78 @@ main{height:auto;min-height:calc(100dvh - 72px)}
   .robot-marker{transition:none}
   .robot-marker.dispatch{animation:none}
 }
+/* [2026.09.16] 고친 내용: 하단 전체 너비의 가로형 카드에 병실명·두 종류의 건수·최근 기록을 배치합니다. */
+.dashboard-history-card { flex: 0 0 auto; min-width: 0; padding: 18px 24px; }
+.dashboard-history-card #room-detail { display:grid; grid-template-columns:1.2fr 1fr 1fr 1.4fr; gap:20px; align-items:center; min-height:88px; }
+#room-detail .history-heading, #room-detail .history-recent { display:flex; flex-direction:column; gap:6px; min-width:0; }
+#room-detail .history-heading > strong { font-size:18px; }
+#room-detail .history-heading > span, #room-detail .history-recent > span, #room-detail .history-recent time { color:var(--muted); font-size:12px; }
+#room-detail .history-metric { border-left:1px solid var(--border); padding-left:24px; }
+#room-detail .history-metric > span { font-size:13px; }
+#room-detail .history-metric > div { display:flex; align-items:baseline; gap:6px; }
+#room-detail .history-metric strong { font-size:30px; line-height:1.3; font-variant-numeric:tabular-nums; }
+#room-detail .history-metric > div > span { color:var(--muted); font-size:12px; }
+#room-detail .history-recent { border-left:1px solid var(--border); padding-left:24px; }
+/* [2026.09.16] 추가한 내용: 좁은 창에서는 카드 내용을 두 줄로 나누어 글씨 겹침을 방지합니다. */
+@media(max-width:999px) {
+  .dashboard-history-card #room-detail { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #room-detail .history-heading { grid-column:1 / -1; }
+  #room-detail .history-metric { border:0; padding-left:0; }
+  #room-detail .history-recent { grid-column:1 / -1; border-left:0; border-top:1px solid var(--border); padding:12px 0 0; }
+}
+/* [2026.09.16] 추가한 내용: 작은 창에서는 글씨를 과도하게 줄이지 않고 세로 배치와 스크롤로 내용을 보존합니다. */
+@media (max-width: 999px) {
+  .layout > .side { display: flex; }
+  .layout > .side > .alerts-panel { max-height: 480px; overflow-y: auto; }
+}
+/* [2026.09.17] 추가한 내용: 테스트 모드에만 패널을 표시하고 본문이 눌리지 않도록 스크롤을 허용합니다. */
+.alert-test-panel[hidden] { display:none !important; }
+.alert-test-panel { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:16px 20px; flex-shrink:0; border:1px dashed #658573; }
+.alert-test-panel label { display:flex; align-items:center; gap:8px; }
+.alert-test-panel select,.alert-test-panel button { padding:8px 12px; border:1px solid #8aa694; border-radius:8px; background:#fff; color:#294b3c; font:inherit; }
+.alert-test-panel button { cursor:pointer; }
+.alert-test-panel button:hover { background:#eaf2ed; }
+.alert-test-panel p,.alert-test-panel output,.alert-test-panel [role="status"] { margin:0; flex-basis:100%; font-size:13px; }
+.alert-test-mode #dashboard-main { height:auto; min-height:calc(100dvh - 88px); }
+.test-alert-badge { display:inline-block; margin-left:8px; padding:2px 8px; border:1px solid currentColor; border-radius:5px; font-size:12px; }
+/* [2026.09.17] 추가한 내용: 침대 이탈도 위치를 점멸로 안내하며 대응 등록 후에는 점멸을 중지합니다. */
+.corridor.caution .corridor-alert-marker { display:block; background:#ca902b; box-shadow:0 0 0 5px #ca902b50; }
+.corridor.caution .corridor-alert-marker::after { background:#8a621f; }
+.corridor.acknowledged .corridor-alert-marker { animation:none; }
+.alert-card.corridor-alert.caution { background:#fff9ed; border-color:#e7c890; border-left-color:#c99537; }
+.alert-card.corridor-alert.caution .alert-top,.alert-card.corridor-alert.caution h3 { color:#8a621f; }
+@keyframes bed-exit-alert-pulse { 0%,100% { opacity:1; } 50% { opacity:.65; } }
+@media (prefers-reduced-motion:no-preference) {
+  .floor .room.caution:not(.acknowledged),.corridor.caution:not(.acknowledged) .corridor-alert-marker { animation:bed-exit-alert-pulse 1.2s ease-in-out infinite; }
+}
+/* [2026.09.17] 추가한 내용: 공통 상단 바 아래에 감지 배너를 내려서 표시하며 대시보드에서는 반드시 숨깁니다. */
+.cross-page-alert[hidden],body:not([data-dashboard-view="records"]) .cross-page-alert { display:none !important; }
+/* [2026.09.17] 고친 내용: 상단 바 높이와 관계없이 화면 위에서 8px 위치에 감지 배너를 고정합니다. */
+.cross-page-alert { position:fixed; z-index:1100; top:8px; left:50%; transform:translateX(-50%); width:min(760px,calc(100% - 32px)); border:1px solid #da8f85; border-radius:14px; background:#fff8f6; box-shadow:0 8px 28px #243f3429; overflow:hidden; color:#80372e; }
+.cross-page-alert.caution { border-color:#d4ad60; background:#fffaf0; color:#805f21; }
+.cross-page-alert-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; }
+.cross-page-alert button { flex-shrink:0; padding:7px 12px; border:1px solid #b8c9c0; border-radius:7px; background:white; color:#294b3c; font:inherit; cursor:pointer; }
+.cross-page-alert button:hover { border-color:#55856a; background:#edf5ef; }
+#cross-page-alert-items { max-height:35dvh; overflow-y:auto; }
+#cross-page-alert-items[hidden] { display:none; }
+.cross-page-alert-row { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px 16px; border-top:1px solid #edd6d1; background:#fff0ec; }
+/* [2026.09.17] 고친 내용: 알림 내용 전체에 이동 커서를 표시하고 위치 문구는 기존 제목 모양을 유지합니다. */
+.cross-page-alert-row { cursor:pointer; }
+.cross-page-alert-row .cross-page-alert-location { flex:1 1 240px; min-width:0; padding:0; border:0; border-radius:0; background:transparent; color:inherit; font-size:16px; font-weight:700; text-align:left; }
+.cross-page-alert-row .cross-page-alert-location:hover { background:transparent; color:inherit; }
+.cross-page-alert-location:focus-visible { outline:2px solid #55856a; outline-offset:4px; }
+/* [2026.09.17] 고친 내용: 접힌 알림 제목과 창 여백도 대시보드 이동 영역임을 커서로 표시합니다. */
+.cross-page-alert { cursor:pointer; }
+.cross-page-alert #cross-page-alert-summary { flex:1; border:0; background:transparent; color:inherit; font-weight:700; text-align:left; padding:0; }
+.cross-page-alert-row.caution { background:#fff8e9; color:#805f21; border-color:#ecdfc4; }
+@keyframes cross-page-alert-enter { from { opacity:0; transform:translate(-50%,-20px); } to { opacity:1; transform:translate(-50%,0); } }
+@media (prefers-reduced-motion:no-preference) { .cross-page-alert { animation:cross-page-alert-enter .25s ease-out; } }
+/* [2026.09.17] 추가한 내용: 페이지 이동 없이 사용할 비밀번호 변경 팝업의 테두리·크기·닫기 버튼입니다. */
+/* [2026.09.17] 고친 내용: 대응 등록 창과 어울리도록 팝업 폭과 안쪽 여백을 줄입니다. */
+.password-change-dialog { width:min(520px,calc(100vw - 32px)); max-width:none; max-height:calc(100dvh - 32px); padding:0; border:2px solid #5f6361; border-radius:14px; background:#fff; color:#294438; overflow:hidden; box-sizing:border-box; }
+.password-change-dialog::backdrop { background:rgba(25,44,35,.45); }
+.password-popup-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:14px 24px; border-bottom:1px solid #dce5df; }
+.password-popup-heading h2 { margin:0; font-size:20px; }
+.password-popup-heading button { border:0; border-radius:6px; padding:6px 10px; background:transparent; color:#486053; font-size:20px; cursor:pointer; }
+.password-popup-heading button:hover { background:#edf3ef; }
+#password-change-frame { display:block; width:100%; height:min(470px,calc(100dvh - 112px)); border:0; background:white; }

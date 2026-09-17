@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>조치 기록 | 병동 통합 관제</title>
+  <!-- [2026.09.17] 고친 내용: 관리자 메뉴에서 열 때도 화면 역할이 제목에 반영되게 합니다. -->
+  <title th:text="${adminRecordPage} ? '관리자 조치기록 | 병동 통합 관제' : '조치 기록 | 병동 통합 관제'">조치 기록 | 병동 통합 관제</title>
 
   <!-- Excel 파일 생성 라이브러리 -->
   <script
@@ -40,20 +41,22 @@
   ></script>
 </head>
 
-<body>
+<!-- [2026.09.17] 고친 내용: 관리자 내부 조치기록에서는 관리자 공통 상단 바만 보이게 구분합니다. -->
+<body th:classappend="${adminRecordPage} ? ' admin-record-page' : (${embeddedRecordPage} ? ' dashboard-record-page' : '')">
   <!-- 공통 상단 메뉴 -->
   <header class="page-header">
     <!-- 대시보드 이동 -->
     <a
       class="dashboard-link"
       href="../dashboard/dashboard.html"
-      th:href="@{/dashboard}"
+      th:href="${adminRecordPage} ? @{/admin} : @{/dashboard}"
+      th:target="${adminRecordPage} ? '_top' : null"
     >
       <!-- [09.13]수정내용: 복귀 링크를 간호사 대시보드로 돌아가기로 변경하여 이동할 화면을 안내한다. -->
       <!-- [09.13]수정내용: 문자 기호를 일정한 크기의 왼쪽 화살표 아이콘으로 변경하고 글자 중앙에 맞춥니다. -->
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;margin-right:6px">
         <path d="m15 18-6-6 6-6"/>
-      </svg>간호사 대시보드로 돌아가기
+      </svg><span th:text="${adminRecordPage} ? '관리자 페이지로 돌아가기' : '간호사 대시보드로 돌아가기'">간호사 대시보드로 돌아가기</span>
     </a>
 
     <!-- 병동 이름 -->

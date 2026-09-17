@@ -1,24 +1,28 @@
 @charset "UTF-8";
+/* [2026.09.16] 추가한 내용: 비활성화 직원관리 상단의 서비스명을 일정한 크기와 간격으로 표시합니다. */
+.admin-service-name { white-space: nowrap; }
+/* [2026.09.16] 추가한 내용: 서비스 이름 자리 문구를 병동 통합 관제 옆의 보조 정보로 표시합니다. */
+.admin-service-placeholder { color: #dbe5d9; font-size: 12px; font-weight: 400; white-space: nowrap; }
 .admin-settings[aria-current="page"] { background: #f1f4ed; color: var(--admin-green); border-color: #f1f4ed; }
-.admin-back-button { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 8px 10px; border-radius: 7px; background: transparent; color: #e1e9df; font-size: 12px; white-space: nowrap; }
-.admin-back-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
-/* [09.13]수정내용: 뒤로가기 링크에 커서를 올려도 반투명 배경이 나타나지 않도록 한다. */
-.admin-back-button:hover { color: #fff; background: transparent; }
-.admin-back-button:focus-visible { outline: 2px solid #f1f4ed; outline-offset: 3px; }
 .admin-settings-page { position: relative; }
 .admin-settings-heading { position: relative; padding: 0; margin-bottom: 24px; }
 .admin-settings-heading .admin-settings-eyebrow { margin-bottom: 10px; font-size: 11px; color: #687b6d; }
-.admin-inactive-overview { position: absolute; top: 24px; right: 24px; display: flex; justify-content: flex-end; margin: 0; }
-.admin-inactive-stat { display: flex; align-items: center; gap: 18px; padding: 18px 24px; border: 1px solid var(--admin-border); border-radius: 14px; background: var(--admin-surface); }
-.admin-inactive-stat h2 { margin: 0 0 6px; font-size: 12px; font-weight: 400; color: #717b6b; }
-.admin-inactive-stat strong { font-size: 28px; line-height: 1.2; }
-.admin-inactive-stat strong span { margin-left: 6px; font-size: 13px; font-weight: 400; }
-.admin-inactive-symbol { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: #edf0e7; color: #71806b; }
-.admin-inactive-symbol svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* [2026.09.16] 고친 내용: 비활성화 직원 카드를 작게 만들고 문서 흐름 안에 배치해 다른 섹션과 겹치지 않게 합니다. */
+.admin-inactive-overview { position: static; display: flex; justify-content: flex-end; margin: 0 0 16px; }
+.admin-inactive-stat { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
+.admin-inactive-stat h2 { margin: 0 0 4px; font-size: 11px; font-weight: 400; color: #717b6b; }
+.admin-inactive-stat strong { font-size: 22px; line-height: 1.2; }
+.admin-inactive-stat strong span { margin-left: 4px; font-size: 12px; font-weight: 400; }
+.admin-inactive-symbol { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #edf0e7; color: #71806b; }
+.admin-inactive-symbol svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .admin-account-guide { display: flex; flex-direction: column; justify-content: center; padding: 18px 24px; border: 1px solid #dce3d7; border-radius: 14px; background: #edf1e8; }
 .admin-settings-heading .admin-account-guide { width: 100%; max-width: none; margin-top: 14px; }
-.admin-inactive-overview .admin-inactive-stat { width: min(340px, 100%); margin-left: auto; }
+.admin-inactive-overview .admin-inactive-stat { width: auto; margin-left: auto; }
 .admin-settings-heading .admin-account-guide p { white-space: nowrap; }
+/* [2026.09.16] 고친 내용: 넓은 화면에서는 비활성화 직원 카드를 제목 영역 오른쪽 위로 올립니다. */
+@media (min-width: 801px) {
+    .admin-settings-heading .admin-inactive-overview { position: absolute; top: 0; right: 0; margin: 0; }
+}
 .admin-guide-heading { display: flex; align-items: center; gap: 9px; color: #405c4f; font-size: 14px; }
 .admin-guide-heading svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .admin-account-guide p { margin: 8px 0 0; color: #626f5c; font-size: 12px; line-height: 1.7; }
@@ -76,7 +80,6 @@
 .admin-inactive-toolbar .admin-bulk-actions { display: flex; order: 3; align-items: center; gap: 12px; margin: 0 0 0 auto; padding: 0; border: 0; background: transparent; }
 .admin-inactive-toolbar .admin-bulk-actions > span { white-space: nowrap; }
 @media (max-width: 800px) {
-    .admin-back-button { padding: 4px 0; font-size: 11px; }
     .admin-bulk-actions { align-items: flex-start; flex-direction: column; }
     .admin-inactive-toolbar .admin-bulk-actions { width: 100%; margin-left: 0; }
     .admin-account-guide { padding: 20px; }
