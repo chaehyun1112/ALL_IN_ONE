@@ -233,7 +233,8 @@ function renderAdminInactiveUsers() {
     document.querySelector("#admin-inactive-empty-description").textContent = filtered
         ? "이름, 아이디 또는 병동 조건을 다시 확인해 주세요."
         : "승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.";
-    document.querySelector("#admin-inactive-reset").hidden = !filtered;
+    // [2026-09-18] 검색 옆 초기화 버튼은 결과 유무와 관계없이 표시하고 처리 중에는 비활성화한다.
+    document.querySelector("#admin-inactive-reset").disabled = adminBusy || adminLoading;
     updateAdminInactiveSelection();
 }
 
