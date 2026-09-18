@@ -350,7 +350,16 @@ async function submitAdminStatusChange(event) {
                 + (loaded ? "" : "\n최신 목록도 불러오지 못했습니다. 다시 불러오기를 눌러 주세요."));
         }
         if (succeeded) {
-            showAdminFeedback(succeeded + "명의 계정을 " + (change.nextStatus === "DELETE" ? "삭제" : "활성화") + "했습니다.");
+            // [2026-09-18] 계정 삭제 성공 시 확인 버튼이 있는 브라우저 기본 알림창으로 완료를 안내한다.
+            if (change.nextStatus === "DELETE") {
+                clearTimeout(adminToastTimer);
+                adminFeedback.hidden = true;
+                // [2026-09-18] 삭제 완료 문구에서 인원수 표시를 제거한다.
+                window.alert("계정 삭제가 완료되었습니다."
+                    + (failures.length ? "\n" + failures.length + "명은 삭제하지 못했습니다. 화면의 오류 안내를 확인해 주세요." : ""));
+            } else {
+                showAdminFeedback(succeeded + "명의 계정을 활성화했습니다.");
+            }
         }
         adminInactiveSearch.focus();
     } finally {
