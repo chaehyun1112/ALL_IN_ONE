@@ -1264,6 +1264,23 @@ function initializePage() {
     applyFilters();
   });
 
+  // [2026-09-18] 추가 내용: 전체 검색 조건과 직접 설정 날짜를 초기화하고 첫 페이지를 표시합니다.
+  document.querySelector("#search-reset").addEventListener("click", () => {
+    searchForm.querySelectorAll("input[type='hidden']").forEach(input => {
+      input.value = "all";
+    });
+    document.querySelector("#search-input").value = "";
+    selectedStart = "";
+    selectedEnd = "";
+    draftStart = "";
+    draftEnd = "";
+    dropdownControls.forEach(control => {
+      control.close();
+      control.updateLabel();
+    });
+    applyFilters();
+  });
+
   /* 달력 이동 */
   previousMonthButton.addEventListener("click", () => {
     displayedMonth.setMonth(

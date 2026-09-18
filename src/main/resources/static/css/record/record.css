@@ -220,6 +220,28 @@ select:focus-visible,
   border-color: #789383;
 }
 
+/* [2026-09-18] 추가 내용: 검색·초기화·내보내기를 같은 높이와 간격으로 유지합니다. */
+.record-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 8.26px;
+  flex-shrink: 0;
+}
+
+.reset-button {
+  width: 63.33px;
+  height: 28px;
+  border: 1px solid #527563;
+  border-radius: 6px;
+  background: #fbfaf4;
+  color: #456653;
+  font-weight: 600;
+}
+
+.reset-button:hover {
+  background: #edf2ec;
+}
+
 /* 검색 버튼 */
 .search-button {
   width: 63.33px;
@@ -340,6 +362,28 @@ select:focus-visible,
 /* 검색 대상 */
 .target-button {
   width: 108px;
+}
+
+/* [2026-09-18] 고친 내용: 간호사·관리자 공통 필터에서 긴 병실·위치 문구와 화살표가 겹치지 않도록 합니다. */
+.period-button,
+.choice-button {
+  width: max-content;
+  min-width: 108px;
+  height: 32px;
+  min-height: 32px;
+  padding-right: 30px;
+  white-space: nowrap;
+}
+
+.room-button {
+  min-width: 128px;
+}
+
+/* [2026-09-18] 고친 내용: 간호사·관리자 검색창과 검색·초기화·내보내기 버튼 높이를 필터에 맞춥니다. */
+.search-input,
+.record-search-actions > button {
+  height: 32px;
+  min-height: 32px;
 }
 
 /* 클릭·선택 시 추가 외곽선 제거 */
@@ -964,6 +1008,8 @@ select:focus-visible,
   .choice-button,
   .search-input,
   .search-button,
+  .reset-button,
+  .record-search-actions > button,
   .export-button {
     height: 36px;
     min-height: 36px;
