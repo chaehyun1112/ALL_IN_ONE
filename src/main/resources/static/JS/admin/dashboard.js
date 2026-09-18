@@ -666,7 +666,12 @@ async function submitAdminAction() {
         );
 
         currentTab?.focus();
-        showAdminFeedback(successMessage);
+        // [2026-09-18] 담당 병동 변경과 목록 갱신이 성공하면 확인 버튼이 있는 브라우저 기본 안내창을 표시한다.
+        if (selectedAction === "ASSIGN") {
+            window.alert("담당 병동 변경이 완료되었습니다");
+        } else {
+            showAdminFeedback(successMessage);
+        }
     } catch (error) {
         console.error(error);
         showAdminFeedback(error.message || "처리 중 오류가 발생했습니다.");
