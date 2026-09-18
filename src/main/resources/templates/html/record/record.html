@@ -421,7 +421,8 @@
               <th scope="col">처리 상태</th>
               <th scope="col">완료 시각</th>
               <!-- [추가] 완료 시각 오른쪽 기록 내용 -->
-              <th scope="col" class="record-content-heading">기록 내용</th>
+              <!-- [2026-09-18] 고친 내용: 간호사·관리자 공통 열 제목을 조치 내용으로 변경합니다. -->
+              <th scope="col" class="record-content-heading">조치 내용</th>
             </tr>
           </thead>
 
@@ -669,14 +670,15 @@
     aria-labelledby="record-content-title"
   >
     <header class="record-content-header">
-      <h2 id="record-content-title">기록 내용</h2>
+      <!-- [2026-09-18] 고친 내용: 상세 팝업 제목과 닫기 안내를 조치 내용으로 통일합니다. -->
+      <h2 id="record-content-title">조치 내용</h2>
 
       <!-- [추가] 닫기 버튼 또는 Esc 키로 팝업을 닫습니다. -->
       <form method="dialog">
         <button
           class="record-content-close"
           type="submit"
-          aria-label="기록 내용 닫기"
+          aria-label="조치 내용 닫기"
           autofocus
         >×</button>
       </form>
