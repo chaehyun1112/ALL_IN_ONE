@@ -157,6 +157,8 @@ function updateAdminInactiveSelection() {
         button.disabled = disabled || !selectedCount;
     }
     for (const input of adminRows.querySelectorAll("input, select")) input.disabled = disabled;
+    // [2026-09-18] 개별 활성화·삭제 버튼도 서버 처리 중에는 비활성화한다.
+    for (const button of adminRows.querySelectorAll(".admin-inactive-task")) button.disabled = disabled;
     adminInactiveSearch.disabled = adminBusy || adminLoading;
     adminInactiveWard.disabled = adminBusy || adminLoading || adminLoadFailed;
     document.querySelector("#admin-inactive-retry").disabled = adminBusy || adminLoading;
@@ -201,22 +203,26 @@ function renderAdminInactiveUsers() {
             row.append(cell);
         }
         const statusCell = document.createElement("td");
-        const select = document.createElement("select");
-        select.className = "admin-inactive-action";
-        select.dataset.status = "INACTIVE";
-        select.setAttribute("aria-label", user.userName + " 계정 관리");
-        for (const [value, text] of [["INACTIVE", "비활성화"], ["ACTIVATE", "활성화"], ["DELETE", "삭제"]]) {
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = text;
-            select.append(option);
+        // [2026-09-18] 상태는 배지로 표시하고 활성화·삭제는 별도의 작업 버튼으로 제공한다.
+        const actions = document.createElement("div");
+        actions.className = "admin-inactive-row-actions";
+        const badge = document.createElement("span");
+        badge.className = "admin-inactive-badge";
+        badge.textContent = "비활성화";
+        actions.append(badge);
+        for (const [action, label] of [["ACTIVATE", "활성화"], ["DELETE", "삭제"]]) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "admin-inactive-task";
+            button.dataset.action = action;
+            button.textContent = label;
+            button.setAttribute("aria-label", user.userName + " 계정 " + label);
+            button.addEventListener("click", () => {
+                if (!button.disabled) openAdminStatusChange([user], action, button);
+            });
+            actions.append(button);
         }
-        select.addEventListener("change", () => {
-            const nextStatus = select.value;
-            select.value = "INACTIVE";
-            if (nextStatus !== "INACTIVE") openAdminStatusChange([user], nextStatus, select);
-        });
-        statusCell.append(select);
+        statusCell.append(actions);
         row.append(statusCell);
         adminRows.append(row);
     }
@@ -233,7 +239,8 @@ function renderAdminInactiveUsers() {
     document.querySelector("#admin-inactive-empty-description").textContent = filtered
         ? "이름, 아이디 또는 병동 조건을 다시 확인해 주세요."
         : "승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.";
-    document.querySelector("#admin-inactive-reset").hidden = !filtered;
+    // [2026-09-18] 검색 옆 초기화 버튼은 결과 유무와 관계없이 표시하고 처리 중에는 비활성화한다.
+    document.querySelector("#admin-inactive-reset").disabled = adminBusy || adminLoading;
     updateAdminInactiveSelection();
 }
 
@@ -343,7 +350,16 @@ async function submitAdminStatusChange(event) {
                 + (loaded ? "" : "\n최신 목록도 불러오지 못했습니다. 다시 불러오기를 눌러 주세요."));
         }
         if (succeeded) {
-            showAdminFeedback(succeeded + "명의 계정을 " + (change.nextStatus === "DELETE" ? "삭제" : "활성화") + "했습니다.");
+            // [2026-09-18] 계정 삭제 성공 시 확인 버튼이 있는 브라우저 기본 알림창으로 완료를 안내한다.
+            if (change.nextStatus === "DELETE") {
+                clearTimeout(adminToastTimer);
+                adminFeedback.hidden = true;
+                // [2026-09-18] 삭제 완료 문구에서 인원수 표시를 제거한다.
+                window.alert("계정 삭제가 완료되었습니다."
+                    + (failures.length ? "\n" + failures.length + "명은 삭제하지 못했습니다. 화면의 오류 안내를 확인해 주세요." : ""));
+            } else {
+                showAdminFeedback(succeeded + "명의 계정을 활성화했습니다.");
+            }
         }
         adminInactiveSearch.focus();
     } finally {

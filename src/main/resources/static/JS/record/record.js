@@ -231,7 +231,8 @@ function initializePage() {
     const rooms = [
       {
         value: "all",
-        label: "전체 병실"
+        // [2026-09-18] 고친 내용: 필터 생성 후에도 병실·위치 문구를 유지합니다.
+        label: "전체 병실·위치"
       },
       ...roomNumbers.map(room => ({
         value: room,
@@ -464,8 +465,9 @@ function initializePage() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "record-content-button";
-    button.title = "기록 내용 보기";
-    button.setAttribute("aria-label", `${record.room} ${record.patient} 기록 내용 보기`);
+    // [2026-09-18] 고친 내용: 상세 보기 버튼과 접근성 안내를 조치 내용으로 통일합니다.
+    button.title = "조치 내용 보기";
+    button.setAttribute("aria-label", `${record.room} ${record.patient} 조치 내용 보기`);
     button.setAttribute("aria-haspopup", "dialog");
     button.setAttribute("aria-controls", "record-content-dialog");
 
@@ -484,7 +486,7 @@ function initializePage() {
       const dialog = document.querySelector("#record-content-dialog");
       const text = document.querySelector("#record-content-text");
       if (!dialog || !text) {
-        window.alert("HTML에 기록 내용 팝업을 추가해주세요.");
+        window.alert("HTML에 조치 내용 팝업을 추가해주세요.");
         return;
       }
 
@@ -492,7 +494,7 @@ function initializePage() {
       /* [수정] 완료 상태라도 작성 내용이 비어 있으면 안내를 표시합니다. */
       text.textContent = content.trim()
         ? content
-        : "등록된 기록 내용이 없습니다.";
+        : "등록된 조치 내용이 없습니다.";
       if (!dialog.open) {
         dialog.showModal();
       }
@@ -903,14 +905,16 @@ function initializePage() {
     return [
       [
         "발생 시각",
-        "병실",
+        // [2026-09-18] 고친 내용: 내보내기 열 제목을 화면의 병실·위치와 통일합니다.
+        "병실·위치",
         "환자명",
         "알림 유형",
         "담당자",
         "처리 상태",
         "완료 시각",
         /* [추가] 내보내기의 여덟 번째 열 */
-        "기록 내용"
+        // [2026-09-18] 고친 내용: 내보내기 열 제목도 조치 내용으로 통일합니다.
+        "조치 내용"
       ],
       ...records.map(record => [
         record.occurredAt.replace("T", " "),
@@ -1259,6 +1263,23 @@ function initializePage() {
   /* 검색 버튼 또는 Enter */
   searchForm.addEventListener("submit", event => {
     event.preventDefault();
+    applyFilters();
+  });
+
+  // [2026-09-18] 추가 내용: 전체 검색 조건과 직접 설정 날짜를 초기화하고 첫 페이지를 표시합니다.
+  document.querySelector("#search-reset").addEventListener("click", () => {
+    searchForm.querySelectorAll("input[type='hidden']").forEach(input => {
+      input.value = "all";
+    });
+    document.querySelector("#search-input").value = "";
+    selectedStart = "";
+    selectedEnd = "";
+    draftStart = "";
+    draftEnd = "";
+    dropdownControls.forEach(control => {
+      control.close();
+      control.updateLabel();
+    });
     applyFilters();
   });
 
