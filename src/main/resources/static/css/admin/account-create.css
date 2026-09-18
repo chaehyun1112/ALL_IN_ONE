@@ -1,5 +1,6 @@
 /* [09.13]추가내용: 관리자 계정 생성 모달 전용 스타일을 기능 파일로 분리했습니다. */
-.admin-create-dialog { width: min(480px, calc(100% - 32px)); }
+/* [2026-09-18] 계정 생성 팝업을 화면의 가로·세로 중앙에 배치하고 작은 화면에서는 내부 스크롤을 허용한다. */
+.admin-create-dialog { position: fixed; inset: 0; margin: auto; width: min(480px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; }
 .admin-create-dialog p { margin: 0 0 18px; font-size: 12px; }
 .admin-create-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
 /* [09.13]수정내용: 마지막 입력 항목의 중복 선택자를 하나로 합쳐 배치와 여백을 함께 관리한다. */
@@ -22,7 +23,8 @@
 .admin-create-dialog .admin-dialog-actions button:hover,
 .admin-create-dialog .admin-dialog-actions button:focus-visible { border-color: #7d9b87; background: #f1f1e9; outline: 0; }
 /* [09.13]수정내용: 계정 생성 모달의 하단 버튼을 우측에 작게 모으지 않고 전체 가로 영역에 균등하게 넓힌다. */
-.admin-create-dialog .admin-dialog-actions { justify-content: stretch; gap: 10px; }
+/* [2026-09-18] 계정 생성 팝업의 버튼 위 여백을 12px에서 4px로 더 줄여 취소·계정 생성 버튼을 올린다. */
+.admin-create-dialog .admin-dialog-actions { justify-content: stretch; gap: 10px; margin-top: 4px; }
 .admin-create-dialog .admin-dialog-actions button { flex: 1; min-height: 48px; padding: 12px 20px; font-size: 13px; }
 .admin-create-dialog .admin-dialog-actions .admin-primary { background: var(--admin-green); border-color: var(--admin-green); color: #fff; }
 .admin-create-dialog .admin-dialog-actions .admin-primary:hover,
