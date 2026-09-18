@@ -231,7 +231,8 @@ function initializePage() {
     const rooms = [
       {
         value: "all",
-        label: "전체 병실"
+        // [2026-09-18] 고친 내용: 필터 생성 후에도 병실·위치 문구를 유지합니다.
+        label: "전체 병실·위치"
       },
       ...roomNumbers.map(room => ({
         value: room,
@@ -903,7 +904,8 @@ function initializePage() {
     return [
       [
         "발생 시각",
-        "병실",
+        // [2026-09-18] 고친 내용: 내보내기 열 제목을 화면의 병실·위치와 통일합니다.
+        "병실·위치",
         "환자명",
         "알림 유형",
         "담당자",
