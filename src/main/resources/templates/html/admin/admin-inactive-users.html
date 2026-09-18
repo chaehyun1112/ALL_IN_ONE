@@ -96,6 +96,8 @@
                     <input type="search" id="admin-inactive-search" placeholder="이름 또는 아이디 검색" autocomplete="off">
                 </div>
                 <button type="submit" class="admin-search-button">검색</button>
+                <!-- [2026-09-18] 초기화 버튼을 검색 버튼 옆에 항상 표시하고 검색어와 병동 조건을 함께 초기화한다. -->
+                <button type="button" id="admin-inactive-reset" class="admin-search-button">초기화</button>
             </form>
             <div class="admin-inactive-filter">
                 <!-- [09.13]수정내용: 검색 영역의 병동 표시 문구를 제거하고 선택칸 자체로 기능을 안내한다. -->
@@ -127,7 +129,7 @@
             <div class="admin-inactive-empty" id="admin-inactive-empty" hidden>
                 <strong id="admin-inactive-empty-title">비활성화 직원이 없습니다</strong>
                 <p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.</p>
-                <button type="button" id="admin-inactive-reset">검색 조건 초기화</button>
+                
             </div>
         </div>
     </section>
