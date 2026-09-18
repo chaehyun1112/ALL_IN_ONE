@@ -413,9 +413,9 @@ document.addEventListener("DOMContentLoaded", () => {
     event.preventDefault();const room=registrationRoom==="corridor" ? corridorAlert : rooms.get(registrationRoom);if(!room)return;
     /* [추가] 등록 창을 연 뒤 같은 병실에 새 경보가 오면 이전 등록으로 해제하지 않습니다. */
     if(room.eventId!==registrationEvent){dialog.close();detail.textContent="새 낙상이 발생했습니다. 해당 병실의 대응 등록을 다시 열어주세요.";return;}
-    const completed=new FormData(form).get("response-status")==="complete";
+    // 조치 내용 등록은 조치 완료로 처리합니다.
     // 실제 적용 시 이 위치에서 서버 저장 성공을 확인한 후 상태를 변경하세요.
-    if(completed){room.status="normal";room.acknowledged=false;if(registrationRoom!=="corridor")cancelAudio(room.number);}
+    room.status="normal";room.acknowledged=false;if(registrationRoom!=="corridor")cancelAudio(room.number);
     dialog.close();render();
   });
   const toggle=document.getElementById("profile-toggle"),menu=document.getElementById("header-menu-list");
