@@ -437,7 +437,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if(event.origin!==window.location.origin||event.source!==passwordFrame.contentWindow||!passwordDialog.open)return;
     if(event.data?.type==='careguard-password-close')passwordDialog.close();
     if(event.data?.type==='careguard-password-changed'){
-      passwordDialog.close();window.alert('비밀번호 변경이 완료되었습니다');
+      // [2026-09-18] 변경 팝업을 배경에 유지하고 완료 안내의 확인 버튼을 누른 뒤 팝업을 닫는다.
+      window.alert('비밀번호 변경이 완료되었습니다');passwordDialog.close();
     }
   });
   toggle.addEventListener("click",()=>{menu.hidden=!menu.hidden;toggle.setAttribute("aria-expanded",String(!menu.hidden));});
