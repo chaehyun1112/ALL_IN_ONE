@@ -326,47 +326,21 @@
         placeholder="환자 이름을 입력하세요."
       >
 
-      <!-- 간호사 이름 -->
+      <!-- 로그인한 사용자의 이름을 자동 표시합니다. -->
       <label
         class="field"
-        for="response-nurse"
+        for="response-user"
       >
         간호사 이름
       </label>
 
       <input
-        id="response-nurse"
+        id="response-user"
         type="text"
-        required
-        maxlength="50"
-        placeholder="간호사 이름을 입력하세요."
+        th:value="${displayName}"
+        readonly
+        placeholder="서버 로그인 후 자동 표시됩니다."
       >
-
-      <!-- 조치 상태 -->
-      <fieldset>
-        <legend>조치 상태</legend>
-
-        <div class="response-options">
-          <label>
-            <input
-              type="radio"
-              name="response-status"
-              value="checking"
-              checked
-            >
-            확인 중
-          </label>
-
-          <label>
-            <input
-              type="radio"
-              name="response-status"
-              value="complete"
-            >
-            조치 완료
-          </label>
-        </div>
-      </fieldset>
 
       <!-- 조치 내용 -->
       <label
@@ -403,7 +377,7 @@
   <script src="../../../static/JS/dashboard/room-status.js" th:src="@{/JS/dashboard/room-status.js}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <!-- [2026.09.17] 고친 내용: 대응 등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
-  <script src="../../../static/JS/dashboard/dashboard.js?v=20260917-banner-click-2" th:src="@{/JS/dashboard/dashboard.js(v='20260917-banner-click-2')}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js?v=20260918-response-complete" th:src="@{/JS/dashboard/dashboard.js(v='20260918-response-complete')}"></script>
 </body>
 </html>
 
