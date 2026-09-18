@@ -174,7 +174,7 @@
         </div>
       </div>
 
-      <!-- 병실 필터 -->
+      <!-- [2026-09-18] 고친 내용: 복도 감지 위치도 포함하므로 필터를 병실·위치로 표시합니다. -->
       <div
         class="choice-dropdown"
         id="room-dropdown"
@@ -182,12 +182,12 @@
         <button
           class="choice-button room-button"
           type="button"
-          aria-label="병실"
+          aria-label="병실·위치"
           aria-expanded="false"
           aria-controls="room-options"
         >
           <span class="choice-label">
-            전체 병실
+            전체 병실·위치
           </span>
         </button>
 
@@ -408,7 +408,8 @@
           <thead>
             <tr>
               <th scope="col">발생 시각</th>
-              <th scope="col">병실</th>
+              <!-- [2026-09-18] 고친 내용: 발생 위치 열 제목을 병실·위치로 변경합니다. -->
+              <th scope="col">병실·위치</th>
               <th scope="col">환자명</th>
               <th scope="col">알림 유형</th>
               <th scope="col">담당자</th>
