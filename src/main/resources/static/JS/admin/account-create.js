@@ -288,7 +288,12 @@ createForm?.addEventListener("submit", async event => {
         createForm.reset();
         createCompleteDialog?.showModal();
     } catch (error) {
-        const fieldErrorDisplayed = showCreateFieldErrors(error.body);
+        // [2026-09-18] 중복 아이디 안내를 배경 화면 대신 계정 생성 창의 아이디 입력란 아래에 표시한다.
+        const fieldErrorDisplayed = showCreateFieldErrors(
+            error.status === 409
+                ? {userId: error.message || "이미 사용 중인 직원 아이디입니다."}
+                : error.body
+        );
 
         if (!fieldErrorDisplayed) {
             showCreateError(error.message ?? "계정 생성에 실패했습니다.");

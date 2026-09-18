@@ -13,6 +13,8 @@
 /* [09.13]수정내용: 계정 생성 모달의 병동 선택 화살표를 오른쪽 끝에서 조금 왼쪽으로 배치한다. */
 #admin-create-ward { appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364705e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-position: calc(100% - 10px) center; background-size: 16px 16px; background-repeat: no-repeat; }
 .admin-field-error { display: block; min-height: 14px; margin-top: 5px; color: #c55454; font-size: 10px; font-weight: 400; }
+/* [2026-09-18] 입력 안내용 small 스타일보다 우선하여 계정 생성 오류를 붉은색으로 표시한다. */
+.admin-create-grid .admin-field-error { color: #c55454; font-size: 10px; }
 .admin-create-check { display: flex !important; align-items: center; gap: 7px; margin: 14px 0 0 !important; color: #777f70; font-size: 10px; font-weight: 400 !important; }
 .admin-create-check input { accent-color: var(--admin-green); }
 .admin-create-dialog .admin-dialog-actions button,
