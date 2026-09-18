@@ -157,6 +157,8 @@ function updateAdminInactiveSelection() {
         button.disabled = disabled || !selectedCount;
     }
     for (const input of adminRows.querySelectorAll("input, select")) input.disabled = disabled;
+    // [2026-09-18] 개별 활성화·삭제 버튼도 서버 처리 중에는 비활성화한다.
+    for (const button of adminRows.querySelectorAll(".admin-inactive-task")) button.disabled = disabled;
     adminInactiveSearch.disabled = adminBusy || adminLoading;
     adminInactiveWard.disabled = adminBusy || adminLoading || adminLoadFailed;
     document.querySelector("#admin-inactive-retry").disabled = adminBusy || adminLoading;
@@ -201,22 +203,26 @@ function renderAdminInactiveUsers() {
             row.append(cell);
         }
         const statusCell = document.createElement("td");
-        const select = document.createElement("select");
-        select.className = "admin-inactive-action";
-        select.dataset.status = "INACTIVE";
-        select.setAttribute("aria-label", user.userName + " 계정 관리");
-        for (const [value, text] of [["INACTIVE", "비활성화"], ["ACTIVATE", "활성화"], ["DELETE", "삭제"]]) {
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = text;
-            select.append(option);
+        // [2026-09-18] 상태는 배지로 표시하고 활성화·삭제는 별도의 작업 버튼으로 제공한다.
+        const actions = document.createElement("div");
+        actions.className = "admin-inactive-row-actions";
+        const badge = document.createElement("span");
+        badge.className = "admin-inactive-badge";
+        badge.textContent = "비활성화";
+        actions.append(badge);
+        for (const [action, label] of [["ACTIVATE", "활성화"], ["DELETE", "삭제"]]) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "admin-inactive-task";
+            button.dataset.action = action;
+            button.textContent = label;
+            button.setAttribute("aria-label", user.userName + " 계정 " + label);
+            button.addEventListener("click", () => {
+                if (!button.disabled) openAdminStatusChange([user], action, button);
+            });
+            actions.append(button);
         }
-        select.addEventListener("change", () => {
-            const nextStatus = select.value;
-            select.value = "INACTIVE";
-            if (nextStatus !== "INACTIVE") openAdminStatusChange([user], nextStatus, select);
-        });
-        statusCell.append(select);
+        statusCell.append(actions);
         row.append(statusCell);
         adminRows.append(row);
     }

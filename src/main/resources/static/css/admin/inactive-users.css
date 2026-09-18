@@ -51,12 +51,16 @@
 .admin-inactive-table td:nth-child(2) { font-weight: 600; color: #565d4f; }
 .admin-inactive-table tbody tr:hover { background: #f6f6ef; }
 .admin-inactive-table time { font-variant-numeric: tabular-nums; }
-.admin-inactive-action { width: 112px; max-width: 100%; min-height: 34px; padding: 6px 8px; border-color: #ded7cb; background: #eeeae3; color: #82725d; font-size: 11px; cursor: pointer; }
-.admin-inactive-action:hover { border-color: #9aab92; }
-.admin-inactive-action[data-status="ACTIVATE"] { background: #e4f1e9; border-color: #b8d0be; color: #39745e; }
+/* [2026-09-18] 비활성 상태 배지와 두 작업 버튼을 구분하고 부드러운 테두리 디자인을 적용한다. */
+.admin-inactive-row-actions { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 216px; }
+.admin-inactive-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 20px; background: #eeece6; color: #7d776a; font-size: 11px; white-space: nowrap; }
+.admin-inactive-badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #a49d90; }
+.admin-inactive-task { min-height: 34px; padding: 6px 11px; border: 1px solid #b8cebf; border-radius: 8px; background: #f3f8f4; color: #405f4e; font-size: 11px; white-space: nowrap; }
+.admin-inactive-task[data-action="DELETE"] { background: transparent; color: #a75e57; border-color: #e3cfcb; }
+.admin-inactive-task:not(:disabled):hover { background: #e3eee6; border-color: #799b85; }
+.admin-inactive-task[data-action="DELETE"]:not(:disabled):hover { background: #faeeeb; border-color: #c58e87; }
+.admin-inactive-task:disabled { opacity: .45; cursor: not-allowed; }
 #admin-status-confirm.admin-delete-confirm { background: #b45b55; border-color: #b45b55; }
-.admin-inactive-action option { background: var(--admin-surface); color: var(--admin-text); }
-.admin-inactive-action:disabled { opacity: .55; cursor: wait; }
 #admin-inactive-error { margin-bottom: 16px; padding: 12px 16px; border: 1px solid #ead3ce; border-radius: 8px; background: #faeeeb; color: #984c45; font-size: 12px; }
 #admin-inactive-error p { margin: 0 0 8px; white-space: pre-line; }
 #admin-inactive-retry { padding: 7px 12px; background: #fff; color: #984c45; }
