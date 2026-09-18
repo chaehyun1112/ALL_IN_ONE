@@ -328,7 +328,7 @@
         id="search-input"
         name="keyword"
         type="text"
-        placeholder="이름을 입력하세요."
+        placeholder="이름 또는 초성 입력 (예: 김, ㄱ)"
         autocomplete="off"
       >
 
@@ -342,7 +342,7 @@
         검색
       </button>
 
-      <button class="reset-button" id="search-reset" type="button">초기화</button>
+      <button class="reset-button" id="search-reset" type="button">검색 초기화</button>
 
       <!-- 내보내기 팝업을 여는 버튼 -->
       <button
@@ -371,7 +371,8 @@
           <path d="M5 16v4h14v-4"></path>
         </svg>
 
-        내보내기
+        <!-- [2026-09-18] 추가 내용: 선택한 기록 수를 내보내기 버튼에 표시합니다. -->
+        <span id="export-button-label">내보내기</span>
       </button>
       </div>
     </form>
@@ -388,6 +389,12 @@
         전체 안전 조치 기록
       </h2>
 
+      <!-- [2026-09-18] 추가 내용: 검색과 별개로 선택을 유지하고 모아보기·선택 해제를 제공합니다. -->
+      <div class="record-selection-toolbar">
+        <button type="button" id="record-selected-view" aria-pressed="false">선택한 0건 모아보기</button>
+        <button type="button" id="record-clear-selection" disabled>선택 해제</button>
+        <span id="record-selection-summary" role="status" aria-live="polite">검색 초기화 후에도 선택한 기록은 유지됩니다.</span>
+      </div>
       <!-- 기록이 많으면 실제 스크롤이 표시됩니다. -->
       <div
         class="table-scroll"
@@ -398,6 +405,8 @@
         <table class="record-table">
           <!-- 각 열의 너비는 CSS에서 지정합니다. -->
           <colgroup>
+            <!-- [2026-09-18] 추가 내용: 현재 페이지 및 개별 기록 선택 열입니다. -->
+            <col class="selection-column">
             <col class="time-column">
             <col class="room-column">
             <col class="patient-column">
@@ -412,6 +421,7 @@
           <!-- 표 머리글 -->
           <thead>
             <tr>
+              <th scope="col" class="record-selection-cell"><input type="checkbox" id="record-select-page" class="record-checkbox" aria-label="현재 페이지 전체 선택" title="현재 페이지 전체 선택" disabled></th>
               <th scope="col">발생 시각</th>
               <!-- [2026-09-18] 고친 내용: 발생 위치 열 제목을 병실·위치로 변경합니다. -->
               <th scope="col">병실·위치</th>
@@ -548,7 +558,8 @@
           </h2>
 
           <p>
-            현재 필터 결과를 원하는 파일 형식으로 저장합니다.
+        <!-- [2026-09-18] 고친 내용: 선택한 기록이 없을 때만 검색 결과 전체를 내보냅니다. -->
+        선택한 기록을 저장합니다. 선택하지 않으면 검색 결과 전체를 저장합니다.
           </p>
         </div>
 
@@ -618,7 +629,7 @@
       <!-- 현재 검색 결과 건수 -->
       <div class="export-summary">
         <p>
-          현재 필터 결과
+          내보내기 대상
         </p>
 
         <strong
