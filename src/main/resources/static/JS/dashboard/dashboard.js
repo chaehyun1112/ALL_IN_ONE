@@ -261,7 +261,8 @@ document.addEventListener("DOMContentLoaded", () => {
     counts[corridorAlert.status]++;
     corridorNode.classList.toggle("urgent",corridorAlert.status==="urgent");
     corridorNode.classList.toggle("caution",corridorAlert.status==="caution");
-    corridorNode.style.setProperty("--camera-x",corridorAlert.cameraX || "13%");
+    // [2026.09.19] 수정: 기본 복도 감지 표시를 첫 번째 칸인 서쪽 화장실 중앙(5%) 앞으로 옮깁니다.
+    corridorNode.style.setProperty("--camera-x",corridorAlert.cameraX || "5%");
     corridorNode.setAttribute("aria-label",`${corridorAlert.cameraLocation} · ${labels[corridorAlert.status]}`);
     corridorNode.style.setProperty("--camera-label", `"${corridorAlert.cameraLocation}"`);
     corridorNode.classList.toggle("acknowledged",corridorAlert.acknowledged);
