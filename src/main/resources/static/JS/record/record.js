@@ -113,6 +113,45 @@ function initializePage() {
   /* 전체 기록과 현재 검색 결과 */
   let allRecords = [];
   let filteredRecords = [];
+  // [2026-09-18] 추가 내용: 페이지를 넘겨도 선택을 유지하고, 내보내기 팝업의 대상을 고정합니다.
+  const selectedRecords = new Set();
+  let exportRecords = [];
+  const selectPageCheckbox = document.querySelector("#record-select-page");
+  const exportButtonLabel = document.querySelector("#export-button-label");
+  // [2026-09-18] 추가 내용: 검색 결과와 선택 목록을 분리하여 검색 밖의 선택도 유지합니다.
+  let selectedOnly = false;
+  let liveSearchTimer;
+  const selectedViewButton = document.querySelector("#record-selected-view");
+  const clearSelectionButton = document.querySelector("#record-clear-selection");
+  const selectionSummary = document.querySelector("#record-selection-summary");
+
+  function getVisibleRecords() {
+    return selectedOnly ? allRecords.filter(record => selectedRecords.has(record)) : filteredRecords;
+  }
+
+  function updateRecordSelection() {
+    const pageRecords = getVisibleRecords().slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage);
+    const selectedOnPage = pageRecords.filter(record => selectedRecords.has(record)).length;
+    selectPageCheckbox.disabled = isLoading || loadFailed || pageRecords.length === 0;
+    selectPageCheckbox.checked = pageRecords.length > 0 && selectedOnPage === pageRecords.length;
+    selectPageCheckbox.indeterminate = selectedOnPage > 0 && selectedOnPage < pageRecords.length;
+    exportButtonLabel.textContent = selectedRecords.size ? `선택한 ${selectedRecords.size}건 내보내기` : "내보내기";
+    selectedViewButton.textContent = selectedOnly ? "검색 결과로 돌아가기" : `선택한 ${selectedRecords.size}건 모아보기`;
+    selectedViewButton.setAttribute("aria-pressed", String(selectedOnly));
+    clearSelectionButton.disabled = selectedRecords.size === 0;
+    const matching = new Set(filteredRecords);
+    const hiddenCount = [...selectedRecords].filter(record => !matching.has(record)).length;
+    selectionSummary.textContent = selectedRecords.size
+      ? `총 ${selectedRecords.size}건 선택${hiddenCount ? ` · 현재 검색 밖 ${hiddenCount}건 포함` : ""}`
+      : "검색 초기화 후에도 선택한 기록은 유지됩니다.";
+  }
+
+  function clearRecordSelection() {
+    selectedRecords.clear();
+    selectedOnly = false;
+    currentPage = 1;
+    renderRecords(filteredRecords);
+  }
 
   /* [9.15] 수정내용: 조치 기록은 한 페이지에 최대 10건씩 표시합니다. */
   const recordsPerPage = 10;
@@ -352,6 +391,8 @@ function initializePage() {
 
       input.value = value;
       updateLabel();
+      // [2026-09-18] 고친 내용: 조건 변경 시 결과만 갱신하고 선택은 그대로 둡니다.
+      applyFilters();
     });
 
     root.addEventListener("keydown", event => {
@@ -509,13 +550,14 @@ function initializePage() {
     const row = document.createElement("tr");
     const cell = createCell(message);
 
-    /* [수정] 기록 내용까지 8개 열에 안내를 표시합니다. */
-    cell.colSpan = 8;
+    // [2026-09-18] 고친 내용: 선택 체크박스까지 9개 열에 안내를 표시합니다.
+    cell.colSpan = 9;
     cell.className = "empty-message";
 
     row.append(cell);
     recordList.replaceChildren(row);
     resultMessage.textContent = message;
+    updateRecordSelection();
   }
 
   /* 검색 결과를 표에 표시합니다. */
@@ -538,7 +580,7 @@ function initializePage() {
 
       button.addEventListener("click", () => {
         currentPage = page;
-        renderRecords(filteredRecords);
+        renderRecords(getVisibleRecords());
         tableScroll.scrollTop = 0;
       });
 
@@ -549,7 +591,7 @@ function initializePage() {
   function renderRecords(records) {
     if (records.length === 0) {
       showTableMessage(
-        "검색 조건에 맞는 조치 기록이 없습니다."
+        selectedOnly ? "선택한 조치 기록이 없습니다." : "검색 조건에 맞는 조치 기록이 없습니다."
       );
       recordPagination.replaceChildren();
       return;
@@ -587,6 +629,8 @@ function initializePage() {
       typeCell.append(badge);
 
       row.append(
+        // [2026-09-18] 추가 내용: 기록 객체별로 선택하여 같은 내용의 기록도 각각 선택할 수 있습니다.
+        createRecordSelectionCell(record),
         createCell(formatTime(record.occurredAt)),
         createCell(record.room),
         createCell(record.patient),
@@ -603,9 +647,10 @@ function initializePage() {
 
     recordList.replaceChildren(rows);
     renderPagination(totalPages);
+    updateRecordSelection();
 
     resultMessage.textContent =
-      `총 ${records.length}건의 조치 기록이 검색되었습니다.`;
+      selectedOnly ? `선택한 조치 기록 ${records.length}건입니다.` : `총 ${records.length}건의 조치 기록이 검색되었습니다.`;
   }
 
   /* ==================================================
@@ -635,10 +680,14 @@ function initializePage() {
    * 화면 필터를 적용합니다.
    * 선택하지 않은 필터는 all이므로 전체로 처리됩니다.
    */
-  function applyFilters() {
+  function applyFilters({ keepView = false, keepPage = false } = {}) {
+    clearTimeout(liveSearchTimer);
     if (isLoading || loadFailed) {
       return;
     }
+
+    // [2026-09-18] 고친 내용: 검색·초기화는 조건만 바꾸며 선택 기록은 지우지 않습니다.
+    if (!keepView) selectedOnly = false;
 
     const conditions = readSearchConditions();
     const period = periodFilter.value;
@@ -686,8 +735,8 @@ function initializePage() {
     });
 
     /* [9.15] 추가내용: 새 검색 결과는 항상 첫 페이지부터 표시합니다. */
-    currentPage = 1;
-    renderRecords(filteredRecords);
+    if (!keepPage) currentPage = 1;
+    renderRecords(getVisibleRecords());
 
     /* 검색 후 스크롤을 맨 위로 이동합니다. */
     tableScroll.scrollTop = 0;
@@ -870,14 +919,14 @@ function initializePage() {
       return;
     }
 
-    /*
-     * 검색 버튼을 누르지 않았더라도
-     * 현재 선택된 필터를 바로 적용합니다.
-     */
-    applyFilters();
+    // [2026-09-18] 고친 내용: 현재 검색에 보이지 않아도 선택한 기록 전체를 내보냅니다.
+    applyFilters({ keepView: true, keepPage: true });
+    exportRecords = selectedRecords.size
+      ? allRecords.filter(record => selectedRecords.has(record))
+      : [...filteredRecords];
 
     exportCount.textContent =
-      `현재 필터 결과 ${filteredRecords.length}건`;
+      `${selectedRecords.size ? "선택한 기록" : "검색 결과 전체"} ${exportRecords.length}건`;
 
     exportError.textContent = "";
 
@@ -886,11 +935,11 @@ function initializePage() {
         "보고서 창에서 인쇄 후 PDF로 저장하세요.";
     } else {
       exportNote.textContent =
-        "현재 선택한 필터 결과만 내보냅니다.";
+        "위에 표시된 내보내기 대상만 저장합니다.";
     }
 
     exportSubmit.disabled =
-      filteredRecords.length === 0;
+      exportRecords.length === 0;
 
     exportDialog.showModal();
   }
@@ -1110,7 +1159,8 @@ function initializePage() {
 
     const count = doc.createElement("p");
     count.textContent =
-      `현재 필터 결과 ${records.length}건`;
+      // [2026-09-18] 고친 내용: PDF에는 실제 내보낸 선택 대상 건수를 표시합니다.
+      `내보낸 조치 기록 ${records.length}건`;
 
     const table = doc.createElement("table");
     const thead = doc.createElement("thead");
@@ -1151,7 +1201,7 @@ function initializePage() {
   function submitExport(event) {
     event.preventDefault();
 
-    if (!filteredRecords.length) {
+    if (!exportRecords.length) {
       exportError.textContent =
         "현재 필터 조건에 해당하는 기록이 없습니다.";
       return;
@@ -1161,11 +1211,11 @@ function initializePage() {
 
     try {
       if (format === "xlsx") {
-        downloadExcel(filteredRecords);
+        downloadExcel(exportRecords);
       } else if (format === "csv") {
-        downloadCsv(filteredRecords);
+        downloadCsv(exportRecords);
       } else {
-        openPdfReport(filteredRecords);
+        openPdfReport(exportRecords);
       }
 
       exportDialog.close();
@@ -1261,12 +1311,54 @@ function initializePage() {
      ================================================== */
 
   /* 검색 버튼 또는 Enter */
+  // [2026-09-18] 추가 내용: 행 선택과 현재 페이지 전체 선택을 연결합니다.
+  function createRecordSelectionCell(record) {
+    const cell = document.createElement("td");
+    cell.className = "record-selection-cell";
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "record-checkbox";
+    checkbox.checked = selectedRecords.has(record);
+    checkbox.setAttribute("aria-label", `${record.room} ${record.patient} ${formatTime(record.occurredAt)} 기록 선택`);
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) selectedRecords.add(record);
+      else selectedRecords.delete(record);
+      if (selectedOnly) renderRecords(getVisibleRecords());
+      else updateRecordSelection();
+    });
+    cell.append(checkbox);
+    return cell;
+  }
+
+  selectPageCheckbox.addEventListener("change", () => {
+    const pageRecords = getVisibleRecords().slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage);
+    pageRecords.forEach(record => {
+      if (selectPageCheckbox.checked) selectedRecords.add(record);
+      else selectedRecords.delete(record);
+    });
+    renderRecords(getVisibleRecords());
+  });
+  // [2026-09-18] 추가 내용: 입력을 잠깐 멈추면 자동 검색하며 한글 조합 중에도 입력창은 건드리지 않습니다.
+  function scheduleLiveSearch() {
+    clearTimeout(liveSearchTimer);
+    liveSearchTimer = setTimeout(() => applyFilters(), 200);
+  }
+  const searchInput = document.querySelector("#search-input");
+  searchInput.addEventListener("input", scheduleLiveSearch);
+  searchInput.addEventListener("compositionend", scheduleLiveSearch);
+  selectedViewButton.addEventListener("click", () => {
+    selectedOnly = !selectedOnly;
+    applyFilters({ keepView: true });
+  });
+  clearSelectionButton.addEventListener("click", clearRecordSelection);
+
+  /* 검색 버튼 또는 Enter */
   searchForm.addEventListener("submit", event => {
     event.preventDefault();
     applyFilters();
   });
 
-  // [2026-09-18] 추가 내용: 전체 검색 조건과 직접 설정 날짜를 초기화하고 첫 페이지를 표시합니다.
+  // [2026-09-18] 고친 내용: 검색 조건과 날짜만 초기화하고 선택은 유지한 채 첫 페이지를 표시합니다.
   document.querySelector("#search-reset").addEventListener("click", () => {
     searchForm.querySelectorAll("input[type='hidden']").forEach(input => {
       input.value = "all";
@@ -1336,7 +1428,7 @@ function initializePage() {
           exportNote.textContent =
             input.value === "pdf"
               ? "보고서 창에서 PDF로 저장하세요."
-              : "현재 선택한 필터 결과만 내보냅니다.";
+              : "위에 표시된 내보내기 대상만 저장합니다.";
         }
       });
     });

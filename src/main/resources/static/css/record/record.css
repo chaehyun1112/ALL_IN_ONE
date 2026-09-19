@@ -225,11 +225,15 @@ select:focus-visible,
   display: flex;
   align-items: center;
   gap: 8.26px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .reset-button {
-  width: 63.33px;
+  /* [2026-09-18] 고친 내용: 검색 초기화와 선택 해제를 구별하는 문구 공간을 확보합니다. */
+  min-width: 80px;
+  padding-inline: 10px;
   height: 28px;
   border: 1px solid #527563;
   border-radius: 6px;
@@ -1055,6 +1059,49 @@ select:focus-visible,
 .record-table .content-column {
   width: 7%;
 }
+
+/* [2026-09-18] 추가 내용: 선택 열을 포함해 너비를 배분하고 두 계정에서 같은 체크박스를 사용합니다. */
+.record-table .selection-column { width: 4%; }
+.record-table .time-column { width: 14%; }
+.record-table .room-column { width: 12%; }
+.record-table .patient-column { width: 10%; }
+.record-table .type-column { width: 13%; }
+.record-table .staff-column { width: 10%; }
+.record-table .status-column { width: 9%; }
+.record-table .complete-column { width: 19%; }
+.record-table .content-column { width: 9%; }
+.record-table .record-selection-cell { text-align: center; vertical-align: middle; }
+.record-checkbox { width: 16px; height: 16px; margin: 0; vertical-align: middle; accent-color: #527563; cursor: pointer; }
+.record-checkbox:disabled { cursor: default; }
+.record-search-actions > button { flex-shrink: 0; white-space: nowrap; }
+
+/* [2026-09-18] 추가 내용: 검색 조건과 별개로 선택한 기록을 확인하고 해제하는 공통 도구입니다. */
+.record-selection-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid #ccd7c9;
+  border-radius: 6px;
+  background: #edf2ec;
+}
+.record-selection-toolbar button {
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid #789383;
+  border-radius: 5px;
+  background: #fbfaf4;
+  color: #395744;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.record-selection-toolbar button[aria-pressed="true"] { background: #527563; color: white; }
+.record-selection-toolbar button:disabled { opacity: .5; cursor: default; }
+#record-selection-summary { color: #53634f; font-size: 11px; }
+.search-input { width: 190px; }
 
 /* 추가: 제목과 아이콘을 같은 열의 가운데에 정렬 */
 .record-table .record-content-heading,

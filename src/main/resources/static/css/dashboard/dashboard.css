@@ -1747,7 +1747,8 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 .corridor.urgent[aria-pressed="true"] { outline:none; }
 /* [2026.09.16] 고친 내용: 감지 지점을 중앙이 아닌 좌측 화장실 앞 구간으로 옮깁니다. */
 /* [2026.09.17] 고친 내용: 테스트한 화장실 앞 위치에 맞춰 복도 마커의 좌표를 이동합니다. */
-.corridor-alert-marker { display:none; position:absolute; z-index:2; left:var(--camera-x,13%); top:50%; width:16px; height:16px; border-radius:50%; transform:translate(-50%,-50%); background:#cf5f53; box-shadow:0 0 0 5px #cf5f5350; }
+/* [2026.09.19] 수정: JS 좌표가 없어도 감지 마커는 311호 앞이 아닌 서쪽 화장실 앞에 표시합니다. */
+.corridor-alert-marker { display:none; position:absolute; z-index:2; left:var(--camera-x,5%); top:50%; width:16px; height:16px; border-radius:50%; transform:translate(-50%,-50%); background:#cf5f53; box-shadow:0 0 0 5px #cf5f5350; }
 .corridor-alert-marker::after { content:var(--camera-label); position:absolute; left:50%; bottom:calc(100% + 6px); transform:translateX(-50%); padding:3px 6px; border-radius:5px; background:#8f3028; color:#fff; font-size:10px; font-style:normal; font-weight:700; letter-spacing:0; white-space:nowrap; }
 .corridor.urgent[aria-pressed="true"] .corridor-alert-marker::before { content:""; position:absolute; inset:-5px; border:2px solid #4f8061; border-radius:50%; }
 .corridor.urgent .corridor-alert-marker { display:block; animation:corridor-alert-pulse 1.15s ease-in-out infinite; }
