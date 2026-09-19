@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="../../../static/css/settings/settings.css" th:href="@{/css/settings/settings.css}">
   <!-- [수정완료] 카드 잘림을 방지하고 메모 입력 영역을 구성합니다. -->
   <link rel="stylesheet" href="../../../static/css/settings/layout.css" th:href="@{/css/settings/layout.css}">
+    <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css" th:href="@{/css/alleyes-brand.css}">
 </head>
 <body>
   <!-- [수정완료] 참고 이미지처럼 프로필과 설정 정보를 분리한 화면으로 구성합니다. -->
@@ -18,7 +20,7 @@
       </svg>
       <span>대시보드로 돌아가기</span>
     </a>
-    <strong>ALLEYES</strong>
+    <strong class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo.png" th:src="@{/image/brand/alleyes-logo.png}" alt="" width="44" height="42">ALLEYES</strong>
   </header>
 
   <main class="settings-page">

@@ -1,0 +1,28 @@
+/* [2026.09.19] 추가: 모든 ALLEYES 표기에 같은 로고를 왼쪽으로 배치합니다. */
+.alleyes-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.alleyes-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.domain-eyebrow.alleyes-brand,
+.service-eyebrow.alleyes-brand {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .alleyes-brand { gap: 8px; }
+  .alleyes-logo { width: 36px; height: 34px; }
+}

@@ -13,6 +13,8 @@
   <link rel="stylesheet"
         th:href="@{/css/auth/login.css}"
         href="../../../static/css/auth/login.css">
+    <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css" th:href="@{/css/alleyes-brand.css}">
 </head>
 
 <body>
@@ -23,7 +25,7 @@
 
       <header class="service-intro">
         <!-- [2026.09.19] 수정: 상단 서비스 이름을 ALLEYES로 표시합니다. -->
-        <p class="service-eyebrow">ALLEYES</p>
+        <p class="service-eyebrow alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo.png" th:src="@{/image/brand/alleyes-logo.png}" alt="" width="44" height="42">ALLEYES</p>
 
         <h1 id="hospital-name"
             th:text="${hospitalName}">

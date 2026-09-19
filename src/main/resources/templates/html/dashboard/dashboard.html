@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ALLEYES · 병동 통합 관제</title>
-
   <!-- [2026.09.17] 고친 내용: 화면 최상단 알림 배너 위치가 반영되도록 CSS 캐시 버전을 갱신합니다. -->
   <link
     rel="stylesheet"
@@ -14,6 +13,8 @@
   <!-- [09.13]추가내용: 병실 상태와 선택 표시를 기능별 CSS 파일로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
   <link rel="stylesheet" href="../../../static/css/dashboard/room-selection.css" th:href="@{/css/dashboard/room-selection.css}">
+    <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css" th:href="@{/css/alleyes-brand.css}">
 </head>
 
 <body th:attr="data-session-url=@{/api/dashboard/session},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
@@ -23,8 +24,8 @@
     <!-- [2026.09.17] 고친 내용: 공통 화면 전환 함수가 상단 감지 알림의 표시 여부도 함께 처리합니다. -->
     <a class="dashboard-back-link" href="dashboard.html" th:href="@{/dashboard}">← 대시보드로 가기</a>
     <div class="brand">
-      <div class="brand-icon" aria-hidden="true">+</div>
-      <strong>ALLEYES</strong>
+
+      <strong class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo.png" th:src="@{/image/brand/alleyes-logo.png}" alt="" width="44" height="42">ALLEYES</strong>
       <span>병동 통합 관제</span>
     </div>
 
