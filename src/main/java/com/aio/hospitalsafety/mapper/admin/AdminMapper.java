@@ -26,8 +26,7 @@ public interface AdminMapper {
               AND user_account.role_cd = 'USER'
               AND user_account.auth_st IN ('PENDING', 'APPROVED')
             ORDER BY
-                CASE user_account.auth_st WHEN 'PENDING' THEN 0 ELSE 1 END,
-                user_account.crt_dt,
+                user_account.crt_dt DESC NULLS LAST,
                 user_account.emp_id
             """)
     List<UserDto> findUsersByHospital(
