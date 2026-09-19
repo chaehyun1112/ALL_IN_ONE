@@ -3,8 +3,8 @@
 
 :root {
     font-synthesis: none;
-    --green: #356e55;
-    --green-dark: #2e604b;
+    --green: #526d82;
+    --green-dark: #405a70;
     --ink: #252d31;
     --muted: #8a918e;
     --line: #c5cac6;
@@ -43,7 +43,7 @@ input {
     padding: clamp(24px, 4svh, 40px) clamp(16px, 2vw, 32px);
     min-height: 100vh;
     min-height: 100svh;
-    background-color: #f5f7f5;
+    background-color: #e9f0f5;
     background-image: url('../../image/login.png');
     background-position: center 34.85%;
     background-repeat: no-repeat;
@@ -192,3 +192,5 @@ input {
         padding-bottom: 24px;
     }
 }
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

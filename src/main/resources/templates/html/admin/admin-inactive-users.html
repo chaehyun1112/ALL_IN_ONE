@@ -21,7 +21,9 @@
             th:src="@{/JS/admin/inactive-users.js}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css" th:href="@{/css/alleyes-brand.css}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=adbfad-header" th:href="@{/css/alleyes-brand.css(v='adbfad-header')}">
+    <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=blue-gray-auth-image" th:href="@{/css/alleyes-theme.css(v='blue-gray-auth-image')}">
 </head>
 
 <body>
@@ -29,7 +31,7 @@
     <div class="admin-brand">
         <!-- [2026.09.16] 고친 내용: 왼쪽 상단의 관리자 대시보드 복귀 링크를 삭제합니다. -->
         <!-- [2026.09.16] 고친 내용: 서비스 이름을 왼쪽에, 병동 통합 관제를 오른쪽에 표시합니다. -->
-        <strong class="admin-service-name alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo.png" th:src="@{/image/brand/alleyes-logo.png}" alt="" width="44" height="42">ALLEYES</strong>
+        <strong class="admin-service-name alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-transparent.png" th:src="@{/image/brand/alleyes-logo-transparent.png}" alt="" width="44" height="42">ALLEYES</strong>
         <span class="admin-service-placeholder">병동 통합 관제</span>
         <nav class="admin-page-nav" aria-label="계정 관리 메뉴">
             <a href="admin.html" th:href="@{/admin}">직원 관리</a>

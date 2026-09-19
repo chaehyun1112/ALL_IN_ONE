@@ -28,9 +28,11 @@
 .admin-create-dialog .admin-dialog-actions button { flex: 1; min-height: 48px; padding: 12px 20px; font-size: 13px; }
 .admin-create-dialog .admin-dialog-actions .admin-primary { background: var(--admin-green); border-color: var(--admin-green); color: #fff; }
 .admin-create-dialog .admin-dialog-actions .admin-primary:hover,
-.admin-create-dialog .admin-dialog-actions .admin-primary:focus-visible { background: #355448; border-color: #355448; }
+.admin-create-dialog .admin-dialog-actions .admin-primary:focus-visible { background: #526d82; border-color: #526d82; }
 .admin-create-complete-dialog { text-align: center; }
 .admin-complete-mark { display: grid; place-items: center; width: 44px; height: 44px; margin: 0 auto 14px; border-radius: 50%; background: #e5f2e9; color: #53846a; font-size: 24px; font-weight: 700; }
 .admin-create-complete-dialog h2 { margin-bottom: 8px; }
 .admin-create-complete-dialog > p { margin: 0 0 18px; font-size: 12px; }
 
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

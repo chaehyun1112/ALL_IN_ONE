@@ -13,16 +13,118 @@
   width: 44px;
   height: 42px;
   object-fit: contain;
-  border-radius: 8px;
+  background: transparent;
+}
+
+/* [2026.09.19] 수정: 모든 화면에서 로그인과 같은 초록·세이지 원본 로고를 표시합니다. */
+.admin-topbar .alleyes-logo,
+.brand .alleyes-logo,
+.settings-header .alleyes-logo {
+  filter: none;
 }
 
 .domain-eyebrow.alleyes-brand,
 .service-eyebrow.alleyes-brand {
   display: flex;
   justify-content: center;
+  color: #39576d;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+/* [2026.09.19] 수정: 상단 로고·서비스명의 중심과 보조 문구의 크기·간격을 통일합니다. */
+/* [2026.09.19] 수정: 첨부 이미지 색보다 조금 진한 #b8cad8 배경에 진한 초록 글자와 버튼으로 대비를 맞춥니다. */
+.admin-topbar,
+body[data-dashboard-view] > header,
+.settings-header {
+  background: #b8cad8;
+  color: #29343d;
+}
+
+.admin-topbar .admin-brand > span,
+.admin-topbar .admin-page-nav a,
+.admin-topbar time,
+body[data-dashboard-view] > header .brand > span,
+body[data-dashboard-view] > header .header-actions time,
+body[data-dashboard-view] > header .profile-copy small {
+  color: #29343d;
+}
+
+.admin-topbar .admin-page-nav a:hover,
+.admin-topbar .admin-page-nav a:focus-visible,
+.admin-topbar .admin-page-nav a.active {
+  background: #29343d14;
+  color: #29343d;
+}
+
+.admin-topbar .admin-fullscreen-toggle,
+.admin-topbar .admin-logout,
+.admin-topbar .admin-settings,
+body[data-dashboard-view] > header .fullscreen-toggle {
+  background: #29343d08;
+  border-color: #29343d40;
+  color: #29343d;
+}
+
+.admin-topbar .admin-fullscreen-toggle:hover,
+.admin-topbar .admin-logout:hover,
+.admin-topbar .admin-settings:hover,
+body[data-dashboard-view] > header .fullscreen-toggle:hover {
+  background: #29343d14;
+  border-color: #29343d80;
+}
+
+body[data-dashboard-view] > header .profile-toggle,
+body[data-dashboard-view] > header .dashboard-back-link,
+body[data-dashboard-view] > header .header-actions a,
+.settings-header .back-link {
+  color: #29343d;
+}
+
+.admin-topbar :focus-visible,
+body[data-dashboard-view] > header .fullscreen-toggle:focus-visible,
+body[data-dashboard-view] > header .profile-toggle:focus-visible {
+  outline: 2px solid #29343d;
+  outline-offset: 3px;
+}
+
+.admin-brand,
+header > .brand {
+  align-items: center;
+  column-gap: 16px;
+}
+
+.admin-brand > .alleyes-brand,
+.brand > .alleyes-brand,
+.settings-header > .alleyes-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: 1.2px;
+  color: #39576d;
+}
+
+.admin-brand > span,
+.brand > span {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+  .admin-brand { align-items: flex-start; }
 }
 
 @media (max-width: 600px) {
   .alleyes-brand { gap: 8px; }
   .alleyes-logo { width: 36px; height: 34px; }
 }
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

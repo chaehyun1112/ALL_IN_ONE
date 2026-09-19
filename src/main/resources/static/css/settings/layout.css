@@ -49,8 +49,8 @@ body { overflow: auto; }
 .account-row { margin-top: 18px; padding: 18px; }
 /* [수정완료] 활성화 표시 아래 메모 입력칸을 배치합니다. */
 .profile-memo { margin-top: 18px; text-align: left; }
-.profile-memo label { display: block; margin-bottom: 7px; font-size: 12px; color: #385b4d; }
-.profile-memo textarea { display: block; width: 100%; box-sizing: border-box; min-height: 80px; padding: 10px; border: 1px solid #cbdcd0; border-radius: 8px; background: #fffdf8; color: #293e34; font: inherit; resize: vertical; }
+.profile-memo label { display: block; margin-bottom: 7px; font-size: 12px; color: #526d82; }
+.profile-memo textarea { display: block; width: 100%; box-sizing: border-box; min-height: 80px; padding: 10px; border: 1px solid #cbdcd0; border-radius: 8px; background: #ffffff; color: #293e34; font: inherit; resize: vertical; }
 .profile-memo textarea:focus-visible { outline: 2px solid #789b85; outline-offset: 2px; }
 @media(max-width:700px) {
   .settings-layout { width: 100%; margin-left: 0; grid-template-columns: 1fr; }
@@ -78,3 +78,5 @@ body { overflow: auto; }
   .settings-content .settings-card { padding: 24px 22px; }
   .profile-card { padding: 20px; }
 }
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

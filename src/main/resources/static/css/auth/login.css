@@ -6,7 +6,7 @@
   color: #1f2933;
   color-scheme: light;
   font-synthesis: none;
-  --primary: #35624d;
+  --primary: #39576d;
   --field-border: #d4ddd8;
   --field-background: #fbfcfb;
 }
@@ -22,7 +22,7 @@ p, h1 { margin: 0; }
   justify-content: center;
   padding: 47px 20px 16px;
   /* 1536×826 기준: 1536×1024 배경의 상단을 약 -69px에 배치. */
-  background: #f5f7f5 url('../../image/login.png') center 34.85% / cover no-repeat;
+  background: #e9f0f5 url('../../image/login.png') center 34.85% / cover no-repeat;
 }
 .login-content { width: 533px; max-width: 100%; }
 .login-header, .login-content > header { text-align: center; margin-bottom: 30px; }
@@ -171,3 +171,5 @@ input:focus-visible, button:focus-visible, a:focus-visible {
   .login-page { align-items: flex-start; padding-top: 24px; padding-bottom: 24px; }
 }
 
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

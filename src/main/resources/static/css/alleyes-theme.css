@@ -1,0 +1,91 @@
+/* [2026.09.19] 전체 화면 공통 블루 그레이 테마. 배치·동작·위험 알림 색은 유지합니다. */
+:root {
+  --ink: #29343d;
+  --muted: #647581;
+  --green: #526d82;
+  --green-dark: #405a70;
+  --primary: #526d82;
+  --border: #d5dfe7;
+  --line: #d5dfe7;
+  --mint: #edf3f7;
+  --admin-background: #e9f0f5;
+  --admin-surface: #fff;
+  --admin-green: #526d82;
+  --admin-text: #29343d;
+  --admin-muted: #647581;
+  --admin-border: #d5dfe7;
+  --page-background: #e9f0f5;
+  --panel-background: #fff;
+  --header-background: #fff;
+  --button-background: #526d82;
+  --border-color: #d5dfe7;
+  --text-color: #29343d;
+}
+body { background-color: #e9f0f5; color: #29343d; }
+.admin-topbar, body[data-dashboard-view] > header, .settings-header, .page-header {
+  /* [2026.09.19] 흰색 상단과 블루 그레이 본문을 얇은 선으로 구분합니다. */
+  background: #fff;
+  border-bottom: 1px solid #d5dfe7;
+  box-shadow: none;
+  color: #29343d;
+}
+/* 상단 높이와 콘텐츠 높이 계산을 함께 맞추고 좁은 화면의 기존 배치를 유지합니다. */
+@media (min-width: 801px) {
+  :root { --admin-topbar-height: 80px; }
+  body[data-dashboard-view] { --dashboard-header-height: 80px; }
+  .admin-topbar, body[data-dashboard-view] > header, .settings-header, .page-header {
+    box-sizing: border-box;
+    height: 80px;
+    min-height: 80px;
+    padding-inline: 24px;
+    align-items: center;
+  }
+}
+.settings-header .back-link:hover { color: #39576d; }
+.page-header .dashboard-link, .page-header time, .page-header .fullscreen-toggle,
+.page-header .profile-toggle, .page-header .profile-copy small { color: #29343d; }
+.page-header .dashboard-link:hover { color: #39576d; }
+.page-header .fullscreen-toggle { border-color: #526d8260; }
+.change-page {
+  background: radial-gradient(ellipse at top, #f9fbfd, #e9f0f5 75%);
+}
+/* [2026.09.19] 도메인·로그인은 기존 CCTV·병원 배경을 복원하고 이미지의 명암을 블루 그레이에 합성합니다. */
+.domain-page, .login-page {
+  background: #e9f0f5 url('../image/login.png') center 34.85% / cover no-repeat;
+  background-blend-mode: luminosity;
+}
+.login-button:hover { background: #405a70; }
+.login-button:active { background: #39576d; }
+.password-popup .change-page, .password-popup .change-body { background: #fff; }
+.floor-panel .floor { background: #f4f7fa; border-color: #d5dfe7; }
+.floor .room:not(.urgent):not(.caution):not(.filtered-out) {
+  background: #edf3f7;
+  border-color: #c3d1dc;
+  border-top-color: #b8cad8;
+  border-left-color: #c3d1dc;
+  box-shadow: 3px 5px 0 #526d8214, inset 0 0 0 2px #ffffff80;
+}
+.floor .room:not(.urgent):not(.caution) small { color: #647581; }
+.floor .room:not(.urgent):not(.caution)::after { background: #7b93a5; }
+.floor .room .door { background: #edf3f7; border-color: #8ea4b4; }
+.floor .room .bed { border-color: #b8cad8; }
+.floor .room .bed::after { background: #d5e1ea; }
+.floor .corridor { background: #e7eef4; border-color: #c3d1dc; box-shadow: none; }
+.floor .corridor::after { border-color: #bacbd8; }
+.floor .corridor > span { background: #e7eef4; color: #647581; }
+.floor .facility { background: #f3f6f9; border-color: #c3d1dc; }
+.floor .facility .symbol { color: #71899b; }
+.floor .station { background: #e4edf4; border-color: #b8cad8; }
+.floor .room[aria-pressed="true"], .floor .room:focus-visible { outline-color: #526d82; }
+.page-heading .counts .count:not(.urgent):not(.caution) { background: #edf3f7; border-color: #d5dfe7; color: #526d82; }
+.page-heading .counts .count:not(.urgent):not(.caution) b { color: #526d82; }
+.page-heading .summary::before, .panel-heading h2::before { background: #71899b; }
+.counts .count[aria-pressed="true"] { border-color: #526d82 !important; box-shadow: 0 0 0 2px #526d8280 !important; }
+.legend span:not(.urgent):not(.caution)::before { background: #7b93a5; }
+.page-heading .counts .count[aria-pressed="true"] { outline-color: #526d82; }
+.admin-table th, .admin-history-table th { background: #e5edf3; color: #39576d; }
+.record-table th { background: #526d82; color: #fff; }
+.admin-account-guide, .admin-inactive-symbol { background: #edf3f7; }
+.settings-card, .profile-card, .admin-dialog, .page-intro, .search-form { background-color: #fff; }
+/* 완료 상태는 위험 색과 겹치지 않는 옅은 청회색으로 구분합니다. */
+.record-table .completed-row td { background-color: #e1eaf2; }

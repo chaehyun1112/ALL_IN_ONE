@@ -7,12 +7,12 @@
 
 /* 공통 색상 */
 :root {
-  --page-background: #f4f1e8;
-  --panel-background: #fbfaf5;
-  --header-background: #3f594c;
-  --button-background: #3b574a;
-  --border-color: #d6d0c2;
-  --text-color: #3e423b;
+  --page-background: #e9f0f5;
+  --panel-background: #ffffff;
+  --header-background: #526d82;
+  --button-background: #526d82;
+  --border-color: #d5dfe7;
+  --text-color: #29343d;
 }
 
 /* 테두리와 안쪽 여백을 요소 크기에 포함합니다. */
@@ -58,7 +58,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 .table-scroll:focus-visible {
-  outline: 2px solid #789383;
+  outline: 2px solid #7b93a5;
   outline-offset: 2px;
 }
 
@@ -173,7 +173,7 @@ select:focus-visible,
 .page-description {
   /* [2026.09.16] 고친 내용: 조치 기록 제목과 안내 문구 사이의 세로 간격을 넓힙니다. */
   margin: 8px 0 0;
-  color: #666b61;
+  color: #586a77;
   font-size: 8.95px;
   line-height: 14px;
 }
@@ -208,7 +208,7 @@ select:focus-visible,
 
 /* 검색창 안내 */
 .search-input::placeholder {
-  color: #777d73;
+  color: #647581;
   opacity: 1;
 }
 
@@ -217,7 +217,7 @@ select:focus-visible,
 .search-form .search-input:focus-visible {
   outline: none;
   box-shadow: none;
-  border-color: #789383;
+  border-color: #7b93a5;
 }
 
 /* [2026-09-18] 추가 내용: 검색·초기화·내보내기를 같은 높이와 간격으로 유지합니다. */
@@ -235,38 +235,38 @@ select:focus-visible,
   min-width: 80px;
   padding-inline: 10px;
   height: 28px;
-  border: 1px solid #527563;
+  border: 1px solid #526d82;
   border-radius: 6px;
-  background: #fbfaf4;
-  color: #456653;
+  background: #ffffff;
+  color: #405a70;
   font-weight: 600;
 }
 
 .reset-button:hover {
-  background: #edf2ec;
+  background: #edf3f7;
 }
 
 /* 검색 버튼 */
 .search-button {
   width: 63.33px;
   height: 28px;
-  border: 1px solid #527563;
+  border: 1px solid #526d82;
   border-radius: 6px;
-  background: #527563;
+  background: #526d82;
   color: white;
   font-weight: 600;
 }
 
 /* 검색 버튼 마우스 올림 */
 .search-button:hover:not(:disabled) {
-  background: #456653;
-  border-color: #456653;
+  background: #405a70;
+  border-color: #405a70;
 }
 
 /* 검색 버튼 누름 */
 .search-button:active {
-  background: #395744;
-  border-color: #395744;
+  background: #39576d;
+  border-color: #39576d;
 }
 
 /* 내보내기 버튼 */
@@ -280,13 +280,13 @@ select:focus-visible,
   gap: 6px;
   border: 1px solid var(--button-background);
   border-radius: 6px;
-  background: #fbfaf4;
+  background: #ffffff;
   color: var(--button-background);
   font-weight: 600;
 }
 
 .export-button:hover {
-  background: #edf2ec;
+  background: #edf3f7;
 }
 
 /* 다운로드 아이콘 */
@@ -531,17 +531,17 @@ select:focus-visible,
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 1px solid #d6d0c2;
+  border: 1px solid #d5dfe7;
   border-radius: 5px;
   background: #fff;
-  color: #666b61;
+  color: #586a77;
   font-size: 10px;
 }
 
 .record-pagination button:hover,
 .record-pagination button[aria-current="page"] {
-  border-color: #527563;
-  background: #527563;
+  border-color: #526d82;
+  background: #526d82;
   color: #fff;
 }
 
@@ -639,7 +639,7 @@ select:focus-visible,
 /* 검색 결과 없음·조회 실패 */
 .record-table .empty-message {
   height: 100px;
-  color: #666b61;
+  color: #586a77;
 }
 
 /* ==================================================
@@ -686,7 +686,7 @@ select:focus-visible,
 #calendar-help {
   min-height: 32px;
   margin: 0 0 12px;
-  color: #666b61;
+  color: #586a77;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -703,7 +703,7 @@ select:focus-visible,
 /* 요일 제목 */
 .calendar-week {
   margin-bottom: 8px;
-  color: #666b61;
+  color: #586a77;
 }
 
 /* 날짜 버튼 */
@@ -784,13 +784,13 @@ select:focus-visible,
 
 .export-header h2 {
   margin: 0;
-  color: #3b574a;
+  color: #526d82;
   font-size: 19px;
 }
 
 .export-header p {
   margin: 7px 0 0;
-  color: #777d73;
+  color: #647581;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -804,12 +804,12 @@ select:focus-visible,
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #666b61;
+  color: #586a77;
   font-size: 24px;
 }
 
 .export-close:hover {
-  background: #edf2ec;
+  background: #edf3f7;
 }
 
 /* 파일 형식과 기간 구역 */
@@ -823,7 +823,7 @@ select:focus-visible,
 .export-section legend {
   margin-bottom: 10px;
   padding: 0;
-  color: #3b574a;
+  color: #526d82;
   font-weight: 700;
 }
 
@@ -848,14 +848,14 @@ select:focus-visible,
 
 /* 선택한 파일 형식 */
 .export-format:has(input:checked) {
-  border-color: #527563;
+  border-color: #526d82;
   background: #e9f1eb;
 }
 
 /* 라디오 버튼 */
 .export-format input {
   margin: 2px 0 0;
-  accent-color: #3b574a;
+  accent-color: #526d82;
 }
 
 .export-format strong,
@@ -865,14 +865,14 @@ select:focus-visible,
 
 /* 형식 이름 */
 .export-format strong {
-  color: #3b574a;
+  color: #526d82;
   font-size: 13px;
 }
 
 /* 형식 설명 */
 .export-format small {
   margin-top: 5px;
-  color: #777d73;
+  color: #647581;
   font-size: 10px;
 }
 
@@ -881,24 +881,24 @@ select:focus-visible,
   margin-top: 18px;
   padding: 12px;
   border-radius: 8px;
-  background: #edf2ec;
+  background: #edf3f7;
 }
 
 .export-summary p {
   margin: 0 0 7px;
-  color: #666b61;
+  color: #586a77;
   font-size: 11px;
   line-height: 1.5;
 }
 
 .export-summary strong {
-  color: #3b574a;
+  color: #526d82;
 }
 
 /* 형식 안내 */
 .export-note {
   margin: 12px 0 0;
-  color: #777d73;
+  color: #647581;
   font-size: 11px;
   line-height: 1.5;
 }
@@ -929,18 +929,18 @@ select:focus-visible,
 /* 취소 버튼 */
 .export-cancel {
   background: white;
-  color: #666b61;
+  color: #586a77;
 }
 
 /* 실행 버튼 */
 .export-submit {
-  border-color: #3b574a;
-  background: #3b574a;
+  border-color: #526d82;
+  background: #526d82;
   color: white;
 }
 
 .export-submit:hover:not(:disabled) {
-  background: #456653;
+  background: #405a70;
 }
 
 /* 내보내기 불가 상태 */
@@ -1071,7 +1071,7 @@ select:focus-visible,
 .record-table .complete-column { width: 19%; }
 .record-table .content-column { width: 9%; }
 .record-table .record-selection-cell { text-align: center; vertical-align: middle; }
-.record-checkbox { width: 16px; height: 16px; margin: 0; vertical-align: middle; accent-color: #527563; cursor: pointer; }
+.record-checkbox { width: 16px; height: 16px; margin: 0; vertical-align: middle; accent-color: #526d82; cursor: pointer; }
 .record-checkbox:disabled { cursor: default; }
 .record-search-actions > button { flex-shrink: 0; white-space: nowrap; }
 
@@ -1085,20 +1085,20 @@ select:focus-visible,
   padding: 10px 12px;
   border: 1px solid #ccd7c9;
   border-radius: 6px;
-  background: #edf2ec;
+  background: #edf3f7;
 }
 .record-selection-toolbar button {
   min-height: 32px;
   padding: 6px 10px;
-  border: 1px solid #789383;
+  border: 1px solid #7b93a5;
   border-radius: 5px;
-  background: #fbfaf4;
-  color: #395744;
+  background: #ffffff;
+  color: #39576d;
   font: inherit;
   font-weight: 600;
   white-space: nowrap;
 }
-.record-selection-toolbar button[aria-pressed="true"] { background: #527563; color: white; }
+.record-selection-toolbar button[aria-pressed="true"] { background: #526d82; color: white; }
 .record-selection-toolbar button:disabled { opacity: .5; cursor: default; }
 #record-selection-summary { color: #53634f; font-size: 11px; }
 .search-input { width: 190px; }
@@ -1233,3 +1233,5 @@ select:focus-visible,
 @media (max-width: 800px) {
   .page-header .dashboard-link { padding: 4px 0; font-size: 11px; }
 }
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

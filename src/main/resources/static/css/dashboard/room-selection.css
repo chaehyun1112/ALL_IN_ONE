@@ -1,6 +1,6 @@
 /* [09.13]추가내용: 병실 선택 상태와 키보드 포커스 표현을 관리합니다. */
-.floor .room[aria-pressed="true"]{outline:3px solid #385b4d;outline-offset:1px}
-.floor .room:focus-visible{outline:3px solid #385b4d;outline-offset:2px}
+.floor .room[aria-pressed="true"]{outline:3px solid #526d82;outline-offset:1px}
+.floor .room:focus-visible{outline:3px solid #526d82;outline-offset:2px}
 
 /* [09.13]수정내용: 오늘의 안전 현황 카드 선택 테두리를 연한 회색으로 표시합니다. */
 .page-heading .counts .count[aria-pressed="true"]{
@@ -50,3 +50,5 @@
 .floor-panel > .panel-heading{flex:0 0 auto;margin-bottom:0;padding-bottom:0}
 .floor-panel > .floor{margin-top:12px}
 
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

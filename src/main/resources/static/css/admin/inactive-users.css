@@ -6,16 +6,16 @@
 .admin-settings[aria-current="page"] { background: #f1f4ed; color: var(--admin-green); border-color: #f1f4ed; }
 .admin-settings-page { position: relative; }
 .admin-settings-heading { position: relative; padding: 0; margin-bottom: 24px; }
-.admin-settings-heading .admin-settings-eyebrow { margin-bottom: 10px; font-size: 11px; color: #687b6d; }
+.admin-settings-heading .admin-settings-eyebrow { margin-bottom: 10px; font-size: 11px; color: #647581; }
 /* [2026.09.16] 고친 내용: 비활성화 직원 카드를 작게 만들고 문서 흐름 안에 배치해 다른 섹션과 겹치지 않게 합니다. */
 .admin-inactive-overview { position: static; display: flex; justify-content: flex-end; margin: 0 0 16px; }
 .admin-inactive-stat { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
-.admin-inactive-stat h2 { margin: 0 0 4px; font-size: 11px; font-weight: 400; color: #717b6b; }
+.admin-inactive-stat h2 { margin: 0 0 4px; font-size: 11px; font-weight: 400; color: #647581; }
 .admin-inactive-stat strong { font-size: 22px; line-height: 1.2; }
 .admin-inactive-stat strong span { margin-left: 4px; font-size: 12px; font-weight: 400; }
-.admin-inactive-symbol { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #edf0e7; color: #71806b; }
+.admin-inactive-symbol { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #edf3f7; color: #71806b; }
 .admin-inactive-symbol svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.admin-account-guide { display: flex; flex-direction: column; justify-content: center; padding: 18px 24px; border: 1px solid #dce3d7; border-radius: 14px; background: #edf1e8; }
+.admin-account-guide { display: flex; flex-direction: column; justify-content: center; padding: 18px 24px; border: 1px solid #d5dfe7; border-radius: 14px; background: #edf3f7; }
 .admin-settings-heading .admin-account-guide { width: 100%; max-width: none; margin-top: 14px; }
 .admin-inactive-overview .admin-inactive-stat { width: auto; margin-left: auto; }
 .admin-settings-heading .admin-account-guide p { white-space: nowrap; }
@@ -23,13 +23,13 @@
 @media (min-width: 801px) {
     .admin-settings-heading .admin-inactive-overview { position: absolute; top: 0; right: 0; margin: 0; }
 }
-.admin-guide-heading { display: flex; align-items: center; gap: 9px; color: #405c4f; font-size: 14px; }
+.admin-guide-heading { display: flex; align-items: center; gap: 9px; color: #526d82; font-size: 14px; }
 .admin-guide-heading svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.admin-account-guide p { margin: 8px 0 0; color: #626f5c; font-size: 12px; line-height: 1.7; }
-.admin-account-guide p strong { color: #405c4f; }
+.admin-account-guide p { margin: 8px 0 0; color: #586a77; font-size: 12px; line-height: 1.7; }
+.admin-account-guide p strong { color: #526d82; }
 .admin-inactive-panel { padding-bottom: 0; }
 .admin-inactive-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.admin-inactive-label { padding: 5px 10px; border: 1px solid #dde4d6; border-radius: 6px; background: #f1f4ec; color: #697a5e; font-size: 10px; white-space: nowrap; }
+.admin-inactive-label { padding: 5px 10px; border: 1px solid #dde4d6; border-radius: 6px; background: #edf3f7; color: #697a5e; font-size: 10px; white-space: nowrap; }
 .admin-inactive-toolbar { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 12px 20px; margin: 24px 0 16px; }
 .admin-inactive-toolbar .admin-search input { width: 260px; }
 .admin-inactive-filter { display: flex; order: 1; align-items: center; gap: 12px; }
@@ -37,17 +37,17 @@
 .admin-inactive-filter label { color: #78816f; font-size: 11px; }
 /* [09.13]수정내용: 비활성화 사용자 병동 필터의 화살표를 오른쪽 끝에서 조금 왼쪽으로 배치한다. */
 .admin-inactive-filter select { appearance: none; height: 44px; min-width: 140px; padding: 0 36px 0 12px; background-color: #fff; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364705e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-position: calc(100% - 10px) center; background-size: 16px 16px; background-repeat: no-repeat; color: #56614e; font-size: 12px; }
-.admin-inactive-result { margin: 0 0 12px; color: #73806a; font-size: 11px; }
+.admin-inactive-result { margin: 0 0 12px; color: #647581; font-size: 11px; }
 .admin-inactive-table th:first-child { width: 48px; }
 .admin-inactive-table th:first-child, .admin-inactive-table td:first-child { padding-left: 12px; text-align: left; }
 .admin-inactive-selection { display: inline-flex; align-items: center; min-height: 32px; cursor: pointer; }
 .admin-inactive-selection input { width: 16px; height: 16px; margin: 0; accent-color: var(--admin-green); cursor: pointer; }
-.admin-inactive-table tbody tr:has(.admin-inactive-checkbox:checked) { background: #edf2e9; }
+.admin-inactive-table tbody tr:has(.admin-inactive-checkbox:checked) { background: #edf3f7; }
 .admin-inactive-table th:nth-child(2) { width: 16%; }
 .admin-inactive-table th:nth-child(3) { width: 24%; }
 .admin-inactive-table th:nth-child(4) { width: 20%; }
 .admin-inactive-table th:nth-child(5) { width: 20%; }
-.admin-inactive-table td { height: 68px; color: #737d6b; }
+.admin-inactive-table td { height: 68px; color: #647581; }
 .admin-inactive-table td:nth-child(2) { font-weight: 600; color: #565d4f; }
 .admin-inactive-table tbody tr:hover { background: #f6f6ef; }
 .admin-inactive-table time { font-variant-numeric: tabular-nums; }
@@ -73,7 +73,7 @@
 .admin-bulk-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding: 12px 14px; border: 1px solid var(--admin-border); border-radius: 8px; background: #f2f3eb; }
 .admin-bulk-actions > span { color: #65765e; font-size: 12px; }
 .admin-bulk-actions[data-has-selection="true"] { border-color: #adc3a6; background: #eaf1e5; }
-.admin-bulk-actions[data-has-selection="true"] > span { color: #405c4f; font-weight: 700; }
+.admin-bulk-actions[data-has-selection="true"] > span { color: #526d82; font-weight: 700; }
 .admin-bulk-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
 .admin-bulk-buttons button { min-height: 34px; padding: 7px 12px; background: #e4f1e9; color: #39745e; font-size: 11px; font-weight: 700; }
 .admin-bulk-buttons button[data-bulk-status="INACTIVE"] { background: #eeeae3; color: #82725d; }
@@ -95,3 +95,5 @@
     .admin-inactive-filter { justify-content: space-between; }
     .admin-inactive-filter select { flex: 1; max-width: 220px; }
 }
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

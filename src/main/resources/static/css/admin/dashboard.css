@@ -1,14 +1,14 @@
 @charset "UTF-8";
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 /* [2026.09.17] 고친 내용: 전체화면에서 상단 영역의 비율을 안정적으로 유지할 수 있도록 공통 높이를 정의합니다. */
-:root { color-scheme: light; --admin-background: #f4f1e8; --admin-surface: #fbfaf5; --admin-border: #e2e2d7; --admin-green: #405c4f; --admin-text: #42483e; --admin-muted: #8b9083; --admin-topbar-height: 88px; }
+:root { color-scheme: light; --admin-background: #e9f0f5; --admin-surface: #ffffff; --admin-border: #d5dfe7; --admin-green: #526d82; --admin-text: #29343d; --admin-muted: #6e7d88; --admin-topbar-height: 88px; }
 * { box-sizing: border-box; }
 /* [9.15] 수정내용: 페이지 전체가 아닌 상단 바 아래의 본문 영역만 스크롤하도록 구성한다. */
 html:has(#admin-management-page), body:has(#admin-management-page) { height: 100%; overflow: hidden; background: var(--admin-background); }
 body { margin: 0; overflow-x: hidden; background: var(--admin-background); color: var(--admin-text); font-family: "Noto Sans KR", "Malgun Gothic", sans-serif; font-size: 14px; }
 button, input, select { font: inherit; border: 1px solid var(--admin-border); border-radius: 7px; }
 button { cursor: pointer; }
-button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 2px solid #547f69; outline-offset: 3px; }
+button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 2px solid #66849a; outline-offset: 3px; }
 [hidden] { display: none !important; }
 /* [9.15] 수정내용: 상단 바는 콘텐츠 너비를 유지하고 우측 여백 색상은 html 배경에서 처리한다. */
 /* [9.15] 수정내용: 가운데 메뉴를 화면 기준으로 정렬할 수 있도록 상단 바를 기준 영역으로 설정한다. */
@@ -26,16 +26,16 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-topbar-actions { gap: 10px; flex-shrink: 0; }
 .admin-topbar-actions form { display: flex; margin: 0; }
 .admin-topbar time { margin-right: 10px; font-size: 11px; color: #e1e9df; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.admin-settings, .admin-logout { display: inline-flex; align-items: center; justify-content: center; height: 36px; background: #536d60; border-color: #74887b; color: #f3f5ee; }
+.admin-settings, .admin-logout { display: inline-flex; align-items: center; justify-content: center; height: 36px; background: #526d82; border-color: #74887b; color: #f3f5ee; }
 .admin-settings { width: 36px; padding: 0; border: 1px solid #74887b; border-radius: 7px; text-decoration: none; }
 .admin-settings svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .admin-logout { padding: 0 16px; font-size: 11px; white-space: nowrap; }
-.admin-settings:hover, .admin-logout:hover { background: #607c6c; border-color: #a1b4a7; }
+.admin-settings:hover, .admin-logout:hover { background: #617d92; border-color: #a1b4a7; }
 .admin-settings:focus-visible, .admin-logout:focus-visible { outline-color: #f1f4ed; }
 /* [2026.09.16] 추가한 내용: 관리자 공통 전체화면 버튼의 크기·아이콘·진입 상태를 상단 메뉴와 맞춥니다. */
-.admin-fullscreen-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:36px; padding:0 12px; border:1px solid #74887b; border-radius:7px; background:#536d60; color:#f3f5ee; font-size:11px; white-space:nowrap; }
+.admin-fullscreen-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:36px; padding:0 12px; border:1px solid #74887b; border-radius:7px; background:#526d82; color:#f3f5ee; font-size:11px; white-space:nowrap; }
 .admin-fullscreen-toggle svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.admin-fullscreen-toggle:hover { background:#607c6c; border-color:#a1b4a7; }
+.admin-fullscreen-toggle:hover { background:#617d92; border-color:#a1b4a7; }
 .admin-fullscreen-toggle:focus-visible { outline:2px solid #f1f4ed; outline-offset:3px; }
 .admin-fullscreen-toggle:disabled { opacity:.55; cursor:default; }
 .admin-fullscreen-exit, .admin-fullscreen-toggle[aria-pressed="true"] .admin-fullscreen-enter { display:none; }
@@ -48,7 +48,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-page::-webkit-scrollbar { width: 10px; }
 .admin-page::-webkit-scrollbar-track { margin: 6px 0; border-radius: 999px; background: #eeede5; }
 .admin-page::-webkit-scrollbar-thumb { border: 2px solid #eeede5; border-radius: 999px; background: #8ba091; }
-.admin-page::-webkit-scrollbar-thumb:hover { background: #607b69; }
+.admin-page::-webkit-scrollbar-thumb:hover { background: #617d92; }
 /* [9.15] 수정내용: 넓은 화면에서 직원 관리 본문을 오른쪽으로 조금 이동해 시각적 여백을 맞춘다. */
 @media (min-width: 801px) {
     .admin-page { position: relative; left: 16px; }
@@ -113,7 +113,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 #admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
 #admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-track { border-radius: 999px; background: #f0f1eb; }
 #admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb { border: 2px solid #f0f1eb; border-radius: 999px; background: #9aaba0; }
-#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb:hover { background: #607b69; }
+#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb:hover { background: #617d92; }
 .admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: center; font-size: 11px; }
 /* [9.15] 추가내용: 직원 목록 스크롤 중에도 각 열의 의미를 확인할 수 있게 헤더를 상단에 고정한다. */
 .admin-table th { position: sticky; top: 0; z-index: 1; height: 46px; background: #f5f5ec; color: #7b8274; font-weight: 600; }
@@ -159,7 +159,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-empty { text-align: center; color: var(--admin-muted); padding: 60px 16px; }
 /* [9.15] 추가내용: 직원 목록과 관리 이력의 페이지 이동 버튼을 공통 스타일로 표시한다. */
 .admin-pagination { display: flex; justify-content: center; align-items: center; gap: 6px; min-height: 42px; margin-top: 14px; }
-.admin-pagination button { min-width: 30px; height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #687b6d; font-size: 12px; }
+.admin-pagination button { min-width: 30px; height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #647581; font-size: 12px; }
 .admin-pagination button:hover, .admin-pagination button:focus-visible { border-color: #cfd8ce; background: #f5f8f3; outline: 0; }
 .admin-pagination button[aria-current="page"] { border-color: var(--admin-green); background: var(--admin-green); color: #fff; font-weight: 700; }
 .admin-pagination button:disabled { cursor: default; opacity: .35; }
@@ -184,7 +184,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-history-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
 .admin-history-wrap::-webkit-scrollbar-track { border-radius: 999px; background: #f0f1eb; }
 .admin-history-wrap::-webkit-scrollbar-thumb { border: 2px solid #f0f1eb; border-radius: 999px; background: #9aaba0; }
-.admin-history-wrap::-webkit-scrollbar-thumb:hover { background: #607b69; }
+.admin-history-wrap::-webkit-scrollbar-thumb:hover { background: #617d92; }
 .admin-history-table { width: 100%; min-width: 0; border-collapse: collapse; table-layout: fixed; text-align: center; font-size: 11px; }
 .admin-history-table th { position: sticky; top: 0; z-index: 1; height: 42px; background: #f5f5ec; color: #7b8274; font-weight: 600; }
 .admin-history-table th:first-child { width: 18%; }
@@ -308,7 +308,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 #admin-management-page .admin-search-field { flex: 1; min-width: 180px; }
 #admin-management-page .admin-search input { width: 100%; min-width: 240px; font-size: 12px; }
 #admin-management-page .admin-search-button { min-height: 44px; }
-.admin-search-result { margin: 0; color: #687b6d; font-size: 12px; }
+.admin-search-result { margin: 0; color: #647581; font-size: 12px; }
 
 /* 관리 이력과 직원 관리의 검색창 및 버튼을 제목 아래 왼쪽에 배치합니다. */
 #admin-management-page .admin-management-heading {
@@ -368,3 +368,5 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
     font-size: 14px;
   }
 }
+
+/* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */
