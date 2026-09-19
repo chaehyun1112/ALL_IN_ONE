@@ -298,7 +298,7 @@ function renderAdminWardOptions() {
         const option = document.createElement("option");
 
         option.value = String(ward.wardId);
-        option.textContent = formatAdminWardName(ward.wardName);
+        option.textContent = ward.wardName;
 
         adminWardSelect.append(option);
 
