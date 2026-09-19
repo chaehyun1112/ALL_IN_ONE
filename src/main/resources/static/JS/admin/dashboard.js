@@ -1069,6 +1069,9 @@ function filterHistory(action, resetPage = false) {
     renderAdminPagination(adminHistoryPagination, adminHistoryPage, totalPages, page => {
         adminHistoryPage = page;
         filterHistory(action);
+        // [2026.09.19] 수정: 관리 이력 페이지를 변경하면 목록 내부 스크롤을 맨 위로 되돌립니다.
+        const historyScrollArea = adminHistoryRows?.closest(".admin-history-wrap");
+        if (historyScrollArea) historyScrollArea.scrollTop = 0;
     });
 
     const empty = document.querySelector("#admin-history-empty");
