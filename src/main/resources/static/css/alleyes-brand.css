@@ -100,6 +100,12 @@ header > .brand {
   column-gap: 16px;
 }
 
+/* 관리자 상단의 브랜드 글꼴과 시작 위치를 간호사 대시보드에 맞춥니다. */
+.admin-topbar .admin-brand { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; }
+@media (min-width: 801px) {
+  .admin-topbar { padding-inline: 30px; }
+}
+
 .admin-brand > .alleyes-brand,
 .brand > .alleyes-brand,
 .settings-header > .alleyes-brand {

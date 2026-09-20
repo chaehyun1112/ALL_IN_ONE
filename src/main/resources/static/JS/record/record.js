@@ -629,6 +629,14 @@ function initializePage() {
       badge.textContent = record.type;
       typeCell.append(badge);
 
+      const statusCell = createCell(record.status);
+      if (record.status === "완료") {
+        const completeLabel = document.createElement("span");
+        completeLabel.className = "record-complete-label";
+        completeLabel.textContent = record.status;
+        statusCell.replaceChildren(completeLabel);
+      }
+
       row.append(
         // [2026-09-18] 추가 내용: 기록 객체별로 선택하여 같은 내용의 기록도 각각 선택할 수 있습니다.
         createRecordSelectionCell(record),
@@ -637,7 +645,7 @@ function initializePage() {
         createCell(record.patient),
         typeCell,
         createCell(record.staff),
-        createCell(record.status),
+        statusCell,
         createCell(formatTime(record.completedAt)),
         /* [추가] 완료된 모든 행에 문서 아이콘을 표시합니다. */
         createRecordContentCell(record)

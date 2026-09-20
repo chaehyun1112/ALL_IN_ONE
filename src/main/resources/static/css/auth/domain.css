@@ -86,7 +86,7 @@ input {
 
 .domain-card {
     width: 100%;
-    padding: 42px 47px 36px;
+    padding: 50px 47px 28px;
     border: 1px solid #bfc5c1;
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.92);
@@ -172,7 +172,7 @@ input {
 
 @media (max-width: 700px) {
     .domain-card {
-        padding: 30px 24px 27px;
+        padding: 36px 24px 21px;
     }
     .domain-page {
         padding: 24px 16px;

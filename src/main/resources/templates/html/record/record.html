@@ -37,12 +37,12 @@
     defer
   ></script>
   <script
-    src="../../../static/JS/record/record.js?v=20260920-text"
-    th:src="@{/JS/record/record.js(v='20260920-text')}"
+    src="../../../static/JS/record/record.js?v=20260920-complete-style"
+    th:src="@{/JS/record/record.js(v='20260920-complete-style')}"
     defer
   ></script>
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=history-scroll-blue" th:href="@{/css/alleyes-theme.css(v='history-scroll-blue')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=checked-record-20260920" th:href="@{/css/alleyes-theme.css(v='checked-record-20260920')}">
 </head>
 
 <!-- [2026.09.17] 고친 내용: 관리자 내부 조치기록에서는 관리자 공통 상단 바만 보이게 구분합니다. -->
@@ -56,7 +56,7 @@
       th:href="${adminRecordPage} ? @{/admin} : @{/dashboard}"
       th:target="${adminRecordPage} ? '_top' : null"
     >
-      <span class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-soft-peach.svg" th:src="@{/image/brand/alleyes-logo-blue-soft-peach.svg}" alt="" width="44" height="42">ALLEYES</span>
+      <span class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-peach-gradient.svg" th:src="@{/image/brand/alleyes-logo-blue-peach-gradient.svg}" alt="" width="44" height="42">ALLEYES</span>
     </a>
 
     <!-- 병동 이름 -->

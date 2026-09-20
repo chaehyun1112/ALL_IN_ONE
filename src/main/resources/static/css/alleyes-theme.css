@@ -192,8 +192,13 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   #response-dialog .response-actions { padding:14px 18px; }
   #response-dialog .response-people { grid-template-columns:1fr; gap:14px; }
 }
-/* 완료 상태는 위험 색과 겹치지 않는 옅은 청회색으로 구분합니다. */
-.record-table .completed-row td { background-color: #e1eaf2; }
+/* 완료 기록은 미완료 기록보다 한 단계 옅게 보여 줍니다. */
+.record-table .completed-row td { background-color: #f8fafc; color: #7e8d98; }
+.record-table .completed-row .alert-badge { color: #8b9aa5; }
+.record-table .record-complete-label { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 6px; background: #edf2f6; color: #687d8f; font-weight: 700; white-space: nowrap; }
+/* 체크된 기록은 완료 여부와 관계없이 선택 색을 우선 보여 줍니다. */
+.record-table tbody tr:has(.record-checkbox:checked) td { background-color: #dceaf5; color: #29343d; }
+.record-table tbody tr:has(.record-checkbox:checked) td:first-child { border-left: 3px solid #526d82; }
 /* [2026.09.20] 알림 유형은 주변 셀의 글꼴·크기를 따르고 글자색으로만 구분합니다. */
 .record-table .alert-badge, .admin-record-page .record-table .alert-badge {
   display: inline;

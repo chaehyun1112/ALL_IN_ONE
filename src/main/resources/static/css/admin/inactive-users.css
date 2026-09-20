@@ -66,7 +66,7 @@
 .admin-inactive-table { font-family: Inter, "Noto Sans KR", "Malgun Gothic", sans-serif; font-size: 11px; }
 .admin-inactive-table th,
 .admin-inactive-table td { font-size: 11px; line-height: 1.5; }
-.admin-inactive-table td { height: 68px; color: #647581; }
+.admin-inactive-table td { height: 68px; color: #647581; font-size: 13px; }
 .admin-inactive-table td:nth-child(2) { font-weight: 600; color: #565d4f; }
 .admin-inactive-table tbody tr:hover { background: #eef4f8; }
 .admin-inactive-table tbody tr:has(.admin-inactive-checkbox:checked):hover { background: #e5eef5; }
