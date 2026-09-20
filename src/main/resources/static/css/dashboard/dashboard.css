@@ -1742,7 +1742,10 @@ main{height:auto;min-height:calc(100dvh - 72px)}
   background: transparent;
 }
 /* [2026.09.16] 고친 내용: 복도 전체를 칠하지 않고 사람이 찾기 쉬운 위치명 지점만 연한 원으로 점멸시킵니다. */
-.corridor { font:inherit; cursor:pointer; }
+.corridor { font:inherit; cursor:default; }
+/* [2026.09.20] 실제 알림 마커만 클릭·키보드 선택 대상으로 표시합니다. */
+.corridor > .corridor-alert-marker { padding:0; border:0; margin:0; cursor:pointer; font:inherit; }
+.corridor > .corridor-alert-marker:focus-visible { outline:2px solid #36566f; outline-offset:7px; }
 /* [2026.09.17] 고친 내용: 위치 확인 시 복도 전체 대신 실제 감지 원에만 선택 표시를 남깁니다. */
 .corridor.urgent[aria-pressed="true"] { outline:none; }
 /* [2026.09.16] 고친 내용: 감지 지점을 중앙이 아닌 좌측 화장실 앞 구간으로 옮깁니다. */

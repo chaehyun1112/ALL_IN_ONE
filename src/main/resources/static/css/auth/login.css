@@ -153,7 +153,9 @@ input:focus-visible, button:focus-visible, a:focus-visible {
   margin-top: 22px;
 }
 
-.login-card .admin-contact {
+.login-card > p.admin-contact {
+  /* [2026.09.20] 마지막 문단의 기존 초록색보다 우선 적용하여 도메인 안내와 같은 색으로 맞춥니다. */
+  color: #969c98;
   line-height: 18px;
 }
 

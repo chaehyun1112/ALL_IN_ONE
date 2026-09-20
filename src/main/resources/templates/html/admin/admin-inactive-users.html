@@ -15,15 +15,15 @@
           href="../../../static/css/admin/dashboard.css"
           th:href="@{/css/admin/dashboard.css}">
 
-    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css" th:href="@{/css/admin/inactive-users.css}">
+    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-selected-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-selected-20260920')}">
 
-    <script src="../../../static/JS/admin/inactive-users.js"
-            th:src="@{/JS/admin/inactive-users.js}"
+<script src="../../../static/JS/admin/inactive-users.js?v=inactive-selected-20260920"
+        th:src="@{/JS/admin/inactive-users.js(v='inactive-selected-20260920')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=adbfad-header" th:href="@{/css/alleyes-brand.css(v='adbfad-header')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=blue-gray-auth-image" th:href="@{/css/alleyes-theme.css(v='blue-gray-auth-image')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=history-scroll-blue" th:href="@{/css/alleyes-theme.css(v='history-scroll-blue')}">
 </head>
 
 <body>
@@ -31,7 +31,7 @@
     <div class="admin-brand">
         <!-- [2026.09.16] 고친 내용: 왼쪽 상단의 관리자 대시보드 복귀 링크를 삭제합니다. -->
         <!-- [2026.09.16] 고친 내용: 서비스 이름을 왼쪽에, 병동 통합 관제를 오른쪽에 표시합니다. -->
-        <strong class="admin-service-name alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-transparent.png" th:src="@{/image/brand/alleyes-logo-transparent.png}" alt="" width="44" height="42">ALLEYES</strong>
+        <strong class="admin-service-name alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-soft-peach.svg" th:src="@{/image/brand/alleyes-logo-blue-soft-peach.svg}" alt="" width="44" height="42">ALLEYES</strong>
         <span class="admin-service-placeholder">병동 통합 관제</span>
         <nav class="admin-page-nav" aria-label="계정 관리 메뉴">
             <a href="admin.html" th:href="@{/admin}">직원 관리</a>
@@ -105,8 +105,16 @@
                 <button type="button" id="admin-inactive-reset" class="admin-search-button">초기화</button>
             </form>
             <div class="admin-inactive-filter">
-                <!-- [09.13]수정내용: 검색 영역의 병동 표시 문구를 제거하고 선택칸 자체로 기능을 안내한다. -->
-                <select id="admin-inactive-ward" aria-label="병동 선택">
+                <div class="admin-ward-dropdown" id="admin-ward-dropdown">
+                    <button type="button" class="admin-ward-trigger" id="admin-ward-trigger"
+                            aria-label="병동 선택" aria-expanded="false" aria-controls="admin-ward-options">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 4v6m10-6v6M5 10h14v10H5z"/></svg>
+                        <span id="admin-ward-label">전체 병동</span>
+                        <svg class="admin-ward-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="admin-ward-options" id="admin-ward-options" hidden></div>
+                </div>
+                <select id="admin-inactive-ward" aria-label="병동 선택" hidden>
                     <option value="">전체 병동</option>
                 </select>
             </div>
@@ -121,6 +129,11 @@
             </div>
         </div>
         <p class="admin-inactive-result" id="admin-inactive-result" role="status">직원 목록을 불러오는 중입니다.</p>
+        <div class="admin-inactive-selection-toolbar" role="group" aria-label="선택한 직원 관리">
+            <button type="button" id="admin-inactive-selected-view" aria-pressed="false">선택한 0명 모아보기</button>
+            <button type="button" id="admin-inactive-clear-selection" disabled>선택 해제</button>
+            <span id="admin-inactive-selection-summary" role="status" aria-live="polite">검색 초기화 후에도 선택한 직원은 유지됩니다.</span>
+        </div>
         <div id="admin-inactive-error" role="alert" hidden>
             <p id="admin-inactive-error-message"></p>
             <button type="button" id="admin-inactive-retry">다시 불러오기</button>
@@ -137,10 +150,12 @@
                 
             </div>
         </div>
+        <nav class="admin-pagination admin-inactive-pagination" id="admin-inactive-pagination"
+             aria-label="비활성화 직원 목록 페이지" hidden></nav>
     </section>
     <footer class="admin-inactive-footer">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>
-        일괄 작업은 현재 검색된 목록에서 선택한 직원에게만 적용됩니다.
+        일괄 작업은 선택한 직원 전체에 적용됩니다.
     </footer>
 </main>
 

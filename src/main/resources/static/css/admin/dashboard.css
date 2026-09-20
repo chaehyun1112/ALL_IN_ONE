@@ -122,6 +122,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-table th:nth-child(3) { width: 27%; }
 .admin-table th:last-child { border-radius: 0 7px 7px 0; }
 .admin-table td { height: 49px; border-bottom: 1px solid #e9e9e0; color: #8c9285; padding: 8px; }
+#admin-user-rows td { font-size: 13px; line-height: 1.45; }
 /* [09.13]수정내용: 마지막 행도 공통 td의 동일한 하단 테두리를 사용하도록 중복 규칙을 제거한다. */
 .admin-table td:first-child { font-weight: 600; color: #565d4f; }
 .admin-row-actions { position: relative; display: flex; justify-content: center; gap: 8px; }
@@ -145,7 +146,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-management-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
 .admin-management-option { display: flex; min-height: 150px; padding: 14px 10px; flex-direction: column; align-items: center; justify-content: center; gap: 7px; border: 1px solid #dfe6dc; border-radius: 11px; background: #fff; color: var(--admin-text); text-align: center; cursor: pointer; }
-.admin-management-option:hover, .admin-management-option:focus-visible, .admin-management-option.is-selected { border-color: #6e927c; background: #f4f8f3; outline: 0; }
+.admin-management-option:hover, .admin-management-option:focus-visible, .admin-management-option.is-selected { border-color: #8ea6b8; background: #edf3f7; outline: 0; }
 .admin-management-option-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: #edf4ee; }
 .admin-management-option-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .admin-management-option-icon.admin-approve { color: #39745e; }
@@ -193,6 +194,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-history-table th:nth-child(4) { width: 18%; }
 .admin-history-table th:nth-child(5) { width: 18%; }
 .admin-history-table td { height: 46px; padding: 8px; border-bottom: 1px solid #e9e9e0; color: #697165; white-space: normal; word-break: keep-all; }
+.admin-history-table tbody td, .admin-history-table tbody .history-status { font-size: 13px; line-height: 1.45; }
 .admin-history-table td:first-child { color: #8c9285; font-variant-numeric: tabular-nums; }
 .admin-history-table td:nth-child(4) { color: #565d4f; font-weight: 600; }
 .history-status { display: inline-flex; padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
@@ -236,6 +238,17 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-deactivate-details li + li { margin-top: 6px; }
 .admin-dialog label { display: block; margin: 20px 0 8px; }
 .admin-dialog select { width: 100%; padding: 12px; background: white; color: var(--admin-text); }
+#admin-action-dialog.ward-menu-overflow { overflow: visible; }
+.admin-action-ward-dropdown { position: relative; }
+.admin-action-ward-dropdown > button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 54px; padding: 0 16px; border: 1px solid #b8cad8; border-radius: 9px; background: #fff; color: #293b49; font: inherit; text-align: left; cursor: pointer; }
+.admin-action-ward-dropdown > button:hover, .admin-action-ward-dropdown > button[aria-expanded="true"] { border-color: #829eb3; background: #f6faff; }
+.admin-action-ward-dropdown > button:focus-visible { outline: 2px solid #829eb3; outline-offset: 2px; }
+.admin-action-ward-dropdown > button:disabled { cursor: wait; opacity: .7; }
+.admin-action-ward-dropdown svg { width: 18px; height: 18px; flex: none; }
+.admin-action-ward-options { position: absolute; top: calc(100% + 5px); left: 0; z-index: 20; box-sizing: border-box; width: 100%; max-height: 240px; overflow-y: auto; padding: 4px; border: 1px solid #d5dfe7; border-radius: 7px; background: #fff; box-shadow: 0 6px 18px #263c4d26; scrollbar-width: thin; scrollbar-color: #b8cad8 #edf3f7; }
+.admin-action-ward-dropdown.open-up .admin-action-ward-options { top: auto; bottom: calc(100% + 5px); }
+.admin-action-ward-options button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 5px; background: transparent; color: #293b49; font: inherit; text-align: left; cursor: pointer; }
+.admin-action-ward-options button:hover, .admin-action-ward-options button:focus-visible, .admin-action-ward-options button[aria-selected="true"] { outline: 0; background: #e8f1f8; color: #36566f; }
 .admin-dialog-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
 .admin-dialog-actions button { padding: 10px 16px; background: #f1f1e9; color: #64705e; }
 .admin-dialog-actions .admin-primary { background: var(--admin-green); color: white; border-color: var(--admin-green); }
@@ -370,3 +383,18 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 }
 
 /* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */
+
+/* [2026.09.20] 일반 창 높이가 낮을 때 관리 이력 표가 두 행 높이로 눌리지 않게 합니다.
+   표는 내용 높이만큼 표시하고, 360px을 넘으면 표 안에서 스크롤합니다. */
+@media (max-height: 800px) {
+  html:not(:fullscreen) #admin-management-page.is-history-page { overflow-y: auto; }
+  html:not(:fullscreen) #admin-management-page.is-history-page .admin-panel,
+  html:not(:fullscreen) #admin-management-page.is-history-page .admin-history-panel {
+    flex: none;
+  }
+  html:not(:fullscreen) #admin-management-page.is-history-page .admin-history-wrap {
+    flex: none;
+    min-height: 0;
+    max-height: 360px;
+  }
+}

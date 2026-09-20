@@ -48,10 +48,11 @@ let adminHistoryFilter = "전체";
 let adminSelectedUser = null;
 let adminAction = "";
 let adminToastTimer = null;
-// [9.15] 추가내용: 직원 목록은 한 화면에 10명씩 보여 주도록 현재 페이지를 관리한다.
+// 직원 관리 목록은 비활성화 직원 목록과 같은 크기로 페이지를 나눕니다.
 let adminUserPage = 1;
 let adminHistoryPage = 1;
 const ADMIN_LIST_PAGE_SIZE = 10;
+const ADMIN_USER_PAGE_SIZE = 5;
 
 const adminRows = document.querySelector("#admin-user-rows");
 const adminTabs = Array.from(document.querySelectorAll("[data-status]"));
@@ -62,6 +63,10 @@ const adminDialogConfirm = document.querySelector("#admin-dialog-confirm");
 const adminDialogCancel = document.querySelector("#admin-dialog-cancel");
 const adminWardField = document.querySelector("#admin-ward-field");
 const adminWardSelect = document.querySelector("#admin-ward-select");
+const adminActionWardDropdown = document.querySelector("#admin-action-ward-dropdown");
+const adminActionWardTrigger = document.querySelector("#admin-action-ward-trigger");
+const adminActionWardValue = document.querySelector("#admin-action-ward-value");
+const adminActionWardOptions = document.querySelector("#admin-action-ward-options");
 const adminSearchForm = document.querySelector("#admin-search-form");
 const adminSearchInput = document.querySelector("#admin-search-input");
 const adminEmpty = document.querySelector("#admin-empty");
@@ -97,12 +102,12 @@ const csrfToken = document.querySelector('meta[name="_csrf"]')?.content ?? "";
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content ?? "X-CSRF-TOKEN";
 
 /* [9.15] 추가내용: 목록 화면에서 공통으로 사용하는 페이지 번호 버튼을 만든다. */
-function renderAdminPagination(container, currentPage, totalPages, onPageChange) {
+function renderAdminPagination(container, currentPage, totalPages, onPageChange, showSinglePage = false) {
     if (!container) return;
 
     container.replaceChildren();
 
-    if (totalPages <= 1) {
+    if (totalPages <= 1 && !showSinglePage) {
         container.hidden = true;
         return;
     }
@@ -306,7 +311,69 @@ function renderAdminWardOptions() {
             adminCreateWard.append(option.cloneNode(true));
         }
     }
+    renderAdminActionWardDropdown();
 }
+
+function closeAdminActionWardOptions() {
+    adminActionWardOptions.hidden = true;
+    adminActionWardTrigger.setAttribute("aria-expanded", "false");
+    adminActionWardDropdown.classList.remove("open-up");
+    adminActionWardOptions.style.maxHeight = "";
+    adminDialog.classList.remove("ward-menu-overflow");
+}
+
+function renderAdminActionWardDropdown() {
+    const selected = adminWardSelect.selectedOptions[0];
+    adminActionWardValue.textContent = selected?.textContent || "병동을 선택해주세요";
+    adminActionWardTrigger.disabled = adminWardSelect.disabled;
+    adminActionWardOptions.replaceChildren();
+    for (const option of adminWardSelect.options) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.textContent = option.textContent;
+        item.dataset.value = option.value;
+        item.setAttribute("aria-selected", String(option.selected));
+        item.addEventListener("click", () => {
+            adminWardSelect.value = option.value;
+            adminWardSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            renderAdminActionWardDropdown();
+            closeAdminActionWardOptions();
+            adminActionWardTrigger.focus();
+        });
+        adminActionWardOptions.append(item);
+    }
+}
+
+adminActionWardTrigger.addEventListener("click", () => {
+    if (!adminActionWardOptions.hidden) {
+        closeAdminActionWardOptions();
+        return;
+    }
+    renderAdminActionWardDropdown();
+    adminActionWardOptions.hidden = false;
+    adminActionWardTrigger.setAttribute("aria-expanded", "true");
+    const trigger = adminActionWardTrigger.getBoundingClientRect();
+    const menuHeight = adminActionWardOptions.getBoundingClientRect().height;
+    if (menuHeight <= window.innerHeight - trigger.bottom - 12) {
+        adminDialog.classList.add("ward-menu-overflow");
+    } else {
+        const dialog = adminDialog.getBoundingClientRect();
+        adminActionWardDropdown.classList.add("open-up");
+        adminActionWardOptions.style.maxHeight = `${Math.max(96, Math.floor(trigger.top - dialog.top - 12))}px`;
+    }
+});
+
+document.addEventListener("click", event => {
+    if (!adminActionWardDropdown.contains(event.target)) closeAdminActionWardOptions();
+});
+adminDialog.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !adminActionWardOptions.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeAdminActionWardOptions();
+        adminActionWardTrigger.focus();
+    }
+}, true);
 
 /**
  * 전체, 승인 완료, 승인 대기 인원을 계산한다.
@@ -343,11 +410,11 @@ function renderAdminUsers() {
         return sameStatus && matchesSearch;
     });
 
-    const totalPages = Math.max(1, Math.ceil(visibleUsers.length / ADMIN_LIST_PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(visibleUsers.length / ADMIN_USER_PAGE_SIZE));
     adminUserPage = Math.min(adminUserPage, totalPages);
     const pageUsers = visibleUsers.slice(
-        (adminUserPage - 1) * ADMIN_LIST_PAGE_SIZE,
-        adminUserPage * ADMIN_LIST_PAGE_SIZE
+        (adminUserPage - 1) * ADMIN_USER_PAGE_SIZE,
+        adminUserPage * ADMIN_USER_PAGE_SIZE
     );
 
     adminRows.replaceChildren();
@@ -453,7 +520,7 @@ function renderAdminUsers() {
     renderAdminPagination(adminUserPagination, adminUserPage, totalPages, page => {
         adminUserPage = page;
         renderAdminUsers();
-    });
+    }, visibleUsers.length > 0);
 }
 
 /* [9.15] 추가내용: 직원별 관리 기능을 중앙 선택 팝업에서 고른 뒤 실행한다. */
@@ -516,6 +583,7 @@ adminManagementChoiceConfirm?.addEventListener("click", () => {
  */
 function selectAdminTab(tab) {
     adminActiveStatus = tab.dataset.status;
+    adminUserPage = 1;
 
     for (const item of adminTabs) {
         const selected = item === tab;
@@ -583,6 +651,8 @@ function openAdminAction(user, action) {
         adminDialogConfirm.textContent = "비활성화";
     }
 
+    renderAdminActionWardDropdown();
+    closeAdminActionWardOptions();
     adminDialog.showModal();
 }
 
@@ -616,7 +686,7 @@ async function submitAdminAction() {
     if (selectedAction === "ASSIGN") {
         if (!adminWardSelect.value) {
             showAdminFeedback("변경할 병동을 선택해주세요.");
-            adminWardSelect.focus();
+            adminActionWardTrigger.focus();
             return;
         }
 
@@ -779,10 +849,12 @@ document.querySelector("#admin-action-form").addEventListener("submit", async ev
 
 /* 팝업이 닫히면 병동 선택란 초기화 */
 adminDialog.addEventListener("close", () => {
+    closeAdminActionWardOptions();
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
     adminWardSelect.required = false;
     adminWardSelect.value = "";
+    renderAdminActionWardDropdown();
 });
 
 document.querySelector("#admin-create-cancel")?.addEventListener("click", () => adminCreateDialog.close());
@@ -832,6 +904,7 @@ document.querySelector("#admin-event-ward-change")?.addEventListener("click", as
     adminWardSelect.required = true;
     adminWardSelect.disabled = true;
     adminWardSelect.replaceChildren(new Option("병동 목록을 불러오는 중…", ""));
+    renderAdminActionWardDropdown();
     adminDialogConfirm.textContent = "변경하기";
     adminDialogConfirm.disabled = true;
     adminHistoryEventDialog.close();
@@ -843,6 +916,7 @@ document.querySelector("#admin-event-ward-change")?.addEventListener("click", as
         if (!user || user.status !== "APPROVED") {
             adminDialogDescription.textContent = "활성화된 직원 계정의 병동만 변경할 수 있습니다.";
             adminWardSelect.replaceChildren(new Option("변경 가능한 직원 정보가 없습니다.", ""));
+            renderAdminActionWardDropdown();
             return;
         }
         adminWardSelect.replaceChildren(new Option("변경할 병동을 선택해주세요", ""));
@@ -850,6 +924,7 @@ document.querySelector("#admin-event-ward-change")?.addEventListener("click", as
             adminWardSelect.add(new Option(ward.wardName, String(ward.wardId)));
         }
         if (!adminWards.length) {
+            renderAdminActionWardDropdown();
             adminDialogDescription.textContent = "등록된 병동이 없어 변경할 수 없습니다.";
             return;
         }
@@ -857,12 +932,14 @@ document.querySelector("#admin-event-ward-change")?.addEventListener("click", as
         adminAction = "ASSIGN";
         adminDialogDescription.textContent = `${user.name} (${user.userId}) · 현재 병동: ${user.ward || "미배정"}`;
         adminWardSelect.disabled = false;
+        renderAdminActionWardDropdown();
         adminDialogConfirm.disabled = false;
-        adminWardSelect.focus();
+        adminActionWardTrigger.focus();
     } catch (error) {
         if (!adminDialog.open) return;
         adminDialogDescription.textContent = error.message || "병동 정보를 불러오지 못했습니다. 창을 닫고 다시 시도해주세요.";
         adminWardSelect.replaceChildren(new Option("병동 목록을 불러오지 못했습니다.", ""));
+        renderAdminActionWardDropdown();
     } finally {
         button.disabled = false;
     }

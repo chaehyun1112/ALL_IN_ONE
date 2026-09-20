@@ -13,6 +13,8 @@
     defer
   ></script>
 
+  <!-- [2026.09.20] 독립 조치기록 화면에도 공통 로고를 표시합니다. -->
+  <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
   <!-- CSS 연결 -->
   <link
     rel="stylesheet"
@@ -35,12 +37,12 @@
     defer
   ></script>
   <script
-    src="../../../static/JS/record/record.js"
-    th:src="@{/JS/record/record.js}"
+    src="../../../static/JS/record/record.js?v=20260920-text"
+    th:src="@{/JS/record/record.js(v='20260920-text')}"
     defer
   ></script>
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=blue-gray-auth-image" th:href="@{/css/alleyes-theme.css(v='blue-gray-auth-image')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=history-scroll-blue" th:href="@{/css/alleyes-theme.css(v='history-scroll-blue')}">
 </head>
 
 <!-- [2026.09.17] 고친 내용: 관리자 내부 조치기록에서는 관리자 공통 상단 바만 보이게 구분합니다. -->
@@ -49,22 +51,16 @@
   <header class="page-header">
     <!-- 대시보드 이동 -->
     <a
-      class="dashboard-link"
+      class="dashboard-link alleyes-record-link" aria-label="ALLEYES 대시보드로 이동"
       href="../dashboard/dashboard.html"
       th:href="${adminRecordPage} ? @{/admin} : @{/dashboard}"
       th:target="${adminRecordPage} ? '_top' : null"
     >
-      <!-- [09.13]수정내용: 복귀 링크를 간호사 대시보드로 돌아가기로 변경하여 이동할 화면을 안내한다. -->
-      <!-- [09.13]수정내용: 문자 기호를 일정한 크기의 왼쪽 화살표 아이콘으로 변경하고 글자 중앙에 맞춥니다. -->
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" style="vertical-align:middle;margin-right:6px">
-        <path d="m15 18-6-6 6-6"/>
-      </svg><span th:text="${adminRecordPage} ? '관리자 페이지로 돌아가기' : '간호사 대시보드로 돌아가기'">간호사 대시보드로 돌아가기</span>
+      <span class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-soft-peach.svg" th:src="@{/image/brand/alleyes-logo-blue-soft-peach.svg}" alt="" width="44" height="42">ALLEYES</span>
     </a>
 
     <!-- 병동 이름 -->
-    <span class="hospital-name">
-      _병동 통합 관제
-    </span>
+    <span class="hospital-name">병동 통합 관제</span>
 
     <!-- JS에서 현재 시각을 표시합니다. -->
     <time
@@ -122,7 +118,7 @@
           aria-label="조회 기간"
           aria-expanded="false"
           aria-controls="period-options"
-        >
+        ><svg class="record-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg>
           <span id="period-label">
             전체 기간
           </span>
@@ -187,7 +183,7 @@
           aria-label="병실·위치"
           aria-expanded="false"
           aria-controls="room-options"
-        >
+        ><svg class="record-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V3h12v18M2 21h20M16 10h4v11M8 7h4m-4 4h4m-4 4h4"/></svg>
           <span class="choice-label">
             전체 병실·위치
           </span>
@@ -220,7 +216,7 @@
           aria-label="처리 상태"
           aria-expanded="false"
           aria-controls="status-options"
-        >
+        ><svg class="record-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l4 4v14H6V3h1m7 0v5h4M9 12h6m-6 4h6"/></svg>
           <span class="choice-label">
             처리 상태 전체
           </span>
@@ -274,7 +270,7 @@
           aria-label="검색 대상"
           aria-expanded="false"
           aria-controls="target-options"
-        >
+        ><svg class="record-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="7" r="3"/><path d="M4 20v-2a6 6 0 0 1 12 0v2m2-12h4m-4 4h4"/></svg>
           <span class="choice-label">
             검색 대상 · 전체
           </span>

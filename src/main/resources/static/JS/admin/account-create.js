@@ -6,6 +6,10 @@ const createForm = document.querySelector("#admin-create-form");
 const createNameInput = document.querySelector("#admin-create-name");
 const createUserIdInput = document.querySelector("#admin-create-user-id");
 const createWardSelect = document.querySelector("#admin-create-ward");
+const createWardDropdown = document.querySelector("#admin-create-ward-dropdown");
+const createWardTrigger = document.querySelector("#admin-create-ward-trigger");
+const createWardOptions = document.querySelector("#admin-create-ward-options");
+const createWardLabel = document.querySelector("#admin-create-ward-label");
 const createSubmitButton = createForm?.querySelector('button[type="submit"]');
 const createCompleteDialog = document.querySelector("#admin-create-complete-dialog");
 const createNameError = document.querySelector("#admin-create-name-error");
@@ -18,6 +22,72 @@ const createCompleteCloseButton = document.querySelector("#admin-create-complete
 let createPending = false;
 let wardRequestVersion = 0;
 let availableWards = [];
+
+function closeCreateWardOptions() {
+    if (!createWardOptions || !createWardTrigger) return;
+    createWardOptions.hidden = true;
+    createWardTrigger.setAttribute("aria-expanded", "false");
+    createWardDropdown?.classList.remove("open-up");
+    createDialog?.classList.remove("ward-menu-overflow");
+    createWardOptions.style.removeProperty("max-height");
+}
+
+function renderCreateWardDropdown() {
+    if (!createWardSelect || !createWardOptions || !createWardTrigger || !createWardLabel) return;
+    createWardOptions.replaceChildren();
+    createWardLabel.textContent = createWardSelect.selectedOptions[0]?.textContent
+        || "담당 병동을 선택해주세요";
+    createWardTrigger.disabled = createWardSelect.disabled;
+    for (const option of createWardSelect.options) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = option.textContent;
+        button.setAttribute("aria-selected", String(option.value === createWardSelect.value));
+        button.addEventListener("click", () => {
+            createWardSelect.value = option.value;
+            createWardSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            closeCreateWardOptions();
+            createWardTrigger.focus();
+        });
+        createWardOptions.append(button);
+    }
+}
+
+if (createWardTrigger && createWardOptions && createWardDropdown) {
+    createWardTrigger.addEventListener("click", () => {
+        if (createWardTrigger.disabled) return;
+        const opening = createWardOptions.hidden;
+        if (!opening) {
+            closeCreateWardOptions();
+            return;
+        }
+        createWardOptions.hidden = false;
+        createWardTrigger.setAttribute("aria-expanded", "true");
+        const triggerBounds = createWardTrigger.getBoundingClientRect();
+        const menuHeight = createWardOptions.getBoundingClientRect().height;
+        const spaceBelowViewport = window.innerHeight - triggerBounds.bottom - 12;
+        if (menuHeight <= spaceBelowViewport) {
+            createDialog.classList.add("ward-menu-overflow");
+        } else {
+            const dialogBounds = createDialog.getBoundingClientRect();
+            const spaceAbove = triggerBounds.top - dialogBounds.top - 12;
+            createWardDropdown.classList.add("open-up");
+            createWardOptions.style.maxHeight = `${Math.max(96, Math.floor(spaceAbove))}px`;
+        }
+    });
+    createWardSelect.addEventListener("change", renderCreateWardDropdown);
+    document.addEventListener("click", event => {
+        if (!createWardDropdown.contains(event.target)) closeCreateWardOptions();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !createWardOptions.hidden) {
+            event.stopPropagation();
+            closeCreateWardOptions();
+            createWardTrigger.focus();
+        }
+    }, true);
+    renderCreateWardDropdown();
+}
 
 if (createNameInput) createNameInput.maxLength = 20;
 if (createUserIdInput) createUserIdInput.maxLength = 20;
@@ -114,18 +184,21 @@ function renderCreateWardOptions(wards) {
     for (const ward of wards) {
         createWardSelect.append(new Option(ward.wardName, String(ward.wardId)));
     }
+    renderCreateWardDropdown();
 }
 
 createAccountButton?.addEventListener("click", async () => {
     if (createPending || createDialog?.open) return;
 
     createForm?.reset();
+    closeCreateWardOptions();
     clearCreateErrors();
     availableWards = [];
 
     if (createWardSelect) {
         createWardSelect.disabled = true;
         createWardSelect.replaceChildren(new Option("병동 목록을 불러오는 중입니다.", ""));
+        renderCreateWardDropdown();
     }
     if (createSubmitButton) createSubmitButton.disabled = true;
 
@@ -147,6 +220,7 @@ createAccountButton?.addEventListener("click", async () => {
         }
 
         if (createWardSelect) createWardSelect.disabled = false;
+        renderCreateWardDropdown();
         if (createSubmitButton) createSubmitButton.disabled = false;
     } catch (error) {
         if (currentVersion !== wardRequestVersion || !createDialog?.open) return;
@@ -166,6 +240,7 @@ createDialog?.addEventListener("cancel", event => {
 
 createDialog?.addEventListener("close", () => {
     wardRequestVersion += 1;
+    closeCreateWardOptions();
 });
 
 createCompleteCloseButton?.addEventListener("click", () => {

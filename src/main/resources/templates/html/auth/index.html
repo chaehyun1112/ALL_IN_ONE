@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>요양병원 안전 모니터링</title>
-    <link rel="stylesheet" th:href="@{/css/auth/domain.css}" href="../../../static/css/auth/domain.css">
+    <link rel="stylesheet" th:href="@{/css/auth/domain.css(v='20260920-position')}" href="../../../static/css/auth/domain.css?v=20260920-position">
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=adbfad-header" th:href="@{/css/alleyes-brand.css(v='adbfad-header')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=blue-gray-auth-image" th:href="@{/css/alleyes-theme.css(v='blue-gray-auth-image')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=history-scroll-blue" th:href="@{/css/alleyes-theme.css(v='history-scroll-blue')}">
+    <!-- [2026.09.20] 테두리 라벨 입력칸과 지우기 버튼을 연결합니다. -->
+    <link rel="stylesheet" href="../../../static/css/auth/outlined-fields.css?v=20260920-centered" th:href="@{/css/auth/outlined-fields.css(v='20260920-centered')}">
+    <script src="../../../static/JS/login/outlined-fields.js?v=20260920" th:src="@{/JS/login/outlined-fields.js(v='20260920')}" defer></script>
 </head>
 <body>
     <main class="domain-page">
         <section class="domain-content" aria-labelledby="domain-title">
             <header class="domain-heading">
                 <!-- [2026.09.19] 수정: 상단 서비스 이름을 ALLEYES로 표시합니다. -->
-                <p class="domain-eyebrow alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-transparent.png" th:src="@{/image/brand/alleyes-logo-transparent.png}" alt="" width="44" height="42">ALLEYES</p>
+                <p class="domain-eyebrow alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-soft-peach.svg" th:src="@{/image/brand/alleyes-logo-blue-soft-peach.svg}" alt="" width="44" height="42">ALLEYES</p>
                 <h1 id="domain-title">요양병원 안전 모니터링</h1>
                 <!-- [09.13]수정내용: 도메인 입력 목적을 명확하게 안내하도록 문구를 변경한다. -->
                 <p class="domain-description">접속할 병원의 도메인을 입력해 주세요.</p>
@@ -23,7 +26,7 @@
 
             <form class="domain-card" action="/domain" th:action="@{/domain}" method="post">
                 <!-- [09.13]수정내용: 입력값의 의미를 명확히 전달하도록 병원 도메인을 병원 도메인 주소로 변경한다. -->
-                <label for="hospital-domain">병원 도메인 주소</label>
+                <div class="auth-outlined-field"><label for="hospital-domain">병원 도메인 주소</label>
                 <!-- [09.13]수정내용: 병원 도메인 주소 placeholder를 작은 글씨로 표시한다. -->
                 <input
                     id="hospital-domain"
@@ -38,6 +41,7 @@
                     aria-describedby="domain-error"
                     th:attr="aria-invalid=${domainError != null}"
                 >
+                <button type="button" class="auth-clear" aria-label="병원 도메인 주소 지우기" aria-controls="hospital-domain"><span aria-hidden="true">×</span></button></div>
                 <p id="domain-error" class="domain-error" role="alert"
                    th:if="${domainError != null}" th:text="${domainError}"></p>
                 <button type="submit">

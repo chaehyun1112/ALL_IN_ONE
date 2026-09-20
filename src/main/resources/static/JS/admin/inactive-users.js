@@ -86,10 +86,26 @@ function updateAdminClock() {
 /* INACTIVE 직원만 DB에서 읽고, 변경 성공 후 목록을 다시 조회한다. */
 const adminInactiveSearch = document.querySelector("#admin-inactive-search");
 const adminInactiveWard = document.querySelector("#admin-inactive-ward");
+const adminWardDropdown = document.querySelector("#admin-ward-dropdown");
+const adminWardTrigger = document.querySelector("#admin-ward-trigger");
+const adminWardOptions = document.querySelector("#admin-ward-options");
+const adminWardLabel = document.querySelector("#admin-ward-label");
 const adminInactiveSelectAll = document.querySelector("#admin-inactive-select-all");
 const adminBulkButtons = Array.from(document.querySelectorAll("[data-bulk-status]"));
 const adminRows = document.querySelector("#admin-inactive-rows");
 const adminList = document.querySelector("#admin-inactive-list");
+const adminSelectedViewButton = document.querySelector("#admin-inactive-selected-view");
+const adminClearSelectionButton = document.querySelector("#admin-inactive-clear-selection");
+const adminSelectionSummary = document.querySelector("#admin-inactive-selection-summary");
+let adminInactivePagination = document.querySelector("#admin-inactive-pagination");
+if (!adminInactivePagination && adminList) {
+    adminInactivePagination = document.createElement("nav");
+    adminInactivePagination.id = "admin-inactive-pagination";
+    adminInactivePagination.className = "admin-pagination admin-inactive-pagination";
+    adminInactivePagination.setAttribute("aria-label", "비활성화 직원 목록 페이지");
+    adminInactivePagination.hidden = true;
+    adminList.after(adminInactivePagination);
+}
 const adminStatusDialog = document.querySelector("#admin-status-dialog");
 const adminStatusConfirm = document.querySelector("#admin-status-confirm");
 const adminStatusCancel = document.querySelector("#admin-status-cancel");
@@ -98,10 +114,58 @@ const csrfToken = document.querySelector('meta[name="_csrf"]')?.content ?? "";
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || "X-CSRF-TOKEN";
 let adminInactiveUsers = [];
 let adminSelectedIds = new Set();
+let adminSelectedOnly = false;
 let adminPendingStatusChange = null;
 let adminBusy = false;
 let adminLoading = false;
 let adminLoadFailed = false;
+const ADMIN_INACTIVE_PAGE_SIZE = 5;
+let adminInactiveCurrentPage = 1;
+
+function closeAdminWardOptions() {
+    if (!adminWardTrigger || !adminWardOptions) return;
+    adminWardOptions.hidden = true;
+    adminWardTrigger.setAttribute("aria-expanded", "false");
+}
+
+function renderAdminWardOptions() {
+    if (!adminWardTrigger || !adminWardOptions || !adminWardLabel) return;
+    adminWardOptions.replaceChildren();
+    const selected = adminInactiveWard.selectedOptions[0];
+    adminWardLabel.textContent = selected?.textContent || "전체 병동";
+    for (const option of adminInactiveWard.options) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = option.textContent;
+        button.setAttribute("aria-selected", String(option.value === adminInactiveWard.value));
+        button.addEventListener("click", () => {
+            adminInactiveWard.value = option.value;
+            adminInactiveWard.dispatchEvent(new Event("change", { bubbles: true }));
+            closeAdminWardOptions();
+            adminWardTrigger.focus();
+        });
+        adminWardOptions.append(button);
+    }
+}
+
+if (adminWardTrigger && adminWardOptions && adminWardDropdown) {
+    adminWardTrigger.addEventListener("click", () => {
+        if (adminWardTrigger.disabled) return;
+        const opening = adminWardOptions.hidden;
+        adminWardOptions.hidden = !opening;
+        adminWardTrigger.setAttribute("aria-expanded", String(opening));
+    });
+    document.addEventListener("click", event => {
+        if (!adminWardDropdown.contains(event.target)) closeAdminWardOptions();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !adminWardOptions.hidden) {
+            closeAdminWardOptions();
+            adminWardTrigger.focus();
+        }
+    });
+    renderAdminWardOptions();
+}
 
 async function requestAdminInactiveApi(url, options = {}) {
     const headers = new Headers(options.headers ?? {});
@@ -129,7 +193,7 @@ function showAdminError(message) {
     adminError.hidden = false;
 }
 
-function getAdminVisibleUsers() {
+function getAdminFilteredUsers() {
     const query = adminInactiveSearch.value.trim().toLowerCase();
     // 병동 이름이 같아도 DB의 병동 ID로 정확히 구분한다.
     const wardId = adminInactiveWard.value;
@@ -140,19 +204,82 @@ function getAdminVisibleUsers() {
             : user.wardId != null && String(user.wardId) === wardId)));
 }
 
+function getAdminVisibleUsers() {
+    return adminSelectedOnly
+        ? adminInactiveUsers.filter(user => adminSelectedIds.has(user.userId))
+        : getAdminFilteredUsers();
+}
+
 function getAdminSelectedUsers() {
-    return getAdminVisibleUsers().filter(user => adminSelectedIds.has(user.userId));
+    return adminInactiveUsers.filter(user => adminSelectedIds.has(user.userId));
+}
+
+function getAdminCurrentPageUsers() {
+    const visibleUsers = getAdminVisibleUsers();
+    const totalPages = Math.max(1, Math.ceil(visibleUsers.length / ADMIN_INACTIVE_PAGE_SIZE));
+    adminInactiveCurrentPage = Math.min(adminInactiveCurrentPage, totalPages);
+    const firstIndex = (adminInactiveCurrentPage - 1) * ADMIN_INACTIVE_PAGE_SIZE;
+    return visibleUsers.slice(firstIndex, firstIndex + ADMIN_INACTIVE_PAGE_SIZE);
+}
+
+function renderAdminInactivePagination(totalUsers) {
+    adminInactivePagination.replaceChildren();
+    const totalPages = Math.ceil(totalUsers / ADMIN_INACTIVE_PAGE_SIZE);
+    if (totalPages <= 1) {
+        adminInactivePagination.hidden = true;
+        return;
+    }
+
+    adminInactivePagination.hidden = false;
+    const createButton = (label, page, disabled = false, current = false) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.disabled = disabled;
+        if (current) {
+            button.setAttribute("aria-current", "page");
+        } else if (!disabled) {
+            button.addEventListener("click", () => {
+                adminInactiveCurrentPage = page;
+                renderAdminInactiveUsers();
+                adminList.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        }
+        return button;
+    };
+
+    adminInactivePagination.append(
+        createButton("‹", adminInactiveCurrentPage - 1, adminInactiveCurrentPage <= 1),
+        ...Array.from({ length: totalPages }, (_, index) =>
+            createButton(String(index + 1), index + 1, false, index + 1 === adminInactiveCurrentPage)
+        ),
+        createButton("›", adminInactiveCurrentPage + 1, adminInactiveCurrentPage >= totalPages)
+    );
 }
 
 function updateAdminInactiveSelection() {
-    const visibleUsers = getAdminVisibleUsers();
+    const visibleUsers = getAdminCurrentPageUsers();
     const selectedCount = getAdminSelectedUsers().length;
+    const currentPageSelectedCount = visibleUsers.filter(user => adminSelectedIds.has(user.userId)).length;
     const disabled = adminBusy || adminLoading || adminLoadFailed;
-    adminInactiveSelectAll.checked = visibleUsers.length > 0 && selectedCount === visibleUsers.length;
-    adminInactiveSelectAll.indeterminate = false;
+    adminInactiveSelectAll.checked = visibleUsers.length > 0 && currentPageSelectedCount === visibleUsers.length;
+    adminInactiveSelectAll.indeterminate = currentPageSelectedCount > 0
+        && currentPageSelectedCount < visibleUsers.length;
     adminInactiveSelectAll.disabled = disabled || !visibleUsers.length;
-    document.querySelector("#admin-bulk-count").textContent = "현재 목록에서 " + selectedCount + "명 선택";
+    document.querySelector("#admin-bulk-count").textContent = "총 " + selectedCount + "명 선택";
     document.querySelector(".admin-bulk-actions").dataset.hasSelection = String(selectedCount > 0);
+    if (adminSelectedViewButton && adminClearSelectionButton && adminSelectionSummary) {
+        adminSelectedViewButton.textContent = adminSelectedOnly
+            ? "검색 결과로 돌아가기" : "선택한 " + selectedCount + "명 모아보기";
+        adminSelectedViewButton.setAttribute("aria-pressed", String(adminSelectedOnly));
+        adminSelectedViewButton.disabled = disabled;
+        adminClearSelectionButton.disabled = disabled || selectedCount === 0;
+        const matchingIds = new Set(getAdminFilteredUsers().map(user => user.userId));
+        const outsideCount = [...adminSelectedIds].filter(id => !matchingIds.has(id)).length;
+        adminSelectionSummary.textContent = selectedCount
+            ? "총 " + selectedCount + "명 선택" + (outsideCount ? " · 현재 검색 밖 " + outsideCount + "명 포함" : "")
+            : "검색 초기화 후에도 선택한 직원은 유지됩니다.";
+    }
     for (const button of adminBulkButtons) {
         button.disabled = disabled || !selectedCount;
     }
@@ -161,6 +288,7 @@ function updateAdminInactiveSelection() {
     for (const button of adminRows.querySelectorAll(".admin-inactive-task")) button.disabled = disabled;
     adminInactiveSearch.disabled = adminBusy || adminLoading;
     adminInactiveWard.disabled = adminBusy || adminLoading || adminLoadFailed;
+    if (adminWardTrigger) adminWardTrigger.disabled = adminInactiveWard.disabled;
     document.querySelector("#admin-inactive-retry").disabled = adminBusy || adminLoading;
     adminList.setAttribute("aria-busy", String(adminBusy || adminLoading));
 }
@@ -176,7 +304,8 @@ function formatAdminDeactivatedDate(value) {
 
 function renderAdminInactiveUsers() {
     adminRows.replaceChildren();
-    const users = getAdminVisibleUsers();
+    const visibleUsers = getAdminVisibleUsers();
+    const users = getAdminCurrentPageUsers();
     for (const user of users) {
         const row = document.createElement("tr");
         row.dataset.userId = user.userId;
@@ -192,7 +321,8 @@ function renderAdminInactiveUsers() {
         checkbox.addEventListener("change", () => {
             if (checkbox.checked) adminSelectedIds.add(user.userId);
             else adminSelectedIds.delete(user.userId);
-            updateAdminInactiveSelection();
+            if (adminSelectedOnly) renderAdminInactiveUsers();
+            else updateAdminInactiveSelection();
         });
         label.append(checkbox);
         checkCell.append(label);
@@ -230,17 +360,21 @@ function renderAdminInactiveUsers() {
         ? "—<span>명</span>" : adminInactiveUsers.length + "<span>명</span>";
     document.querySelector("#admin-inactive-result").textContent = adminLoading
         ? "직원 목록을 불러오는 중입니다."
-        : adminLoadFailed ? "목록을 불러오지 못했습니다." : "검색 결과 " + users.length + "명";
+        : adminLoadFailed ? "목록을 불러오지 못했습니다."
+            : adminSelectedOnly ? "선택한 직원 " + visibleUsers.length + "명" : "검색 결과 " + visibleUsers.length + "명";
     const empty = document.querySelector("#admin-inactive-empty");
-    empty.hidden = adminLoading || adminLoadFailed || users.length > 0;
+    empty.hidden = adminLoading || adminLoadFailed || visibleUsers.length > 0;
     const filtered = Boolean(adminInactiveSearch.value.trim() || adminInactiveWard.value);
-    document.querySelector("#admin-inactive-empty-title").textContent = filtered
-        ? "검색 결과가 없습니다" : "비활성화 직원이 없습니다";
-    document.querySelector("#admin-inactive-empty-description").textContent = filtered
-        ? "이름, 아이디 또는 병동 조건을 다시 확인해 주세요."
-        : "승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.";
+    document.querySelector("#admin-inactive-empty-title").textContent = adminSelectedOnly
+        ? "선택한 직원이 없습니다"
+        : filtered ? "검색 결과가 없습니다" : "비활성화 직원이 없습니다";
+    document.querySelector("#admin-inactive-empty-description").textContent = adminSelectedOnly
+        ? "검색 결과로 돌아가 직원을 선택해 주세요."
+        : filtered ? "이름, 아이디 또는 병동 조건을 다시 확인해 주세요."
+            : "승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.";
     // [2026-09-18] 검색 옆 초기화 버튼은 결과 유무와 관계없이 표시하고 처리 중에는 비활성화한다.
     document.querySelector("#admin-inactive-reset").disabled = adminBusy || adminLoading;
+    renderAdminInactivePagination(visibleUsers.length);
     updateAdminInactiveSelection();
 }
 
@@ -276,11 +410,14 @@ async function loadAdminInactiveData() {
         }
         adminInactiveWard.value = previousWard;
         if (!adminInactiveWard.value) adminInactiveWard.value = "";
+        renderAdminWardOptions();
         adminSelectedIds = new Set([...adminSelectedIds].filter(id => adminInactiveUsers.some(user => user.userId === id)));
+        if (!adminSelectedIds.size) adminSelectedOnly = false;
         return true;
     } catch (error) {
         adminInactiveUsers = [];
         adminSelectedIds.clear();
+        adminSelectedOnly = false;
         adminLoadFailed = true;
         showAdminError(error.message || "목록을 불러오지 못했습니다.");
         return false;
@@ -372,10 +509,23 @@ async function submitAdminStatusChange(event) {
 }
 
 adminInactiveSelectAll.addEventListener("change", () => {
-    for (const user of getAdminVisibleUsers()) {
+    for (const user of getAdminCurrentPageUsers()) {
         if (adminInactiveSelectAll.checked) adminSelectedIds.add(user.userId);
         else adminSelectedIds.delete(user.userId);
     }
+    renderAdminInactiveUsers();
+});
+adminSelectedViewButton?.addEventListener("click", () => {
+    if (adminBusy || adminLoading || adminLoadFailed) return;
+    adminSelectedOnly = !adminSelectedOnly;
+    adminInactiveCurrentPage = 1;
+    renderAdminInactiveUsers();
+});
+adminClearSelectionButton?.addEventListener("click", () => {
+    if (adminBusy || adminLoading || adminLoadFailed) return;
+    adminSelectedIds.clear();
+    adminSelectedOnly = false;
+    adminInactiveCurrentPage = 1;
     renderAdminInactiveUsers();
 });
 for (const button of adminBulkButtons) {
@@ -395,14 +545,31 @@ adminStatusDialog.addEventListener("close", () => {
 });
 document.querySelector("#admin-inactive-search-form").addEventListener("submit", event => {
     event.preventDefault();
-    if (!adminBusy) renderAdminInactiveUsers();
+    if (!adminBusy) {
+        adminSelectedOnly = false;
+        adminInactiveCurrentPage = 1;
+        renderAdminInactiveUsers();
+    }
 });
-adminInactiveSearch.addEventListener("input", renderAdminInactiveUsers);
-adminInactiveWard.addEventListener("change", renderAdminInactiveUsers);
+adminInactiveSearch.addEventListener("input", () => {
+    adminSelectedOnly = false;
+    adminInactiveCurrentPage = 1;
+    renderAdminInactiveUsers();
+});
+adminInactiveWard.addEventListener("change", () => {
+    adminSelectedOnly = false;
+    adminInactiveCurrentPage = 1;
+    renderAdminWardOptions();
+    renderAdminInactiveUsers();
+});
 document.querySelector("#admin-inactive-reset").addEventListener("click", () => {
     if (adminBusy || adminLoading) return;
     adminInactiveSearch.value = "";
     adminInactiveWard.value = "";
+    adminSelectedOnly = false;
+    renderAdminWardOptions();
+    closeAdminWardOptions();
+    adminInactiveCurrentPage = 1;
     renderAdminInactiveUsers();
     adminInactiveSearch.focus();
 });

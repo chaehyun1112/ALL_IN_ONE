@@ -22,6 +22,77 @@
   --text-color: #29343d;
 }
 body { background-color: #e9f0f5; color: #29343d; }
+/* [2026.09.20] 관리 이력 카드의 선택·마우스·키보드 강조 테두리를 블루 그레이로 표시합니다. */
+.admin-history-summary .history-filter-card:hover,
+.admin-history-summary .history-filter-card:focus-visible,
+.admin-history-summary .history-filter-card[aria-pressed="true"],
+.admin-history-summary .history-filter-card.is-selected {
+  border-color: #526d82;
+  box-shadow: 0 0 0 3px #526d8226;
+  outline: 0;
+}
+/* [2026.09.20] 관리자 관리 이력의 스크롤바를 블루 그레이로 통일합니다. */
+.admin-history-wrap { scrollbar-color: #8ea6b8 #edf3f7; scrollbar-width: thin; }
+.admin-history-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+.admin-history-wrap::-webkit-scrollbar-track { background: #edf3f7; border-radius: 6px; }
+.admin-history-wrap::-webkit-scrollbar-thumb { background: #8ea6b8; border: 2px solid #edf3f7; border-radius: 6px; }
+.admin-history-wrap::-webkit-scrollbar-thumb:hover { background: #526d82; }
+/* [2026.09.20] 조치기록 검색 도구를 아이콘이 있는 한 줄 구성으로 정리합니다. 좁은 화면에서는 줄바꿈합니다. */
+.search-form { gap:8px; padding:12px; min-height:60px; border:1px solid #e0e8ef; border-radius:9px; box-shadow:0 3px 12px #526d8208; }
+.search-form .period-button, .search-form .choice-button {
+  height:34px; min-height:34px; padding-left:9px; gap:6px;
+  background-color:#f7fafc; border-color:#d5dfe7; color:#526d82; font-size:11px;
+}
+.search-form .period-button { min-width:115px; }
+.search-form .choice-button { min-width:130px; }
+.record-filter-icon { display:block; width:15px; height:15px; flex:0 0 15px; }
+.search-form .search-input {
+  flex:1 1 190px; min-width:180px; width:auto; height:34px; padding-left:30px;
+  border-color:#d5dfe7; background-color:#fbfcfe; font-size:11px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23526d82' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='6'/%3E%3Cpath d='m15 15 5 5'/%3E%3C/svg%3E");
+  background-position:9px center; background-repeat:no-repeat; background-size:15px;
+}
+.search-form .record-search-actions { flex-wrap:nowrap; gap:8px; }
+.search-form .record-search-actions button { height:34px; min-width:94px; font-size:11px; }
+.search-form .period-button:is(:hover,:focus-visible,[aria-expanded="true"]),
+.search-form .choice-button:is(:hover,:focus-visible,[aria-expanded="true"]) { background-color:#e9f0f5; }
+/* 목록 본문과 알림 유형은 같은 크기로 조금 확대합니다. */
+.record-table, .admin-record-page .record-table { font-size:11px; }
+.record-table td, .admin-record-page .record-table td { height:43px; line-height:1.5; }
+@media(max-width:700px) {
+  .search-form .search-input { flex-basis:100%; }
+  .search-form .record-search-actions { width:100%; }
+  .search-form .record-search-actions button { flex:1; }
+}
+/* [2026.09.20] 조치기록 필터의 마우스·선택 강조를 블루 그레이로 통일합니다. */
+.period-button:hover, .choice-button:hover,
+.period-button:focus-visible, .choice-button:focus-visible,
+.period-button[aria-expanded="true"], .choice-button[aria-expanded="true"] {
+  background-color: #e9f0f5;
+  border-color: #b8cad8;
+  color: #36566f;
+}
+.period-options, .choice-options { border-color: #d5dfe7; scrollbar-color: #b8cad8 #edf3f7; }
+.period-options button:hover, .period-options button:focus-visible,
+.choice-options button:hover, .choice-options button:focus-visible,
+.period-options button[aria-selected="true"], .choice-options button[aria-selected="true"] {
+  background: #e1eaf2;
+  color: #36566f;
+}
+/* [2026.09.20] 프로필 아이콘과 로고 복귀 링크를 공통 색상·정렬에 맞춥니다. */
+.profile-avatar { background: #e9f0f5; color: #526d82; }
+body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
+.dashboard-back-link .alleyes-brand, .page-header .dashboard-link .alleyes-brand {
+  gap: 8px; color: #36566f; font-size: 18px; font-weight: 700; line-height: 1; letter-spacing: 1.2px;
+}
+.page-header .dashboard-link { display: inline-flex; align-items: center; text-decoration: none; }
+.dashboard-back-link:hover, .page-header .dashboard-link:hover { text-decoration: none; }
+/* [2026.09.20] 상단 사용자 메뉴의 마우스·키보드 강조색을 블루 그레이로 통일합니다. */
+.header-menu-list a:hover, .header-menu-list button:hover,
+.header-menu-list a:focus-visible, .header-menu-list button:focus-visible {
+  background: #e9f0f5;
+  color: #36566f;
+}
 .admin-topbar, body[data-dashboard-view] > header, .settings-header, .page-header {
   /* [2026.09.19] 흰색 상단과 블루 그레이 본문을 얇은 선으로 구분합니다. */
   background: #fff;
@@ -80,12 +151,144 @@ body { background-color: #e9f0f5; color: #29343d; }
 .page-heading .counts .count:not(.urgent):not(.caution) { background: #edf3f7; border-color: #d5dfe7; color: #526d82; }
 .page-heading .counts .count:not(.urgent):not(.caution) b { color: #526d82; }
 .page-heading .summary::before, .panel-heading h2::before { background: #71899b; }
-.counts .count[aria-pressed="true"] { border-color: #526d82 !important; box-shadow: 0 0 0 2px #526d8280 !important; }
+/* [2026.09.20] 안전 현황 카드의 기본·선택 테두리를 각 상태 색으로 표시합니다. */
+.page-heading .counts .count { --count-border: #b8cad8; --count-ring: #526d8280; }
+.page-heading .counts .count.urgent { --count-border: #d9574a; --count-ring: #d9574a60; }
+.page-heading .counts .count.caution { --count-border: #d99a28; --count-ring: #d99a2860; }
+.page-heading .counts .count:not(.urgent):not(.caution) { border-color: var(--count-border); }
+.counts .count[aria-pressed="true"] { border-color: var(--count-border) !important; box-shadow: 0 0 0 2px var(--count-ring) !important; }
 .legend span:not(.urgent):not(.caution)::before { background: #7b93a5; }
-.page-heading .counts .count[aria-pressed="true"] { outline-color: #526d82; }
+.page-heading .counts .count[aria-pressed="true"] { outline-color: var(--count-border); }
 .admin-table th, .admin-history-table th { background: #e5edf3; color: #39576d; }
 .record-table th { background: #526d82; color: #fff; }
 .admin-account-guide, .admin-inactive-symbol { background: #edf3f7; }
 .settings-card, .profile-card, .admin-dialog, .page-intro, .search-form { background-color: #fff; }
+/* [2026.09.20] 대응 등록 창의 정보·입력·버튼 영역을 나누고 노트북에서도 간결하게 표시합니다. */
+#response-dialog { width:min(560px,calc(100vw - 32px)); padding:0; background:#fff; color:#29343d; border:2px solid #5f6361; border-radius:18px; box-shadow:0 24px 70px #29343d30; }
+#response-dialog::backdrop { background:#29343d66; }
+#response-dialog .response-heading { padding:24px 28px 18px; border-bottom:1px solid #e4ebf0; }
+#response-dialog h2 { margin:0 0 6px; font-size:21px; letter-spacing:-.025em; }
+#response-dialog p { margin:0; color:#647581; font-size:12px; line-height:1.6; }
+#response-dialog .response-body { padding:20px 28px; }
+#response-dialog .response-event { margin:0 0 20px; padding:14px 16px; border-radius:10px; border-width:1px 1px 1px 4px; font-size:15px; font-weight:700; }
+#response-dialog .response-event.urgent-event { background:var(--alert-fall-bg); border-color:var(--alert-fall); color:var(--alert-fall-text); }
+#response-dialog .response-event.caution-event { background:var(--alert-caution-bg); border-color:var(--alert-caution); color:var(--alert-caution-text); }
+#response-dialog .response-people { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+#response-dialog .response-field { min-width:0; }
+#response-dialog label.field { display:flex; align-items:center; gap:8px; margin:0 0 8px; font-size:13px; font-weight:600; }
+#response-dialog :is(.response-required,.response-auto) { font-size:10px; font-weight:400; color:#647581; }
+#response-dialog input[type="text"], #response-dialog textarea { box-sizing:border-box; background:#fff; border:1px solid #d5dfe7; border-radius:9px; color:#29343d; padding:12px; font-size:14px; }
+#response-dialog input[readonly] { background:#edf3f7; color:#526d82; }
+#response-dialog input[type="text"]:focus, #response-dialog textarea:focus { border-color:#526d82; outline:2px solid #526d8226; outline-offset:0; }
+#response-dialog .response-note-field { margin-top:20px; }
+#response-dialog textarea { min-height:120px; line-height:1.6; }
+#response-dialog .response-note-help { margin-top:6px; font-size:11px; }
+#response-dialog .response-actions { display:flex; justify-content:flex-end; gap:10px; margin:0; padding:16px 28px; border-top:1px solid #e4ebf0; background:#f7f9fb; }
+#response-dialog .response-actions button { flex:0 0 auto; min-height:42px; min-width:80px; padding:10px 18px; border:1px solid #d5dfe7; border-radius:8px; background:#fff; color:#526d82; }
+#response-dialog .response-actions button[type="submit"] { min-width:132px; background:#edf3f7; border-color:#b8cad8; color:#36566f; font-weight:700; }
+#response-dialog .response-actions button[type="submit"]:hover { background:#edf3f7; border-color:#36566f; color:#36566f; }
+@media(max-width:480px) {
+  #response-dialog .response-heading, #response-dialog .response-body { padding:18px; }
+  #response-dialog .response-actions { padding:14px 18px; }
+  #response-dialog .response-people { grid-template-columns:1fr; gap:14px; }
+}
 /* 완료 상태는 위험 색과 겹치지 않는 옅은 청회색으로 구분합니다. */
 .record-table .completed-row td { background-color: #e1eaf2; }
+/* [2026.09.20] 알림 유형은 주변 셀의 글꼴·크기를 따르고 글자색으로만 구분합니다. */
+.record-table .alert-badge, .admin-record-page .record-table .alert-badge {
+  display: inline;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  font: inherit;
+}
+.record-table .fall-badge { color: #a83228; }
+.record-table .bed-exit-badge { color: #c45a12; }
+/* [2026.09.20] 유형 글자색과 같은 작은 원을 왼쪽에 표시합니다. */
+.record-table .alert-badge::before {
+  content: '';
+  display: inline-block;
+  width: .65em;
+  height: .65em;
+  margin-right: .45em;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: .02em;
+}
+/* [2026.09.20] 침대 이탈은 주황 삼각형으로 낙상 원형 표시와 구분합니다. */
+.record-table .bed-exit-badge::before {
+  width: .8em;
+  height: .7em;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* [2026.09.20] 블루 그레이 관제 화면의 낙상은 코랄, 주의는 앰버로 통일합니다. */
+:root {
+  --alert-fall-bg: #fdebe8;
+  --alert-fall: #d9574a;
+  --alert-fall-text: #a83228;
+  --alert-caution-bg: #fff4de;
+  --alert-caution: #d99a28;
+  --alert-caution-text: #946014;
+}
+.floor .room.urgent, .floor .room.urgent.acknowledged,
+.floor .room.urgent:not(.acknowledged),
+.page-heading .counts .count.urgent,
+.alerts-panel .alert-card:not(.caution), .response-event.urgent-event,
+.cross-page-alert, .cross-page-alert-row:not(.caution) {
+  background: var(--alert-fall-bg);
+  border-color: var(--alert-fall);
+}
+.floor .room.caution, .page-heading .counts .count.caution,
+.alerts-panel .alert-card.caution, .response-event.caution-event,
+.cross-page-alert.caution, .cross-page-alert-row.caution {
+  background: var(--alert-caution-bg);
+  border-color: var(--alert-caution);
+}
+.floor .room.urgent small, .floor .room.urgent:not(.acknowledged) small,
+.page-heading .counts .count.urgent :is(span,b),
+.alerts-panel .alert-card:not(.caution) :is(.alert-top,.event-label,p),
+.response-event.urgent-event, .cross-page-alert, .cross-page-alert-row:not(.caution),
+#room-detail .room-history-urgent { color: var(--alert-fall-text); }
+.floor .room.caution small, .page-heading .counts .count.caution :is(span,b),
+.alerts-panel .alert-card.caution :is(.alert-top,.event-label,p),
+.response-event.caution-event, .cross-page-alert.caution, .cross-page-alert-row.caution,
+#room-detail .room-history-caution { color: var(--alert-caution-text); }
+.alerts-panel .alert-card h3, .alerts-panel .alert-card:not(.caution) h3,
+.alerts-panel .alert-card.caution h3, .floor .room:is(.urgent,.caution) strong { color: #29343d; }
+.legend .urgent::before, .floor .room.urgent::after { background: var(--alert-fall); }
+.legend .caution::before, .floor .room.caution::after { background: var(--alert-caution); }
+.corridor.urgent .corridor-alert-marker { background: var(--alert-fall); }
+.corridor.urgent .corridor-alert-marker::after { background: var(--alert-fall-text); }
+/* [2026.09.20] 화장실 앞 낙상 위치의 선택 테두리도 코랄 계열로 통일합니다. */
+.corridor.urgent[aria-pressed="true"] .corridor-alert-marker::before { border-color: var(--alert-fall-text); }
+.corridor.urgent > .corridor-alert-marker:focus-visible { outline-color: var(--alert-fall-text); }
+.corridor.caution .corridor-alert-marker { background: var(--alert-caution); box-shadow: 0 0 0 5px #d99a2840; }
+.corridor.caution .corridor-alert-marker::after { background: var(--alert-caution-text); }
+.alert-heading .alert-total { background: var(--alert-fall-bg); border-color: #d9574a40; color: var(--alert-fall-text); }
+/* 기존 점멸 주기와 중지 동작은 유지하고 색상만 새 팔레트에 맞춥니다. */
+/* [2026.09.20] 낙상 점멸만 1.15초에서 0.8초로 조금 빠르게 합니다. 확인 후 중지와 동작 줄이기는 유지합니다. */
+@media (prefers-reduced-motion: no-preference) {
+  .floor .room.urgent:not(.acknowledged),
+  .floor .room.urgent:not(.acknowledged)::after,
+  .corridor.urgent:not(.acknowledged) .corridor-alert-marker {
+    animation-duration: .8s;
+  }
+}
+@keyframes careguard-emergency-pulse {
+  0%,100% { background:#fdebe8; border-color:#d9574a; box-shadow:0 0 0 2px #d9574a30,inset 0 0 0 2px #ffffff70; }
+  50% { background:#f5c4bd; border-color:#d9574a; box-shadow:0 0 0 5px #d9574a50,0 0 16px #d9574a35,inset 0 0 0 2px #ffffff45; }
+}
+@keyframes careguard-emergency-dot {
+  0%,100% { background:#d9574a; transform:scale(1); }
+  50% { background:#a83228; transform:scale(1.45); }
+}
+@keyframes corridor-alert-pulse {
+  0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.85); background:#d9574a; box-shadow:0 0 0 4px #d9574a44,0 0 6px 1px #d9574a55; }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.18); background:#d9574a; box-shadow:0 0 0 10px #d9574a45,0 0 10px 2px #d9574a77; }
+}

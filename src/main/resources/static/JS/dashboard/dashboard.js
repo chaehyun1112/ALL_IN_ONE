@@ -200,8 +200,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // [09.13]수정내용: 병실 선택 처리를 전용 모듈에 위임하고 현재 화면 상태만 전달합니다.
   function choose(number){corridorSelected=false;window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);}
-  function chooseCorridor(){selected=null;corridorSelected=true;render();corridorNode.focus({preventScroll:true});}
-  corridorNode.addEventListener("click",chooseCorridor);
+  // [2026.09.20] 중앙 복도 빈 공간은 선택하지 않고 실제 감지 마커에서만 위치 기록을 엽니다.
+  const corridorMarker=corridorNode.querySelector('.corridor-alert-marker');
+  function chooseCorridor(){
+    if(!['urgent','caution'].includes(corridorAlert.status))return;
+    selected=null;corridorSelected=true;render();corridorMarker.focus({preventScroll:true});
+  }
+  corridorMarker.addEventListener("click",chooseCorridor);
   /* [추가] 전체/상태 카드가 아닌 화면을 클릭하면 카드 선택 테두리를 제거합니다. */
   document.addEventListener("click", event => {
     if (event.target.closest(".counts .count")) return;
@@ -263,7 +268,8 @@ document.addEventListener("DOMContentLoaded", () => {
     corridorNode.classList.toggle("caution",corridorAlert.status==="caution");
     // [2026.09.19] 수정: 기본 복도 감지 표시를 첫 번째 칸인 서쪽 화장실 중앙(5%) 앞으로 옮깁니다.
     corridorNode.style.setProperty("--camera-x",corridorAlert.cameraX || "5%");
-    corridorNode.setAttribute("aria-label",`${corridorAlert.cameraLocation} · ${labels[corridorAlert.status]}`);
+    corridorMarker.setAttribute("aria-label",`${corridorAlert.cameraLocation} · ${labels[corridorAlert.status]} · 기록 보기`);
+    corridorMarker.setAttribute("aria-pressed",String(corridorSelected));
     corridorNode.style.setProperty("--camera-label", `"${corridorAlert.cameraLocation}"`);
     corridorNode.classList.toggle("acknowledged",corridorAlert.acknowledged);
     corridorNode.setAttribute("aria-pressed",String(corridorSelected));

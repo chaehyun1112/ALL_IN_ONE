@@ -13,33 +13,33 @@
     <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history'} ? '관리 이력 | 병동 통합 관제' : '직원 관리 | 병동 통합 관제')">직원 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/dashboard.css"
-          th:href="@{/css/admin/dashboard.css}">
-    <link rel="stylesheet" href="../../../static/css/admin/account-create.css" th:href="@{/css/admin/account-create.css}">
-    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css" th:href="@{/css/admin/inactive-users.css}">
+          href="../../../static/css/admin/dashboard.css?v=history-row-text-20260920"
+          th:href="@{/css/admin/dashboard.css(v='history-row-text-20260920')}">
+    <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=ward-options-overflow-20260920" th:href="@{/css/admin/account-create.css(v='ward-options-overflow-20260920')}">
+    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-selected-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-selected-20260920')}">
 
-    <script src="../../../static/JS/admin/dashboard.js"
-            th:src="@{/JS/admin/dashboard.js}"
+    <script src="../../../static/JS/admin/dashboard.js?v=action-ward-dropdown-20260920"
+            th:src="@{/JS/admin/dashboard.js(v='action-ward-dropdown-20260920')}"
             defer></script>
     <script src="../../../static/JS/admin/admin-history.js"
         th:src="@{/JS/admin/admin-history.js}"
         defer></script>
-    <script src="../../../static/JS/admin/account-create.js"
-            th:src="@{/JS/admin/account-create.js}"
+    <script src="../../../static/JS/admin/account-create.js?v=ward-options-overflow-20260920"
+            th:src="@{/JS/admin/account-create.js(v='ward-options-overflow-20260920')}"
             defer></script>
-    <script src="../../../static/JS/admin/inactive-users.js"
-            th:src="@{/JS/admin/inactive-users.js}"
+    <script src="../../../static/JS/admin/inactive-users.js?v=inactive-selected-20260920"
+            th:src="@{/JS/admin/inactive-users.js(v='inactive-selected-20260920')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=adbfad-header" th:href="@{/css/alleyes-brand.css(v='adbfad-header')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=blue-gray-auth-image" th:href="@{/css/alleyes-theme.css(v='blue-gray-auth-image')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=history-scroll-blue" th:href="@{/css/alleyes-theme.css(v='history-scroll-blue')}">
 </head>
 
 <body>
 <header class="admin-topbar">
     <div class="admin-brand">
-        <strong class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-transparent.png" th:src="@{/image/brand/alleyes-logo-transparent.png}" alt="" width="44" height="42">ALLEYES</strong>
+        <strong class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-soft-peach.svg" th:src="@{/image/brand/alleyes-logo-blue-soft-peach.svg}" alt="" width="44" height="42">ALLEYES</strong>
         <span>병동 통합 관제</span>
         <!-- [9.15] 추가내용: 직원 관리와 관리 이력 화면을 서로 이동할 수 있는 메뉴를 제공한다. -->
         <nav class="admin-page-nav" aria-label="계정 관리 메뉴">
@@ -236,14 +236,29 @@
             <form id="admin-inactive-search-form" class="admin-search" role="search" aria-label="비활성화 직원 검색"><div class="admin-search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><label class="visually-hidden" for="admin-inactive-search">이름 또는 아이디 검색</label><input type="search" id="admin-inactive-search" placeholder="이름 또는 아이디 검색" autocomplete="off"></div><button type="submit" class="admin-search-button">검색</button>
                 <!-- [2026-09-18] 초기화 버튼을 검색 버튼 옆에 항상 표시하고 검색어와 병동 조건을 함께 초기화한다. -->
                 <button type="button" id="admin-inactive-reset" class="admin-search-button">초기화</button></form>
-            <div class="admin-inactive-filter"><select id="admin-inactive-ward" aria-label="병동 선택"><option value="">전체 병동</option></select></div>
+            <div class="admin-inactive-filter">
+                <div class="admin-ward-dropdown" id="admin-ward-dropdown">
+                    <button type="button" class="admin-ward-trigger" id="admin-ward-trigger" aria-label="병동 선택" aria-expanded="false" aria-controls="admin-ward-options">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 4v6m10-6v6M5 10h14v10H5z"/></svg>
+                        <span id="admin-ward-label">전체 병동</span>
+                        <svg class="admin-ward-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="admin-ward-options" id="admin-ward-options" hidden></div>
+                </div>
+                <select id="admin-inactive-ward" aria-label="병동 선택" hidden><option value="">전체 병동</option></select>
+            </div>
             <div class="admin-bulk-actions" role="group" aria-label="선택 직원 일괄 관리"><span id="admin-bulk-count" role="status">현재 목록에서 0명 선택</span><div class="admin-bulk-buttons"><button type="button" data-bulk-status="ACTIVATE" disabled>계정 활성화</button><button type="button" data-bulk-status="DELETE" class="admin-bulk-delete" disabled>계정 삭제</button></div></div>
         </div>
         <p class="admin-inactive-result" id="admin-inactive-result" role="status">직원 목록을 불러오는 중입니다.</p>
+        <div class="admin-inactive-selection-toolbar" role="group" aria-label="선택한 직원 관리">
+            <button type="button" id="admin-inactive-selected-view" aria-pressed="false">선택한 0명 모아보기</button>
+            <button type="button" id="admin-inactive-clear-selection" disabled>선택 해제</button>
+            <span id="admin-inactive-selection-summary" role="status" aria-live="polite">검색 초기화 후에도 선택한 직원은 유지됩니다.</span>
+        </div>
         <div id="admin-inactive-error" role="alert" hidden><p id="admin-inactive-error-message"></p><button type="button" id="admin-inactive-retry">다시 불러오기</button></div>
         <div class="admin-table-wrap" id="admin-inactive-list" aria-busy="true"><table class="admin-table admin-inactive-table"><caption class="visually-hidden">비활성화 직원 목록</caption><thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><th scope="col">아이디</th><th scope="col">병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead><tbody id="admin-inactive-rows"></tbody></table><div class="admin-inactive-empty" id="admin-inactive-empty" hidden><strong id="admin-inactive-empty-title">비활성화 직원이 없습니다</strong><p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.</p></div></div>
     </section>
-    <footer class="admin-inactive-footer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>일괄 작업은 현재 검색된 목록에서 선택한 직원에게만 적용됩니다.</footer>
+    <footer class="admin-inactive-footer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>일괄 작업은 선택한 직원 전체에 적용됩니다.</footer>
 </section>
 
 <dialog id="admin-status-dialog" class="admin-dialog" aria-labelledby="admin-status-dialog-title" aria-describedby="admin-status-dialog-description"><form id="admin-status-form"><h2 id="admin-status-dialog-title">상태 변경</h2><p id="admin-status-dialog-description"></p><p id="admin-status-dialog-note"></p><div class="admin-dialog-actions"><button type="button" id="admin-status-cancel" autofocus>취소</button><button type="submit" id="admin-status-confirm" class="admin-primary">확인</button></div></form></dialog>
@@ -282,7 +297,7 @@
         class="admin-dialog"
         aria-labelledby="admin-dialog-title">
 
-    <form id="admin-action-form">
+    <form id="admin-action-form" novalidate>
         <h2 id="admin-dialog-title">사용자 관리</h2>
         <p id="admin-dialog-description"></p>
         <ul id="admin-deactivate-details" class="admin-deactivate-details" hidden>
@@ -291,9 +306,15 @@
         </ul>
 
         <div id="admin-ward-field" hidden>
-            <label for="admin-ward-select">변경할 병동</label>
-
-            <select id="admin-ward-select">
+            <label for="admin-action-ward-trigger">변경할 병동</label>
+            <div class="admin-action-ward-dropdown" id="admin-action-ward-dropdown">
+                <button type="button" id="admin-action-ward-trigger" aria-label="변경할 병동 선택" aria-expanded="false" aria-controls="admin-action-ward-options">
+                    <span id="admin-action-ward-value">병동을 선택해주세요</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="admin-action-ward-options" class="admin-action-ward-options" hidden></div>
+            </div>
+            <select id="admin-ward-select" hidden>
                 <option value="">병동을 선택해주세요</option>
             </select>
         </div>
@@ -314,7 +335,17 @@
         <div class="admin-create-grid">
             <label>이름<input id="admin-create-name" placeholder="예: 김서윤"><small class="admin-field-error" id="admin-create-name-error"></small></label>
             <label>아이디<input id="admin-create-user-id" placeholder="예: nurse.ksy01"><small class="admin-field-error" id="admin-create-user-id-error"></small></label>
-            <label>담당 병동<select id="admin-create-ward"><option value="">담당 병동을 선택해주세요</option></select><small class="admin-field-error" id="admin-create-ward-error"></small></label>
+            <label>담당 병동
+                <span class="admin-create-ward-dropdown" id="admin-create-ward-dropdown">
+                    <button type="button" id="admin-create-ward-trigger" aria-label="담당 병동 선택" aria-expanded="false" aria-controls="admin-create-ward-options">
+                        <span id="admin-create-ward-label">담당 병동을 선택해주세요</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <span class="admin-create-ward-options" id="admin-create-ward-options" hidden></span>
+                </span>
+                <select id="admin-create-ward" hidden><option value="">담당 병동을 선택해주세요</option></select>
+                <small class="admin-field-error" id="admin-create-ward-error"></small>
+            </label>
         </div>
         <div class="admin-dialog-actions"><button type="button" id="admin-create-cancel">취소</button><button type="submit" class="admin-primary">계정 생성</button></div>
     </form>

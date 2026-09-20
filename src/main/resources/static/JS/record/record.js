@@ -625,7 +625,8 @@ function initializePage() {
         badge.classList.add("bed-exit-badge");
       }
 
-      badge.textContent = `● ${record.type}`;
+      // [2026.09.20] 별도 점·배지 없이 유형명과 글자색만으로 구분합니다.
+      badge.textContent = record.type;
       typeCell.append(badge);
 
       row.append(

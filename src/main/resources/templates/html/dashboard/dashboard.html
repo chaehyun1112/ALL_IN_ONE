@@ -8,15 +8,15 @@
   <!-- [2026.09.17] 고친 내용: 화면 최상단 알림 배너 위치가 반영되도록 CSS 캐시 버전을 갱신합니다. -->
   <link
     rel="stylesheet"
-    href="../../../static/css/dashboard/dashboard.css?v=20260917-password-compact" th:href="@{/css/dashboard/dashboard.css(v='20260917-password-compact')}"
+    href="../../../static/css/dashboard/dashboard.css?v=20260920-corridor-marker" th:href="@{/css/dashboard/dashboard.css(v='20260920-corridor-marker')}"
   >
   <!-- [09.13]추가내용: 병실 상태와 선택 표시를 기능별 CSS 파일로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
   <link rel="stylesheet" href="../../../static/css/dashboard/room-selection.css" th:href="@{/css/dashboard/room-selection.css}">
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=adbfad-header" th:href="@{/css/alleyes-brand.css(v='adbfad-header')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=blue-gray-auth-image" th:href="@{/css/alleyes-theme.css(v='blue-gray-auth-image')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=history-scroll-blue" th:href="@{/css/alleyes-theme.css(v='history-scroll-blue')}">
 </head>
 
 <body th:attr="data-session-url=@{/api/dashboard/session},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
@@ -24,10 +24,14 @@
   <header>
     <!-- [2026.09.17] 고친 내용: 조치기록에서 대시보드로 돌아가는 버튼을 왼쪽 상단에 배치합니다. -->
     <!-- [2026.09.17] 고친 내용: 공통 화면 전환 함수가 상단 감지 알림의 표시 여부도 함께 처리합니다. -->
-    <a class="dashboard-back-link" href="dashboard.html" th:href="@{/dashboard}">← 대시보드로 가기</a>
+    <!-- [2026.09.20] 복귀 링크를 로고로 표시하고 기존 전체화면 유지 전환을 사용합니다. -->
+    <div class="record-brand">
+      <a class="dashboard-back-link" href="dashboard.html" th:href="@{/dashboard}" aria-label="ALLEYES 대시보드로 이동"><span class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-soft-peach.svg" th:src="@{/image/brand/alleyes-logo-blue-soft-peach.svg}" alt="" width="44" height="42">ALLEYES</span></a>
+      <span class="record-service-label">병동 통합 관제</span>
+    </div>
     <div class="brand">
 
-      <strong class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-transparent.png" th:src="@{/image/brand/alleyes-logo-transparent.png}" alt="" width="44" height="42">ALLEYES</strong>
+      <strong class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-soft-peach.svg" th:src="@{/image/brand/alleyes-logo-blue-soft-peach.svg}" alt="" width="44" height="42">ALLEYES</strong>
       <span>병동 통합 관제</span>
     </div>
 
@@ -171,12 +175,13 @@
           <!-- 중앙 복도 -->
           <!-- [2026.09.16] 추가한 내용: 복도 낙상 감지 위치도 병실처럼 선택하고 확인할 수 있게 합니다. -->
           <!-- [2026.09.16] 고친 내용: 복도 감지 위치를 카메라 ID 대신 사람이 찾기 쉬운 위치명으로 안내합니다. -->
-          <button type="button" class="corridor" id="central-corridor" aria-label="중앙 복도 · 서·화장실 앞 · 낙상 감지">
+          <!-- [2026.09.20] 복도는 배경으로 두고 실제 감지 마커만 선택할 수 있게 합니다. -->
+          <div class="corridor" id="central-corridor">
             <span>←</span>
             <span>중앙 복도</span>
-            <i class="corridor-alert-marker" aria-hidden="true"></i>
+            <button type="button" class="corridor-alert-marker" aria-label="복도 감지 위치 기록 보기" aria-pressed="false"></button>
             <span>→</span>
-          </button>
+          </div>
 
           <!-- 아래쪽 병실은 JS로 생성됩니다 -->
           <div
@@ -299,79 +304,33 @@
     class="response-dialog"
     aria-labelledby="response-title"
   >
+    <!-- [2026.09.20] 발생 정보 → 대상·담당자 → 조치 내용 → 등록 순서로 입력 영역을 구분합니다. -->
     <form id="response-form">
-      <h2 id="response-title">
-        경보 대응 등록
-      </h2>
-
-      <p>
-        현장 확인 후 대응 정보를 등록해 주세요.
-      </p>
-
-      <!-- 선택한 경보 정보가 JS로 표시됩니다 -->
-      <div
-        id="response-event"
-        class="response-event"
-      ></div>
-
-      <!-- 환자 이름 -->
-      <label
-        class="field"
-        for="response-patient"
-      >
-        환자 이름
-      </label>
-
-      <input
-        id="response-patient"
-        type="text"
-        required
-        maxlength="50"
-        placeholder="환자 이름을 입력하세요."
-      >
-
-      <!-- 로그인한 사용자의 이름을 자동 표시합니다. -->
-      <label
-        class="field"
-        for="response-user"
-      >
-        간호사 이름
-      </label>
-
-      <input
-        id="response-user"
-        type="text"
-        th:value="${displayName}"
-        readonly
-        placeholder="서버 로그인 후 자동 표시됩니다."
-      >
-
-      <!-- 조치 내용 -->
-      <label
-        class="field"
-        for="response-note"
-      >
-        조치 내용
-      </label>
-
-      <textarea
-        id="response-note"
-        maxlength="1000"
-        required
-        placeholder="확인한 상태와 조치 내용을 입력하세요."
-      ></textarea>
-
+      <div class="response-heading">
+        <h2 id="response-title">경보 대응 등록</h2>
+        <p>현장 조치 후 확인한 상태와 조치 내용을 기록해 주세요.</p>
+      </div>
+      <div class="response-body">
+        <div id="response-event" class="response-event"></div>
+        <div class="response-people">
+          <div class="response-field">
+            <label class="field" for="response-patient">환자 이름 <span class="response-required">필수</span></label>
+            <input id="response-patient" type="text" required maxlength="50" placeholder="환자 이름을 입력하세요.">
+          </div>
+          <div class="response-field">
+            <label class="field" for="response-user">담당 간호사 <span class="response-auto">자동 입력</span></label>
+            <input id="response-user" type="text" th:value="${displayName}" readonly placeholder="로그인한 간호사 이름">
+          </div>
+        </div>
+        <div class="response-field response-note-field">
+          <label class="field" for="response-note">조치 내용 <span class="response-required">필수</span></label>
+          <textarea id="response-note" maxlength="1000" required placeholder="환자 상태와 시행한 조치를 입력해 주세요."></textarea>
+          <p class="response-note-help">현장에서 확인한 내용을 구체적으로 작성해 주세요.</p>
+        </div>
+      </div>
       <div class="response-actions">
-        <button
-          type="button"
-          id="response-cancel"
-        >
-          취소
-        </button>
-
-        <button type="submit">
-          조치 기록 등록
-        </button>
+        <button type="button" id="response-cancel">취소</button>
+        <button type="submit">조치 기록 등록</button>
       </div>
     </form>
   </dialog>
@@ -381,7 +340,7 @@
   <script src="../../../static/JS/dashboard/room-status.js" th:src="@{/JS/dashboard/room-status.js}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <!-- [2026.09.17] 고친 내용: 대응 등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
-  <script src="../../../static/JS/dashboard/dashboard.js?v=20260918-response-complete" th:src="@{/JS/dashboard/dashboard.js(v='20260918-response-complete')}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js?v=20260920-corridor-marker" th:src="@{/JS/dashboard/dashboard.js(v='20260920-corridor-marker')}"></script>
 </body>
 </html>
 

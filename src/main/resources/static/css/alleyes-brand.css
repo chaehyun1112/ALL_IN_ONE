@@ -1,5 +1,6 @@
 /* [2026.09.19] 추가: 모든 ALLEYES 표기에 같은 로고를 왼쪽으로 배치합니다. */
 .alleyes-brand {
+  color: #36566f;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -7,16 +8,20 @@
   vertical-align: middle;
 }
 
+/* [2026.09.20] 독립 비밀번호 화면의 로고를 정렬하고, 팝업은 부모 화면의 로고를 사용합니다. */
+.change-header .change-brand { justify-content: center; margin: 0 0 12px; font-size: 18px; font-weight: 700; }
+.password-popup .change-header .change-brand { display: none; }
+
 .alleyes-logo {
   display: block;
   flex: 0 0 auto;
-  width: 44px;
-  height: 42px;
+  width: 52px;
+  height: 50px;
   object-fit: contain;
   background: transparent;
 }
 
-/* [2026.09.19] 수정: 모든 화면에서 로그인과 같은 초록·세이지 원본 로고를 표시합니다. */
+/* 모든 화면은 자체 색상이 적용된 투명 로고를 사용합니다. */
 .admin-topbar .alleyes-logo,
 .brand .alleyes-logo,
 .settings-header .alleyes-logo {
@@ -27,7 +32,7 @@
 .service-eyebrow.alleyes-brand {
   display: flex;
   justify-content: center;
-  color: #39576d;
+  color: #36566f;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -106,7 +111,7 @@ header > .brand {
   font-size: 18px;
   line-height: 1;
   letter-spacing: 1.2px;
-  color: #39576d;
+  color: #36566f;
 }
 
 .admin-brand > span,
@@ -118,13 +123,22 @@ header > .brand {
   white-space: nowrap;
 }
 
+.record-brand { display: none; align-items: center; gap: 16px; }
+body[data-dashboard-view="records"] > header .record-brand { display: inline-flex; }
+.record-service-label { color: #29343d; font-size: 11px; font-weight: 400; line-height: 1; white-space: nowrap; }
+
+/* 독립 조치기록 상단의 로고와 보조 문구를 대시보드와 동일하게 정렬합니다. */
+.page-header .dashboard-link.alleyes-record-link { padding: 0; font-size: 18px; font-weight: 700; line-height: 1; color: #36566f; }
+.page-header .dashboard-link.alleyes-record-link:hover { color: #36566f; }
+.page-header .hospital-name { margin-left: -8px; font-size: 11px; font-weight: 400; line-height: 1; white-space: nowrap; color: #29343d; }
+
 @media (max-width: 800px) {
   .admin-brand { align-items: flex-start; }
 }
 
 @media (max-width: 600px) {
   .alleyes-brand { gap: 8px; }
-  .alleyes-logo { width: 36px; height: 34px; }
+  .alleyes-logo { width: 42px; height: 40px; }
 }
 
 /* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */
