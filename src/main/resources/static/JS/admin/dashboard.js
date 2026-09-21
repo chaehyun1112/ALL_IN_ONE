@@ -410,7 +410,51 @@ function renderAdminCounts() {
     adminTotalCount.textContent = `${approvedCount + pendingCount}명`;
     adminApprovedCount.textContent = `${approvedCount}명`;
     adminPendingCount.textContent = `${pendingCount}명`;
+    // 관리자 홈의 간호사 수에는 간병인 계정을 포함하지 않습니다.
+    const homeStaffCount = document.querySelector("#admin-home-staff-count");
+    if (homeStaffCount && adminJobType === "GENERAL") homeStaffCount.textContent = String(approvedCount);
 }
+
+// 관리자 홈 달력은 브라우저의 현재 월을 기준으로 만들고, 이전·다음 달 이동 시 날짜를 다시 그립니다.
+const adminCalendarMonth = document.querySelector("#admin-calendar-month");
+const adminCalendarDates = document.querySelector("#admin-calendar-dates");
+let adminCalendarDate = new Date();
+adminCalendarDate = new Date(adminCalendarDate.getFullYear(), adminCalendarDate.getMonth(), 1);
+
+function renderAdminCalendar() {
+    if (!adminCalendarMonth || !adminCalendarDates) return;
+    const year = adminCalendarDate.getFullYear();
+    const month = adminCalendarDate.getMonth();
+    const today = new Date();
+    adminCalendarMonth.textContent = `${year}년 ${month + 1}월`;
+    adminCalendarDates.replaceChildren();
+    for (let index = 0; index < new Date(year, month, 1).getDay(); index += 1) {
+        const empty = document.createElement("span");
+        empty.className = "admin-calendar-empty";
+        empty.setAttribute("aria-hidden", "true");
+        adminCalendarDates.append(empty);
+    }
+    for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day += 1) {
+        const date = document.createElement("time");
+        date.dateTime = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        date.textContent = String(day);
+        if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+            date.classList.add("is-today");
+            date.setAttribute("aria-label", `${month + 1}월 ${day}일 오늘`);
+        }
+        adminCalendarDates.append(date);
+    }
+}
+
+document.querySelector("#admin-calendar-prev")?.addEventListener("click", () => {
+    adminCalendarDate = new Date(adminCalendarDate.getFullYear(), adminCalendarDate.getMonth() - 1, 1);
+    renderAdminCalendar();
+});
+document.querySelector("#admin-calendar-next")?.addEventListener("click", () => {
+    adminCalendarDate = new Date(adminCalendarDate.getFullYear(), adminCalendarDate.getMonth() + 1, 1);
+    renderAdminCalendar();
+});
+renderAdminCalendar();
 
 /**
  * 선택한 승인 상태와 검색어에 맞는 목록을 출력한다.
@@ -1286,45 +1330,80 @@ setInterval(updateAdminClock, 30000);
 
 // [2026.09.16] 추가한 내용: 관리자 메뉴는 문서를 새로 열지 않고 본문만 바꿔 전체화면을 유지합니다.
 const adminInactiveView = document.querySelector("#admin-inactive-view");
+const adminHomePage = document.querySelector("#admin-home-page");
 const adminRecordView = document.querySelector("#admin-record-view");
 const adminRecordFrame = document.querySelector("#admin-record-frame");
 const adminViewLinks = Array.from(document.querySelectorAll("[data-admin-view]"));
+// 상단의 두 관리 메뉴는 커서·키보드 포커스와 클릭으로 하위 메뉴를 엽니다.
+const adminNavGroups = Array.from(document.querySelectorAll(".admin-nav-group"));
+function closeAdminNavMenus() {
+    adminNavGroups.forEach(group => {
+        group.classList.remove("is-open");
+        group.querySelector(".admin-nav-trigger")?.setAttribute("aria-expanded", "false");
+    });
+}
+adminNavGroups.forEach(group => {
+    const trigger = group.querySelector(".admin-nav-trigger");
+    trigger?.addEventListener("click", () => {
+        const shouldOpen = !group.classList.contains("is-open");
+        closeAdminNavMenus();
+        group.classList.toggle("is-open", shouldOpen);
+        trigger.setAttribute("aria-expanded", String(shouldOpen));
+    });
+    group.addEventListener("mouseenter", () => trigger?.setAttribute("aria-expanded", "true"));
+    group.addEventListener("mouseleave", () => {
+        group.classList.remove("is-open");
+        trigger?.setAttribute("aria-expanded", "false");
+    });
+    group.addEventListener("focusin", () => trigger?.setAttribute("aria-expanded", "true"));
+    group.addEventListener("focusout", event => {
+        if (!group.contains(event.relatedTarget)) trigger?.setAttribute("aria-expanded", "false");
+    });
+});
+document.addEventListener("click", event => {
+    if (!event.target.closest(".admin-nav-group")) closeAdminNavMenus();
+});
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeAdminNavMenus();
+});
 function setAdminView(view, updateAddress = true) {
+    const isHome = view === "home";
     const isInactive = view === "inactive" || view === "inactive-caregivers";
     const isRecords = view === "records";
     const nextJobType = view === "caregivers" || view === "inactive-caregivers" ? "CAREGIVER" : "GENERAL";
     const jobChanged = adminJobType !== nextJobType;
     adminJobType = nextJobType;
     document.body.dataset.adminJobType = adminJobType;
+    adminHomePage.hidden = !isHome;
     adminInactiveView.hidden = !isInactive;
     adminRecordView.hidden = !isRecords;
-    adminPage.hidden = isInactive || isRecords;
+    adminPage.hidden = isHome || isInactive || isRecords;
     // [2026.09.17] 추가한 내용: 전체화면 중에도 문서를 이동하지 않도록 조치기록을 내부 화면으로 한 번만 불러옵니다.
     if (isRecords && !adminRecordFrame.dataset.loaded) {
         adminRecordFrame.src = adminRecordFrame.dataset.src;
         adminRecordFrame.dataset.loaded = "true";
     }
-    if (!isInactive && !isRecords) {
+    if (!isHome && !isInactive && !isRecords) {
         adminPage.classList.toggle("is-history-page", view === "history");
         adminPage.classList.toggle("is-staff-page", view !== "history");
         filterHistory(adminHistoryFilter);
     }
     const caregiver = view === "caregivers";
-    document.querySelector("#admin-title").textContent = view === "history" ? "관리 이력" : caregiver ? "간병인 관리" : "직원 관리";
-    document.querySelector("#admin-list-title").textContent = view === "history" ? "관리 이력 검색" : caregiver ? "간병인 목록" : "직원 목록";
-    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history" ? "관리자가 처리한 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다." : "직원 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
-    document.querySelector(".admin-management-title p").textContent = view === "history" ? "이름, 아이디 또는 병동으로 처리 이력을 검색합니다." : caregiver ? "간병인 계정을 검색하고 필요한 관리 작업을 진행합니다." : "직원 계정을 검색하고 필요한 관리 작업을 진행합니다.";
+    document.querySelector("#admin-title").textContent = view === "history" ? "관리 이력" : caregiver ? "간병인 관리" : "간호사 관리";
+    document.querySelector("#admin-list-title").textContent = view === "history" ? "관리 이력 검색" : caregiver ? "간병인 목록" : "간호사 목록";
+    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history" ? "관리자가 처리한 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
+    document.querySelector(".admin-management-title p").textContent = view === "history" ? "이름, 아이디 또는 병동으로 처리 이력을 검색합니다." : caregiver ? "간병인 계정을 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
     document.querySelector("#admin-create-title").textContent = caregiver ? "간병인 계정 생성" : "간호사 계정 생성";
     document.querySelector("#admin-create-complete-dialog > p").textContent = caregiver ? "등록된 간병인 정보를 확인해 주세요." : "아래 로그인 정보를 간호사에게 전달해주세요.";
     document.querySelector("#admin-password-reset-dialog > p").textContent = caregiver ? "아래 변경된 비밀번호를 간병인에게 전달해주세요." : "아래 변경된 비밀번호를 간호사에게 전달해주세요.";
     document.querySelector("#admin-management-choice-title").textContent = caregiver ? "간병인 관리" : "직원 관리";
-    document.querySelector("#admin-user-caption").textContent = caregiver ? "간병인 관리 목록" : "직원 관리 목록";
+    document.querySelector("#admin-user-caption").textContent = caregiver ? "간병인 관리 목록" : "간호사 관리 목록";
     document.querySelector("#admin-user-id-heading").textContent = caregiver ? "전화번호" : "아이디";
     document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
     document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
     document.querySelector("#admin-assignment-heading").textContent = caregiver ? "담당 병실" : "배정 병동";
     document.querySelector("#complete-account-assignment-label").textContent = caregiver ? "담당 병실" : "담당 병동";
-    document.querySelector("#admin-user-pagination").setAttribute("aria-label", caregiver ? "간병인 목록 페이지" : "직원 목록 페이지");
+    document.querySelector("#admin-user-pagination").setAttribute("aria-label", caregiver ? "간병인 목록 페이지" : "간호사 목록 페이지");
     document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "비활성화 간병인관리" : "비활성화 직원관리";
     if (jobChanged && !isRecords) {
         adminUsers = [];
@@ -1338,32 +1417,37 @@ function setAdminView(view, updateAddress = true) {
         link.classList.toggle("active", active);
         link.toggleAttribute("aria-current", active);
     });
-    document.title = view === "records" ? "관리자 조치기록 | 병동 통합 관제"
+    // 하위 화면에 있을 때도 상단의 상위 메뉴 버튼을 명시적으로 활성화합니다.
+    document.querySelector("#admin-staff-submenu")?.previousElementSibling?.classList.toggle("active", view === "staff" || view === "caregivers");
+    document.querySelector("#admin-inactive-submenu")?.previousElementSibling?.classList.toggle("active", view === "inactive" || view === "inactive-caregivers");
+    document.title = isHome ? "관리자 홈 | 병동 통합 관제"
+        : view === "records" ? "관리자 조치기록 | 병동 통합 관제"
         : view === "history" ? "관리 이력 | 병동 통합 관제"
         : view === "caregivers" ? "간병인 관리 | 병동 통합 관제"
         : view === "inactive-caregivers" ? "비활성화 간병인관리 | 병동 통합 관제"
         : view === "inactive" ? "비활성화 직원관리 | 병동 통합 관제"
-        : "직원 관리 | 병동 통합 관제";
+        : "간호사 관리 | 병동 통합 관제";
     if (updateAddress) {
-        const path = view === "records" ? "/admin/records" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : "/admin";
+        const path = view === "records" ? "/admin/records" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : view === "staff" ? "/admin?view=staff" : "/admin";
         window.history.pushState({ adminView: view }, "", path);
     }
 }
 adminViewLinks.forEach(link => link.addEventListener("click", event => {
     event.preventDefault();
+    closeAdminNavMenus();
     setAdminView(link.dataset.adminView);
 }));
 window.addEventListener("popstate", () => {
     const path = window.location.pathname.replace(/\/+$/, "");
     const previewView = new URLSearchParams(window.location.search).get("view");
-    setAdminView(path.endsWith("/records") ? "records" : path.endsWith("/history") || previewView === "history" ? "history" : path.endsWith("/caregivers/inactive") || previewView === "inactive-caregivers" ? "inactive-caregivers" : path.endsWith("/caregivers") || previewView === "caregivers" ? "caregivers" : path.endsWith("/admin_de") ? "inactive" : "staff", false);
+    setAdminView(path.endsWith("/records") ? "records" : path.endsWith("/history") || previewView === "history" ? "history" : path.endsWith("/caregivers/inactive") || previewView === "inactive-caregivers" ? "inactive-caregivers" : path.endsWith("/caregivers") || previewView === "caregivers" ? "caregivers" : path.endsWith("/admin_de") ? "inactive" : previewView === "staff" ? "staff" : "home", false);
 });
 
 // [2026.09.17] 추가한 내용: /admin/records를 새로고침해도 조치기록을 관리자 공통 화면 안에서 다시 표시합니다.
 const initialAdminPath = window.location.pathname.replace(/\/+$/, "");
 const initialPreviewView = new URLSearchParams(window.location.search).get("view");
 const serverAdminView = adminPage.dataset.pageMode;
-setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : "staff", false);
+setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : initialPreviewView === "staff" ? "staff" : "home", false);
 loadAdminData().catch(() => {});
 
 

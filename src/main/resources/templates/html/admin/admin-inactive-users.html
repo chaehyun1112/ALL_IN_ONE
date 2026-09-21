@@ -36,7 +36,7 @@
         <span class="admin-service-placeholder">병동 통합 관제</span>
         <nav class="admin-page-nav" aria-label="계정 관리 메뉴">
             <div class="admin-nav-group">
-                <a href="admin.html" th:href="@{/admin}">직원 관리</a>
+                <a href="admin.html?view=staff" th:href="@{/admin(view='staff')}">직원 관리</a>
                 <div class="admin-nav-submenu">
                     <a href="admin.html?view=caregivers" th:href="@{/admin/caregivers}" aria-label="간병인 관리">
                         <span class="admin-nav-item-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.6-3.7 2.8-5.7 6.5-5.7s5.9 2 6.5 5.7"/></svg></span>
