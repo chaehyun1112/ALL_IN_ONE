@@ -335,6 +335,10 @@ main {
   font-size:23px;
   color:#688571}
 .station {
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-weight:650;
   background:linear-gradient(135deg,#e4eee6,#cfdfd1);
   border-color:#9db8a3}
 .floor-footer {

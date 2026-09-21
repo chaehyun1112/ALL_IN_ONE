@@ -132,7 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function facility(){const el=document.createElement("div");el.className="facility";el.innerHTML='<span class="symbol" aria-hidden="true">WC</span><span>화장실</span>';return el;}
   for(let n=roomStart;n<roomStart+10;n++)addRoom(n,upper);
   lower.append(facility());for(let n=roomStart+10;n<roomStart+13;n++)addRoom(n,lower);
-  const gap=document.createElement("div");gap.setAttribute("aria-hidden","true");lower.append(gap);
+  const station=document.createElement("div");
+  station.className="facility station";
+  station.innerHTML='<span>간호사<br>스테이션</span>';
+  lower.append(station);
   for(let n=roomStart+13;n<roomStart+17;n++)addRoom(n,lower);lower.append(facility());
 
   /* [2026.09.16] 고친 내용: 현황 카드를 전체·낙상·침대 이탈·정상 순서로 표시해도 기존 상태 필터와 연결합니다. */
