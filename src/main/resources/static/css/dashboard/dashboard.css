@@ -1958,6 +1958,6 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 .password-popup-heading h2 { margin:0; font-size:20px; }
 .password-popup-heading button { border:0; border-radius:6px; padding:6px 10px; background:transparent; color:#486053; font-size:20px; cursor:pointer; }
 .password-popup-heading button:hover { background:#edf3ef; }
-#password-change-frame { display:block; width:100%; height:min(470px,calc(100dvh - 112px)); border:0; background:white; }
+#password-change-frame { display:block; width:100%; height:min(410px,calc(100dvh - 112px)); border:0; background:white; }
 
 /* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */

@@ -18,8 +18,8 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserDto> findUsers(String hospitalDomain) {
-        return adminMapper.findUsersByHospital(hospitalDomain);
+    public List<UserDto> findUsers(String hospitalDomain, String jobType) {
+        return adminMapper.findUsersByHospital(hospitalDomain, jobType);
     }
 
     @Transactional

@@ -14,13 +14,16 @@
             e.emp_nm AS user_name,
             e.auth_st AS auth_status,
             e.ward_id,
-            w.ward_nm AS ward_name
+            w.ward_nm AS ward_name,
+            e.phone_no AS phone_number,
+            e.room_no AS room_number
         FROM tb_emp e
         LEFT JOIN tb_ward w
           ON w.ward_id = e.ward_id
          AND w.hosp_div_id = e.hosp_div_id
         WHERE e.hosp_div_id = #{hospitalDomain}
           AND e.role_cd = 'USER'
+          AND e.job_cd = #{jobType}
           AND e.auth_st = 'APPROVED'
 
         <if test="keyword != null and keyword != ''">
@@ -45,13 +48,15 @@
             e.auth_st AS auth_status,
             e.ward_id,
             w.ward_nm AS ward_name,
-            e.upd_dt AS deactivated_at
+            e.upd_dt AS deactivated_at,
+            e.room_no AS room_number
         FROM tb_emp e
         LEFT JOIN tb_ward w
           ON w.ward_id = e.ward_id
          AND w.hosp_div_id = e.hosp_div_id
         WHERE e.hosp_div_id = #{hospitalDomain}
           AND e.role_cd = 'USER'
+          AND e.job_cd = #{jobType}
           AND e.auth_st = 'INACTIVE'
         ORDER BY e.upd_dt DESC NULLS LAST, e.emp_id
     </select>

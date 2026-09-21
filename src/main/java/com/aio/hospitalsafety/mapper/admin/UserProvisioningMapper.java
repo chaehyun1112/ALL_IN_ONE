@@ -15,11 +15,16 @@ public interface UserProvisioningMapper {
             @Param("wardId") Long wardId
     );
 
+    Long findThirdFloorWardId(@Param("hospitalId") String hospitalId);
+
     int insertUser(
             @Param("userId") String userId,
             @Param("passwordHash") String passwordHash,
             @Param("hospitalId") String hospitalId,
             @Param("wardId") Long wardId,
-            @Param("userName") String userName
+            @Param("userName") String userName,
+            @Param("jobType") String jobType,
+            @Param("phoneNumber") String phoneNumber,
+            @Param("roomNumber") String roomNumber
     );
 }

@@ -15,7 +15,8 @@ public interface AdminUserManagementMapper {
     // 승인 완료 사용자 목록 조회
     List<ApprovedUserResponse> findApprovedUsers(
             @Param("hospitalDomain") String hospitalDomain,
-            @Param("keyword") String keyword
+            @Param("keyword") String keyword,
+            @Param("jobType") String jobType
     );
 
     // 현재 병원의 병동 목록 조회
@@ -38,7 +39,8 @@ public interface AdminUserManagementMapper {
 
     // 비활성화된 일반 사용자 목록 조회
     List<InactiveUserResponse> findInactiveUsers(
-            @Param("hospitalDomain") String hospitalDomain
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("jobType") String jobType
     );
 
     // 비활성화된 일반 사용자 계정 재활성화

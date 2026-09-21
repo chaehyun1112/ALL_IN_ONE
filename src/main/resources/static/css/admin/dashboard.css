@@ -145,6 +145,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 /* [9.15] 추가내용: 관리 선택 팝업이 열려 있는 동안 뒤 화면의 스크롤을 고정한다. */
 body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-management-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+.admin-management-choice-dialog.is-caregiver .admin-management-options { grid-template-columns: repeat(2, 1fr); }
 .admin-management-option { display: flex; min-height: 150px; padding: 14px 10px; flex-direction: column; align-items: center; justify-content: center; gap: 7px; border: 1px solid #dfe6dc; border-radius: 11px; background: #fff; color: var(--admin-text); text-align: center; cursor: pointer; }
 .admin-management-option:hover, .admin-management-option:focus-visible, .admin-management-option.is-selected { border-color: #8ea6b8; background: #edf3f7; outline: 0; }
 .admin-management-option-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: #edf4ee; }
@@ -156,6 +157,15 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-management-option small { color: #7b8274; font-size: 11px; line-height: 1.4; }
 /* [2026-09-16 변경] 설명 줄 수와 무관하게 세 관리 카드의 아이콘·제목 위치를 같게 맞춘다. */
 .admin-management-option small { display: block; min-height: 46px; }
+.admin-management-choice-dialog.is-caregiver .admin-management-option {
+    display: grid;
+    grid-template-rows: 38px 20px 20px;
+    align-content: center;
+    justify-items: center;
+    row-gap: 9px;
+}
+.admin-management-choice-dialog.is-caregiver .admin-management-option strong { line-height: 20px; }
+.admin-management-choice-dialog.is-caregiver .admin-management-option small { min-height: 0; line-height: 20px; }
 .admin-management-choice-dialog .admin-primary:disabled { border-color: #e1e6df; background: #e1e6df; color: #9aa69c; cursor: not-allowed; }
 .admin-empty { text-align: center; color: var(--admin-muted); padding: 60px 16px; }
 /* [9.15] 추가내용: 직원 목록과 관리 이력의 페이지 이동 버튼을 공통 스타일로 표시한다. */
@@ -306,6 +316,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
     .admin-create-account { align-self: flex-start; }
     .admin-create-grid { grid-template-columns: 1fr; }
     .admin-management-options { grid-template-columns: 1fr; }
+    .admin-management-choice-dialog.is-caregiver .admin-management-options { grid-template-columns: 1fr; }
     .admin-management-option { min-height: 90px; }
 }
 

@@ -2,6 +2,7 @@ package com.aio.hospitalsafety.controller.admin;
 
 import com.aio.hospitalsafety.config.HospitalUserDetails;
 import com.aio.hospitalsafety.dto.admin.CreateUserRequest;
+import com.aio.hospitalsafety.dto.admin.CreateCaregiverRequest;
 import com.aio.hospitalsafety.dto.admin.CreateUserResponse;
 import com.aio.hospitalsafety.service.admin.UserProvisioningService;
 import jakarta.validation.Valid;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.aio.hospitalsafety.domain.UserJobType;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -33,19 +37,37 @@ public class UserProvisioningController {
     @PostMapping("/users")
     public ResponseEntity<CreateUserResponse> createUser(
             @AuthenticationPrincipal HospitalUserDetails loginAdmin,
+            @RequestParam(defaultValue = "GENERAL") UserJobType jobType,
             @Valid @RequestBody CreateUserRequest request
     ) {
         HospitalUserDetails admin = requireAdmin(loginAdmin);
+        if (jobType != UserJobType.GENERAL) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "간병인 계정은 간병인 생성 화면에서 등록해 주세요.");
+        }
 
         CreateUserResponse response =
                 userProvisioningService.createUser(
                         admin.getHospitalId(),
                         admin.getUsername(),
-                        request
+                        request,
+                        jobType.name()
                 );
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .cacheControl(CacheControl.noStore())
+                .body(response);
+    }
+
+    @PostMapping("/caregivers")
+    public ResponseEntity<CreateUserResponse> createCaregiver(
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
+            @Valid @RequestBody CreateCaregiverRequest request
+    ) {
+        HospitalUserDetails admin = requireAdmin(loginAdmin);
+        CreateUserResponse response = userProvisioningService.createCaregiver(
+                admin.getHospitalId(), admin.getUsername(), request);
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .cacheControl(CacheControl.noStore())
                 .body(response);
     }

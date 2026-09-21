@@ -21,6 +21,15 @@
         )
     </select>
 
+    <select id="findThirdFloorWardId" resultType="java.lang.Long">
+        SELECT ward_id
+        FROM tb_ward
+        WHERE hosp_div_id = #{hospitalId}
+          AND TRIM(ward_nm) LIKE '3%'
+        ORDER BY ward_id
+        LIMIT 1
+    </select>
+
     <insert id="insertUser">
         INSERT INTO tb_emp (
             emp_id,
@@ -28,6 +37,9 @@
             hosp_div_id,
             ward_id,
             emp_nm,
+            phone_no,
+            room_no,
+            job_cd,
             role_cd,
             auth_st,
             must_change_password
@@ -38,6 +50,9 @@
             #{hospitalId},
             #{wardId},
             #{userName},
+            #{phoneNumber,jdbcType=VARCHAR},
+            #{roomNumber,jdbcType=VARCHAR},
+            #{jobType},
             'USER',
             'APPROVED',
             TRUE

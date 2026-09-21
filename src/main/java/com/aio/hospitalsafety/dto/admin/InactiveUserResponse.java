@@ -8,6 +8,7 @@ public record InactiveUserResponse(
         String authStatus,
         Long wardId,
         String wardName,
-        Instant deactivatedAt
+        Instant deactivatedAt,
+        String roomNumber
 ) {
 }

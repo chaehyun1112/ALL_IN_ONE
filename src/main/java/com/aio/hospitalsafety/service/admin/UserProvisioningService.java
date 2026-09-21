@@ -3,6 +3,7 @@ package com.aio.hospitalsafety.service.admin;
 import com.aio.hospitalsafety.domain.ApprovalStatus;
 import com.aio.hospitalsafety.domain.Role;
 import com.aio.hospitalsafety.dto.admin.CreateUserRequest;
+import com.aio.hospitalsafety.dto.admin.CreateCaregiverRequest;
 import com.aio.hospitalsafety.dto.admin.CreateUserResponse;
 import com.aio.hospitalsafety.exception.UserConflictException;
 import com.aio.hospitalsafety.mapper.admin.UserProvisioningMapper;
@@ -41,7 +42,38 @@ public class UserProvisioningService {
     public CreateUserResponse createUser(
             String hospitalId,
             String adminId,
-            CreateUserRequest request
+            CreateUserRequest request,
+            String jobType
+    ) {
+        return createAccount(hospitalId, adminId, request.userId(), request.userName(),
+                request.wardId(), jobType, null, null);
+    }
+
+    @Transactional
+    public CreateUserResponse createCaregiver(
+            String hospitalId,
+            String adminId,
+            CreateCaregiverRequest request
+    ) {
+        String phoneNumber = request.phoneNumber().replace("-", "");
+        String userId = "cg." + phoneNumber;
+        Long wardId = userProvisioningMapper.findThirdFloorWardId(hospitalId);
+        if (wardId == null) {
+            throw new IllegalArgumentException("현재 병원에 3병동이 등록되어 있지 않습니다.");
+        }
+        return createAccount(hospitalId, adminId, userId, request.userName(),
+                wardId, "CAREGIVER", phoneNumber, String.valueOf(request.roomNumber()));
+    }
+
+    private CreateUserResponse createAccount(
+            String hospitalId,
+            String adminId,
+            String userId,
+            String userName,
+            Long wardId,
+            String jobType,
+            String phoneNumber,
+            String roomNumber
     ) {
         String normalizedHospitalId = requireText(
                 hospitalId,
@@ -54,12 +86,12 @@ public class UserProvisioningService {
         );
 
         String normalizedUserId = requireText(
-                request.userId(),
+                userId,
                 "직원 아이디를 입력해 주세요."
         );
 
         String normalizedUserName = requireText(
-                request.userName(),
+                userName,
                 "직원 이름을 입력해 주세요."
         );
 
@@ -71,7 +103,7 @@ public class UserProvisioningService {
 
         if (!userProvisioningMapper.existsWardInHospital(
                 normalizedHospitalId,
-                request.wardId()
+                wardId
         )) {
             throw new IllegalArgumentException(
                     "현재 병원에 속한 병동을 선택해 주세요."
@@ -89,8 +121,11 @@ public class UserProvisioningService {
                     normalizedUserId,
                     passwordHash,
                     normalizedHospitalId,
-                    request.wardId(),
-                    normalizedUserName
+                    wardId,
+                    normalizedUserName,
+                    jobType,
+                    phoneNumber,
+                    roomNumber
             );
 
             if (inserted != 1) {
@@ -115,7 +150,7 @@ public class UserProvisioningService {
         return new CreateUserResponse(
                 normalizedUserId,
                 normalizedUserName,
-                request.wardId(),
+                wardId,
                 Role.USER,
                 ApprovalStatus.APPROVED,
                 true,

@@ -327,7 +327,10 @@ function renderAdminInactiveUsers() {
         label.append(checkbox);
         checkCell.append(label);
         row.append(checkCell);
-        for (const value of [user.userName, user.userId, user.wardName || "미배정", formatAdminDeactivatedDate(user.deactivatedAt)]) {
+        const assignment = document.body.dataset.adminJobType === "CAREGIVER"
+            ? (user.roomNumber ? `${user.roomNumber}호` : "미배정")
+            : (user.wardName || "미배정");
+        for (const value of [user.userName, user.userId, assignment, formatAdminDeactivatedDate(user.deactivatedAt)]) {
             const cell = document.createElement("td");
             cell.textContent = value;
             row.append(cell);
@@ -358,20 +361,21 @@ function renderAdminInactiveUsers() {
     }
     document.querySelector("#admin-inactive-count").innerHTML = adminLoadFailed
         ? "—<span>명</span>" : adminInactiveUsers.length + "<span>명</span>";
+    const personLabel = document.body.dataset.adminJobType === "CAREGIVER" ? "간병인" : "직원";
     document.querySelector("#admin-inactive-result").textContent = adminLoading
-        ? "직원 목록을 불러오는 중입니다."
+        ? `${personLabel} 목록을 불러오는 중입니다.`
         : adminLoadFailed ? "목록을 불러오지 못했습니다."
-            : adminSelectedOnly ? "선택한 직원 " + visibleUsers.length + "명" : "검색 결과 " + visibleUsers.length + "명";
+            : adminSelectedOnly ? `선택한 ${personLabel} ` + visibleUsers.length + "명" : "검색 결과 " + visibleUsers.length + "명";
     const empty = document.querySelector("#admin-inactive-empty");
     empty.hidden = adminLoading || adminLoadFailed || visibleUsers.length > 0;
     const filtered = Boolean(adminInactiveSearch.value.trim() || adminInactiveWard.value);
     document.querySelector("#admin-inactive-empty-title").textContent = adminSelectedOnly
-        ? "선택한 직원이 없습니다"
-        : filtered ? "검색 결과가 없습니다" : "비활성화 직원이 없습니다";
+        ? `선택한 ${personLabel}이 없습니다`
+        : filtered ? "검색 결과가 없습니다" : `비활성화 ${personLabel}이 없습니다`;
     document.querySelector("#admin-inactive-empty-description").textContent = adminSelectedOnly
-        ? "검색 결과로 돌아가 직원을 선택해 주세요."
+        ? `검색 결과로 돌아가 ${personLabel}을 선택해 주세요.`
         : filtered ? "이름, 아이디 또는 병동 조건을 다시 확인해 주세요."
-            : "승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.";
+            : `승인완료 목록에서 비활성화한 ${personLabel}이 여기에 표시됩니다.`;
     // [2026-09-18] 검색 옆 초기화 버튼은 결과 유무와 관계없이 표시하고 처리 중에는 비활성화한다.
     document.querySelector("#admin-inactive-reset").disabled = adminBusy || adminLoading;
     renderAdminInactivePagination(visibleUsers.length);
@@ -386,7 +390,7 @@ async function loadAdminInactiveData() {
     try {
         if (!csrfToken) throw new Error("DB 목록은 Spring Boot 서버에 로그인한 뒤 확인해 주세요.");
         const [users, wards] = await Promise.all([
-            requestAdminInactiveApi("/api/admin/users/inactive"),
+            requestAdminInactiveApi(`/api/admin/users/inactive?jobType=${document.body.dataset.adminJobType === "CAREGIVER" ? "CAREGIVER" : "GENERAL"}`),
             requestAdminInactiveApi("/api/admin/wards")
         ]);
         if (!Array.isArray(users) || !Array.isArray(wards)) throw new Error("목록 응답 형식이 올바르지 않습니다.");
@@ -478,7 +482,7 @@ async function submitAdminStatusChange(event) {
         adminStatusDialog.close();
         if (!failures.length && change.nextStatus === "ACTIVATE") {
             // [2026.09.16] 고친 내용: 삭제한 복귀 링크 대신 활성화 완료 후 관리자 직원 관리 화면으로 이동합니다.
-            window.location.assign("/admin?status=APPROVED");
+            window.location.assign(document.body.dataset.adminJobType === "CAREGIVER" ? "/admin/caregivers?status=APPROVED" : "/admin?status=APPROVED");
             return;
         }
         const loaded = await loadAdminInactiveData();
@@ -577,6 +581,23 @@ document.querySelector("#admin-inactive-retry").addEventListener("click", loadAd
 
 updateAdminClock();
 setInterval(updateAdminClock, 30000);
-loadAdminInactiveData();
+window.addEventListener("admin-job-type-changed", () => {
+    adminSelectedIds.clear();
+    adminSelectedOnly = false;
+    adminInactiveCurrentPage = 1;
+    const caregiver = document.body.dataset.adminJobType === "CAREGIVER";
+    document.querySelector("#admin-inactive-stat-title").textContent = caregiver ? "비활성화 간병인" : "비활성화 직원";
+    const assignmentHeading = document.querySelector("#admin-inactive-assignment-heading");
+    if (assignmentHeading) assignmentHeading.textContent = caregiver ? "담당 병실" : "병동";
+    document.querySelector("#admin-inactive-view .admin-heading > p").textContent = caregiver
+        ? "간병인의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다."
+        : "직원의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.";
+    loadAdminInactiveData();
+});
+if (document.body.dataset.adminJobType === "CAREGIVER") {
+    window.dispatchEvent(new CustomEvent("admin-job-type-changed"));
+} else {
+    loadAdminInactiveData();
+}
 
 })();

@@ -41,6 +41,9 @@
 })();
 
 let adminUsers = [];
+let adminJobType = window.location.pathname.startsWith("/admin/caregivers") || new URLSearchParams(window.location.search).get("view")?.includes("caregivers") ? "CAREGIVER" : "GENERAL";
+let adminLoadVersion = 0;
+document.body.dataset.adminJobType = adminJobType;
 let adminWards = [];
 let adminActiveStatus = "ALL";
 let adminSearchQuery = "";
@@ -224,7 +227,9 @@ function combineAdminUsers(users, approvedUsers) {
             name: approvedDetail?.userName ?? user.name ?? "",
             status: approvedDetail?.authStatus ?? user.status ?? "",
             wardId: approvedDetail?.wardId ?? null,
-            ward: approvedDetail?.wardName ?? user.ward ?? "미배정"
+            ward: approvedDetail?.wardName ?? user.ward ?? "미배정",
+            phoneNumber: approvedDetail?.phoneNumber ?? null,
+            roomNumber: approvedDetail?.roomNumber ?? null
         };
     });
 }
@@ -233,12 +238,15 @@ function combineAdminUsers(users, approvedUsers) {
  * 사용자 목록과 병동 목록을 DB에서 불러온다.
  */
 async function loadAdminData(silent = false) {
+    const requestVersion = ++adminLoadVersion;
+    const requestedJobType = adminJobType;
     try {
         const [users, approvedUsers, wards] = await Promise.all([
-            requestAdminApi("/api/admin/users"),
-            requestAdminApi("/api/admin/users/approved"),
+            requestAdminApi(`/api/admin/users?jobType=${requestedJobType}`),
+            requestAdminApi(`/api/admin/users/approved?jobType=${requestedJobType}`),
             requestAdminApi("/api/admin/wards")
         ]);
+        if (requestVersion !== adminLoadVersion) return;
 
         adminUsers = combineAdminUsers(users ?? [], approvedUsers ?? []);
         adminWards = wards ?? [];
@@ -246,6 +254,7 @@ async function loadAdminData(silent = false) {
         renderAdminWardOptions();
         renderAdminUsers();
     } catch (error) {
+        if (requestVersion !== adminLoadVersion) return;
         console.error(error);
 
         adminUsers = [];
@@ -310,6 +319,14 @@ function renderAdminWardOptions() {
         if (adminCreateWard) {
             adminCreateWard.append(option.cloneNode(true));
         }
+    }
+    renderAdminActionWardDropdown();
+}
+
+function renderAdminRoomOptions() {
+    adminWardSelect.replaceChildren(new Option("병실을 선택해 주세요", ""));
+    for (let roomNumber = 301; roomNumber <= 317; roomNumber += 1) {
+        adminWardSelect.append(new Option(`${roomNumber}호`, String(roomNumber)));
     }
     renderAdminActionWardDropdown();
 }
@@ -404,7 +421,7 @@ function renderAdminUsers() {
 
     const visibleUsers = adminUsers.filter(user => {
         const sameStatus = adminActiveStatus === "ALL" || user.status === adminActiveStatus;
-        const searchableText = `${user.name} ${user.userId}`.toLowerCase();
+        const searchableText = `${user.name} ${user.userId} ${user.phoneNumber || ""}`.toLowerCase();
         const matchesSearch = searchableText.includes(adminSearchQuery);
 
         return sameStatus && matchesSearch;
@@ -421,8 +438,18 @@ function renderAdminUsers() {
 
     for (const user of pageUsers) {
         const row = document.createElement("tr");
+        row.dataset.userId = user.userId;
 
-        for (const value of [user.name, user.userId, user.ward || "미배정"]) {
+        const assignment = adminJobType === "CAREGIVER"
+            ? (user.roomNumber ? `${user.roomNumber}호` : "미배정")
+            : (user.ward || "미배정");
+        const phoneDigits = (user.phoneNumber || "").replace(/\D/g, "");
+        const phoneDisplay = phoneDigits.length === 11
+            ? `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 7)}-${phoneDigits.slice(7)}`
+            : phoneDigits.length === 10
+                ? `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`
+                : (user.phoneNumber || "—");
+        for (const value of [user.name, adminJobType === "CAREGIVER" ? phoneDisplay : user.userId, assignment]) {
             const cell = document.createElement("td");
             cell.textContent = value;
             row.append(cell);
@@ -443,7 +470,7 @@ function renderAdminUsers() {
                     <path d="m4 16.5-.7 3.2 3.2-.7L18.4 7.1 15.9 4.6 4 16.5Z" />
                     <path d="m14.6 5.9 2.5 2.5" />
                 </svg>`;
-            editButton.title = "직원 관리 기능 열기";
+            editButton.title = adminJobType === "CAREGIVER" ? "간병인 관리 기능 열기" : "직원 관리 기능 열기";
             editButton.setAttribute("aria-label", `${user.name} 관리 기능 열기`);
 
             editButton.addEventListener("click", () => {
@@ -527,7 +554,17 @@ function renderAdminUsers() {
 function openAdminManagementChoice(user) {
     adminSelectedUser = user;
     adminManagementChoiceAction = "";
-    adminManagementChoiceDescription.textContent = `${user.name} (${user.userId})님에게 적용할 관리 작업을 선택해주세요.`;
+    adminManagementChoiceDescription.textContent = adminJobType === "CAREGIVER"
+        ? `${user.name}님에게 적용할 관리 작업을 선택해주세요.`
+        : `${user.name} (${user.userId})님에게 적용할 관리 작업을 선택해주세요.`;
+    const caregiver = adminJobType === "CAREGIVER";
+    adminManagementChoiceDialog.classList.toggle("is-caregiver", caregiver);
+    const assignmentOption = adminManagementOptions.find(option => option.dataset.adminAction === "ASSIGN" || option.dataset.adminAction === "ASSIGN_ROOM");
+    if (assignmentOption) assignmentOption.dataset.adminAction = caregiver ? "ASSIGN_ROOM" : "ASSIGN";
+    document.querySelector("#admin-management-assignment-title").textContent = caregiver ? "병실 변경" : "병동 변경";
+    document.querySelector("#admin-management-assignment-description").textContent = caregiver ? "담당 병실을 변경합니다." : "담당 병동을 변경합니다.";
+    const resetOption = adminManagementOptions.find(option => option.dataset.adminAction === "RESET_PASSWORD");
+    if (resetOption) resetOption.hidden = caregiver;
     adminManagementChoiceConfirm.disabled = true;
 
     for (const option of adminManagementOptions) {
@@ -624,23 +661,29 @@ function openAdminAction(user, action) {
         adminDialogConfirm.textContent = "반려하기";
     }
 
-    if (action === "ASSIGN") {
-        adminDialogTitle.textContent = "담당 병동 변경";
-        adminDialogDescription.textContent =
-            `${user.name} (${user.userId})님의 담당 병동을 변경합니다.`;
+    if (action === "ASSIGN" || action === "ASSIGN_ROOM") {
+        const roomChange = action === "ASSIGN_ROOM";
+        adminDialogTitle.textContent = roomChange ? "담당 병실 변경" : "담당 병동 변경";
+        adminDialogDescription.textContent = roomChange
+            ? `${user.name}님의 담당 병실을 변경합니다.`
+            : `${user.name} (${user.userId})님의 담당 병동을 변경합니다.`;
         adminDialogConfirm.textContent = "변경하기";
 
         adminWardField.hidden = false;
         adminWardSelect.disabled = false;
         adminWardSelect.required = true;
-
-        const currentWard = adminWards.find(ward =>
-            String(ward.wardId) === String(user.wardId)
-            || ward.wardName === user.ward
-        );
-
-        if (currentWard) {
-            adminWardSelect.value = String(currentWard.wardId);
+        document.querySelector("#admin-action-assignment-label").textContent = roomChange ? "변경할 병실" : "변경할 병동";
+        adminActionWardTrigger.setAttribute("aria-label", roomChange ? "변경할 병실 선택" : "변경할 병동 선택");
+        if (roomChange) {
+            renderAdminRoomOptions();
+            adminWardSelect.value = user.roomNumber ?? "";
+        } else {
+            renderAdminWardOptions();
+            const currentWard = adminWards.find(ward =>
+                String(ward.wardId) === String(user.wardId)
+                || ward.wardName === user.ward
+            );
+            if (currentWard) adminWardSelect.value = String(currentWard.wardId);
         }
     }
 
@@ -667,6 +710,21 @@ async function submitAdminAction() {
     const selectedUser = adminSelectedUser;
     const selectedAction = adminAction;
 
+    if (selectedAction === "ASSIGN_ROOM") {
+        if (!adminWardSelect.value) {
+            showAdminFeedback("변경할 병실을 선택해 주세요.");
+            adminActionWardTrigger.focus();
+            return;
+        }
+        selectedUser.roomNumber = adminWardSelect.value;
+        adminDialog.close();
+        renderAdminUsers();
+        showAdminFeedback("담당 병실을 화면에 반영했습니다. 새로고침하면 이전 배정으로 돌아갑니다.");
+        adminSelectedUser = null;
+        adminAction = "";
+        return;
+    }
+
     let url = "";
     let method = "PATCH";
     let body;
@@ -691,11 +749,7 @@ async function submitAdminAction() {
         }
 
         url = `/api/admin/users/${encodeURIComponent(selectedUser.userId)}/ward`;
-        body = JSON.stringify({
-            wardId: /^\d+$/.test(adminWardSelect.value)
-                ? Number(adminWardSelect.value)
-                : adminWardSelect.value
-        });
+        body = JSON.stringify({wardId: Number(adminWardSelect.value)});
         successMessage = "담당 병동을 변경했습니다.";
     }
 
@@ -866,7 +920,7 @@ document.querySelector("#admin-deactivate-cancel")?.addEventListener("click", ()
 document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", async event => {
     const confirmButton = event.currentTarget;
     if (confirmButton.disabled || !pendingDeactivateRow) return;
-    const userId = pendingDeactivateRow.querySelectorAll("td")[2]?.textContent.trim();
+    const userId = pendingDeactivateRow.dataset.userId || pendingDeactivateRow.querySelectorAll("td")[2]?.textContent.trim();
     if (!userId) {
         showAdminFeedback("비활성화할 계정 아이디를 확인할 수 없습니다.");
         return;
@@ -1230,18 +1284,18 @@ filterHistory(adminHistoryFilter);
 updateAdminClock();
 setInterval(updateAdminClock, 30000);
 
-loadAdminData().catch(() => {
-    // 오류 메시지는 loadAdminData에서 표시한다.
-});
-
 // [2026.09.16] 추가한 내용: 관리자 메뉴는 문서를 새로 열지 않고 본문만 바꿔 전체화면을 유지합니다.
 const adminInactiveView = document.querySelector("#admin-inactive-view");
 const adminRecordView = document.querySelector("#admin-record-view");
 const adminRecordFrame = document.querySelector("#admin-record-frame");
 const adminViewLinks = Array.from(document.querySelectorAll("[data-admin-view]"));
 function setAdminView(view, updateAddress = true) {
-    const isInactive = view === "inactive";
+    const isInactive = view === "inactive" || view === "inactive-caregivers";
     const isRecords = view === "records";
+    const nextJobType = view === "caregivers" || view === "inactive-caregivers" ? "CAREGIVER" : "GENERAL";
+    const jobChanged = adminJobType !== nextJobType;
+    adminJobType = nextJobType;
+    document.body.dataset.adminJobType = adminJobType;
     adminInactiveView.hidden = !isInactive;
     adminRecordView.hidden = !isRecords;
     adminPage.hidden = isInactive || isRecords;
@@ -1255,6 +1309,30 @@ function setAdminView(view, updateAddress = true) {
         adminPage.classList.toggle("is-staff-page", view !== "history");
         filterHistory(adminHistoryFilter);
     }
+    const caregiver = view === "caregivers";
+    document.querySelector("#admin-title").textContent = view === "history" ? "관리 이력" : caregiver ? "간병인 관리" : "직원 관리";
+    document.querySelector("#admin-list-title").textContent = view === "history" ? "관리 이력 검색" : caregiver ? "간병인 목록" : "직원 목록";
+    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history" ? "관리자가 처리한 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다." : "직원 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
+    document.querySelector(".admin-management-title p").textContent = view === "history" ? "이름, 아이디 또는 병동으로 처리 이력을 검색합니다." : caregiver ? "간병인 계정을 검색하고 필요한 관리 작업을 진행합니다." : "직원 계정을 검색하고 필요한 관리 작업을 진행합니다.";
+    document.querySelector("#admin-create-title").textContent = caregiver ? "간병인 계정 생성" : "간호사 계정 생성";
+    document.querySelector("#admin-create-complete-dialog > p").textContent = caregiver ? "등록된 간병인 정보를 확인해 주세요." : "아래 로그인 정보를 간호사에게 전달해주세요.";
+    document.querySelector("#admin-password-reset-dialog > p").textContent = caregiver ? "아래 변경된 비밀번호를 간병인에게 전달해주세요." : "아래 변경된 비밀번호를 간호사에게 전달해주세요.";
+    document.querySelector("#admin-management-choice-title").textContent = caregiver ? "간병인 관리" : "직원 관리";
+    document.querySelector("#admin-user-caption").textContent = caregiver ? "간병인 관리 목록" : "직원 관리 목록";
+    document.querySelector("#admin-user-id-heading").textContent = caregiver ? "전화번호" : "아이디";
+    document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
+    document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
+    document.querySelector("#admin-assignment-heading").textContent = caregiver ? "담당 병실" : "배정 병동";
+    document.querySelector("#complete-account-assignment-label").textContent = caregiver ? "담당 병실" : "담당 병동";
+    document.querySelector("#admin-user-pagination").setAttribute("aria-label", caregiver ? "간병인 목록 페이지" : "직원 목록 페이지");
+    document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "비활성화 간병인관리" : "비활성화 직원관리";
+    if (jobChanged && !isRecords) {
+        adminUsers = [];
+        adminUserPage = 1;
+        renderAdminUsers();
+        loadAdminData().catch(() => {});
+        window.dispatchEvent(new CustomEvent("admin-job-type-changed"));
+    }
     adminViewLinks.forEach(link => {
         const active = link.dataset.adminView === view;
         link.classList.toggle("active", active);
@@ -1262,10 +1340,12 @@ function setAdminView(view, updateAddress = true) {
     });
     document.title = view === "records" ? "관리자 조치기록 | 병동 통합 관제"
         : view === "history" ? "관리 이력 | 병동 통합 관제"
+        : view === "caregivers" ? "간병인 관리 | 병동 통합 관제"
+        : view === "inactive-caregivers" ? "비활성화 간병인관리 | 병동 통합 관제"
         : view === "inactive" ? "비활성화 직원관리 | 병동 통합 관제"
         : "직원 관리 | 병동 통합 관제";
     if (updateAddress) {
-        const path = view === "records" ? "/admin/records" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : "/admin";
+        const path = view === "records" ? "/admin/records" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : "/admin";
         window.history.pushState({ adminView: view }, "", path);
     }
 }
@@ -1274,12 +1354,16 @@ adminViewLinks.forEach(link => link.addEventListener("click", event => {
     setAdminView(link.dataset.adminView);
 }));
 window.addEventListener("popstate", () => {
-    const path = window.location.pathname;
-    setAdminView(path.endsWith("/records") ? "records" : path.endsWith("/history") ? "history" : path.endsWith("/admin_de") ? "inactive" : "staff", false);
+    const path = window.location.pathname.replace(/\/+$/, "");
+    const previewView = new URLSearchParams(window.location.search).get("view");
+    setAdminView(path.endsWith("/records") ? "records" : path.endsWith("/history") || previewView === "history" ? "history" : path.endsWith("/caregivers/inactive") || previewView === "inactive-caregivers" ? "inactive-caregivers" : path.endsWith("/caregivers") || previewView === "caregivers" ? "caregivers" : path.endsWith("/admin_de") ? "inactive" : "staff", false);
 });
 
 // [2026.09.17] 추가한 내용: /admin/records를 새로고침해도 조치기록을 관리자 공통 화면 안에서 다시 표시합니다.
-const initialAdminPath = window.location.pathname;
-setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") ? "history" : initialAdminPath.endsWith("/admin_de") ? "inactive" : "staff", false);
+const initialAdminPath = window.location.pathname.replace(/\/+$/, "");
+const initialPreviewView = new URLSearchParams(window.location.search).get("view");
+const serverAdminView = adminPage.dataset.pageMode;
+setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : "staff", false);
+loadAdminData().catch(() => {});
 
 

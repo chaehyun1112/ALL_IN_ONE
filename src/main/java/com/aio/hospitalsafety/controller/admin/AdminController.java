@@ -17,6 +17,20 @@ public class AdminController {
         return "html/admin/admin";
     }
 
+    @GetMapping({"/admin/caregivers", "/admin/caregivers/"})
+    public String adminCaregivers(Authentication authentication, Model model) {
+        model.addAttribute("adminId", authentication == null ? "admin01" : authentication.getName());
+        model.addAttribute("pageMode", "caregivers");
+        return "html/admin/admin";
+    }
+
+    @GetMapping({"/admin/caregivers/inactive", "/admin/caregivers/inactive/"})
+    public String adminInactiveCaregivers(Authentication authentication, Model model) {
+        model.addAttribute("adminId", authentication == null ? "admin01" : authentication.getName());
+        model.addAttribute("pageMode", "inactive-caregivers");
+        return "html/admin/admin";
+    }
+
     @GetMapping({"/admin/history", "/admin/history/"})
     public String adminHistory(Authentication authentication, Model model) {
         String adminId = authentication == null ? "admin01" : authentication.getName();

@@ -1,0 +1,115 @@
+@charset "UTF-8";
+
+/* 관리자 메뉴를 화면의 블루 그레이 카드 디자인과 맞춥니다. */
+.admin-topbar { z-index: 20; }
+.admin-page-nav {
+  z-index: 1;
+  align-items: center;
+  gap: 10px;
+  padding: 4px;
+  border: 1px solid #e0e8ee;
+  border-radius: 12px;
+  background: #f4f7fa;
+  overflow: visible;
+}
+.admin-nav-group { position: relative; display: flex; align-items: center; }
+.admin-page-nav > a,
+.admin-nav-group > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 35px;
+  padding: 0 17px;
+  border-radius: 8px;
+  color: #526577;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+}
+.admin-nav-group > a::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  margin: -3px 0 0 9px;
+  border-right: 1.7px solid currentColor;
+  border-bottom: 1.7px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform .16s ease;
+}
+.admin-nav-group:hover > a::after,
+.admin-nav-group:focus-within > a::after { transform: translateY(3px) rotate(225deg); }
+.admin-page-nav > a:hover,
+.admin-page-nav > a:focus-visible,
+.admin-nav-group:hover > a,
+.admin-nav-group:focus-within > a { background: #e6eef5; color: #36566f; }
+.admin-page-nav > a.active,
+.admin-nav-group > a.active,
+.admin-nav-group:has(.admin-nav-submenu a.active) > a {
+  background: #fff;
+  color: #39576d;
+  box-shadow: 0 1px 5px #29343d1b;
+}
+.admin-page-nav a:focus-visible { outline: 2px solid #66849a; outline-offset: 2px; }
+
+.admin-nav-submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 30;
+  display: none;
+  width: 258px;
+  padding: 8px;
+  border: 1px solid #d8e3eb;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 14px 32px #29343d25;
+}
+.admin-nav-group:hover .admin-nav-submenu,
+.admin-nav-group:focus-within .admin-nav-submenu { display: block; }
+.admin-nav-submenu a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 60px;
+  padding: 9px;
+  border-radius: 9px;
+  color: #29343d;
+  text-decoration: none;
+}
+.admin-nav-submenu a:hover,
+.admin-nav-submenu a:focus-visible,
+.admin-nav-submenu a.active { background: #edf3f7; color: #294b62; }
+.admin-nav-item-icon {
+  display: grid;
+  flex: 0 0 38px;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #d9e5ed;
+  border-radius: 11px;
+  background: #f2f7fa;
+  color: #526d82;
+}
+.admin-nav-item-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.admin-nav-item-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 3px; }
+.admin-nav-item-copy strong { font-size: 13px; line-height: 1.2; }
+.admin-nav-item-copy small { color: #738697; font-size: 11px; font-weight: 400; line-height: 1.2; white-space: nowrap; }
+.admin-nav-item-arrow { color: #90a4b4; font-size: 21px; line-height: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .admin-nav-group:hover .admin-nav-submenu,
+  .admin-nav-group:focus-within .admin-nav-submenu { animation: admin-nav-enter .16s ease-out; }
+}
+@keyframes admin-nav-enter {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 801px) and (max-width: 1450px) {
+  :root { --admin-topbar-height: 112px; }
+  .admin-topbar { height: 112px; min-height: 112px; align-items: flex-start; padding-top: 14px; }
+  .admin-page-nav { top: 63px; left: 24px; max-width: calc(100% - 48px); transform: none; }
+}
+@media (max-width: 800px) {
+  .admin-page-nav { flex-wrap: wrap; max-width: calc(100vw - 32px); white-space: normal; }
+  .admin-nav-submenu { width: min(258px, calc(100vw - 40px)); }
+}

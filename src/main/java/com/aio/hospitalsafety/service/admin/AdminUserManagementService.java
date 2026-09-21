@@ -28,14 +28,16 @@ public class AdminUserManagementService {
     @Transactional(readOnly = true)
     public List<ApprovedUserResponse> getApprovedUsers(
             String hospitalDomain,
-            String keyword
+            String keyword,
+            String jobType
     ) {
         String normalizedKeyword =
                 keyword == null ? "" : keyword.trim();
 
         return adminUserManagementMapper.findApprovedUsers(
                 hospitalDomain,
-                normalizedKeyword
+                normalizedKeyword,
+                jobType
         );
     }
 
@@ -94,10 +96,12 @@ public class AdminUserManagementService {
     // 비활성화된 일반 사용자 목록 조회
     @Transactional(readOnly = true)
     public List<InactiveUserResponse> getInactiveUsers(
-            String hospitalDomain
+            String hospitalDomain,
+            String jobType
     ) {
         return adminUserManagementMapper.findInactiveUsers(
-                hospitalDomain
+                hospitalDomain,
+                jobType
         );
     }
 

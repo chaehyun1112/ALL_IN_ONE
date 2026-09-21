@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.aio.hospitalsafety.domain.UserJobType;
 
 import com.aio.hospitalsafety.common.SessionConstants;
 import com.aio.hospitalsafety.dto.UserDto;
@@ -32,6 +34,7 @@ public class AdminApprovalController {
     // 가입 신청 및 승인 완료 사용자 목록 조회
     @GetMapping
     public ResponseEntity<List<UserDto>> findUsers(
+            @RequestParam(defaultValue = "GENERAL") UserJobType jobType,
             HttpSession session
     ) {
         String hospitalDomain =
@@ -44,7 +47,7 @@ public class AdminApprovalController {
         }
 
         return ResponseEntity.ok(
-                adminService.findUsers(hospitalDomain)
+                adminService.findUsers(hospitalDomain, jobType.name())
         );
     }
 

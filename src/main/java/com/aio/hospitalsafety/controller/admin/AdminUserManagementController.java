@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.aio.hospitalsafety.common.SessionConstants;
 import com.aio.hospitalsafety.config.HospitalUserDetails;
 import com.aio.hospitalsafety.dto.WardOption;
+import com.aio.hospitalsafety.domain.UserJobType;
 import com.aio.hospitalsafety.dto.admin.ApprovedUserResponse;
 import com.aio.hospitalsafety.dto.admin.ChangeUserWardRequest;
 import com.aio.hospitalsafety.dto.admin.InactiveUserResponse;
@@ -56,13 +57,15 @@ public class AdminUserManagementController {
     @GetMapping("/users/approved")
     public List<ApprovedUserResponse> getApprovedUsers(
             @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "GENERAL") UserJobType jobType,
             HttpSession session
     ) {
         String hospitalDomain = requireHospitalDomain(session);
 
         return adminUserManagementService.getApprovedUsers(
                 hospitalDomain,
-                keyword
+                keyword,
+                jobType.name()
         );
     }
 
@@ -199,10 +202,12 @@ public class AdminUserManagementController {
     // 비활성화된 사용자 목록 조회
     @GetMapping("/users/inactive")
     public List<InactiveUserResponse> getInactiveUsers(
+            @RequestParam(defaultValue = "GENERAL") UserJobType jobType,
             HttpSession session
     ) {
         return adminUserManagementService.getInactiveUsers(
-                requireHospitalDomain(session)
+                requireHospitalDomain(session),
+                jobType.name()
         );
     }
 

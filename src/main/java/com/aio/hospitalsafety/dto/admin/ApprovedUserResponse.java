@@ -5,6 +5,8 @@ public record ApprovedUserResponse(
         String userName,
         String authStatus,
         Long wardId,
-        String wardName
+        String wardName,
+        String phoneNumber,
+        String roomNumber
 ) {
 }

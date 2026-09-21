@@ -117,11 +117,8 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .page-header .profile-toggle, .page-header .profile-copy small { color: #29343d; }
 .page-header .dashboard-link:hover { color: #39576d; }
 .page-header .fullscreen-toggle { border-color: #526d8260; }
-.change-page {
-  background: radial-gradient(ellipse at top, #f9fbfd, #e9f0f5 75%);
-}
-/* [2026.09.19] 도메인·로그인은 기존 CCTV·병원 배경을 복원하고 이미지의 명암을 블루 그레이에 합성합니다. */
-.domain-page, .login-page {
+/* 도메인·로그인·비밀번호 변경 화면의 배경 이미지를 동일하게 유지합니다. */
+.domain-page, .login-page, .change-page {
   background: #e9f0f5 url('../image/login.png') center 34.85% / cover no-repeat;
   background-blend-mode: luminosity;
 }
