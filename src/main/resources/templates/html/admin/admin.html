@@ -10,7 +10,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <!-- [9.15] 수정내용: 직원 관리와 관리 이력 화면에서 브라우저 제목도 현재 화면에 맞게 표시한다. -->
-    <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history'} ? '관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '직원 관리 | 병동 통합 관제'))">직원 관리 | 병동 통합 관제</title>
+    <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history'} ? '관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제'))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css?v=caregiver-card-align-20260921"
@@ -18,8 +18,8 @@
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=caregiver-complete-20260921" th:href="@{/css/admin/account-create.css(v='caregiver-complete-20260921')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-row-text-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-row-text-20260920')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=admin-nav-active-20260921"
-            th:src="@{/JS/admin/dashboard.js(v='admin-nav-active-20260921')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=admin-nurse-list-20260921"
+            th:src="@{/JS/admin/dashboard.js(v='admin-nurse-list-20260921')}"
             defer></script>
     <script src="../../../static/JS/admin/admin-history.js?v=caregiver-room-change-20260921"
         th:src="@{/JS/admin/admin-history.js(v='caregiver-room-change-20260921')}"
@@ -159,8 +159,8 @@
 <main class="admin-page" id="admin-management-page" aria-labelledby="admin-title" data-admin-id="admin01" data-page-mode="staff" th:classappend="${pageMode == 'history'} ? ' is-history-page' : ' is-staff-page'" th:attr="data-admin-id=${adminId},data-history-only=${pageMode == 'history'},data-page-mode=${pageMode}" th:hidden="${pageMode == 'records' or pageMode == 'inactive-caregivers'}">
     <header class="admin-heading">
         <!-- [9.15] 수정내용: 화면 역할에 맞는 제목과 안내 문구를 표시한다. -->
-        <h1 id="admin-title" th:text="${pageMode == 'history'} ? '관리 이력' : (${pageMode == 'caregivers'} ? '간병인 관리' : '직원 관리')">직원 관리</h1>
-        <p th:text="${pageMode == 'history'} ? '관리자가 처리한 계정 및 병동 변경 내역을 조회합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.' : '직원 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.')">직원 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
+        <h1 id="admin-title" th:text="${pageMode == 'history'} ? '관리 이력' : (${pageMode == 'caregivers'} ? '간병인 관리' : '간호사 관리')">간호사 관리</h1>
+        <p th:text="${pageMode == 'history'} ? '관리자가 처리한 계정 및 병동 변경 내역을 조회합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.' : '간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.')">간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
         <div class="admin-account-actions">
             <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
         </div>
@@ -213,8 +213,8 @@
 
     <section class="admin-panel" aria-labelledby="admin-list-title">
         <header class="admin-panel-heading admin-management-heading">
-                <!-- [9.15] 수정내용: 직원 관리 화면에서는 직원 목록의 기능을 명확히 안내한다. -->
-                <div class="admin-management-title"><h2 id="admin-list-title" th:text="${pageMode == 'history'} ? '관리 이력 검색' : (${pageMode == 'caregivers'} ? '간병인 목록' : '직원 목록')">직원 목록</h2><p th:text="${pageMode == 'history'} ? '이름, 아이디 또는 병동으로 처리 이력을 검색합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 검색하고 필요한 관리 작업을 진행합니다.' : '직원 계정을 검색하고 필요한 관리 작업을 진행합니다.')">직원 계정을 검색하고 필요한 관리 작업을 진행합니다.</p></div>
+                <!-- 간호사 관리 화면에서는 간호사 목록과 관리 기능을 명확히 안내합니다. -->
+                <div class="admin-management-title"><h2 id="admin-list-title" th:text="${pageMode == 'history'} ? '관리 이력 검색' : (${pageMode == 'caregivers'} ? '간병인 목록' : '간호사 목록')">간호사 목록</h2><p th:text="${pageMode == 'history'} ? '이름, 아이디 또는 병동으로 처리 이력을 검색합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 검색하고 필요한 관리 작업을 진행합니다.' : '간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.')">간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.</p></div>
             <form id="admin-search-form" class="admin-search" role="search">
                 <div class="admin-search-field">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -263,8 +263,8 @@
                 해당하는 사용자가 없습니다.
             </p>
         </div>
-        <!-- [9.15] 추가내용: 직원 목록을 페이지 단위로 이동할 수 있는 번호 영역을 제공한다. -->
-        <nav id="admin-user-pagination" class="admin-pagination" aria-label="직원 목록 페이지"></nav>
+        <!-- 간호사 목록을 페이지 단위로 이동할 수 있는 번호 영역을 제공합니다. -->
+        <nav id="admin-user-pagination" class="admin-pagination" aria-label="간호사 목록 페이지"></nav>
 
         <noscript>
             <p>사용자 목록을 확인하려면 JavaScript를 활성화해주세요.</p>
