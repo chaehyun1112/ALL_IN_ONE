@@ -86,20 +86,26 @@
 </header>
 
 <main class="admin-page admin-home-page" id="admin-home-page" aria-labelledby="admin-home-title" hidden>
-    <!-- 관리자 홈: 인사말과 승인 완료된 간호사 수를 같은 줄에 배치합니다. -->
+    <!-- [2026-09-21] 관리자 홈의 한 카드 안에서 활성 간호사와 간병인 수를 함께 확인합니다. -->
     <div class="admin-home-overview">
         <section class="admin-home-intro">
             <span class="admin-home-eyebrow">ALLEYES 관리자 홈</span>
             <h1 id="admin-home-title">안녕하세요, 관리자님</h1>
             <p>병원 운영 현황을 한눈에 확인하세요.</p>
         </section>
-        <article class="admin-home-stat admin-home-stat-primary">
-            <div><span>전체 간호사</span><p>현재 활성화된 간호사</p></div>
-            <strong><span id="admin-home-staff-count">10</span><small>명</small></strong>
+        <article class="admin-home-stat admin-home-stat-primary admin-home-workforce">
+            <section class="admin-home-workforce-item">
+                <div><span>전체 간호사</span><p>현재 활성화된 간호사</p></div>
+                <strong><span id="admin-home-staff-count">—</span><small>명</small></strong>
+            </section>
+            <section class="admin-home-workforce-item">
+                <div><span>전체 간병인</span><p>현재 활성화된 간병인</p></div>
+                <strong><span id="admin-home-caregiver-count">—</span><small>명</small></strong>
+            </section>
         </article>
     </div>
 
-    <!-- 최근 조치기록·실시간 알림 위에, 병실별 사고 현황·달력을 아래에 배치합니다. -->
+    <!-- 최근 조치기록·실시간 알림 위에, 병동별 사고 현황·달력을 아래에 배치합니다. -->
     <div class="admin-home-content">
         <!-- 조치기록 화면과 동일하게 실제 기록 연동 전에는 예시 항목임을 표시합니다. -->
         <section class="admin-home-recent-records" aria-labelledby="admin-home-records-title">
@@ -128,29 +134,37 @@
                 <time datetime="2026-08-25T14:41">14:41</time>
             </div>
         </section>
-        <!-- 병실별 집계 API 연결 전에는 예시 수치로 세로 막대그래프를 표시합니다. -->
-        <section class="admin-home-ward-summary" aria-labelledby="admin-home-room-title">
+        <!-- [2026-09-21] 관리자 관점에 맞춰 병동별 사고 건수를 세로 막대그래프로 표시합니다. -->
+        <section class="admin-home-ward-summary" aria-labelledby="admin-home-ward-title">
             <div class="admin-home-section-heading">
-                <h2 id="admin-home-room-title">병실별 사고 발생 현황</h2>
-                <span class="admin-home-alert-demo">화면 예시</span>
-            </div>
-            <div class="admin-home-ward-chart" role="img" aria-label="예시 집계: 301호 5건, 303호 3건, 305호 2건">
-                <div class="admin-home-ward-column"><strong>5건</strong><div class="admin-home-ward-track"><span style="height: 100%"></span></div><span>301호</span></div>
-                <div class="admin-home-ward-column"><strong>3건</strong><div class="admin-home-ward-track"><span style="height: 60%"></span></div><span>303호</span></div>
-                <div class="admin-home-ward-column"><strong>2건</strong><div class="admin-home-ward-track"><span style="height: 40%"></span></div><span>305호</span></div>
-            </div>
-        </section>
-        <section class="admin-home-calendar" aria-labelledby="admin-calendar-title">
-            <div class="admin-calendar-header">
-                <h2 id="admin-calendar-title">달력</h2>
-                <div class="admin-calendar-controls">
-                    <button type="button" id="admin-calendar-prev" aria-label="이전 달">‹</button>
-                    <strong id="admin-calendar-month" aria-live="polite"></strong>
-                    <button type="button" id="admin-calendar-next" aria-label="다음 달">›</button>
+                <h2 id="admin-home-ward-title">병동별 사고 발생 현황</h2>
+                <div class="admin-home-accident-legend" aria-label="사고 유형 범례">
+                    <span><i class="is-fall" aria-hidden="true"></i>낙상</span>
+                    <span><i class="is-bed-exit" aria-hidden="true"></i>침대 이탈</span>
+                    <span class="admin-home-alert-demo">화면 예시</span>
                 </div>
             </div>
-            <div class="admin-calendar-weekdays" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
-            <div class="admin-calendar-dates" id="admin-calendar-dates"></div>
+            <div class="admin-home-ward-chart" role="img" aria-label="예시 집계: 1병동 낙상 3건, 침대 이탈 2건. 2병동 낙상 2건, 침대 이탈 1건. 3병동 낙상 1건, 침대 이탈 1건.">
+                <div class="admin-home-ward-column"><strong>5건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 60%" title="낙상 3건"></span><span class="is-bed-exit" style="height: 40%" title="침대 이탈 2건"></span></div><span>1병동</span><small>낙상 3 · 이탈 2</small></div>
+                <div class="admin-home-ward-column"><strong>3건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 40%" title="낙상 2건"></span><span class="is-bed-exit" style="height: 20%" title="침대 이탈 1건"></span></div><span>2병동</span><small>낙상 2 · 이탈 1</small></div>
+                <div class="admin-home-ward-column"><strong>2건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 20%" title="낙상 1건"></span><span class="is-bed-exit" style="height: 20%" title="침대 이탈 1건"></span></div><span>3병동</span><small>낙상 1 · 이탈 1</small></div>
+            </div>
+        </section>
+        <!-- [2026-09-21] 달력 대신 관리자 인력 배치 판단에 필요한 시간대별 사고 추이를 표시합니다. -->
+        <section class="admin-home-time-summary" aria-labelledby="admin-home-time-title">
+            <div class="admin-home-section-heading">
+                <div><h2 id="admin-home-time-title">시간대별 사고 발생 현황</h2><p>오늘 발생한 사고 기준</p></div>
+                <div class="admin-home-accident-legend" aria-label="사고 유형 범례">
+                    <span><i class="is-fall" aria-hidden="true"></i>낙상</span>
+                    <span><i class="is-bed-exit" aria-hidden="true"></i>침대 이탈</span>
+                    <span class="admin-home-alert-demo">화면 예시</span>
+                </div>
+            </div>
+            <div class="admin-home-time-chart" role="img" aria-label="예시 집계: 오전 낙상 1건과 침대 이탈 1건, 오후 낙상 2건과 침대 이탈 1건, 저녁 낙상 1건과 침대 이탈 2건">
+                <div class="admin-home-time-row"><span><strong>오전</strong><small>06–12시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 25%" title="낙상 1건"></i><i class="is-bed-exit" style="width: 25%" title="침대 이탈 1건"></i></div><b>2건</b></div>
+                <div class="admin-home-time-row"><span><strong>오후</strong><small>12–18시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 50%" title="낙상 2건"></i><i class="is-bed-exit" style="width: 25%" title="침대 이탈 1건"></i></div><b>3건</b></div>
+                <div class="admin-home-time-row"><span><strong>저녁</strong><small>18–24시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 25%" title="낙상 1건"></i><i class="is-bed-exit" style="width: 50%" title="침대 이탈 2건"></i></div><b>3건</b></div>
+            </div>
         </section>
     </div>
 </main>

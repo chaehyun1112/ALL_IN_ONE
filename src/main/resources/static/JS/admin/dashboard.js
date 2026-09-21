@@ -415,6 +415,28 @@ function renderAdminCounts() {
     if (homeStaffCount && adminJobType === "GENERAL") homeStaffCount.textContent = String(approvedCount);
 }
 
+/**
+ * [2026-09-21] 관리자 홈의 간호사·간병인 카드는 현재 병원 DB의 승인 완료 계정 수를 각각 표시한다.
+ */
+async function loadAdminHomeAccountCounts() {
+    const nurseCount = document.querySelector("#admin-home-staff-count");
+    const caregiverCount = document.querySelector("#admin-home-caregiver-count");
+    if (!nurseCount || !caregiverCount) return;
+
+    try {
+        const [nurses, caregivers] = await Promise.all([
+            requestAdminApi("/api/admin/users/approved?jobType=GENERAL"),
+            requestAdminApi("/api/admin/users/approved?jobType=CAREGIVER")
+        ]);
+        nurseCount.textContent = String(Array.isArray(nurses) ? nurses.length : 0);
+        caregiverCount.textContent = String(Array.isArray(caregivers) ? caregivers.length : 0);
+    } catch (error) {
+        nurseCount.textContent = "—";
+        caregiverCount.textContent = "—";
+        console.error(error);
+    }
+}
+
 // 관리자 홈 달력은 브라우저의 현재 월을 기준으로 만들고, 이전·다음 달 이동 시 날짜를 다시 그립니다.
 const adminCalendarMonth = document.querySelector("#admin-calendar-month");
 const adminCalendarDates = document.querySelector("#admin-calendar-dates");
@@ -1448,6 +1470,7 @@ const initialAdminPath = window.location.pathname.replace(/\/+$/, "");
 const initialPreviewView = new URLSearchParams(window.location.search).get("view");
 const serverAdminView = adminPage.dataset.pageMode;
 setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : initialPreviewView === "staff" ? "staff" : "home", false);
+loadAdminHomeAccountCounts();
 loadAdminData().catch(() => {});
 
 

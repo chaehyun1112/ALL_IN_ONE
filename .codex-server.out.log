@@ -35,37 +35,21 @@
 
  :: Spring Boot ::                (v4.1.1)
 
-2026-09-21T16:47:46.436+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12.1 with PID 17640 (C:\Users\구예진\Desktop\ALL_IN_ONE\target\classes started by 구예진 in C:\Users\구예진\Desktop\ALL_IN_ONE)
-2026-09-21T16:47:46.441+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
-2026-09-21T16:47:46.550+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2026-09-21T16:47:46.551+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2026-09-21T16:47:49.199+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
-2026-09-21T16:47:49.230+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-09-21T16:47:49.231+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
-2026-09-21T16:47:49.312+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 2758 ms
-2026-09-21T16:47:50.200+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name userAuthenticationProvider
-2026-09-21T16:47:50.201+09:00  WARN 17640 --- [hospital-safety] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
-2026-09-21T16:47:50.939+09:00  WARN 17640 --- [hospital-safety] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2026-09-21T16:47:50.963+09:00  INFO 17640 --- [hospital-safety] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2026-09-21T16:47:50.990+09:00 ERROR 17640 --- [hospital-safety] [  restartedMain] o.s.b.d.LoggingFailureAnalysisReporter   : 
-
-***************************
-APPLICATION FAILED TO START
-***************************
-
-Description:
-
-Web server failed to start. Port 8081 was already in use.
-
-Action:
-
-Identify and stop the process that's listening on port 8081 or configure this application to listen on another port.
-
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  12.827 s
-[INFO] Finished at: 2026-09-21T16:47:51+09:00
-[INFO] ------------------------------------------------------------------------
+2026-09-21T20:24:24.043+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Starting HospitalSafetyApplication using Java 21.0.12.1 with PID 18448 (C:\Users\구예진\Desktop\ALL_IN_ONE\target\classes started by 구예진 in C:\Users\구예진\Desktop\ALL_IN_ONE)
+2026-09-21T20:24:24.048+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : No active profile set, falling back to 1 default profile: "default"
+2026-09-21T20:24:24.123+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-09-21T20:24:24.125+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-09-21T20:24:26.016+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8081 (http)
+2026-09-21T20:24:26.055+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-09-21T20:24:26.057+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-09-21T20:24:26.122+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1996 ms
+2026-09-21T20:24:26.828+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name userAuthenticationProvider
+2026-09-21T20:24:26.842+09:00  WARN 18448 --- [hospital-safety] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-09-21T20:24:27.549+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8081 (http) with context path '/'
+2026-09-21T20:24:27.558+09:00  INFO 18448 --- [hospital-safety] [  restartedMain] c.a.h.HospitalSafetyApplication          : Started HospitalSafetyApplication in 4.207 seconds (process running for 5.036)
+2026-09-21T20:24:27.649+09:00  INFO 18448 --- [hospital-safety] [nio-8081-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-21T20:24:27.650+09:00  INFO 18448 --- [hospital-safety] [nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-09-21T20:24:27.652+09:00  INFO 18448 --- [hospital-safety] [nio-8081-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-09-21T20:24:41.013+09:00  INFO 18448 --- [hospital-safety] [nio-8081-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-21T20:24:41.742+09:00  INFO 18448 --- [hospital-safety] [nio-8081-exec-4] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5d53c05d
+2026-09-21T20:24:41.761+09:00  INFO 18448 --- [hospital-safety] [nio-8081-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
