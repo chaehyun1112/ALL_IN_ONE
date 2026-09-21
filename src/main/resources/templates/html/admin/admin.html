@@ -95,7 +95,7 @@
         </section>
         <article class="admin-home-stat admin-home-stat-primary">
             <div><span>전체 간호사</span><p>현재 활성화된 간호사</p></div>
-            <strong><span id="admin-home-staff-count">—</span><small>명</small></strong>
+            <strong><span id="admin-home-staff-count">10</span><small>명</small></strong>
         </article>
     </div>
 
@@ -340,7 +340,7 @@
             <span id="admin-inactive-selection-summary" role="status" aria-live="polite">검색 초기화 후에도 선택한 직원은 유지됩니다.</span>
         </div>
         <div id="admin-inactive-error" role="alert" hidden><p id="admin-inactive-error-message"></p><button type="button" id="admin-inactive-retry">다시 불러오기</button></div>
-        <div class="admin-table-wrap" id="admin-inactive-list" aria-busy="true"><table class="admin-table admin-inactive-table"><caption class="visually-hidden">비활성화 직원 목록</caption><thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><th scope="col">아이디</th><th scope="col" id="admin-inactive-assignment-heading">병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead><tbody id="admin-inactive-rows"></tbody></table><div class="admin-inactive-empty" id="admin-inactive-empty" hidden><strong id="admin-inactive-empty-title">비활성화 직원이 없습니다</strong><p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.</p></div></div>
+        <div class="admin-table-wrap" id="admin-inactive-list" aria-busy="true"><table class="admin-table admin-inactive-table"><caption class="visually-hidden">비활성화 직원 목록</caption><thead><tr><th scope="col"><label class="admin-inactive-selection"><input type="checkbox" id="admin-inactive-select-all" aria-label="현재 목록 전체 선택"></label></th><th scope="col">이름</th><!-- [2026-09-21] 간병인 화면에서는 내부 아이디 대신 등록된 전화번호를 표시한다. --><th scope="col" id="admin-inactive-identifier-heading">아이디</th><th scope="col" id="admin-inactive-assignment-heading">병동</th><th scope="col">비활성화 일자</th><th scope="col">상태</th></tr></thead><tbody id="admin-inactive-rows"></tbody></table><div class="admin-inactive-empty" id="admin-inactive-empty" hidden><strong id="admin-inactive-empty-title">비활성화 직원이 없습니다</strong><p id="admin-inactive-empty-description">승인완료 목록에서 비활성화한 직원이 여기에 표시됩니다.</p></div></div>
     </section>
     <footer class="admin-inactive-footer"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>일괄 작업은 선택한 직원 전체에 적용됩니다.</footer>
 </section>

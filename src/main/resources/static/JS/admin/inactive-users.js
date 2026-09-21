@@ -195,10 +195,11 @@ function showAdminError(message) {
 
 function getAdminFilteredUsers() {
     const query = adminInactiveSearch.value.trim().toLowerCase();
+    const caregiver = document.body.dataset.adminJobType === "CAREGIVER";
     // 병동 이름이 같아도 DB의 병동 ID로 정확히 구분한다.
     const wardId = adminInactiveWard.value;
     return adminInactiveUsers.filter(user =>
-        (user.userName + " " + user.userId).toLowerCase().includes(query)
+        (user.userName + " " + (caregiver ? (user.phoneNumber || "") : user.userId)).toLowerCase().includes(query)
         && (!wardId || (wardId === "UNASSIGNED"
             ? user.wardId == null
             : user.wardId != null && String(user.wardId) === wardId)));
@@ -330,7 +331,11 @@ function renderAdminInactiveUsers() {
         const assignment = document.body.dataset.adminJobType === "CAREGIVER"
             ? (user.roomNumber ? `${user.roomNumber}호` : "미배정")
             : (user.wardName || "미배정");
-        for (const value of [user.userName, user.userId, assignment, formatAdminDeactivatedDate(user.deactivatedAt)]) {
+        // [2026-09-21] 비활성화 간병인 목록에는 로그인용 내부 아이디를 노출하지 않고 전화번호를 표시한다.
+        const identifier = document.body.dataset.adminJobType === "CAREGIVER"
+            ? (user.phoneNumber || "—")
+            : user.userId;
+        for (const value of [user.userName, identifier, assignment, formatAdminDeactivatedDate(user.deactivatedAt)]) {
             const cell = document.createElement("td");
             cell.textContent = value;
             row.append(cell);
@@ -374,7 +379,9 @@ function renderAdminInactiveUsers() {
         : filtered ? "검색 결과가 없습니다" : `비활성화 ${personLabel}이 없습니다`;
     document.querySelector("#admin-inactive-empty-description").textContent = adminSelectedOnly
         ? `검색 결과로 돌아가 ${personLabel}을 선택해 주세요.`
-        : filtered ? "이름, 아이디 또는 병동 조건을 다시 확인해 주세요."
+        : filtered ? (document.body.dataset.adminJobType === "CAREGIVER"
+            ? "이름, 전화번호 또는 담당 병실 조건을 다시 확인해 주세요."
+            : "이름, 아이디 또는 병동 조건을 다시 확인해 주세요.")
             : `승인완료 목록에서 비활성화한 ${personLabel}이 여기에 표시됩니다.`;
     // [2026-09-18] 검색 옆 초기화 버튼은 결과 유무와 관계없이 표시하고 처리 중에는 비활성화한다.
     document.querySelector("#admin-inactive-reset").disabled = adminBusy || adminLoading;
@@ -587,8 +594,14 @@ window.addEventListener("admin-job-type-changed", () => {
     adminInactiveCurrentPage = 1;
     const caregiver = document.body.dataset.adminJobType === "CAREGIVER";
     document.querySelector("#admin-inactive-stat-title").textContent = caregiver ? "비활성화 간병인" : "비활성화 직원";
+    const identifierHeading = document.querySelector("#admin-inactive-identifier-heading");
+    if (identifierHeading) identifierHeading.textContent = caregiver ? "전화번호" : "아이디";
     const assignmentHeading = document.querySelector("#admin-inactive-assignment-heading");
     if (assignmentHeading) assignmentHeading.textContent = caregiver ? "담당 병실" : "병동";
+    const searchLabel = document.querySelector('label[for="admin-inactive-search"]');
+    const searchText = caregiver ? "이름 또는 전화번호 검색" : "이름 또는 아이디 검색";
+    if (searchLabel) searchLabel.textContent = searchText;
+    adminInactiveSearch.placeholder = searchText;
     document.querySelector("#admin-inactive-view .admin-heading > p").textContent = caregiver
         ? "간병인의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다."
         : "직원의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.";
