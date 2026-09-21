@@ -25,6 +25,12 @@
       // 다른 탭에서 로그아웃하거나 인증이 종료된 세션을 복원하지 않습니다.
       if (response.redirected || response.status === 401 || response.status === 403) {
         signedOut = true;
+      } else if (response.ok) {
+        const ward = await response.json();
+        if (String(ward.wardId ?? "") !== document.body.dataset.wardId ||
+            ward.wardName !== document.body.dataset.wardName) {
+          window.location.reload();
+        }
       }
     } catch {
       // 일시적인 연결 실패에는 화면을 이동하지 않고 다음 주기에 재시도합니다.
@@ -43,6 +49,7 @@
     refreshSession();
   });
   window.addEventListener("online", refreshSession);
+  window.addEventListener("focus", refreshSession);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") refreshSession();
   });

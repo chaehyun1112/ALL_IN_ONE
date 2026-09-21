@@ -13,6 +13,11 @@ import java.util.Optional;
 @Mapper
 public interface UserMapper {
 
+    /** 로그인한 사용자의 현재 담당 병동을 DB에서 조회한다. */
+    com.aio.hospitalsafety.dto.WardOption findUserWard(
+            @Param("hospitalId") String hospitalId,
+            @Param("userId") String userId);
+
     /** 최초 로그인 비밀번호 변경이 필요한 계정인지 조회한다. */
     Boolean isInitialUserPassword(
             @Param("hospitalId") String hospitalId,

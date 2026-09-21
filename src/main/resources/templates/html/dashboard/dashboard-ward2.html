@@ -19,14 +19,14 @@
     <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=checked-record-20260920" th:href="@{/css/alleyes-theme.css(v='checked-record-20260920')}">
 </head>
 
-<body data-ward-number="3" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
+<body data-ward-number="2" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
   <!-- 상단 헤더 -->
   <header>
     <!-- [2026.09.17] 고친 내용: 조치기록에서 대시보드로 돌아가는 버튼을 왼쪽 상단에 배치합니다. -->
     <!-- [2026.09.17] 고친 내용: 공통 화면 전환 함수가 상단 감지 알림의 표시 여부도 함께 처리합니다. -->
     <!-- [2026.09.20] 복귀 링크를 로고로 표시하고 기존 전체화면 유지 전환을 사용합니다. -->
     <div class="record-brand">
-      <a class="dashboard-back-link" href="dashboard.html" th:href="@{/dashboard}" aria-label="ALLEYES 대시보드로 이동"><span class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-peach-gradient.svg" th:src="@{/image/brand/alleyes-logo-blue-peach-gradient.svg}" alt="" width="44" height="42">ALLEYES</span></a>
+      <a class="dashboard-back-link" href="dashboard-ward2.html" th:href="@{/dashboard}" aria-label="ALLEYES 대시보드로 이동"><span class="alleyes-brand"><img class="alleyes-logo" src="../../../static/image/brand/alleyes-logo-blue-peach-gradient.svg" th:src="@{/image/brand/alleyes-logo-blue-peach-gradient.svg}" alt="" width="44" height="42">ALLEYES</span></a>
       <span class="record-service-label">병동 통합 관제</span>
     </div>
     <div class="brand">
@@ -68,7 +68,7 @@
           </span>
           <!-- [수정완료] 로그인한 계정 아이디에 따라 프로필 이름을 표시합니다. -->
           <!-- [수정완료] 로그인에서 입력한 이름을 프로필에 표시합니다. -->
-          <span class="profile-copy"><strong th:text="${displayName + ' 간호사'}">이름 간호사</strong><small th:text="${dashboardWard.wardName}">3병동</small></span>
+          <span class="profile-copy"><strong th:text="${displayName + ' 간호사'}">이름 간호사</strong><small th:text="${dashboardWard.wardName}">2병동</small></span>
           <span class="profile-chevron" aria-hidden="true">▿</span>
         </button>
 
@@ -151,7 +151,7 @@
       <!-- 병동 평면도 -->
       <section class="panel floor-panel">
         <div class="panel-heading">
-          <h2 th:text="${dashboardWard.wardName + ' 안전 상태'}">3병동 안전 상태</h2>
+          <h2 th:text="${dashboardWard.wardName + ' 안전 상태'}">2병동 안전 상태</h2>
 
           <!-- [09.13]수정내용: 범례와 등록 버튼을 오른쪽 세로 영역으로 묶습니다. -->
           <div class="room-heading-actions">
@@ -209,7 +209,7 @@
           <!-- 낙상 감지 알림 -->
           <article
             class="alert-card"
-            data-alert-room="305"
+            data-alert-room="205"
           >
             <div class="alert-top">
               <strong>● 긴급</strong>
@@ -217,7 +217,7 @@
             </div>
 
             <h3>
-              305호
+              205호
               <span class="event-label">낙상 감지</span>
             </h3>
 
@@ -226,7 +226,7 @@
             <button
               type="button"
               class="locate-room"
-              data-locate="305"
+              data-locate="205"
             >
               대응 등록
             </button>
@@ -235,7 +235,7 @@
           <!-- 침대 이탈 알림 -->
           <article
             class="alert-card caution"
-            data-alert-room="312"
+            data-alert-room="212"
           >
             <div class="alert-top">
               <strong>● 주의</strong>
@@ -243,7 +243,7 @@
             </div>
 
             <h3>
-              312호
+              212호
               <span class="event-label">침대 이탈</span>
             </h3>
 
@@ -252,7 +252,7 @@
             <button
               type="button"
               class="locate-room"
-              data-locate="312"
+              data-locate="212"
             >
               대응 등록
             </button>
@@ -343,8 +343,3 @@
   <script src="../../../static/JS/dashboard/dashboard.js?v=20260920-corridor-marker" th:src="@{/JS/dashboard/dashboard.js(v='20260920-corridor-marker')}"></script>
 </body>
 </html>
-
-
-
-
-

@@ -6,6 +6,14 @@
 
 <mapper namespace="com.aio.hospitalsafety.mapper.UserMapper">
 
+    <select id="findUserWard" resultType="com.aio.hospitalsafety.dto.WardOption">
+        SELECT w.ward_id, w.ward_nm AS ward_name
+        FROM tb_emp e
+        JOIN tb_ward w ON w.ward_id = e.ward_id AND w.hosp_div_id = e.hosp_div_id
+        WHERE e.hosp_div_id = #{hospitalId} AND e.emp_id = #{userId}
+          AND e.role_cd = 'USER'
+    </select>
+
     <resultMap id="userMap"
                type="com.aio.hospitalsafety.domain.User">
         <constructor>

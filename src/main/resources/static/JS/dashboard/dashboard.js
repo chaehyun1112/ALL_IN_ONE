@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* [수정] 화면 예시 상태입니다. 실제 서버 조회 결과로 교체하세요.
      페이지를 열 때 조회한 이전 경보에는 음성을 재생하지 않습니다. */
   const rooms = window.CareGuardRoomStatus.rooms;
+  const roomStart = window.CareGuardRoomStatus.roomStart;
   const labels = window.CareGuardRoomStatus.labels;
   const upper=document.getElementById("upper-rooms"), lower=document.getElementById("lower-rooms");
   const detail=document.getElementById("room-detail");
@@ -47,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // [2026.09.16] 추가한 내용: 환자를 특정하지 않아도 위치만으로 표시할 수 있는 복도 낙상 경보 예시입니다.
   // [2026.09.16] 고친 내용: 복도 감지 위치를 화면 방향 대신 고정 방위 표기인 서·화장실 앞으로 표시합니다.
   const corridorAlert={location:"중앙 복도",cameraId:"C-02",cameraLocation:"서·화장실 앞",status:"urgent",acknowledged:false,eventId:"corridor-fall-001",occurredAt:"2026-09-16T14:33:00+09:00"};
+  if (!rooms.size) corridorAlert.status = "normal";
   let selected=null, corridorSelected=false, filter="all";
   // [2026.09.17] 추가한 내용: 새로 수신한 감지만 공통 상단 배너에 보관하며 기존 예시 알림은 자동으로 띄우지 않습니다.
   const crossPageAlert=document.getElementById('cross-page-alert');
@@ -122,15 +124,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const nodes=new Map();
   upper.replaceChildren();lower.replaceChildren();
   function addRoom(number,parent){
+    if (!rooms.has(number)) return;
     const node=document.createElement("button");node.type="button";node.className="room";
     node.innerHTML=`<strong>${number}호</strong><small></small><span class="door" aria-hidden="true"></span>`;
     node.addEventListener("click",()=>choose(number));nodes.set(number,node);parent.append(node);
   }
   function facility(){const el=document.createElement("div");el.className="facility";el.innerHTML='<span class="symbol" aria-hidden="true">WC</span><span>화장실</span>';return el;}
-  for(let n=301;n<=310;n++)addRoom(n,upper);
-  lower.append(facility());for(let n=311;n<=313;n++)addRoom(n,lower);
+  for(let n=roomStart;n<roomStart+10;n++)addRoom(n,upper);
+  lower.append(facility());for(let n=roomStart+10;n<roomStart+13;n++)addRoom(n,lower);
   const gap=document.createElement("div");gap.setAttribute("aria-hidden","true");lower.append(gap);
-  for(let n=314;n<=317;n++)addRoom(n,lower);lower.append(facility());
+  for(let n=roomStart+13;n<roomStart+17;n++)addRoom(n,lower);lower.append(facility());
 
   /* [2026.09.16] 고친 내용: 현황 카드를 전체·낙상·침대 이탈·정상 순서로 표시해도 기존 상태 필터와 연결합니다. */
   const cards=[];
@@ -337,8 +340,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const testIds=new Set();
     let delayedTestTimer=null;
     const corridorLocations={
-      'wc-301':{cameraLocation:'301호 화장실 앞',cameraX:'5%',fileName:'301호화장실앞즉시확인.wav'},
-      'wc-310':{cameraLocation:'310호 화장실 앞',cameraX:'95%',fileName:'310호화장실앞즉시확인.wav'}
+      [`wc-${roomStart}`]:{cameraLocation:`${roomStart}호 화장실 앞`,cameraX:'5%',fileName:`${roomStart}호화장실앞즉시확인.wav`},
+      [`wc-${roomStart+9}`]:{cameraLocation:`${roomStart+9}호 화장실 앞`,cameraX:'95%',fileName:`${roomStart+9}호화장실앞즉시확인.wav`}
     };
     for(const number of rooms.keys())locationSelect.add(new Option(`${number}호`,String(number)));
     for(const [id,location] of Object.entries(corridorLocations))locationSelect.add(new Option(location.cameraLocation,id));
