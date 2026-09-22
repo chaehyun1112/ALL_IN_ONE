@@ -114,6 +114,7 @@
      */
     function renderHistories(histories) {
         const fragment = document.createDocumentFragment();
+        const caregiverHistory = document.body.dataset.adminJobType === "CAREGIVER";
 
         for (const history of histories) {
             const row = document.createElement("tr");
@@ -129,7 +130,8 @@
             row.append(
                 createCell(formatCreatedAt(history.createdAt)),
                 createCell(history.adminId),
-                createCell(history.userId),
+                // [2026-09-22 변경] 간병인 관리 이력은 내부 아이디 대신 간병인 이름을 표시합니다.
+                createCell(caregiverHistory ? (history.userName ?? "이름 미확인") : history.userId),
                 createCell(history.wardName ?? "미확인"),
                 createCell(actionLabel),
                 createManagementCell(history)

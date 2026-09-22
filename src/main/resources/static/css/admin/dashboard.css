@@ -57,7 +57,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-heading h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.35; letter-spacing: -1px; }
 .admin-heading p { margin: 0; font-size: 13px; color: var(--admin-muted); }
 /* [2026.09.16] 고친 내용: 계정 생성 요약 카드를 제거하고 남은 네 카드의 너비·높이·내용 정렬을 동일하게 맞춥니다. */
-.admin-history-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
+.admin-history-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
 .admin-history-summary article { display: flex; align-items: center; gap: 12px; min-height: 88px; padding: 17px; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
 .admin-history-summary article > div { display: flex; min-width: 0; min-height: 48px; flex: 1; flex-direction: column; justify-content: center; }
 .history-filter-card { cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
@@ -70,6 +70,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .history-card-icon.create { color: #53846a; }
 .history-card-icon.ward { color: #668594; }
 .history-card-icon.password { color: #bd7a2c; font-size: 12px; letter-spacing: 1px; }
+.history-card-icon.phone { color: #526d82; }
 .history-card-icon.disable { color: #b06e6a; }
 .admin-history-summary small, .admin-history-summary strong { display: block; }
 .admin-history-summary small { color: var(--admin-muted); font-size: 10px; }

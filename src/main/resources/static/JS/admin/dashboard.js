@@ -528,11 +528,9 @@ function renderAdminUsers() {
         const phoneDisplay = phoneDigits.length >= 7
             ? `${phoneDigits.slice(0, 3)}-****-${phoneDigits.slice(-4)}`
             : "—";
-        const caregiverPhoneDisplay = phoneDigits.length === 11
-            ? `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 7)}-${phoneDigits.slice(7)}`
-            : phoneDigits.length === 10
-                ? `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`
-                : (user.phoneNumber || "—");
+        const caregiverPhoneDisplay = phoneDigits.length >= 7
+            ? `${phoneDigits.slice(0, 3)}-****-${phoneDigits.slice(-4)}`
+            : "—";
         const values = adminJobType === "CAREGIVER"
             ? [user.name, caregiverPhoneDisplay, assignment]
             : [user.name, user.userId, phoneDisplay, assignment];
@@ -1504,7 +1502,13 @@ function setAdminView(view, updateAddress = true) {
     const historyHeaders = document.querySelectorAll(".admin-history-table th");
     if (historyHeaders[2]) historyHeaders[2].textContent = caregiver ? "대상 간병인" : "대상 간호사";
     if (historyHeaders[3]) historyHeaders[3].textContent = caregiver ? "담당 병실" : "담당 병동";
-    document.querySelector("#admin-create-title").textContent = caregiver ? "간병인 계정 생성" : "간호사 계정 생성";
+    const historyPhoneCard = document.querySelector("#admin-history-phone-card");
+    if (historyPhoneCard) historyPhoneCard.hidden = caregiver;
+    // [2026-09-22 변경] 간병인은 계정 생성 대신 등록 용어를 사용합니다.
+    document.querySelector("#admin-create-account").textContent = caregiver ? "간병인 등록" : "+ 계정 생성";
+    document.querySelector("#admin-create-title").textContent = caregiver ? "간병인 등록" : "간호사 계정 생성";
+    document.querySelector("#admin-create-form button[type='submit']").textContent = caregiver ? "등록" : "계정 생성";
+    document.querySelector("#admin-create-complete-title").textContent = caregiver ? "간병인 등록 완료" : "계정 생성 완료";
     document.querySelector("#admin-create-complete-dialog > p").textContent = caregiver ? "등록된 간병인 정보를 확인해 주세요." : "아래 로그인 정보를 간호사에게 전달해주세요.";
     document.querySelector("#admin-password-reset-dialog > p").textContent = caregiver ? "아래 변경된 비밀번호를 간병인에게 전달해주세요." : "아래 변경된 비밀번호를 간호사에게 전달해주세요.";
     // [2026-09-22 변경] 간호사 화면의 관리 팝업 제목을 화면 명칭과 동일하게 표시합니다.

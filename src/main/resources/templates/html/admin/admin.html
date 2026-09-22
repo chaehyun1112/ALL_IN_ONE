@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=nurse-phone-20260922" th:href="@{/css/admin/account-create.css(v='nurse-phone-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-row-text-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-row-text-20260920')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=nurse-phone-edit-20260922"
-            th:src="@{/JS/admin/dashboard.js(v='nurse-phone-edit-20260922')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=history-phone-card-20260922"
+            th:src="@{/JS/admin/dashboard.js(v='history-phone-card-20260922')}"
             defer></script>
-    <script src="../../../static/JS/admin/admin-history.js?v=history-menu-20260922"
-        th:src="@{/JS/admin/admin-history.js(v='history-menu-20260922')}"
+    <script src="../../../static/JS/admin/admin-history.js?v=caregiver-history-name-20260922"
+        th:src="@{/JS/admin/admin-history.js(v='caregiver-history-name-20260922')}"
         defer></script>
     <script src="../../../static/JS/admin/account-create.js?v=nurse-phone-mask-20260922"
             th:src="@{/JS/admin/account-create.js(v='nurse-phone-mask-20260922')}"
@@ -229,6 +229,15 @@
                 <small>계정 비활성화</small>
                 <strong>0건</strong>
             </div>
+        </article>
+        <!-- [2026-09-22 추가] 간호사 연락처 수정 이력을 별도로 확인합니다. -->
+        <article class="history-filter-card" id="admin-history-phone-card"
+                data-history-filter="전화번호 수정"
+                tabindex="0">
+            <span class="history-card-icon phone">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h4l2 5-3 2a15 15 0 0 0 4 4l2-3 5 2v4a4 4 0 0 1-4 4C9.3 21 3 14.7 3 7a4 4 0 0 1 4-4Z"/><path d="m15 5 4 4M14 10l1.2-4.8L19 9l-5 1Z"/></svg>
+            </span>
+            <div><small>전화번호 수정</small><strong>0건</strong></div>
         </article>
     </section>
 
