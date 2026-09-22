@@ -1446,6 +1446,14 @@ function closeAdminNavMenus() {
 }
 adminNavGroups.forEach(group => {
     const trigger = group.querySelector(".admin-nav-trigger");
+    // [2026-09-22 변경] 다른 메뉴에 커서를 올리면 이전에 클릭해 둔 하위 메뉴를 닫아 겹침을 방지합니다.
+    group.addEventListener("pointerenter", () => {
+        adminNavGroups.forEach(otherGroup => {
+            if (otherGroup === group) return;
+            otherGroup.classList.remove("is-open");
+            otherGroup.querySelector(".admin-nav-trigger")?.setAttribute("aria-expanded", "false");
+        });
+    });
     trigger?.addEventListener("click", () => {
         const shouldOpen = !group.classList.contains("is-open");
         closeAdminNavMenus();
@@ -1457,9 +1465,11 @@ adminNavGroups.forEach(group => {
         group.classList.remove("is-open");
         trigger?.setAttribute("aria-expanded", "false");
     });
-    group.addEventListener("focusin", () => trigger?.setAttribute("aria-expanded", "true"));
     group.addEventListener("focusout", event => {
-        if (!group.contains(event.relatedTarget)) trigger?.setAttribute("aria-expanded", "false");
+        if (!group.contains(event.relatedTarget)) {
+            group.classList.remove("is-open");
+            trigger?.setAttribute("aria-expanded", "false");
+        }
     });
 });
 document.addEventListener("click", event => {

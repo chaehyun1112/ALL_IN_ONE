@@ -63,10 +63,8 @@
   box-shadow: 0 14px 32px #29343d25;
 }
 .admin-nav-click-group:hover .admin-nav-submenu,
-.admin-nav-click-group:focus-within .admin-nav-submenu,
 .admin-nav-click-group.is-open .admin-nav-submenu,
 .admin-nav-hover-group:hover .admin-nav-submenu,
-.admin-nav-hover-group:focus-within .admin-nav-submenu,
 .admin-nav-hover-group.is-open .admin-nav-submenu { display: block; }
 .admin-nav-submenu a {
   display: flex;
@@ -86,9 +84,7 @@
 @media (prefers-reduced-motion: no-preference) {
   .admin-nav-group.is-open .admin-nav-submenu,
   .admin-nav-click-group:hover .admin-nav-submenu,
-  .admin-nav-click-group:focus-within .admin-nav-submenu,
-  .admin-nav-hover-group:hover .admin-nav-submenu,
-  .admin-nav-hover-group:focus-within .admin-nav-submenu { animation: admin-nav-enter .16s ease-out; }
+  .admin-nav-hover-group:hover .admin-nav-submenu { animation: admin-nav-enter .16s ease-out; }
 }
 @keyframes admin-nav-enter {
   from { opacity: 0; transform: translateY(-5px); }
