@@ -502,7 +502,8 @@ function renderAdminUsers() {
 
     const visibleUsers = adminUsers.filter(user => {
         const sameStatus = adminActiveStatus === "ALL" || user.status === adminActiveStatus;
-        const searchableText = `${user.name} ${user.userId} ${user.phoneNumber || ""}`.toLowerCase();
+        const phoneNumber = user.phoneNumber || "";
+        const searchableText = `${user.name} ${user.userId} ${phoneNumber} ${formatPhoneInput(phoneNumber)} ${user.ward || ""}`.toLowerCase();
         const matchesSearch = searchableText.includes(adminSearchQuery);
 
         return sameStatus && matchesSearch;
@@ -653,6 +654,12 @@ function openAdminManagementChoice(user) {
     const phoneOption = adminManagementOptions.find(option => option.dataset.adminAction === "EDIT_PHONE");
     // [2026-09-22 변경] 간병인도 등록된 전화번호를 수정할 수 있도록 관리 항목을 표시합니다.
     if (phoneOption) phoneOption.hidden = false;
+    document.querySelector("#admin-management-deactivate-title").textContent = caregiver
+        ? "비활성화"
+        : "계정 비활성화";
+    document.querySelector("#admin-management-deactivate-description").textContent = caregiver
+        ? "SMS 수신 대상에서 제외합니다."
+        : "계정을 비활성 상태로 전환합니다.";
     adminManagementChoiceConfirm.disabled = true;
 
     for (const option of adminManagementOptions) {
@@ -831,9 +838,17 @@ function openAdminAction(user, action) {
     }
 
     if (action === "DEACTIVATE") {
-        adminDialogTitle.textContent = "계정 비활성화";
-        adminDialogDescription.textContent =
-            `${user.name} (${user.userId})\n계정을 비활성화하시겠습니까?`;
+        const caregiver = adminJobType === "CAREGIVER";
+        adminDialogTitle.textContent = caregiver ? "비활성화" : "계정 비활성화";
+        adminDialogDescription.textContent = caregiver
+            ? `${user.name}\n해당 간병인을 비활성화하시겠습니까?`
+            : `${user.name} (${user.userId})\n계정을 비활성화하시겠습니까?`;
+        document.querySelector("#admin-deactivate-detail-primary").textContent = caregiver
+            ? "비활성화된 간병인은 SMS 수신 대상에서 제외됩니다."
+            : "이 계정으로 로그인할 수 없습니다.";
+        document.querySelector("#admin-deactivate-detail-secondary").textContent = caregiver
+            ? "담당 병실 및 기존 관리 이력은 유지됩니다."
+            : "기존 활동 및 업무 처리 기록은 유지됩니다.";
         adminDialogConfirm.textContent = "비활성화";
     }
 
@@ -899,7 +914,9 @@ async function submitAdminAction() {
 
     if (selectedAction === "DEACTIVATE") {
         url = `/api/admin/users/${encodeURIComponent(selectedUser.userId)}/deactivate`;
-        successMessage = "계정을 비활성화했습니다.";
+        successMessage = adminJobType === "CAREGIVER"
+            ? "간병인을 비활성화했습니다."
+            : "계정을 비활성화했습니다.";
     }
 
     if (!url) {
@@ -1504,7 +1521,7 @@ function setAdminView(view, updateAddress = true) {
     const caregiver = view === "caregivers" || view === "history-caregivers";
     document.querySelector("#admin-title").textContent = view === "history-caregivers" ? "간병인 관리 이력" : view === "history" ? "간호사 관리 이력" : caregiver ? "간병인 관리" : "간호사 관리";
     document.querySelector("#admin-list-title").textContent = isHistory ? (caregiver ? "간병인 관리 이력 검색" : "간호사 관리 이력 검색") : caregiver ? "간병인 목록" : "간호사 목록";
-    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history-caregivers" ? "관리자가 처리한 간병인 정보와 담당 병실 변경 내역을 조회합니다." : view === "history" ? "관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 정보를 등록하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
+    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history-caregivers" ? "관리자가 처리한 간병인 정보와 담당 병실 변경 내역을 조회합니다." : view === "history" ? "관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 정보를 등록하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 전화번호 수정, 비밀번호 초기화, 비활성화를 관리합니다.";
     document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름, 아이디 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 정보를 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
     const historyAssignmentCard = document.querySelector('.history-filter-card[data-history-filter="병동 변경"], .history-filter-card[data-history-filter="병실 변경"]');
     if (historyAssignmentCard) {
@@ -1537,12 +1554,12 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-user-id-heading").textContent = caregiver ? "병동" : "아이디";
     document.querySelector("#admin-user-phone-heading").textContent = caregiver ? "담당 병실" : "전화번호";
     document.querySelector("#admin-user-phone-heading").hidden = false;
-    document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
-    document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
+    document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디, 전화번호 또는 병동 검색";
+    document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디, 전화번호 또는 병동 검색";
     document.querySelector("#admin-assignment-heading").textContent = caregiver ? "전화번호" : "배정 병동";
     document.querySelector("#complete-account-assignment-label").textContent = caregiver ? "담당 병실" : "담당 병동";
     document.querySelector("#admin-user-pagination").setAttribute("aria-label", caregiver ? "간병인 목록 페이지" : "간호사 목록 페이지");
-    document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "비활성화 간병인관리" : "비활성화 직원관리";
+    document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "비활성화 간병인관리" : "비활성화 간호사 관리";
     if (jobChanged && !isRecords) {
         adminUsers = [];
         adminUserPage = 1;
@@ -1565,7 +1582,7 @@ function setAdminView(view, updateAddress = true) {
         : view === "history" ? "간호사 관리 이력 | 병동 통합 관제"
         : view === "caregivers" ? "간병인 관리 | 병동 통합 관제"
         : view === "inactive-caregivers" ? "비활성화 간병인관리 | 병동 통합 관제"
-        : view === "inactive" ? "비활성화 직원관리 | 병동 통합 관제"
+        : view === "inactive" ? "비활성화 간호사 관리 | 병동 통합 관제"
         : "간호사 관리 | 병동 통합 관제";
     if (updateAddress) {
         const path = view === "records" ? "/admin/records" : view === "history-caregivers" ? "/admin/caregivers/history" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : view === "staff" ? "/admin?view=staff" : "/admin";
