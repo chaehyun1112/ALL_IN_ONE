@@ -64,6 +64,8 @@ const adminDialogTitle = document.querySelector("#admin-dialog-title");
 const adminDialogDescription = document.querySelector("#admin-dialog-description");
 const adminDialogConfirm = document.querySelector("#admin-dialog-confirm");
 const adminDialogCancel = document.querySelector("#admin-dialog-cancel");
+const adminRoomWardField = document.querySelector("#admin-room-ward-field");
+const adminRoomWardSelect = document.querySelector("#admin-room-ward-select");
 const adminWardField = document.querySelector("#admin-ward-field");
 const adminWardSelect = document.querySelector("#admin-ward-select");
 const adminActionWardDropdown = document.querySelector("#admin-action-ward-dropdown");
@@ -325,11 +327,19 @@ function renderAdminWardOptions() {
 
 function renderAdminRoomOptions() {
     adminWardSelect.replaceChildren(new Option("병실을 선택해 주세요", ""));
-    for (let roomNumber = 301; roomNumber <= 317; roomNumber += 1) {
+    const wardNumber = Number(adminRoomWardSelect.value);
+    adminWardSelect.disabled = !wardNumber;
+    if (!wardNumber) adminWardSelect.options[0].textContent = "병동을 먼저 선택해 주세요";
+    for (let roomNumber = wardNumber * 100 + 1; wardNumber && roomNumber <= wardNumber * 100 + 17; roomNumber += 1) {
         adminWardSelect.append(new Option(`${roomNumber}호`, String(roomNumber)));
     }
     renderAdminActionWardDropdown();
 }
+
+adminRoomWardSelect.addEventListener("change", () => {
+    closeAdminActionWardOptions();
+    renderAdminRoomOptions();
+});
 
 function closeAdminActionWardOptions() {
     adminActionWardOptions.hidden = true;
@@ -708,6 +718,8 @@ function openAdminAction(user, action) {
     adminDialog.classList.toggle("is-deactivate-action", action === "DEACTIVATE");
     document.getElementById("admin-deactivate-details").hidden = action !== "DEACTIVATE";
 
+    adminRoomWardField.hidden = true;
+    adminRoomWardSelect.value = "";
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
     adminWardSelect.required = false;
@@ -741,6 +753,10 @@ function openAdminAction(user, action) {
         document.querySelector("#admin-action-assignment-label").textContent = roomChange ? "변경할 병실" : "변경할 병동";
         adminActionWardTrigger.setAttribute("aria-label", roomChange ? "변경할 병실 선택" : "변경할 병동 선택");
         if (roomChange) {
+            adminRoomWardField.hidden = false;
+            const currentWardNumber = Math.floor(Number(user.roomNumber) / 100);
+            adminRoomWardSelect.value = [1, 2, 3].includes(currentWardNumber) ? String(currentWardNumber) : "";
+            adminDialogDescription.textContent = user.name + "님 · 현재 병실: " + (user.roomNumber ? user.roomNumber + "호" : "미배정");
             renderAdminRoomOptions();
             adminWardSelect.value = user.roomNumber ?? "";
         } else {
@@ -783,6 +799,7 @@ async function submitAdminAction() {
             return;
         }
         selectedUser.roomNumber = adminWardSelect.value;
+        selectedUser.ward = `${adminRoomWardSelect.value}병동`;
         adminDialog.close();
         renderAdminUsers();
         showAdminFeedback("담당 병실을 화면에 반영했습니다. 새로고침하면 이전 배정으로 돌아갑니다.");
@@ -970,6 +987,8 @@ document.querySelector("#admin-action-form").addEventListener("submit", async ev
 /* 팝업이 닫히면 병동 선택란 초기화 */
 adminDialog.addEventListener("close", () => {
     closeAdminActionWardOptions();
+    adminRoomWardField.hidden = true;
+    adminRoomWardSelect.value = "";
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
     adminWardSelect.required = false;
@@ -1472,5 +1491,4 @@ const serverAdminView = adminPage.dataset.pageMode;
 setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : initialPreviewView === "staff" ? "staff" : "home", false);
 loadAdminHomeAccountCounts();
 loadAdminData().catch(() => {});
-
 

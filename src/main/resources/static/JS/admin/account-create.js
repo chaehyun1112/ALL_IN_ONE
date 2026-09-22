@@ -6,6 +6,8 @@ const createForm = document.querySelector("#admin-create-form");
 const createNameInput = document.querySelector("#admin-create-name");
 const createUserIdInput = document.querySelector("#admin-create-user-id");
 const createPhoneInput = document.querySelector("#admin-create-phone");
+const createRoomWardSelect = document.querySelector("#admin-create-room-ward");
+const createRoomWardError = document.querySelector("#admin-create-room-ward-error");
 const createRoomSelect = document.querySelector("#admin-create-room");
 const createRoomDropdown = document.querySelector("#admin-create-room-dropdown");
 const createRoomTrigger = document.querySelector("#admin-create-room-trigger");
@@ -38,7 +40,7 @@ function isCaregiverCreation() {
 function renderCreateRoomDropdown() {
     createRoomOptions.replaceChildren();
     createRoomLabel.textContent = createRoomSelect.value
-        ? `${createRoomSelect.value}호` : "담당 병실을 선택해 주세요";
+        ? `${createRoomSelect.value}호` : createRoomSelect.options[0].textContent;
     for (const option of createRoomSelect.options) {
         const button = document.createElement("button");
         button.type = "button";
@@ -61,11 +63,27 @@ function closeCreateRoomOptions() {
     createDialog.classList.remove("room-menu-open");
 }
 
-createRoomSelect.replaceChildren(new Option("담당 병실을 선택해 주세요", ""));
-for (let roomNumber = 301; roomNumber <= 317; roomNumber += 1) {
-    createRoomSelect.append(new Option(`${roomNumber}호`, String(roomNumber)));
+// 프런트 미리보기용 병실 번호이며 DB의 병동·위치 ID로 사용하지 않는다.
+function refreshCreateRooms() {
+    const wardNumber = Number(createRoomWardSelect.value);
+    createRoomSelect.replaceChildren(new Option(wardNumber ? "담당 병실을 선택해 주세요" : "병동을 먼저 선택해 주세요", ""));
+    if (wardNumber) {
+        for (let offset = 1; offset <= 17; offset += 1) {
+            const room = wardNumber * 100 + offset;
+            createRoomSelect.append(new Option(room + "호", String(room)));
+        }
+    }
+    createRoomSelect.disabled = !wardNumber;
+    createRoomTrigger.disabled = !wardNumber;
+    closeCreateRoomOptions();
+    renderCreateRoomDropdown();
 }
-renderCreateRoomDropdown();
+createRoomWardSelect.addEventListener("change", () => {
+    createRoomWardError.textContent = "";
+    createRoomError.textContent = "";
+    refreshCreateRooms();
+});
+refreshCreateRooms();
 createRoomTrigger.addEventListener("click", () => {
     if (!createRoomOptions.hidden) return closeCreateRoomOptions();
     renderCreateRoomDropdown();
@@ -162,6 +180,7 @@ function clearCreateErrors() {
     if (createWardError) createWardError.textContent = "";
     if (createPhoneError) createPhoneError.textContent = "";
     if (createRoomError) createRoomError.textContent = "";
+    createRoomWardError.textContent = "";
 }
 
 function showCreateFieldErrors(errorBody) {
@@ -265,6 +284,7 @@ createAccountButton?.addEventListener("click", async () => {
     if (createPending || createDialog?.open) return;
 
     createForm?.reset();
+    refreshCreateRooms();
     closeCreateWardOptions();
     closeCreateRoomOptions();
     renderCreateRoomDropdown();
@@ -398,12 +418,19 @@ createForm?.addEventListener("submit", async event => {
     if (caregiver && !/^01\d{8,9}$/.test(phoneNumber)) {
         createPhoneError.textContent = "휴대전화 번호를 확인해 주세요.";
     }
-    if (caregiver && (roomNumber < 301 || roomNumber > 317)) {
-        createRoomError.textContent = "301호부터 317호까지 선택해 주세요.";
-    }
+    const selectedWardNumber = Number(createRoomWardSelect.value);
+    const validRoom = selectedWardNumber >= 1 && selectedWardNumber <= 3
+        && roomNumber > selectedWardNumber * 100 && roomNumber <= selectedWardNumber * 100 + 17;
+    if (caregiver && !selectedWardNumber) createRoomWardError.textContent = "담당 병동을 선택해 주세요.";
+    if (caregiver && !validRoom) createRoomError.textContent = "선택한 병동의 담당 병실을 선택해 주세요.";
     if (!validUserName || (caregiver
-        ? !/^01\d{8,9}$/.test(phoneNumber) || roomNumber < 301 || roomNumber > 317
+        ? !/^01\d{8,9}$/.test(phoneNumber) || !validRoom
         : !validUserId || !selectedWard)) return;
+
+    if (caregiver && selectedWardNumber !== 3) {
+        createRoomError.textContent = "1·2병동 계정 생성은 서버 연동 후 사용할 수 있습니다.";
+        return;
+    }
 
     createPending = true;
     const controls = [...createForm.querySelectorAll("input, select, button")];
