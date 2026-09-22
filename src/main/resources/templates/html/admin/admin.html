@@ -15,17 +15,17 @@
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css?v=caregiver-card-align-20260921"
           th:href="@{/css/admin/dashboard.css(v='caregiver-card-align-20260921')}">
-    <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=caregiver-complete-20260921" th:href="@{/css/admin/account-create.css(v='caregiver-complete-20260921')}">
+    <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=caregiver-ward-select-20260922" th:href="@{/css/admin/account-create.css(v='caregiver-ward-select-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-row-text-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-row-text-20260920')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=history-menu-20260922"
-            th:src="@{/JS/admin/dashboard.js(v='history-menu-20260922')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=caregiver-ward-select-20260922"
+            th:src="@{/JS/admin/dashboard.js(v='caregiver-ward-select-20260922')}"
             defer></script>
     <script src="../../../static/JS/admin/admin-history.js?v=history-menu-20260922"
         th:src="@{/JS/admin/admin-history.js(v='history-menu-20260922')}"
         defer></script>
-    <script src="../../../static/JS/admin/account-create.js?v=caregiver-complete-20260921"
-            th:src="@{/JS/admin/account-create.js(v='caregiver-complete-20260921')}"
+    <script src="../../../static/JS/admin/account-create.js?v=caregiver-ward-select-20260922"
+            th:src="@{/JS/admin/account-create.js(v='caregiver-ward-select-20260922')}"
             defer></script>
     <script src="../../../static/JS/admin/inactive-users.js?v=caregiver-room-20260921"
             th:src="@{/JS/admin/inactive-users.js(v='caregiver-room-20260921')}"
@@ -410,6 +410,11 @@
             <li>기존 활동 및 업무 처리 기록은 유지됩니다.</li>
         </ul>
 
+        <div id="admin-room-ward-field" hidden>
+            <label for="admin-room-ward-select">병동</label>
+            <select id="admin-room-ward-select"><option value="">병동을 선택해 주세요</option><option value="1">1병동</option><option value="2">2병동</option><option value="3">3병동</option></select>
+        </div>
+
         <div id="admin-ward-field" hidden>
             <label for="admin-action-ward-trigger" id="admin-action-assignment-label">변경할 병동</label>
             <div class="admin-action-ward-dropdown" id="admin-action-ward-dropdown">
@@ -451,6 +456,10 @@
                 </span>
                 <select id="admin-create-ward" hidden><option value="">담당 병동을 선택해주세요</option></select>
                 <small class="admin-field-error" id="admin-create-ward-error"></small>
+            </label>
+            <label class="admin-create-caregiver-field admin-create-ward-field" hidden>병동
+                <select id="admin-create-room-ward"><option value="">병동을 선택해 주세요</option><option value="1">1병동</option><option value="2">2병동</option><option value="3">3병동</option></select>
+                <small class="admin-field-error" id="admin-create-room-ward-error"></small>
             </label>
             <label class="admin-create-caregiver-field admin-create-room-field" hidden>담당 병실
                 <span class="admin-create-ward-dropdown" id="admin-create-room-dropdown">
@@ -525,7 +534,6 @@
         th:src="@{/JS/auth/session-history.js}"></script>
 </body>
 </html>
-
 
 
 
