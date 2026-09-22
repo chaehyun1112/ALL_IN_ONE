@@ -7,6 +7,9 @@
 .admin-create-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
 .admin-create-grid label.admin-create-ward-field,
 .admin-create-grid label.admin-create-room-field { grid-column: 1 / -1; width: 100%; margin-top: -4px; }
+/* [2026-09-22 추가] 간호사 전화번호와 담당 병동을 같은 행에 배치합니다. */
+.admin-create-grid label.admin-create-staff-phone-field,
+.admin-create-grid label.admin-create-staff-ward-field { grid-column: auto; margin-top: 8px; }
 .admin-create-grid .admin-create-ward-field .admin-create-ward-dropdown,
 .admin-create-grid .admin-create-room-field .admin-create-ward-dropdown { display: block; position: relative; width: 100%; margin: 7px 0 0; }
 

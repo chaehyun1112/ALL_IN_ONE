@@ -92,6 +92,11 @@ const adminManagementChoiceDialog = document.querySelector("#admin-management-ch
 const adminManagementChoiceDescription = document.querySelector("#admin-management-choice-description");
 const adminManagementOptions = Array.from(document.querySelectorAll(".admin-management-option"));
 const adminManagementChoiceConfirm = document.querySelector("#admin-management-choice-confirm");
+const adminPhoneEditDialog = document.querySelector("#admin-phone-edit-dialog");
+const adminPhoneEditForm = document.querySelector("#admin-phone-edit-form");
+const adminPhoneEditDescription = document.querySelector("#admin-phone-edit-description");
+const adminPhoneEditInput = document.querySelector("#admin-phone-edit-input");
+const adminPhoneEditError = document.querySelector("#admin-phone-edit-error");
 const adminPage = document.querySelector("#admin-management-page");
 let adminManagementChoiceAction = "";
 let adminModalScrollPosition = 0;
@@ -520,12 +525,18 @@ function renderAdminUsers() {
             ? (user.roomNumber ? `${user.roomNumber}호` : "미배정")
             : (user.ward || "미배정");
         const phoneDigits = (user.phoneNumber || "").replace(/\D/g, "");
-        const phoneDisplay = phoneDigits.length === 11
+        const phoneDisplay = phoneDigits.length >= 7
+            ? `${phoneDigits.slice(0, 3)}-****-${phoneDigits.slice(-4)}`
+            : "—";
+        const caregiverPhoneDisplay = phoneDigits.length === 11
             ? `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 7)}-${phoneDigits.slice(7)}`
             : phoneDigits.length === 10
                 ? `${phoneDigits.slice(0, 3)}-${phoneDigits.slice(3, 6)}-${phoneDigits.slice(6)}`
                 : (user.phoneNumber || "—");
-        for (const value of [user.name, adminJobType === "CAREGIVER" ? phoneDisplay : user.userId, assignment]) {
+        const values = adminJobType === "CAREGIVER"
+            ? [user.name, caregiverPhoneDisplay, assignment]
+            : [user.name, user.userId, phoneDisplay, assignment];
+        for (const value of values) {
             const cell = document.createElement("td");
             cell.textContent = value;
             row.append(cell);
@@ -641,6 +652,8 @@ function openAdminManagementChoice(user) {
     document.querySelector("#admin-management-assignment-description").textContent = caregiver ? "담당 병실을 변경합니다." : "담당 병동을 변경합니다.";
     const resetOption = adminManagementOptions.find(option => option.dataset.adminAction === "RESET_PASSWORD");
     if (resetOption) resetOption.hidden = caregiver;
+    const phoneOption = adminManagementOptions.find(option => option.dataset.adminAction === "EDIT_PHONE");
+    if (phoneOption) phoneOption.hidden = caregiver;
     adminManagementChoiceConfirm.disabled = true;
 
     for (const option of adminManagementOptions) {
@@ -688,7 +701,54 @@ adminManagementChoiceConfirm?.addEventListener("click", () => {
         return;
     }
 
+    if (selectedAction === "EDIT_PHONE") {
+        openAdminPhoneEdit(selectedUser);
+        return;
+    }
+
     openAdminAction(selectedUser, selectedAction);
+});
+
+/* [2026-09-22 추가] 간호사 전화번호는 현재 프런트 목록에서만 수정합니다. */
+function formatPhoneInput(value) {
+    const digits = String(value ?? "").replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function openAdminPhoneEdit(user) {
+    adminSelectedUser = user;
+    adminPhoneEditDescription.textContent = `${user.name} (${user.userId})님의 전화번호를 수정합니다.`;
+    adminPhoneEditInput.value = formatPhoneInput(user.phoneNumber);
+    adminPhoneEditError.textContent = "";
+    adminPhoneEditDialog.showModal();
+    adminPhoneEditInput.focus();
+}
+
+adminPhoneEditInput?.addEventListener("input", () => {
+    adminPhoneEditInput.value = formatPhoneInput(adminPhoneEditInput.value);
+    adminPhoneEditError.textContent = "";
+});
+
+document.querySelector("#admin-phone-edit-cancel")?.addEventListener("click", () => {
+    adminPhoneEditDialog.close();
+});
+
+adminPhoneEditForm?.addEventListener("submit", event => {
+    event.preventDefault();
+    if (!adminSelectedUser) return;
+    const digits = adminPhoneEditInput.value.replace(/\D/g, "");
+    if (!/^01\d{8,9}$/.test(digits)) {
+        adminPhoneEditError.textContent = "휴대전화 번호를 확인해 주세요.";
+        adminPhoneEditInput.focus();
+        return;
+    }
+    adminSelectedUser.phoneNumber = digits;
+    adminPhoneEditDialog.close();
+    renderAdminUsers();
+    showAdminFeedback("전화번호를 화면에 반영했습니다. 새로고침하면 이전 번호로 돌아갑니다.");
+    adminSelectedUser = null;
 });
 
 /**
@@ -1451,6 +1511,7 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-management-choice-title").textContent = caregiver ? "간병인 관리" : "간호사 관리";
     document.querySelector("#admin-user-caption").textContent = caregiver ? "간병인 관리 목록" : "간호사 관리 목록";
     document.querySelector("#admin-user-id-heading").textContent = caregiver ? "전화번호" : "아이디";
+    document.querySelector("#admin-user-phone-heading").hidden = caregiver;
     document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
     document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
     document.querySelector("#admin-assignment-heading").textContent = caregiver ? "담당 병실" : "배정 병동";
