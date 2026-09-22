@@ -140,8 +140,8 @@
             row.append(
                 createCell(formatCreatedAt(history.createdAt)),
                 createCell(history.adminId),
-                // [2026-09-22 변경] 간병인 관리 이력은 내부 아이디 대신 간병인 이름을 표시합니다.
-                createCell(caregiverHistory ? (history.userName ?? "이름 미확인") : history.userId),
+                // [2026-09-22 변경] 대상 간호사와 간병인은 내부 아이디 대신 이름을 표시합니다.
+                createCell(history.userName || "이름 미확인"),
                 createCell(caregiverHistory ? formatCaregiverLocation(history) : (history.wardName ?? "미확인")),
                 createCell(actionLabel),
                 createManagementCell(history)
@@ -257,6 +257,10 @@
             );
 
             const approvedById = new Map();
+            for (const account of Array.isArray(accounts) ? accounts : []) {
+                if (account.userId) approvedById.set(account.userId, account);
+                if (account.phoneNumber) approvedById.set(account.phoneNumber, account);
+            }
             for (const account of Array.isArray(approvedAccounts) ? approvedAccounts : []) {
                 if (account.userId) approvedById.set(account.userId, account);
                 if (account.phoneNumber) approvedById.set(account.phoneNumber, account);
@@ -265,12 +269,12 @@
             return histories
                 .filter(history => accountIds.has(history.userId))
                 .map(history => {
-                    if (jobType !== "CAREGIVER") return history;
                     const account = approvedById.get(history.userId);
                     return {
                         ...history,
-                        wardName: account?.wardName ?? history.wardName,
-                        roomNumber: account?.roomNumber ?? history.roomNumber
+                        userName: account?.userName ?? account?.name ?? history.userName,
+                        wardName: jobType === "CAREGIVER" ? (account?.wardName ?? history.wardName) : history.wardName,
+                        roomNumber: jobType === "CAREGIVER" ? (account?.roomNumber ?? history.roomNumber) : history.roomNumber
                     };
                 });
         }

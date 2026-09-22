@@ -45,7 +45,7 @@
 .admin-home-stat strong span { color: inherit; font-size: inherit; }
 .admin-home-stat strong small { margin-left: 5px; font-size: 16px; font-weight: 600; }
 
-/* 시간대별 그래프는 낙상과 침대 이탈이 집중되는 시간을 가로 누적 막대로 비교합니다. */
+/* 시간대별 그래프는 낙상 감지가 집중되는 시간을 가로 막대로 비교합니다. */
 .admin-home-time-summary { min-width: 0; min-height: 335px; padding: 22px 24px; border: 1px solid #d5e0e8; border-radius: 18px; background: #fff; box-shadow: 0 6px 20px #3d596a0a; }
 .admin-home-time-summary .admin-home-section-heading { align-items: flex-start; }
 .admin-home-time-summary .admin-home-section-heading h2 { margin-bottom: 5px; }
@@ -58,7 +58,6 @@
 .admin-home-time-track { display: flex; align-items: stretch; height: 22px; overflow: hidden; border-radius: 7px; background: #edf3f7; }
 .admin-home-time-track i { display: block; height: 100%; }
 .admin-home-time-track .is-fall { background: #bd7167; }
-.admin-home-time-track .is-bed-exit { background: #d79a45; }
 .admin-calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 13px; }
 .admin-calendar-header h2 { margin: 0; color: #293f50; font-size: 17px; }
 .admin-calendar-controls { display: flex; align-items: center; gap: 5px; }
@@ -106,7 +105,6 @@
 .admin-home-accident-legend > span { display: inline-flex; align-items: center; gap: 5px; }
 .admin-home-accident-legend i { width: 8px; height: 8px; border-radius: 50%; }
 .admin-home-accident-legend i.is-fall { background: #bd7167; }
-.admin-home-accident-legend i.is-bed-exit { background: #d79a45; }
 .admin-home-ward-chart { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 16px; height: 235px; padding: 4px 6px 0; }
 .admin-home-ward-column { display: flex; flex-direction: column; align-items: center; gap: 9px; min-width: 0; color: #40586a; font-size: 12px; }
 .admin-home-ward-column > strong { color: #36566f; font-size: 13px; font-variant-numeric: tabular-nums; }
@@ -114,7 +112,6 @@
 .admin-home-ward-track { display: flex; flex-direction: column; justify-content: flex-end; width: min(100%, 72px); height: 165px; overflow: hidden; border-radius: 9px 9px 0 0; background: #edf3f7; }
 .admin-home-ward-track > span { display: block; width: 100%; flex: 0 0 auto; }
 .admin-home-ward-track > .is-fall { background: #bd7167; }
-.admin-home-ward-track > .is-bed-exit { background: #d79a45; }
 
 @media (max-width: 800px) {
     .admin-home-overview, .admin-home-content { grid-template-columns: 1fr; }

@@ -1111,7 +1111,7 @@ document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", a
 document.querySelector("#admin-event-ward-change")?.addEventListener("click", async event => {
     const button = event.currentTarget;
     if (button.disabled) return;
-    const userId = document.querySelector("#event-target").textContent.trim();
+    const userId = document.querySelector("#event-target")?.dataset.userId;
     button.disabled = true;
     adminSelectedUser = null;
     adminAction = "ASSIGN";
@@ -1243,9 +1243,7 @@ async function resetUserPassword(userId, resetButton, closeHistoryDialog = false
 
 /* [9.15] 수정내용: 관리 이력 상세의 초기화 버튼도 공통 비밀번호 초기화 기능으로 연결한다. */
 document.querySelector("#admin-event-change")?.addEventListener("click", event => {
-    const userId = document.querySelector("#event-target")
-        ?.textContent
-        .trim();
+    const userId = document.querySelector("#event-target")?.dataset.userId;
 
     resetUserPassword(userId, event.currentTarget, true);
 });
@@ -1327,7 +1325,7 @@ function filterHistory(action, resetPage = false) {
 
     for (const row of rows) {
         const cells = row.querySelectorAll("td");
-        const userId = cells[2]?.textContent.trim() ?? "";
+        const userId = row.dataset.userId ?? "";
         const ward = cells[3]?.textContent.trim() ?? "";
 
         const userName =
@@ -1390,7 +1388,9 @@ adminHistoryRows?.addEventListener("click", event => {
     const cells = row.querySelectorAll("td");
     document.querySelector("#event-time").textContent = cells[0].textContent;
     document.querySelector("#event-admin").textContent = cells[1].textContent;
-    document.querySelector("#event-target").textContent = cells[2].textContent;
+    const eventTarget = document.querySelector("#event-target");
+    eventTarget.textContent = cells[2].textContent;
+    eventTarget.dataset.userId = row.dataset.userId ?? "";
     document.querySelector("#event-action").textContent = cells[4].textContent;
     adminHistoryEventDialog.showModal();
 });
@@ -1522,7 +1522,7 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-title").textContent = view === "history-caregivers" ? "간병인 관리 이력" : view === "history" ? "간호사 관리 이력" : caregiver ? "간병인 관리" : "간호사 관리";
     document.querySelector("#admin-list-title").textContent = isHistory ? (caregiver ? "간병인 관리 이력 검색" : "간호사 관리 이력 검색") : caregiver ? "간병인 목록" : "간호사 목록";
     document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history-caregivers" ? "관리자가 처리한 간병인 정보와 담당 병실 변경 내역을 조회합니다." : view === "history" ? "관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 정보를 등록하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 전화번호 수정, 비밀번호 초기화, 비활성화를 관리합니다.";
-    document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름, 아이디 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 정보를 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
+    document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 정보를 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
     const historyAssignmentCard = document.querySelector('.history-filter-card[data-history-filter="병동 변경"], .history-filter-card[data-history-filter="병실 변경"]');
     if (historyAssignmentCard) {
         historyAssignmentCard.dataset.historyFilter = caregiver ? "병실 변경" : "병동 변경";
@@ -1554,12 +1554,17 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-user-id-heading").textContent = caregiver ? "병동" : "아이디";
     document.querySelector("#admin-user-phone-heading").textContent = caregiver ? "담당 병실" : "전화번호";
     document.querySelector("#admin-user-phone-heading").hidden = false;
-    document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디, 전화번호 또는 병동 검색";
-    document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디, 전화번호 또는 병동 검색";
+    const adminSearchLabel = caregiver
+        ? "이름 또는 전화번호 검색"
+        : isHistory
+            ? "이름, 병동 검색"
+            : "이름, 아이디, 전화번호 또는 병동 검색";
+    document.querySelector("#admin-search-input").placeholder = adminSearchLabel;
+    document.querySelector('label[for="admin-search-input"]').textContent = adminSearchLabel;
     document.querySelector("#admin-assignment-heading").textContent = caregiver ? "전화번호" : "배정 병동";
     document.querySelector("#complete-account-assignment-label").textContent = caregiver ? "담당 병실" : "담당 병동";
     document.querySelector("#admin-user-pagination").setAttribute("aria-label", caregiver ? "간병인 목록 페이지" : "간호사 목록 페이지");
-    document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "비활성화 간병인관리" : "비활성화 간호사 관리";
+    document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "간병인 비활성화" : "간호사 비활성화";
     if (jobChanged && !isRecords) {
         adminUsers = [];
         adminUserPage = 1;
@@ -1581,8 +1586,8 @@ function setAdminView(view, updateAddress = true) {
         : view === "history-caregivers" ? "간병인 관리 이력 | 병동 통합 관제"
         : view === "history" ? "간호사 관리 이력 | 병동 통합 관제"
         : view === "caregivers" ? "간병인 관리 | 병동 통합 관제"
-        : view === "inactive-caregivers" ? "비활성화 간병인관리 | 병동 통합 관제"
-        : view === "inactive" ? "비활성화 간호사 관리 | 병동 통합 관제"
+        : view === "inactive-caregivers" ? "간병인 비활성화 | 병동 통합 관제"
+        : view === "inactive" ? "간호사 비활성화 | 병동 통합 관제"
         : "간호사 관리 | 병동 통합 관제";
     if (updateAddress) {
         const path = view === "records" ? "/admin/records" : view === "history-caregivers" ? "/admin/caregivers/history" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : view === "staff" ? "/admin?view=staff" : "/admin";

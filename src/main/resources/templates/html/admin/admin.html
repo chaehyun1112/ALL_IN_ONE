@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=nurse-phone-20260922" th:href="@{/css/admin/account-create.css(v='nurse-phone-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=caregiver-room-filter-label-20260922" th:href="@{/css/admin/inactive-users.css(v='caregiver-room-filter-label-20260922')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=caregiver-deactivate-card-20260922"
-            th:src="@{/JS/admin/dashboard.js(v='caregiver-deactivate-card-20260922')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=history-nurse-search-label-20260922"
+            th:src="@{/JS/admin/dashboard.js(v='history-nurse-search-label-20260922')}"
             defer></script>
-    <script src="../../../static/JS/admin/admin-history.js?v=caregiver-history-location-20260922"
-        th:src="@{/JS/admin/admin-history.js(v='caregiver-history-location-20260922')}"
+    <script src="../../../static/JS/admin/admin-history.js?v=history-nurse-name-20260922"
+        th:src="@{/JS/admin/admin-history.js(v='history-nurse-name-20260922')}"
         defer></script>
     <script src="../../../static/JS/admin/account-create.js?v=nurse-phone-mask-20260922"
             th:src="@{/JS/admin/account-create.js(v='nurse-phone-mask-20260922')}"
@@ -35,7 +35,7 @@
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=checked-record-20260920" th:href="@{/css/alleyes-theme.css(v='checked-record-20260920')}">
     <link rel="stylesheet" href="../../../static/css/admin/navigation.css?v=single-nav-submenu-20260922" th:href="@{/css/admin/navigation.css(v='single-nav-submenu-20260922')}">
-    <link rel="stylesheet" href="../../../static/css/admin/home.css?v=admin-home-card-align-20260921" th:href="@{/css/admin/home.css(v='admin-home-card-align-20260921')}">
+    <link rel="stylesheet" href="../../../static/css/admin/home.css?v=fall-only-20260922" th:href="@{/css/admin/home.css(v='fall-only-20260922')}">
 </head>
 
 <body>
@@ -61,7 +61,7 @@
                 </div>
             </div>
             <div class="admin-nav-group admin-nav-hover-group">
-                <button type="button" class="admin-nav-trigger" aria-expanded="false" aria-controls="admin-inactive-submenu">비활성화 직원관리</button>
+                <button type="button" class="admin-nav-trigger" aria-expanded="false" aria-controls="admin-inactive-submenu">비활성화 관리</button>
                 <div class="admin-nav-submenu" id="admin-inactive-submenu">
                     <a id="admin-settings" href="admin-inactive-users.html" th:href="@{/admin/admin_de}" data-admin-view="inactive">간호사 비활성화</a>
                     <a href="admin.html?view=inactive-caregivers" th:href="@{/admin/caregivers/inactive}" data-admin-view="inactive-caregivers" th:classappend="${pageMode == 'inactive-caregivers'} ? ' active'">간병인 비활성화</a>
@@ -122,7 +122,6 @@
             </div>
             <div class="admin-home-record-list">
                 <div class="admin-home-record-row"><div><strong>306호 · 낙상 감지</strong><small>2026.08.25 14:41</small></div><span class="is-pending">미확인</span></div>
-                <div class="admin-home-record-row"><div><strong>303호 · 침대 이탈</strong><small>2026.08.25 14:39</small></div><span class="is-complete">완료</span></div>
                 <div class="admin-home-record-row"><div><strong>307호 · 낙상 감지</strong><small>2026.08.25 14:37</small></div><span class="is-complete">완료</span></div>
             </div>
         </section>
@@ -147,14 +146,13 @@
                 <h2 id="admin-home-ward-title">병동별 사고 발생 현황</h2>
                 <div class="admin-home-accident-legend" aria-label="사고 유형 범례">
                     <span><i class="is-fall" aria-hidden="true"></i>낙상</span>
-                    <span><i class="is-bed-exit" aria-hidden="true"></i>침대 이탈</span>
                     <span class="admin-home-alert-demo">화면 예시</span>
                 </div>
             </div>
-            <div class="admin-home-ward-chart" role="img" aria-label="예시 집계: 1병동 낙상 3건, 침대 이탈 2건. 2병동 낙상 2건, 침대 이탈 1건. 3병동 낙상 1건, 침대 이탈 1건.">
-                <div class="admin-home-ward-column"><strong>5건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 60%" title="낙상 3건"></span><span class="is-bed-exit" style="height: 40%" title="침대 이탈 2건"></span></div><span>1병동</span><small>낙상 3 · 이탈 2</small></div>
-                <div class="admin-home-ward-column"><strong>3건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 40%" title="낙상 2건"></span><span class="is-bed-exit" style="height: 20%" title="침대 이탈 1건"></span></div><span>2병동</span><small>낙상 2 · 이탈 1</small></div>
-                <div class="admin-home-ward-column"><strong>2건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 20%" title="낙상 1건"></span><span class="is-bed-exit" style="height: 20%" title="침대 이탈 1건"></span></div><span>3병동</span><small>낙상 1 · 이탈 1</small></div>
+            <div class="admin-home-ward-chart" role="img" aria-label="예시 집계: 1병동 낙상 3건, 2병동 낙상 2건, 3병동 낙상 1건.">
+                <div class="admin-home-ward-column"><strong>3건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 100%" title="낙상 3건"></span></div><span>1병동</span><small>낙상 3건</small></div>
+                <div class="admin-home-ward-column"><strong>2건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 67%" title="낙상 2건"></span></div><span>2병동</span><small>낙상 2건</small></div>
+                <div class="admin-home-ward-column"><strong>1건</strong><div class="admin-home-ward-track"><span class="is-fall" style="height: 33%" title="낙상 1건"></span></div><span>3병동</span><small>낙상 1건</small></div>
             </div>
         </section>
         <!-- [2026-09-21] 달력 대신 관리자 인력 배치 판단에 필요한 시간대별 사고 추이를 표시합니다. -->
@@ -163,14 +161,13 @@
                 <div><h2 id="admin-home-time-title">시간대별 사고 발생 현황</h2><p>오늘 발생한 사고 기준</p></div>
                 <div class="admin-home-accident-legend" aria-label="사고 유형 범례">
                     <span><i class="is-fall" aria-hidden="true"></i>낙상</span>
-                    <span><i class="is-bed-exit" aria-hidden="true"></i>침대 이탈</span>
                     <span class="admin-home-alert-demo">화면 예시</span>
                 </div>
             </div>
-            <div class="admin-home-time-chart" role="img" aria-label="예시 집계: 오전 낙상 1건과 침대 이탈 1건, 오후 낙상 2건과 침대 이탈 1건, 저녁 낙상 1건과 침대 이탈 2건">
-                <div class="admin-home-time-row"><span><strong>오전</strong><small>06–12시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 25%" title="낙상 1건"></i><i class="is-bed-exit" style="width: 25%" title="침대 이탈 1건"></i></div><b>2건</b></div>
-                <div class="admin-home-time-row"><span><strong>오후</strong><small>12–18시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 50%" title="낙상 2건"></i><i class="is-bed-exit" style="width: 25%" title="침대 이탈 1건"></i></div><b>3건</b></div>
-                <div class="admin-home-time-row"><span><strong>저녁</strong><small>18–24시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 25%" title="낙상 1건"></i><i class="is-bed-exit" style="width: 50%" title="침대 이탈 2건"></i></div><b>3건</b></div>
+            <div class="admin-home-time-chart" role="img" aria-label="예시 집계: 오전 낙상 1건, 오후 낙상 2건, 저녁 낙상 1건">
+                <div class="admin-home-time-row"><span><strong>오전</strong><small>06–12시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 50%" title="낙상 1건"></i></div><b>1건</b></div>
+                <div class="admin-home-time-row"><span><strong>오후</strong><small>12–18시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 100%" title="낙상 2건"></i></div><b>2건</b></div>
+                <div class="admin-home-time-row"><span><strong>저녁</strong><small>18–24시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 50%" title="낙상 1건"></i></div><b>1건</b></div>
             </div>
         </section>
     </div>
@@ -257,12 +254,13 @@
                     </svg>
 
                     <label class="visually-hidden" for="admin-search-input">
-                        이름, 아이디, 전화번호 또는 병동 검색
+                        <span th:text="${pageMode == 'history'} ? '이름, 병동 검색' : '이름, 아이디, 전화번호 또는 병동 검색'">이름, 아이디, 전화번호 또는 병동 검색</span>
                     </label>
 
                     <input type="search"
                            id="admin-search-input"
                            placeholder="이름, 아이디, 전화번호 또는 병동 검색"
+                           th:placeholder="${pageMode == 'history'} ? '이름, 병동 검색' : '이름, 아이디, 전화번호 또는 병동 검색'"
                            autocomplete="off">
                 </div>
 
@@ -344,7 +342,7 @@
 <!-- [2026.09.16] 추가한 내용: 전체화면을 해제하지 않고 본문만 전환할 수 있도록 비활성화 직원관리 화면을 같은 관리자 문서에 둡니다. -->
 <section class="admin-page admin-settings-page" id="admin-inactive-view" aria-labelledby="admin-settings-title" hidden>
     <header class="admin-heading admin-settings-heading">
-        <h1 id="admin-settings-title" tabindex="-1">비활성화 간호사 관리</h1>
+        <h1 id="admin-settings-title" tabindex="-1">간호사 비활성화</h1>
         <p>간호사의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
         <div class="admin-inactive-overview"><section class="admin-inactive-stat" aria-labelledby="admin-inactive-stat-title"><span class="admin-inactive-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span><div><h2 id="admin-inactive-stat-title">비활성화 간호사</h2><strong id="admin-inactive-count">—<span>명</span></strong></div></section></div>
         <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title"><div class="admin-guide-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><strong id="admin-account-guide-title">계정 상태 관리</strong></div><p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 직원은 <strong>활성화</strong>로 변경해 주세요.</p></aside>

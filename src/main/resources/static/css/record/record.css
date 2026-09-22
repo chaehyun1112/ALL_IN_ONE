@@ -630,12 +630,6 @@ select:focus-visible,
   color: #7a3434;
 }
 
-/* 침대 이탈 */
-.bed-exit-badge {
-  background: #f7e9d2;
-  color: #8a5b24;
-}
-
 /* 검색 결과 없음·조회 실패 */
 .record-table .empty-message {
   height: 100px;
