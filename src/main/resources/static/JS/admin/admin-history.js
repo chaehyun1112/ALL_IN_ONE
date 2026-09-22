@@ -52,6 +52,9 @@
      * 감사 코드에 해당하는 화면 표시 문구를 반환한다.
      */
     function getActionLabel(actionCode) {
+        if (actionCode === "CHANGE_WARD" && document.body.dataset.adminJobType === "CAREGIVER") {
+            return "병실 변경";
+        }
         return actionLabels[actionCode] ?? actionCode ?? "알 수 없음";
     }
 
@@ -215,6 +218,28 @@
             throw new Error("감사 로그 응답 형식이 올바르지 않습니다.");
         }
 
+        // [2026-09-22 추가] 선택한 직무의 계정 작업 이력만 해당 관리 이력 화면에 표시합니다.
+        if (document.querySelector("#admin-management-page")?.classList.contains("is-history-page")) {
+            const jobType = document.body.dataset.adminJobType === "CAREGIVER" ? "CAREGIVER" : "GENERAL";
+            const accountResponse = await fetch(
+                `/api/admin/users?jobType=${jobType}`,
+                { credentials: "same-origin", cache: "no-store", headers: { "Accept": "application/json" } }
+            );
+
+            if (!accountResponse.ok) {
+                throw new Error("계정 정보를 불러오지 못했습니다.");
+            }
+
+            const accounts = await accountResponse.json();
+            const accountIds = new Set(
+                (Array.isArray(accounts) ? accounts : [])
+                    .map(account => account.userId ?? account.phoneNumber)
+                    .filter(Boolean)
+            );
+
+            return histories.filter(history => accountIds.has(history.userId));
+        }
+
         return histories;
     }
 
@@ -256,6 +281,7 @@
      * 다른 관리자 JS에서도 작업 성공 후 이력을 갱신할 수 있도록 공개한다.
      */
     window.refreshAdminHistory = refreshAdminHistory;
+    window.addEventListener("admin-job-type-changed", refreshAdminHistory);
 
     /*
      * 계정 생성, 병동 변경, 비밀번호 초기화 팝업을 닫으면
