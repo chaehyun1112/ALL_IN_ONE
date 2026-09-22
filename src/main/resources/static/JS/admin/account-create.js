@@ -5,6 +5,8 @@ const createDialog = document.querySelector("#admin-create-dialog");
 const createForm = document.querySelector("#admin-create-form");
 const createNameInput = document.querySelector("#admin-create-name");
 const createUserIdInput = document.querySelector("#admin-create-user-id");
+const createStaffPhoneInput = document.querySelector("#admin-create-staff-phone");
+const createStaffPhoneError = document.querySelector("#admin-create-staff-phone-error");
 const createPhoneInput = document.querySelector("#admin-create-phone");
 const createRoomWardSelect = document.querySelector("#admin-create-room-ward");
 const createRoomWardError = document.querySelector("#admin-create-room-ward-error");
@@ -173,12 +175,19 @@ if (createWardTrigger && createWardOptions && createWardDropdown) {
 if (createNameInput) createNameInput.maxLength = 20;
 if (createUserIdInput) createUserIdInput.maxLength = 20;
 if (createPhoneInput) createPhoneInput.maxLength = 13;
+if (createStaffPhoneInput) createStaffPhoneInput.maxLength = 13;
+
+function maskCompletePhone(phoneNumber) {
+    const digits = String(phoneNumber ?? "").replace(/\D/g, "");
+    return digits.length >= 7 ? `${digits.slice(0, 3)}-****-${digits.slice(-4)}` : "—";
+}
 
 function clearCreateErrors() {
     if (createNameError) createNameError.textContent = "";
     if (createUserIdError) createUserIdError.textContent = "";
     if (createWardError) createWardError.textContent = "";
     if (createPhoneError) createPhoneError.textContent = "";
+    if (createStaffPhoneError) createStaffPhoneError.textContent = "";
     if (createRoomError) createRoomError.textContent = "";
     createRoomWardError.textContent = "";
 }
@@ -200,7 +209,7 @@ function showCreateFieldErrors(errorBody) {
         displayed = true;
     }
     if (typeof errorBody.phoneNumber === "string" && createPhoneError) {
-        createPhoneError.textContent = errorBody.phoneNumber;
+        (isCaregiverCreation() ? createPhoneError : createStaffPhoneError).textContent = errorBody.phoneNumber;
         displayed = true;
     }
     if (typeof errorBody.roomNumber === "string" && createRoomError) {
@@ -397,6 +406,7 @@ createForm?.addEventListener("submit", async event => {
     const userId = createUserIdInput?.value.trim() ?? "";
     const caregiver = isCaregiverCreation();
     const phoneNumber = createPhoneInput?.value.replace(/\D/g, "") ?? "";
+    const staffPhoneNumber = createStaffPhoneInput?.value.replace(/\D/g, "") ?? "";
     const roomNumber = Number(createRoomSelect?.value ?? 0);
     const wardValue = createWardSelect?.value ?? "";
     const validUserId = /^[A-Za-z0-9._-]{1,20}$/.test(userId);
@@ -415,6 +425,9 @@ createForm?.addEventListener("submit", async event => {
     if (!caregiver && !selectedWard && createWardError) {
         createWardError.textContent = "담당 병동을 선택해 주세요.";
     }
+    if (!caregiver && !/^01\d{8,9}$/.test(staffPhoneNumber)) {
+        createStaffPhoneError.textContent = "휴대전화 번호를 확인해 주세요.";
+    }
     if (caregiver && !/^01\d{8,9}$/.test(phoneNumber)) {
         createPhoneError.textContent = "휴대전화 번호를 확인해 주세요.";
     }
@@ -425,7 +438,7 @@ createForm?.addEventListener("submit", async event => {
     if (caregiver && !validRoom) createRoomError.textContent = "선택한 병동의 담당 병실을 선택해 주세요.";
     if (!validUserName || (caregiver
         ? !/^01\d{8,9}$/.test(phoneNumber) || !validRoom
-        : !validUserId || !selectedWard)) return;
+        : !validUserId || !selectedWard || !/^01\d{8,9}$/.test(staffPhoneNumber))) return;
 
     if (caregiver && selectedWardNumber !== 3) {
         createRoomError.textContent = "1·2병동 계정 생성은 서버 연동 후 사용할 수 있습니다.";
@@ -442,6 +455,7 @@ createForm?.addEventListener("submit", async event => {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(caregiver
                 ? { userName, phoneNumber, roomNumber }
+                // [2026-09-22 프런트 전용] 간호사 전화번호는 화면 예시에만 사용하고 서버 요청에는 포함하지 않습니다.
                 : { userId, userName, wardId: Number(selectedWard.wardId) })
         });
 
@@ -461,13 +475,11 @@ createForm?.addEventListener("submit", async event => {
         const completePassword = document.querySelector("#complete-account-password");
 
         if (completeName) completeName.textContent = created.userName;
-        if (completePhone) completePhone.textContent = caregiver
-            ? `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, phoneNumber.length - 4)}-${phoneNumber.slice(-4)}`
-            : "";
+        if (completePhone) completePhone.textContent = maskCompletePhone(caregiver ? phoneNumber : staffPhoneNumber);
         if (completeUserId) completeUserId.textContent = caregiver ? "" : created.userId;
         if (completeWard) completeWard.textContent = caregiver ? `${roomNumber}호` : selectedWard.wardName;
         if (completePassword) completePassword.textContent = caregiver ? "" : created.temporaryPassword;
-        document.querySelector("#complete-account-phone-row").hidden = !caregiver;
+        document.querySelector("#complete-account-phone-row").hidden = false;
         document.querySelector("#complete-account-user-id-row").hidden = caregiver;
         document.querySelector("#complete-account-password-row").hidden = caregiver;
         createCompleteDialog.classList.toggle("is-caregiver", caregiver);
@@ -484,7 +496,7 @@ createForm?.addEventListener("submit", async event => {
                     status: created.accountStatus ?? "APPROVED",
                     wardId: created.wardId,
                     ward: caregiver ? "3병동" : selectedWard.wardName,
-                    phoneNumber: caregiver ? phoneNumber : null,
+                    phoneNumber: caregiver ? phoneNumber : staffPhoneNumber,
                     roomNumber: caregiver ? String(roomNumber) : null
                 });
             }

@@ -144,7 +144,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-management-choice-dialog { width: min(520px, calc(100% - 32px)); }
 /* [9.15] 추가내용: 관리 선택 팝업이 열려 있는 동안 뒤 화면의 스크롤을 고정한다. */
 body.admin-modal-open .admin-page { overflow-y: hidden; }
-.admin-management-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+.admin-management-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
 .admin-management-choice-dialog.is-caregiver .admin-management-options { grid-template-columns: repeat(2, 1fr); }
 .admin-management-option { display: flex; min-height: 150px; padding: 14px 10px; flex-direction: column; align-items: center; justify-content: center; gap: 7px; border: 1px solid #dfe6dc; border-radius: 11px; background: #fff; color: var(--admin-text); text-align: center; cursor: pointer; }
 .admin-management-option:hover, .admin-management-option:focus-visible, .admin-management-option.is-selected { border-color: #8ea6b8; background: #edf3f7; outline: 0; }
@@ -152,6 +152,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-management-option-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .admin-management-option-icon.admin-approve { color: #39745e; }
 .admin-management-option-icon.admin-password-reset { color: #b7782a; background: #fcf5e9; }
+.admin-management-option-icon.admin-phone-edit { color: #526d82; background: #edf3f7; }
 .admin-management-option-icon.admin-reject { color: #c55454; background: #fceeed; }
 .admin-management-option strong { font-size: 13px; }
 .admin-management-option small { color: #7b8274; font-size: 11px; line-height: 1.4; }
@@ -218,7 +219,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .history-actions button:hover { background: transparent; opacity: .7; }
 .admin-dialog { width: min(420px, calc(100% - 32px)); padding: 28px; border: 1px solid var(--admin-border); border-radius: 14px; color: var(--admin-text); background: var(--admin-surface); }
 /* [2026.09.16] 고친 내용: 직원 관리 작업 선택 카드의 가로 폭을 40px 늘려 항목 사이 여백을 자연스럽게 맞춥니다. */
-#admin-management-choice-dialog.admin-management-choice-dialog { width: min(620px, calc(100% - 32px)); }
+#admin-management-choice-dialog.admin-management-choice-dialog { width: min(780px, calc(100% - 32px)); }
 /* [2026-09-16 변경] 관리 작업 선택 창의 취소·선택 버튼을 조금 넓혀 누르기 쉽게 만든다. */
 #admin-management-choice-cancel, #admin-management-choice-confirm { min-width: 72px; }
 .admin-dialog::backdrop { background: #1c302666; }
@@ -248,6 +249,8 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-deactivate-details li + li { margin-top: 6px; }
 .admin-dialog label { display: block; margin: 20px 0 8px; }
 .admin-dialog select { width: 100%; padding: 12px; background: white; color: var(--admin-text); }
+.admin-phone-edit-dialog input { box-sizing: border-box; width: 100%; min-height: 52px; padding: 0 14px; border: 1px solid #b8cad8; border-radius: 9px; background: #fff; color: var(--admin-text); font: inherit; }
+.admin-phone-edit-dialog input:focus { border-color: #66849a; outline: 2px solid #b8cad866; }
 #admin-action-dialog.ward-menu-overflow { overflow: visible; }
 .admin-action-ward-dropdown { position: relative; }
 .admin-action-ward-dropdown > button { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 54px; padding: 0 16px; border: 1px solid #b8cad8; border-radius: 9px; background: #fff; color: #293b49; font: inherit; text-align: left; cursor: pointer; }

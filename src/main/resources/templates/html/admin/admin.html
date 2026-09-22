@@ -13,19 +13,19 @@
     <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제')))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/dashboard.css?v=caregiver-card-align-20260921"
-          th:href="@{/css/admin/dashboard.css(v='caregiver-card-align-20260921')}">
-    <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=caregiver-ward-select-20260922" th:href="@{/css/admin/account-create.css(v='caregiver-ward-select-20260922')}">
+          href="../../../static/css/admin/dashboard.css?v=nurse-phone-edit-20260922"
+          th:href="@{/css/admin/dashboard.css(v='nurse-phone-edit-20260922')}">
+    <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=nurse-phone-20260922" th:href="@{/css/admin/account-create.css(v='nurse-phone-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-row-text-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-row-text-20260920')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=caregiver-ward-select-20260922"
-            th:src="@{/JS/admin/dashboard.js(v='caregiver-ward-select-20260922')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=nurse-phone-edit-20260922"
+            th:src="@{/JS/admin/dashboard.js(v='nurse-phone-edit-20260922')}"
             defer></script>
     <script src="../../../static/JS/admin/admin-history.js?v=history-menu-20260922"
         th:src="@{/JS/admin/admin-history.js(v='history-menu-20260922')}"
         defer></script>
-    <script src="../../../static/JS/admin/account-create.js?v=caregiver-ward-select-20260922"
-            th:src="@{/JS/admin/account-create.js(v='caregiver-ward-select-20260922')}"
+    <script src="../../../static/JS/admin/account-create.js?v=nurse-phone-mask-20260922"
+            th:src="@{/JS/admin/account-create.js(v='nurse-phone-mask-20260922')}"
             defer></script>
     <script src="../../../static/JS/admin/inactive-users.js?v=caregiver-room-20260921"
             th:src="@{/JS/admin/inactive-users.js(v='caregiver-room-20260921')}"
@@ -272,6 +272,7 @@
                 <tr>
                     <th scope="col">이름</th>
                     <th scope="col" id="admin-user-id-heading">아이디</th>
+                    <th scope="col" id="admin-user-phone-heading">전화번호</th>
                     <th scope="col" id="admin-assignment-heading">배정 병동</th>
                     <th scope="col">관리</th>
                 </tr>
@@ -379,6 +380,12 @@
             <strong id="admin-management-assignment-title">병동 변경</strong>
             <small id="admin-management-assignment-description">담당 병동을 변경합니다.</small>
         </button>
+        <!-- [2026-09-22 추가] 간호사 연락처를 화면에서 수정하는 관리 항목입니다. -->
+        <button type="button" class="admin-management-option" data-admin-action="EDIT_PHONE" role="radio" aria-checked="false">
+            <span class="admin-management-option-icon admin-phone-edit" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h4l2 5-3 2a15 15 0 0 0 4 4l2-3 5 2v4a4 4 0 0 1-4 4C9.3 21 3 14.7 3 7a4 4 0 0 1 4-4Z"/><path d="m15 5 4 4M14 10l1.2-4.8L19 9l-5 1Z"/></svg></span>
+            <strong>전화번호 수정</strong>
+            <small>등록된 전화번호를 수정합니다.</small>
+        </button>
         <button type="button" class="admin-management-option" data-admin-action="RESET_PASSWORD" role="radio" aria-checked="false">
             <!-- [9.15] 수정내용: 비밀번호 초기화 기능을 자물쇠 아이콘으로 표시한다. -->
             <span class="admin-management-option-icon admin-password-reset" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2" /></svg></span>
@@ -395,6 +402,17 @@
         <button type="button" id="admin-management-choice-cancel">취소</button>
         <button type="button" id="admin-management-choice-confirm" class="admin-primary" disabled>선택</button>
     </div>
+</dialog>
+
+<dialog id="admin-phone-edit-dialog" class="admin-dialog admin-phone-edit-dialog" aria-labelledby="admin-phone-edit-title">
+    <form id="admin-phone-edit-form" novalidate>
+        <h2 id="admin-phone-edit-title">전화번호 수정</h2>
+        <p id="admin-phone-edit-description"></p>
+        <label for="admin-phone-edit-input">변경할 전화번호</label>
+        <input id="admin-phone-edit-input" type="tel" inputmode="tel" autocomplete="tel" maxlength="13" placeholder="예: 010-1234-5678">
+        <small class="admin-field-error" id="admin-phone-edit-error"></small>
+        <div class="admin-dialog-actions"><button type="button" id="admin-phone-edit-cancel">취소</button><button type="submit" class="admin-primary">수정하기</button></div>
+    </form>
 </dialog>
 
 <!-- 승인, 반려, 병동 변경, 비활성화 공용 팝업 -->
@@ -445,8 +463,10 @@
         <div class="admin-create-grid">
             <label>이름<input id="admin-create-name" placeholder="예: 김서윤"><small class="admin-field-error" id="admin-create-name-error"></small></label>
             <label class="admin-create-staff-field">아이디<input id="admin-create-user-id" placeholder="예: user.ksy01"><small class="admin-field-error" id="admin-create-user-id-error"></small></label>
+            <!-- [2026-09-22 추가] 간호사 계정에도 연락 가능한 전화번호를 함께 등록합니다. -->
+            <label class="admin-create-staff-field admin-create-staff-phone-field">전화번호<input id="admin-create-staff-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="예: 010-1234-5678"><small class="admin-field-error" id="admin-create-staff-phone-error"></small></label>
             <label class="admin-create-caregiver-field" hidden>전화번호<input id="admin-create-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="예: 010-1234-5678"><small class="admin-field-error" id="admin-create-phone-error"></small></label>
-            <label class="admin-create-staff-field admin-create-ward-field">담당 병동
+            <label class="admin-create-staff-field admin-create-ward-field admin-create-staff-ward-field">담당 병동
                 <span class="admin-create-ward-dropdown" id="admin-create-ward-dropdown">
                     <button type="button" id="admin-create-ward-trigger" aria-label="담당 병동 선택" aria-expanded="false" aria-controls="admin-create-ward-options">
                         <span id="admin-create-ward-label">담당 병동을 선택해주세요</span>
@@ -483,7 +503,7 @@
     <p>아래 로그인 정보를 간호사에게 전달해주세요.</p>
     <dl class="admin-account-info">
         <div><dt>이름</dt><dd id="complete-account-name"></dd></div>
-        <div id="complete-account-phone-row" hidden><dt>전화번호</dt><dd id="complete-account-phone"></dd></div>
+        <div id="complete-account-phone-row"><dt>전화번호</dt><dd id="complete-account-phone"></dd></div>
         <div id="complete-account-user-id-row"><dt>아이디</dt><dd id="complete-account-user-id"></dd></div>
         <div id="complete-account-ward-row"><dt id="complete-account-assignment-label">담당 병동</dt><dd id="complete-account-ward"></dd></div>
         <div id="complete-account-password-row"><dt>임시 비밀번호</dt><dd class="admin-password-value"><span id="complete-account-password"></span><button type="button" id="copy-account-password">복사하기</button></dd></div>
