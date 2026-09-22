@@ -105,15 +105,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-table-wrap { overflow-x: auto; }
 #admin-management-page .admin-table-wrap { min-height: 220px; }
 /* [9.15] 추가내용: 직원 목록이 길어질 때 표 내부에서 스크롤하고 열 제목은 고정한다. */
-#admin-management-page.is-staff-page .admin-table-wrap { max-height: 520px; overflow: auto; margin-right: -14px; padding-right: 14px; scrollbar-width: thin; scrollbar-color: #9aaba0 #f0f1eb; }
+#admin-management-page.is-staff-page .admin-table-wrap { max-height: 520px; overflow: auto; margin-right: -14px; padding-right: 14px; scrollbar-width: thin; scrollbar-color: #8ea6b8 #edf3f7; }
 /* [2026-09-16 변경] 직원 관리에서는 본문 스크롤을 없애고 목록 영역만 남은 높이 안에서 스크롤한다. */
 #admin-management-page.is-staff-page { overflow-y: hidden; }
 #admin-management-page.is-staff-page .admin-panel { min-height: 0; display: flex; flex-direction: column; }
 #admin-management-page.is-staff-page .admin-table-wrap { flex: 1 1 auto; min-height: 0; max-height: none; }
 #admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
-#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-track { border-radius: 999px; background: #f0f1eb; }
-#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb { border: 2px solid #f0f1eb; border-radius: 999px; background: #9aaba0; }
-#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb:hover { background: #617d92; }
+#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-track { border-radius: 999px; background: #edf3f7; }
+#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb { border: 2px solid #edf3f7; border-radius: 999px; background: #8ea6b8; }
+#admin-management-page.is-staff-page .admin-table-wrap::-webkit-scrollbar-thumb:hover { background: #526d82; }
 .admin-table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: center; font-size: 11px; }
 /* [9.15] 추가내용: 직원 목록 스크롤 중에도 각 열의 의미를 확인할 수 있게 헤더를 상단에 고정한다. */
 .admin-table th { position: sticky; top: 0; z-index: 1; height: 46px; background: #f5f5ec; color: #7b8274; font-weight: 600; }

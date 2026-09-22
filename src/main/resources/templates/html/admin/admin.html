@@ -10,7 +10,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <!-- [9.15] 수정내용: 직원 관리와 관리 이력 화면에서 브라우저 제목도 현재 화면에 맞게 표시한다. -->
-    <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history'} ? '관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제'))">간호사 관리 | 병동 통합 관제</title>
+    <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제')))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css?v=caregiver-card-align-20260921"
@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=caregiver-complete-20260921" th:href="@{/css/admin/account-create.css(v='caregiver-complete-20260921')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-row-text-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-row-text-20260920')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=admin-nurse-list-20260921"
-            th:src="@{/JS/admin/dashboard.js(v='admin-nurse-list-20260921')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=history-menu-20260922"
+            th:src="@{/JS/admin/dashboard.js(v='history-menu-20260922')}"
             defer></script>
-    <script src="../../../static/JS/admin/admin-history.js?v=caregiver-room-change-20260921"
-        th:src="@{/JS/admin/admin-history.js(v='caregiver-room-change-20260921')}"
+    <script src="../../../static/JS/admin/admin-history.js?v=history-menu-20260922"
+        th:src="@{/JS/admin/admin-history.js(v='history-menu-20260922')}"
         defer></script>
     <script src="../../../static/JS/admin/account-create.js?v=caregiver-complete-20260921"
             th:src="@{/JS/admin/account-create.js(v='caregiver-complete-20260921')}"
@@ -52,7 +52,14 @@
                     <a href="admin.html?view=caregivers" th:href="@{/admin/caregivers}" data-admin-view="caregivers" th:classappend="${pageMode == 'caregivers'} ? ' active'">간병인 관리</a>
                 </div>
             </div>
-            <a href="admin.html?view=history" th:href="@{/admin/history}" data-admin-view="history" th:classappend="${pageMode == 'history'} ? ' active'">관리 이력</a>
+            <!-- [2026-09-22 변경] 관리 이력도 간호사와 간병인 화면을 하위 메뉴에서 구분합니다. -->
+            <div class="admin-nav-group admin-nav-hover-group">
+                <button type="button" class="admin-nav-trigger" aria-expanded="false" aria-controls="admin-history-submenu">관리 이력</button>
+                <div class="admin-nav-submenu" id="admin-history-submenu">
+                    <a href="admin.html?view=history" th:href="@{/admin/history}" data-admin-view="history" th:classappend="${pageMode == 'history'} ? ' active'">간호사 관리 이력</a>
+                    <a href="admin.html?view=history-caregivers" th:href="@{/admin/caregivers/history}" data-admin-view="history-caregivers" th:classappend="${pageMode == 'history-caregivers'} ? ' active'">간병인 관리 이력</a>
+                </div>
+            </div>
             <div class="admin-nav-group admin-nav-hover-group">
                 <button type="button" class="admin-nav-trigger" aria-expanded="false" aria-controls="admin-inactive-submenu">비활성화 직원관리</button>
                 <div class="admin-nav-submenu" id="admin-inactive-submenu">
@@ -170,11 +177,11 @@
 </main>
 
 <!-- [9.15] 수정내용: 주소에 따라 직원 관리 또는 관리 이력 전용 화면으로 구분한다. -->
-<main class="admin-page" id="admin-management-page" aria-labelledby="admin-title" data-admin-id="admin01" data-page-mode="staff" th:classappend="${pageMode == 'history'} ? ' is-history-page' : ' is-staff-page'" th:attr="data-admin-id=${adminId},data-history-only=${pageMode == 'history'},data-page-mode=${pageMode}" th:hidden="${pageMode == 'records' or pageMode == 'inactive-caregivers'}">
+<main class="admin-page" id="admin-management-page" aria-labelledby="admin-title" data-admin-id="admin01" data-page-mode="staff" th:classappend="${pageMode == 'history' or pageMode == 'history-caregivers'} ? ' is-history-page' : ' is-staff-page'" th:attr="data-admin-id=${adminId},data-history-only=${pageMode == 'history' or pageMode == 'history-caregivers'},data-page-mode=${pageMode}" th:hidden="${pageMode == 'records' or pageMode == 'inactive-caregivers'}">
     <header class="admin-heading">
         <!-- [9.15] 수정내용: 화면 역할에 맞는 제목과 안내 문구를 표시한다. -->
-        <h1 id="admin-title" th:text="${pageMode == 'history'} ? '관리 이력' : (${pageMode == 'caregivers'} ? '간병인 관리' : '간호사 관리')">간호사 관리</h1>
-        <p th:text="${pageMode == 'history'} ? '관리자가 처리한 계정 및 병동 변경 내역을 조회합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.' : '간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.')">간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
+        <h1 id="admin-title" th:text="${pageMode == 'history-caregivers'} ? '간병인 관리 이력' : (${pageMode == 'history'} ? '간호사 관리 이력' : (${pageMode == 'caregivers'} ? '간병인 관리' : '간호사 관리'))">간호사 관리</h1>
+        <p th:text="${pageMode == 'history-caregivers'} ? '관리자가 처리한 간병인 계정 및 담당 병실 변경 내역을 조회합니다.' : (${pageMode == 'history'} ? '관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다.' : '간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.'))">간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
         <div class="admin-account-actions">
             <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
         </div>
@@ -363,7 +370,7 @@
 
 <!-- [9.15] 추가내용: 직원별 관리 작업을 중앙 팝업에서 선택한다. -->
 <dialog id="admin-management-choice-dialog" class="admin-dialog admin-management-choice-dialog" aria-labelledby="admin-management-choice-title">
-    <h2 id="admin-management-choice-title">직원 관리</h2>
+    <h2 id="admin-management-choice-title">간호사 관리</h2>
     <p id="admin-management-choice-description">실행할 관리 작업을 선택해주세요.</p>
     <div class="admin-management-options" role="radiogroup" aria-label="관리 작업 선택">
         <button type="button" class="admin-management-option" data-admin-action="ASSIGN" role="radio" aria-checked="false">

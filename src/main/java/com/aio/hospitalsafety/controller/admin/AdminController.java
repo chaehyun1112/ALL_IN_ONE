@@ -40,6 +40,14 @@ public class AdminController {
         return "html/admin/admin";
     }
 
+    @GetMapping({"/admin/caregivers/history", "/admin/caregivers/history/"})
+    public String adminCaregiverHistory(Authentication authentication, Model model) {
+        model.addAttribute("adminId", authentication == null ? "admin01" : authentication.getName());
+        // [2026-09-22 추가] 간병인 계정 작업만 확인하는 별도 관리 이력 화면을 제공합니다.
+        model.addAttribute("pageMode", "history-caregivers");
+        return "html/admin/admin";
+    }
+
     @GetMapping({"/admin/admin_de", "/admin/admin_de/"})
     public String adminDeactivatedUsers() {
         return "html/admin/admin-inactive-users";

@@ -1392,7 +1392,8 @@ function setAdminView(view, updateAddress = true) {
     const isHome = view === "home";
     const isInactive = view === "inactive" || view === "inactive-caregivers";
     const isRecords = view === "records";
-    const nextJobType = view === "caregivers" || view === "inactive-caregivers" ? "CAREGIVER" : "GENERAL";
+    const isHistory = view === "history" || view === "history-caregivers";
+    const nextJobType = view === "caregivers" || view === "inactive-caregivers" || view === "history-caregivers" ? "CAREGIVER" : "GENERAL";
     const jobChanged = adminJobType !== nextJobType;
     adminJobType = nextJobType;
     document.body.dataset.adminJobType = adminJobType;
@@ -1406,19 +1407,29 @@ function setAdminView(view, updateAddress = true) {
         adminRecordFrame.dataset.loaded = "true";
     }
     if (!isHome && !isInactive && !isRecords) {
-        adminPage.classList.toggle("is-history-page", view === "history");
-        adminPage.classList.toggle("is-staff-page", view !== "history");
+        adminPage.classList.toggle("is-history-page", isHistory);
+        adminPage.classList.toggle("is-staff-page", !isHistory);
         filterHistory(adminHistoryFilter);
     }
-    const caregiver = view === "caregivers";
-    document.querySelector("#admin-title").textContent = view === "history" ? "관리 이력" : caregiver ? "간병인 관리" : "간호사 관리";
-    document.querySelector("#admin-list-title").textContent = view === "history" ? "관리 이력 검색" : caregiver ? "간병인 목록" : "간호사 목록";
-    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history" ? "관리자가 처리한 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
-    document.querySelector(".admin-management-title p").textContent = view === "history" ? "이름, 아이디 또는 병동으로 처리 이력을 검색합니다." : caregiver ? "간병인 계정을 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
+    const caregiver = view === "caregivers" || view === "history-caregivers";
+    document.querySelector("#admin-title").textContent = view === "history-caregivers" ? "간병인 관리 이력" : view === "history" ? "간호사 관리 이력" : caregiver ? "간병인 관리" : "간호사 관리";
+    document.querySelector("#admin-list-title").textContent = isHistory ? (caregiver ? "간병인 관리 이력 검색" : "간호사 관리 이력 검색") : caregiver ? "간병인 목록" : "간호사 목록";
+    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history-caregivers" ? "관리자가 처리한 간병인 계정 및 담당 병실 변경 내역을 조회합니다." : view === "history" ? "관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
+    document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름, 아이디 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 계정을 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
+    const historyAssignmentCard = document.querySelector('.history-filter-card[data-history-filter="병동 변경"], .history-filter-card[data-history-filter="병실 변경"]');
+    if (historyAssignmentCard) {
+        historyAssignmentCard.dataset.historyFilter = caregiver ? "병실 변경" : "병동 변경";
+        const label = historyAssignmentCard.querySelector("small");
+        if (label) label.textContent = caregiver ? "병실 변경" : "병동 변경";
+    }
+    const historyHeaders = document.querySelectorAll(".admin-history-table th");
+    if (historyHeaders[2]) historyHeaders[2].textContent = caregiver ? "대상 간병인" : "대상 간호사";
+    if (historyHeaders[3]) historyHeaders[3].textContent = caregiver ? "담당 병실" : "담당 병동";
     document.querySelector("#admin-create-title").textContent = caregiver ? "간병인 계정 생성" : "간호사 계정 생성";
     document.querySelector("#admin-create-complete-dialog > p").textContent = caregiver ? "등록된 간병인 정보를 확인해 주세요." : "아래 로그인 정보를 간호사에게 전달해주세요.";
     document.querySelector("#admin-password-reset-dialog > p").textContent = caregiver ? "아래 변경된 비밀번호를 간병인에게 전달해주세요." : "아래 변경된 비밀번호를 간호사에게 전달해주세요.";
-    document.querySelector("#admin-management-choice-title").textContent = caregiver ? "간병인 관리" : "직원 관리";
+    // [2026-09-22 변경] 간호사 화면의 관리 팝업 제목을 화면 명칭과 동일하게 표시합니다.
+    document.querySelector("#admin-management-choice-title").textContent = caregiver ? "간병인 관리" : "간호사 관리";
     document.querySelector("#admin-user-caption").textContent = caregiver ? "간병인 관리 목록" : "간호사 관리 목록";
     document.querySelector("#admin-user-id-heading").textContent = caregiver ? "전화번호" : "아이디";
     document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
@@ -1442,15 +1453,17 @@ function setAdminView(view, updateAddress = true) {
     // 하위 화면에 있을 때도 상단의 상위 메뉴 버튼을 명시적으로 활성화합니다.
     document.querySelector("#admin-staff-submenu")?.previousElementSibling?.classList.toggle("active", view === "staff" || view === "caregivers");
     document.querySelector("#admin-inactive-submenu")?.previousElementSibling?.classList.toggle("active", view === "inactive" || view === "inactive-caregivers");
+    document.querySelector("#admin-history-submenu")?.previousElementSibling?.classList.toggle("active", isHistory);
     document.title = isHome ? "관리자 홈 | 병동 통합 관제"
         : view === "records" ? "관리자 조치기록 | 병동 통합 관제"
-        : view === "history" ? "관리 이력 | 병동 통합 관제"
+        : view === "history-caregivers" ? "간병인 관리 이력 | 병동 통합 관제"
+        : view === "history" ? "간호사 관리 이력 | 병동 통합 관제"
         : view === "caregivers" ? "간병인 관리 | 병동 통합 관제"
         : view === "inactive-caregivers" ? "비활성화 간병인관리 | 병동 통합 관제"
         : view === "inactive" ? "비활성화 직원관리 | 병동 통합 관제"
         : "간호사 관리 | 병동 통합 관제";
     if (updateAddress) {
-        const path = view === "records" ? "/admin/records" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : view === "staff" ? "/admin?view=staff" : "/admin";
+        const path = view === "records" ? "/admin/records" : view === "history-caregivers" ? "/admin/caregivers/history" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : view === "staff" ? "/admin?view=staff" : "/admin";
         window.history.pushState({ adminView: view }, "", path);
     }
 }
@@ -1462,14 +1475,14 @@ adminViewLinks.forEach(link => link.addEventListener("click", event => {
 window.addEventListener("popstate", () => {
     const path = window.location.pathname.replace(/\/+$/, "");
     const previewView = new URLSearchParams(window.location.search).get("view");
-    setAdminView(path.endsWith("/records") ? "records" : path.endsWith("/history") || previewView === "history" ? "history" : path.endsWith("/caregivers/inactive") || previewView === "inactive-caregivers" ? "inactive-caregivers" : path.endsWith("/caregivers") || previewView === "caregivers" ? "caregivers" : path.endsWith("/admin_de") ? "inactive" : previewView === "staff" ? "staff" : "home", false);
+    setAdminView(path.endsWith("/records") ? "records" : path.endsWith("/caregivers/history") || previewView === "history-caregivers" ? "history-caregivers" : path.endsWith("/history") || previewView === "history" ? "history" : path.endsWith("/caregivers/inactive") || previewView === "inactive-caregivers" ? "inactive-caregivers" : path.endsWith("/caregivers") || previewView === "caregivers" ? "caregivers" : path.endsWith("/admin_de") ? "inactive" : previewView === "staff" ? "staff" : "home", false);
 });
 
 // [2026.09.17] 추가한 내용: /admin/records를 새로고침해도 조치기록을 관리자 공통 화면 안에서 다시 표시합니다.
 const initialAdminPath = window.location.pathname.replace(/\/+$/, "");
 const initialPreviewView = new URLSearchParams(window.location.search).get("view");
 const serverAdminView = adminPage.dataset.pageMode;
-setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : initialPreviewView === "staff" ? "staff" : "home", false);
+setAdminView(initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/caregivers/history") || initialPreviewView === "history-caregivers" || serverAdminView === "history-caregivers" ? "history-caregivers" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : initialPreviewView === "staff" ? "staff" : "home", false);
 loadAdminHomeAccountCounts();
 loadAdminData().catch(() => {});
 
