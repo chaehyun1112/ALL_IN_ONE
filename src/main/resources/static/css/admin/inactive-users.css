@@ -41,7 +41,10 @@
 .admin-ward-trigger { display: flex; align-items: center; gap: 8px; width: 144px; height: 44px; padding: 0 12px; border: 1px solid #b8cad8; border-radius: 8px; background: #f0f7fc; color: #36566f; font-size: 12px; white-space: nowrap; }
 .admin-ward-trigger:hover, .admin-ward-trigger[aria-expanded="true"] { background: #e9f0f5; border-color: #8ea6b8; }
 .admin-ward-trigger > svg { width: 17px; height: 17px; flex: none; }
+.admin-ward-trigger > span { min-width: 0; overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
 .admin-ward-trigger .admin-ward-chevron { width: 15px; height: 15px; margin-left: auto; }
+.admin-room-filter-dropdown .admin-ward-trigger { width: 164px; }
+.admin-room-filter-dropdown .admin-ward-trigger:disabled { border-color: #d7e0e6; background: #f5f7f8; color: #98a4ad; cursor: not-allowed; }
 .admin-ward-options { position: absolute; top: calc(100% + 5px); left: 0; z-index: 10; width: 100%; max-height: 240px; overflow-y: auto; overflow-x: hidden; padding: 4px; border: 1px solid #d5dfe7; border-radius: 6px; background: #fff; box-shadow: 0 4px 12px #0000001f; scrollbar-width: thin; scrollbar-color: #b8cad8 #edf3f7; }
 .admin-ward-options button { display: block; width: 100%; padding: 9px 6px; border: 0; border-radius: 4px; background: transparent; color: #29343d; font-size: 11px; line-height: 1.5; text-align: left; white-space: normal; overflow-wrap: anywhere; }
 .admin-ward-options button:hover, .admin-ward-options button:focus-visible,

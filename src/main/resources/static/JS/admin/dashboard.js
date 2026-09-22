@@ -532,7 +532,7 @@ function renderAdminUsers() {
             ? `${phoneDigits.slice(0, 3)}-****-${phoneDigits.slice(-4)}`
             : "—";
         const values = adminJobType === "CAREGIVER"
-            ? [user.name, caregiverPhoneDisplay, assignment]
+            ? [user.name, user.ward || "미배정", assignment, caregiverPhoneDisplay]
             : [user.name, user.userId, phoneDisplay, assignment];
         for (const value of values) {
             const cell = document.createElement("td");
@@ -651,7 +651,8 @@ function openAdminManagementChoice(user) {
     const resetOption = adminManagementOptions.find(option => option.dataset.adminAction === "RESET_PASSWORD");
     if (resetOption) resetOption.hidden = caregiver;
     const phoneOption = adminManagementOptions.find(option => option.dataset.adminAction === "EDIT_PHONE");
-    if (phoneOption) phoneOption.hidden = caregiver;
+    // [2026-09-22 변경] 간병인도 등록된 전화번호를 수정할 수 있도록 관리 항목을 표시합니다.
+    if (phoneOption) phoneOption.hidden = false;
     adminManagementChoiceConfirm.disabled = true;
 
     for (const option of adminManagementOptions) {
@@ -707,7 +708,7 @@ adminManagementChoiceConfirm?.addEventListener("click", () => {
     openAdminAction(selectedUser, selectedAction);
 });
 
-/* [2026-09-22 추가] 간호사 전화번호는 현재 프런트 목록에서만 수정합니다. */
+/* [2026-09-22 변경] 간호사와 간병인 전화번호는 현재 프런트 목록에서만 수정합니다. */
 function formatPhoneInput(value) {
     const digits = String(value ?? "").replace(/\D/g, "").slice(0, 11);
     if (digits.length <= 3) return digits;
@@ -717,7 +718,9 @@ function formatPhoneInput(value) {
 
 function openAdminPhoneEdit(user) {
     adminSelectedUser = user;
-    adminPhoneEditDescription.textContent = `${user.name} (${user.userId})님의 전화번호를 수정합니다.`;
+    adminPhoneEditDescription.textContent = adminJobType === "CAREGIVER"
+        ? `${user.name}님의 전화번호를 수정합니다.`
+        : `${user.name} (${user.userId})님의 전화번호를 수정합니다.`;
     adminPhoneEditInput.value = formatPhoneInput(user.phoneNumber);
     adminPhoneEditError.textContent = "";
     adminPhoneEditDialog.showModal();
@@ -1491,8 +1494,8 @@ function setAdminView(view, updateAddress = true) {
     const caregiver = view === "caregivers" || view === "history-caregivers";
     document.querySelector("#admin-title").textContent = view === "history-caregivers" ? "간병인 관리 이력" : view === "history" ? "간호사 관리 이력" : caregiver ? "간병인 관리" : "간호사 관리";
     document.querySelector("#admin-list-title").textContent = isHistory ? (caregiver ? "간병인 관리 이력 검색" : "간호사 관리 이력 검색") : caregiver ? "간병인 목록" : "간호사 목록";
-    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history-caregivers" ? "관리자가 처리한 간병인 계정 및 담당 병실 변경 내역을 조회합니다." : view === "history" ? "관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
-    document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름, 아이디 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 계정을 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
+    document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history-caregivers" ? "관리자가 처리한 간병인 정보와 담당 병실 변경 내역을 조회합니다." : view === "history" ? "관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 정보를 등록하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.";
+    document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름, 아이디 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 정보를 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
     const historyAssignmentCard = document.querySelector('.history-filter-card[data-history-filter="병동 변경"], .history-filter-card[data-history-filter="병실 변경"]');
     if (historyAssignmentCard) {
         historyAssignmentCard.dataset.historyFilter = caregiver ? "병실 변경" : "병동 변경";
@@ -1501,11 +1504,18 @@ function setAdminView(view, updateAddress = true) {
     }
     const historyHeaders = document.querySelectorAll(".admin-history-table th");
     if (historyHeaders[2]) historyHeaders[2].textContent = caregiver ? "대상 간병인" : "대상 간호사";
-    if (historyHeaders[3]) historyHeaders[3].textContent = caregiver ? "담당 병실" : "담당 병동";
+    if (historyHeaders[3]) historyHeaders[3].textContent = caregiver ? "병동 / 담당 병실" : "담당 병동";
+    const historySummary = document.querySelector("#admin-history-summary");
+    if (historySummary) historySummary.classList.toggle("is-caregiver-history", caregiver);
+    const historyPasswordCard = document.querySelector("#admin-history-password-card");
+    if (historyPasswordCard) historyPasswordCard.hidden = caregiver;
     const historyPhoneCard = document.querySelector("#admin-history-phone-card");
-    if (historyPhoneCard) historyPhoneCard.hidden = caregiver;
+    if (historyPhoneCard) historyPhoneCard.hidden = false;
+    if (caregiver && adminHistoryFilter === "비밀번호 초기화") {
+        filterHistory("전체", true);
+    }
     // [2026-09-22 변경] 간병인은 계정 생성 대신 등록 용어를 사용합니다.
-    document.querySelector("#admin-create-account").textContent = caregiver ? "간병인 등록" : "+ 계정 생성";
+    document.querySelector("#admin-create-account").textContent = caregiver ? "+ 등록" : "+ 계정 생성";
     document.querySelector("#admin-create-title").textContent = caregiver ? "간병인 등록" : "간호사 계정 생성";
     document.querySelector("#admin-create-form button[type='submit']").textContent = caregiver ? "등록" : "계정 생성";
     document.querySelector("#admin-create-complete-title").textContent = caregiver ? "간병인 등록 완료" : "계정 생성 완료";
@@ -1514,11 +1524,12 @@ function setAdminView(view, updateAddress = true) {
     // [2026-09-22 변경] 간호사 화면의 관리 팝업 제목을 화면 명칭과 동일하게 표시합니다.
     document.querySelector("#admin-management-choice-title").textContent = caregiver ? "간병인 관리" : "간호사 관리";
     document.querySelector("#admin-user-caption").textContent = caregiver ? "간병인 관리 목록" : "간호사 관리 목록";
-    document.querySelector("#admin-user-id-heading").textContent = caregiver ? "전화번호" : "아이디";
-    document.querySelector("#admin-user-phone-heading").hidden = caregiver;
+    document.querySelector("#admin-user-id-heading").textContent = caregiver ? "병동" : "아이디";
+    document.querySelector("#admin-user-phone-heading").textContent = caregiver ? "담당 병실" : "전화번호";
+    document.querySelector("#admin-user-phone-heading").hidden = false;
     document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
     document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디 또는 병동 검색";
-    document.querySelector("#admin-assignment-heading").textContent = caregiver ? "담당 병실" : "배정 병동";
+    document.querySelector("#admin-assignment-heading").textContent = caregiver ? "전화번호" : "배정 병동";
     document.querySelector("#complete-account-assignment-label").textContent = caregiver ? "담당 병실" : "담당 병동";
     document.querySelector("#admin-user-pagination").setAttribute("aria-label", caregiver ? "간병인 목록 페이지" : "간호사 목록 페이지");
     document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "비활성화 간병인관리" : "비활성화 직원관리";

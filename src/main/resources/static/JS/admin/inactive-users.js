@@ -90,6 +90,11 @@ const adminWardDropdown = document.querySelector("#admin-ward-dropdown");
 const adminWardTrigger = document.querySelector("#admin-ward-trigger");
 const adminWardOptions = document.querySelector("#admin-ward-options");
 const adminWardLabel = document.querySelector("#admin-ward-label");
+const adminInactiveRoom = document.querySelector("#admin-inactive-room");
+const adminRoomFilterDropdown = document.querySelector("#admin-room-filter-dropdown");
+const adminRoomFilterTrigger = document.querySelector("#admin-room-filter-trigger");
+const adminRoomFilterOptions = document.querySelector("#admin-room-filter-options");
+const adminRoomFilterLabel = document.querySelector("#admin-room-filter-label");
 const adminInactiveSelectAll = document.querySelector("#admin-inactive-select-all");
 const adminBulkButtons = Array.from(document.querySelectorAll("[data-bulk-status]"));
 const adminRows = document.querySelector("#admin-inactive-rows");
@@ -126,6 +131,56 @@ function closeAdminWardOptions() {
     if (!adminWardTrigger || !adminWardOptions) return;
     adminWardOptions.hidden = true;
     adminWardTrigger.setAttribute("aria-expanded", "false");
+}
+
+function closeAdminRoomOptions() {
+    if (!adminRoomFilterTrigger || !adminRoomFilterOptions) return;
+    adminRoomFilterOptions.hidden = true;
+    adminRoomFilterTrigger.setAttribute("aria-expanded", "false");
+}
+
+function getSelectedWardNumber() {
+    const selectedText = adminInactiveWard.selectedOptions[0]?.textContent ?? "";
+    const match = selectedText.match(/(\d+)\s*병동/);
+    return match ? Number(match[1]) : 0;
+}
+
+function renderAdminRoomOptions() {
+    if (!adminInactiveRoom || !adminRoomFilterOptions || !adminRoomFilterLabel) return;
+    adminRoomFilterOptions.replaceChildren();
+    const selected = adminInactiveRoom.selectedOptions[0];
+    adminRoomFilterLabel.textContent = selected?.textContent || "전체 호실";
+    for (const option of adminInactiveRoom.options) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = option.textContent;
+        button.setAttribute("aria-selected", String(option.value === adminInactiveRoom.value));
+        button.addEventListener("click", () => {
+            adminInactiveRoom.value = option.value;
+            adminInactiveRoom.dispatchEvent(new Event("change", { bubbles: true }));
+            closeAdminRoomOptions();
+            adminRoomFilterTrigger.focus();
+        });
+        adminRoomFilterOptions.append(button);
+    }
+}
+
+function refreshAdminRoomFilter(resetSelection = false) {
+    if (!adminInactiveRoom || !adminRoomFilterDropdown) return;
+    const caregiver = document.body.dataset.adminJobType === "CAREGIVER";
+    adminRoomFilterDropdown.hidden = !caregiver;
+    const previousRoom = resetSelection ? "" : adminInactiveRoom.value;
+    const wardNumber = caregiver ? getSelectedWardNumber() : 0;
+    adminInactiveRoom.replaceChildren(new Option(wardNumber ? "전체 호실" : "병동 먼저 선택", ""));
+    if (wardNumber) {
+        for (let roomNumber = wardNumber * 100 + 1; roomNumber <= wardNumber * 100 + 17; roomNumber += 1) {
+            adminInactiveRoom.add(new Option(`${roomNumber}호`, String(roomNumber)));
+        }
+    }
+    adminInactiveRoom.value = [...adminInactiveRoom.options].some(option => option.value === previousRoom)
+        ? previousRoom : "";
+    renderAdminRoomOptions();
+    closeAdminRoomOptions();
 }
 
 function renderAdminWardOptions() {
@@ -167,6 +222,24 @@ if (adminWardTrigger && adminWardOptions && adminWardDropdown) {
     renderAdminWardOptions();
 }
 
+if (adminRoomFilterTrigger && adminRoomFilterOptions && adminRoomFilterDropdown) {
+    adminRoomFilterTrigger.addEventListener("click", () => {
+        if (adminRoomFilterTrigger.disabled) return;
+        const opening = adminRoomFilterOptions.hidden;
+        adminRoomFilterOptions.hidden = !opening;
+        adminRoomFilterTrigger.setAttribute("aria-expanded", String(opening));
+    });
+    document.addEventListener("click", event => {
+        if (!adminRoomFilterDropdown.contains(event.target)) closeAdminRoomOptions();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !adminRoomFilterOptions.hidden) {
+            closeAdminRoomOptions();
+            adminRoomFilterTrigger.focus();
+        }
+    });
+}
+
 async function requestAdminInactiveApi(url, options = {}) {
     const headers = new Headers(options.headers ?? {});
     headers.set("Accept", "application/json");
@@ -198,11 +271,13 @@ function getAdminFilteredUsers() {
     const caregiver = document.body.dataset.adminJobType === "CAREGIVER";
     // 병동 이름이 같아도 DB의 병동 ID로 정확히 구분한다.
     const wardId = adminInactiveWard.value;
+    const roomNumber = caregiver ? adminInactiveRoom.value : "";
     return adminInactiveUsers.filter(user =>
         (user.userName + " " + (caregiver ? (user.phoneNumber || "") : user.userId)).toLowerCase().includes(query)
         && (!wardId || (wardId === "UNASSIGNED"
             ? user.wardId == null
-            : user.wardId != null && String(user.wardId) === wardId)));
+            : user.wardId != null && String(user.wardId) === wardId))
+        && (!roomNumber || String(user.roomNumber ?? "").replace(/호$/, "") === roomNumber));
 }
 
 function getAdminVisibleUsers() {
@@ -290,6 +365,10 @@ function updateAdminInactiveSelection() {
     adminInactiveSearch.disabled = adminBusy || adminLoading;
     adminInactiveWard.disabled = adminBusy || adminLoading || adminLoadFailed;
     if (adminWardTrigger) adminWardTrigger.disabled = adminInactiveWard.disabled;
+    if (adminInactiveRoom && adminRoomFilterTrigger) {
+        adminInactiveRoom.disabled = adminInactiveWard.disabled || !getSelectedWardNumber();
+        adminRoomFilterTrigger.disabled = adminInactiveRoom.disabled;
+    }
     document.querySelector("#admin-inactive-retry").disabled = adminBusy || adminLoading;
     adminList.setAttribute("aria-busy", String(adminBusy || adminLoading));
 }
@@ -373,7 +452,7 @@ function renderAdminInactiveUsers() {
             : adminSelectedOnly ? `선택한 ${personLabel} ` + visibleUsers.length + "명" : "검색 결과 " + visibleUsers.length + "명";
     const empty = document.querySelector("#admin-inactive-empty");
     empty.hidden = adminLoading || adminLoadFailed || visibleUsers.length > 0;
-    const filtered = Boolean(adminInactiveSearch.value.trim() || adminInactiveWard.value);
+    const filtered = Boolean(adminInactiveSearch.value.trim() || adminInactiveWard.value || adminInactiveRoom?.value);
     document.querySelector("#admin-inactive-empty-title").textContent = adminSelectedOnly
         ? `선택한 ${personLabel}이 없습니다`
         : filtered ? "검색 결과가 없습니다" : `비활성화 ${personLabel}이 없습니다`;
@@ -422,6 +501,7 @@ async function loadAdminInactiveData() {
         adminInactiveWard.value = previousWard;
         if (!adminInactiveWard.value) adminInactiveWard.value = "";
         renderAdminWardOptions();
+        refreshAdminRoomFilter(false);
         adminSelectedIds = new Set([...adminSelectedIds].filter(id => adminInactiveUsers.some(user => user.userId === id)));
         if (!adminSelectedIds.size) adminSelectedOnly = false;
         return true;
@@ -571,15 +651,24 @@ adminInactiveWard.addEventListener("change", () => {
     adminSelectedOnly = false;
     adminInactiveCurrentPage = 1;
     renderAdminWardOptions();
+    refreshAdminRoomFilter(true);
+    renderAdminInactiveUsers();
+});
+adminInactiveRoom?.addEventListener("change", () => {
+    adminSelectedOnly = false;
+    adminInactiveCurrentPage = 1;
+    renderAdminRoomOptions();
     renderAdminInactiveUsers();
 });
 document.querySelector("#admin-inactive-reset").addEventListener("click", () => {
     if (adminBusy || adminLoading) return;
     adminInactiveSearch.value = "";
     adminInactiveWard.value = "";
+    if (adminInactiveRoom) adminInactiveRoom.value = "";
     adminSelectedOnly = false;
     renderAdminWardOptions();
     closeAdminWardOptions();
+    refreshAdminRoomFilter(true);
     adminInactiveCurrentPage = 1;
     renderAdminInactiveUsers();
     adminInactiveSearch.focus();
@@ -598,13 +687,31 @@ window.addEventListener("admin-job-type-changed", () => {
     if (identifierHeading) identifierHeading.textContent = caregiver ? "전화번호" : "아이디";
     const assignmentHeading = document.querySelector("#admin-inactive-assignment-heading");
     if (assignmentHeading) assignmentHeading.textContent = caregiver ? "담당 병실" : "병동";
+    document.querySelector("#admin-inactive-list-title").textContent = caregiver ? "간병인 목록" : "직원 목록";
+    document.querySelector("#admin-inactive-list-description").textContent = caregiver
+        ? "간병인 정보와 담당 병실을 확인한 뒤 사용 상태를 변경합니다."
+        : "계정 정보와 병동을 확인한 후 상태를 변경해 주세요.";
+    const activateButton = document.querySelector('[data-bulk-status="ACTIVATE"]');
+    const deleteButton = document.querySelector('[data-bulk-status="DELETE"]');
+    if (activateButton) activateButton.textContent = caregiver ? "활성화" : "계정 활성화";
+    if (deleteButton) deleteButton.textContent = caregiver ? "삭제" : "계정 삭제";
     const searchLabel = document.querySelector('label[for="admin-inactive-search"]');
     const searchText = caregiver ? "이름 또는 전화번호 검색" : "이름 또는 아이디 검색";
     if (searchLabel) searchLabel.textContent = searchText;
     adminInactiveSearch.placeholder = searchText;
+    refreshAdminRoomFilter(true);
     document.querySelector("#admin-inactive-view .admin-heading > p").textContent = caregiver
-        ? "간병인의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다."
+        ? "비활성화된 간병인 정보를 조회하고 사용 상태를 관리합니다."
         : "직원의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.";
+    document.querySelector("#admin-account-guide-title").textContent = caregiver
+        ? "간병인 사용 상태 관리"
+        : "계정 상태 관리";
+    const accountGuideDescription = document.querySelector("#admin-inactive-view .admin-account-guide p");
+    if (accountGuideDescription) {
+        accountGuideDescription.innerHTML = caregiver
+            ? "비활성화된 간병인은 SMS 수신 대상에서 제외됩니다. 다시 담당자로 지정하려면 <strong>활성화</strong>해 주세요."
+            : "비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 직원은 <strong>활성화</strong>로 변경해 주세요.";
+    }
     loadAdminInactiveData();
 });
 if (document.body.dataset.adminJobType === "CAREGIVER") {

@@ -13,22 +13,22 @@
     <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제')))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/dashboard.css?v=nurse-phone-edit-20260922"
-          th:href="@{/css/admin/dashboard.css(v='nurse-phone-edit-20260922')}">
+          href="../../../static/css/admin/dashboard.css?v=history-card-icons-20260922"
+          th:href="@{/css/admin/dashboard.css(v='history-card-icons-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=nurse-phone-20260922" th:href="@{/css/admin/account-create.css(v='nurse-phone-20260922')}">
-    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-row-text-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-row-text-20260920')}">
+    <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=caregiver-room-filter-label-20260922" th:href="@{/css/admin/inactive-users.css(v='caregiver-room-filter-label-20260922')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=history-phone-card-20260922"
-            th:src="@{/JS/admin/dashboard.js(v='history-phone-card-20260922')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=caregiver-history-phone-20260922"
+            th:src="@{/JS/admin/dashboard.js(v='caregiver-history-phone-20260922')}"
             defer></script>
-    <script src="../../../static/JS/admin/admin-history.js?v=caregiver-history-name-20260922"
-        th:src="@{/JS/admin/admin-history.js(v='caregiver-history-name-20260922')}"
+    <script src="../../../static/JS/admin/admin-history.js?v=caregiver-history-location-20260922"
+        th:src="@{/JS/admin/admin-history.js(v='caregiver-history-location-20260922')}"
         defer></script>
     <script src="../../../static/JS/admin/account-create.js?v=nurse-phone-mask-20260922"
             th:src="@{/JS/admin/account-create.js(v='nurse-phone-mask-20260922')}"
             defer></script>
-    <script src="../../../static/JS/admin/inactive-users.js?v=caregiver-room-20260921"
-            th:src="@{/JS/admin/inactive-users.js(v='caregiver-room-20260921')}"
+    <script src="../../../static/JS/admin/inactive-users.js?v=caregiver-list-copy-20260922"
+            th:src="@{/JS/admin/inactive-users.js(v='caregiver-list-copy-20260922')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=admin-brand-align-20260920" th:href="@{/css/alleyes-brand.css(v='admin-brand-align-20260920')}">
@@ -181,17 +181,19 @@
     <header class="admin-heading">
         <!-- [9.15] 수정내용: 화면 역할에 맞는 제목과 안내 문구를 표시한다. -->
         <h1 id="admin-title" th:text="${pageMode == 'history-caregivers'} ? '간병인 관리 이력' : (${pageMode == 'history'} ? '간호사 관리 이력' : (${pageMode == 'caregivers'} ? '간병인 관리' : '간호사 관리'))">간호사 관리</h1>
-        <p th:text="${pageMode == 'history-caregivers'} ? '관리자가 처리한 간병인 계정 및 담당 병실 변경 내역을 조회합니다.' : (${pageMode == 'history'} ? '관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 생성하고 담당 병실 변경과 비활성화를 관리합니다.' : '간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.'))">간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
+        <p th:text="${pageMode == 'history-caregivers'} ? '관리자가 처리한 간병인 정보와 담당 병실 변경 내역을 조회합니다.' : (${pageMode == 'history'} ? '관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다.' : (${pageMode == 'caregivers'} ? '간병인 정보를 등록하고 담당 병실 변경과 비활성화를 관리합니다.' : '간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.'))">간호사 계정을 생성하고 병동 배정, 비밀번호 초기화, 비활성화를 관리합니다.</p>
         <div class="admin-account-actions">
             <button type="button" class="admin-create-account" id="admin-create-account">+ 계정 생성</button>
         </div>
     </header>
 
-    <section class="admin-history-summary" aria-label="관리 이력 처리 내용별 현황">
+    <section class="admin-history-summary" id="admin-history-summary" aria-label="관리 이력 처리 내용별 현황">
         <article class="history-filter-card active"
                 data-history-filter="전체"
                 tabindex="0">
-            <span class="history-card-icon all">⌕</span>
+            <span class="history-card-icon all">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+            </span>
             <div><small>전체</small><strong>0건</strong></div>
         </article>
 
@@ -206,7 +208,7 @@
             <div><small>병동 변경</small><strong>0건</strong></div>
         </article>
 
-        <article class="history-filter-card"
+        <article class="history-filter-card" id="admin-history-password-card"
                 data-history-filter="비밀번호 초기화"
                 tabindex="0">
             <span class="history-card-icon password">
@@ -224,18 +226,20 @@
         <article class="history-filter-card"
                 data-history-filter="계정 비활성화"
                 tabindex="0">
-            <span class="history-card-icon disable">×</span>
+            <span class="history-card-icon disable">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="3"/><path d="M4.5 20a5.5 5.5 0 0 1 8-5M16 16l5 5m0-5-5 5"/></svg>
+            </span>
             <div>
                 <small>계정 비활성화</small>
                 <strong>0건</strong>
             </div>
         </article>
-        <!-- [2026-09-22 추가] 간호사 연락처 수정 이력을 별도로 확인합니다. -->
+        <!-- [2026-09-22 변경] 간호사와 간병인의 연락처 수정 이력을 확인합니다. -->
         <article class="history-filter-card" id="admin-history-phone-card"
                 data-history-filter="전화번호 수정"
                 tabindex="0">
             <span class="history-card-icon phone">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h4l2 5-3 2a15 15 0 0 0 4 4l2-3 5 2v4a4 4 0 0 1-4 4C9.3 21 3 14.7 3 7a4 4 0 0 1 4-4Z"/><path d="m15 5 4 4M14 10l1.2-4.8L19 9l-5 1Z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.5h3.2l1.8 4.7-2.4 1.7a14.2 14.2 0 0 0 4.3 4.3l1.7-2.4 4.7 1.8v3.2a3.7 3.7 0 0 1-3.7 3.7C9.5 20.5 3.5 14.5 3.5 7.2a3.7 3.7 0 0 1 3.7-3.7Z"/></svg>
             </span>
             <div><small>전화번호 수정</small><strong>0건</strong></div>
         </article>
@@ -244,7 +248,7 @@
     <section class="admin-panel" aria-labelledby="admin-list-title">
         <header class="admin-panel-heading admin-management-heading">
                 <!-- 간호사 관리 화면에서는 간호사 목록과 관리 기능을 명확히 안내합니다. -->
-                <div class="admin-management-title"><h2 id="admin-list-title" th:text="${pageMode == 'history'} ? '관리 이력 검색' : (${pageMode == 'caregivers'} ? '간병인 목록' : '간호사 목록')">간호사 목록</h2><p th:text="${pageMode == 'history'} ? '이름, 아이디 또는 병동으로 처리 이력을 검색합니다.' : (${pageMode == 'caregivers'} ? '간병인 계정을 검색하고 필요한 관리 작업을 진행합니다.' : '간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.')">간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.</p></div>
+                <div class="admin-management-title"><h2 id="admin-list-title" th:text="${pageMode == 'history'} ? '관리 이력 검색' : (${pageMode == 'caregivers'} ? '간병인 목록' : '간호사 목록')">간호사 목록</h2><p th:text="${pageMode == 'history'} ? '이름, 아이디 또는 병동으로 처리 이력을 검색합니다.' : (${pageMode == 'caregivers'} ? '간병인 정보를 검색하고 필요한 관리 작업을 진행합니다.' : '간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.')">간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.</p></div>
             <form id="admin-search-form" class="admin-search" role="search">
                 <div class="admin-search-field">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -346,7 +350,7 @@
         <aside class="admin-account-guide" aria-labelledby="admin-account-guide-title"><div class="admin-guide-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><strong id="admin-account-guide-title">계정 상태 관리</strong></div><p>비활성화된 계정은 서비스에 로그인할 수 없습니다. 서비스 이용을 재개할 직원은 <strong>활성화</strong>로 변경해 주세요.</p></aside>
     </header>
     <section class="admin-panel admin-inactive-panel" aria-labelledby="admin-inactive-list-title">
-        <header class="admin-panel-heading admin-inactive-panel-heading"><div><h2 id="admin-inactive-list-title">직원 목록</h2><p>계정 정보와 병동을 확인한 후 상태를 변경해 주세요.</p></div></header>
+        <header class="admin-panel-heading admin-inactive-panel-heading"><div><h2 id="admin-inactive-list-title">직원 목록</h2><p id="admin-inactive-list-description">계정 정보와 병동을 확인한 후 상태를 변경해 주세요.</p></div></header>
         <div class="admin-inactive-toolbar">
             <form id="admin-inactive-search-form" class="admin-search" role="search" aria-label="비활성화 직원 검색"><div class="admin-search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><label class="visually-hidden" for="admin-inactive-search">이름 또는 아이디 검색</label><input type="search" id="admin-inactive-search" placeholder="이름 또는 아이디 검색" autocomplete="off"></div><button type="submit" class="admin-search-button">검색</button>
                 <!-- [2026-09-18] 초기화 버튼을 검색 버튼 옆에 항상 표시하고 검색어와 병동 조건을 함께 초기화한다. -->
@@ -354,13 +358,23 @@
             <div class="admin-inactive-filter">
                 <div class="admin-ward-dropdown" id="admin-ward-dropdown">
                     <button type="button" class="admin-ward-trigger" id="admin-ward-trigger" aria-label="병동 선택" aria-expanded="false" aria-controls="admin-ward-options">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 4v6m10-6v6M5 10h14v10H5z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M4 21h16M8 9h2m4 0h2M8 13h2m4 0h2M10 21v-4h4v4"/></svg>
                         <span id="admin-ward-label">전체 병동</span>
                         <svg class="admin-ward-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
                     <div class="admin-ward-options" id="admin-ward-options" hidden></div>
                 </div>
                 <select id="admin-inactive-ward" aria-label="병동 선택" hidden><option value="">전체 병동</option></select>
+                <!-- [2026-09-22 추가] 간병인은 선택한 병동에 속한 호실로 목록을 추가 필터링합니다. -->
+                <div class="admin-ward-dropdown admin-room-filter-dropdown" id="admin-room-filter-dropdown" hidden>
+                    <button type="button" class="admin-ward-trigger" id="admin-room-filter-trigger" aria-label="호실 선택" aria-expanded="false" aria-controls="admin-room-filter-options">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M4 21h16M8 9h2m4 0h2M8 13h2m4 0h2M10 21v-4h4v4"/></svg>
+                        <span id="admin-room-filter-label">전체 호실</span>
+                        <svg class="admin-ward-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="admin-ward-options" id="admin-room-filter-options" hidden></div>
+                </div>
+                <select id="admin-inactive-room" aria-label="호실 선택" hidden><option value="">전체 호실</option></select>
             </div>
             <div class="admin-bulk-actions" role="group" aria-label="선택 직원 일괄 관리"><span id="admin-bulk-count" role="status">현재 목록에서 0명 선택</span><div class="admin-bulk-buttons"><button type="button" data-bulk-status="ACTIVATE" disabled>계정 활성화</button><button type="button" data-bulk-status="DELETE" class="admin-bulk-delete" disabled>계정 삭제</button></div></div>
         </div>
@@ -389,9 +403,9 @@
             <strong id="admin-management-assignment-title">병동 변경</strong>
             <small id="admin-management-assignment-description">담당 병동을 변경합니다.</small>
         </button>
-        <!-- [2026-09-22 추가] 간호사 연락처를 화면에서 수정하는 관리 항목입니다. -->
+        <!-- [2026-09-22 변경] 간호사와 간병인의 연락처 수정 기능을 전화기 아이콘으로 표시합니다. -->
         <button type="button" class="admin-management-option" data-admin-action="EDIT_PHONE" role="radio" aria-checked="false">
-            <span class="admin-management-option-icon admin-phone-edit" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h4l2 5-3 2a15 15 0 0 0 4 4l2-3 5 2v4a4 4 0 0 1-4 4C9.3 21 3 14.7 3 7a4 4 0 0 1 4-4Z"/><path d="m15 5 4 4M14 10l1.2-4.8L19 9l-5 1Z"/></svg></span>
+            <span class="admin-management-option-icon admin-phone-edit" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.2 3.5h3.2l1.8 4.7-2.4 1.7a14.2 14.2 0 0 0 4.3 4.3l1.7-2.4 4.7 1.8v3.2a3.7 3.7 0 0 1-3.7 3.7C9.5 20.5 3.5 14.5 3.5 7.2a3.7 3.7 0 0 1 3.7-3.7Z"/></svg></span>
             <strong>전화번호 수정</strong>
             <small>등록된 전화번호를 수정합니다.</small>
         </button>

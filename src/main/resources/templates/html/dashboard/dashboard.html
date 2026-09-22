@@ -314,16 +314,16 @@
         <div id="response-event" class="response-event"></div>
         <div class="response-people">
           <div class="response-field">
-            <label class="field" for="response-patient">환자 이름 <span class="response-required">필수</span></label>
+            <label class="field" for="response-patient">환자 이름</label>
             <input id="response-patient" type="text" required maxlength="50" placeholder="환자 이름을 입력하세요.">
           </div>
           <div class="response-field">
-            <label class="field" for="response-user">담당 간호사 <span class="response-auto">자동 입력</span></label>
+            <label class="field" for="response-user">담당 간호사</label>
             <input id="response-user" type="text" th:value="${displayName}" readonly placeholder="로그인한 간호사 이름">
           </div>
         </div>
         <div class="response-field response-note-field">
-          <label class="field" for="response-note">조치 내용 <span class="response-required">필수</span></label>
+          <label class="field" for="response-note">조치 내용</label>
           <textarea id="response-note" maxlength="1000" required placeholder="환자 상태와 시행한 조치를 입력해 주세요."></textarea>
           <p class="response-note-help">현장에서 확인한 내용을 구체적으로 작성해 주세요.</p>
         </div>

@@ -68,6 +68,16 @@
     }
 
     /**
+     * 간병인 이력의 병동과 담당 병실을 한 셀에 함께 표시한다.
+     */
+    function formatCaregiverLocation(history) {
+        const wardName = history.wardName?.trim() || "미배정 병동";
+        const roomValue = String(history.roomNumber ?? "").replace(/호$/, "").trim();
+        const roomName = roomValue ? `${roomValue}호` : "미배정 병실";
+        return `${wardName} · ${roomName}`;
+    }
+
+    /**
      * 기존 Yejin 화면의 회원 관리 버튼을 생성한다.
      */
     function createManagementCell(history) {
@@ -132,7 +142,7 @@
                 createCell(history.adminId),
                 // [2026-09-22 변경] 간병인 관리 이력은 내부 아이디 대신 간병인 이름을 표시합니다.
                 createCell(caregiverHistory ? (history.userName ?? "이름 미확인") : history.userId),
-                createCell(history.wardName ?? "미확인"),
+                createCell(caregiverHistory ? formatCaregiverLocation(history) : (history.wardName ?? "미확인")),
                 createCell(actionLabel),
                 createManagementCell(history)
             );
@@ -223,23 +233,46 @@
         // [2026-09-22 추가] 선택한 직무의 계정 작업 이력만 해당 관리 이력 화면에 표시합니다.
         if (document.querySelector("#admin-management-page")?.classList.contains("is-history-page")) {
             const jobType = document.body.dataset.adminJobType === "CAREGIVER" ? "CAREGIVER" : "GENERAL";
-            const accountResponse = await fetch(
-                `/api/admin/users?jobType=${jobType}`,
-                { credentials: "same-origin", cache: "no-store", headers: { "Accept": "application/json" } }
-            );
+            const [accountResponse, approvedResponse] = await Promise.all([
+                fetch(
+                    `/api/admin/users?jobType=${jobType}`,
+                    { credentials: "same-origin", cache: "no-store", headers: { "Accept": "application/json" } }
+                ),
+                fetch(
+                    `/api/admin/users/approved?jobType=${jobType}`,
+                    { credentials: "same-origin", cache: "no-store", headers: { "Accept": "application/json" } }
+                )
+            ]);
 
-            if (!accountResponse.ok) {
+            if (!accountResponse.ok || !approvedResponse.ok) {
                 throw new Error("계정 정보를 불러오지 못했습니다.");
             }
 
             const accounts = await accountResponse.json();
+            const approvedAccounts = await approvedResponse.json();
             const accountIds = new Set(
                 (Array.isArray(accounts) ? accounts : [])
                     .map(account => account.userId ?? account.phoneNumber)
                     .filter(Boolean)
             );
 
-            return histories.filter(history => accountIds.has(history.userId));
+            const approvedById = new Map();
+            for (const account of Array.isArray(approvedAccounts) ? approvedAccounts : []) {
+                if (account.userId) approvedById.set(account.userId, account);
+                if (account.phoneNumber) approvedById.set(account.phoneNumber, account);
+            }
+
+            return histories
+                .filter(history => accountIds.has(history.userId))
+                .map(history => {
+                    if (jobType !== "CAREGIVER") return history;
+                    const account = approvedById.get(history.userId);
+                    return {
+                        ...history,
+                        wardName: account?.wardName ?? history.wardName,
+                        roomNumber: account?.roomNumber ?? history.roomNumber
+                    };
+                });
         }
 
         return histories;

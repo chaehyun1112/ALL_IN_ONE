@@ -58,18 +58,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-heading p { margin: 0; font-size: 13px; color: var(--admin-muted); }
 /* [2026.09.16] 고친 내용: 계정 생성 요약 카드를 제거하고 남은 네 카드의 너비·높이·내용 정렬을 동일하게 맞춥니다. */
 .admin-history-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
+/* [2026-09-22 변경] 간병인 이력은 비밀번호 초기화 대신 전화번호 수정 카드를 표시하고 네 칸을 균등 배치합니다. */
+.admin-history-summary.is-caregiver-history { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .admin-history-summary article { display: flex; align-items: center; gap: 12px; min-height: 88px; padding: 17px; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
 .admin-history-summary article > div { display: flex; min-width: 0; min-height: 48px; flex: 1; flex-direction: column; justify-content: center; }
 .history-filter-card { cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
 .history-filter-card:hover, .history-filter-card:focus-visible { border-color: #7d9b87; box-shadow: 0 0 0 3px #6f92751f; outline: 0; transform: translateY(-1px); }
 .history-filter-card:focus { outline: 0; }
-.history-card-icon.all { color: #64705e; transform: translateY(-3px) scale(1.15); }
+.history-card-icon.all { color: #647581; }
 .history-card-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 /* [09.13]수정내용: 아이콘별 무효한 배경색을 제거하고 공통 투명 배경 한 곳에서 관리한다. */
 .history-card-icon { display: grid; place-items: center; width: 28px; height: 36px; border-radius: 0; background: transparent; font-size: 19px; font-weight: 700; }
 .history-card-icon.create { color: #53846a; }
 .history-card-icon.ward { color: #668594; }
-.history-card-icon.password { color: #bd7a2c; font-size: 12px; letter-spacing: 1px; }
+.history-card-icon.password { color: #bd7a2c; }
 .history-card-icon.phone { color: #526d82; }
 .history-card-icon.disable { color: #b06e6a; }
 .admin-history-summary small, .admin-history-summary strong { display: block; }
@@ -146,8 +148,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 /* [9.15] 추가내용: 관리 선택 팝업이 열려 있는 동안 뒤 화면의 스크롤을 고정한다. */
 body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-management-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
-.admin-management-choice-dialog.is-caregiver .admin-management-options { grid-template-columns: repeat(2, 1fr); }
-.admin-management-option { display: flex; min-height: 150px; padding: 14px 10px; flex-direction: column; align-items: center; justify-content: center; gap: 7px; border: 1px solid #dfe6dc; border-radius: 11px; background: #fff; color: var(--admin-text); text-align: center; cursor: pointer; }
+.admin-management-choice-dialog.is-caregiver .admin-management-options { grid-template-columns: repeat(3, 1fr); }
+/* [2026-09-22 변경] 간호사·간병인 관리 카드의 아이콘, 제목, 설명 기준선을 동일하게 맞춥니다. */
+.admin-management-option { display: grid; min-height: 150px; padding: 14px 10px; grid-template-rows: 38px 22px 46px; align-content: center; justify-items: center; row-gap: 7px; border: 1px solid #dfe6dc; border-radius: 11px; background: #fff; color: var(--admin-text); text-align: center; cursor: pointer; }
 .admin-management-option:hover, .admin-management-option:focus-visible, .admin-management-option.is-selected { border-color: #8ea6b8; background: #edf3f7; outline: 0; }
 .admin-management-option-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: #edf4ee; }
 .admin-management-option-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
@@ -155,19 +158,8 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-management-option-icon.admin-password-reset { color: #b7782a; background: #fcf5e9; }
 .admin-management-option-icon.admin-phone-edit { color: #526d82; background: #edf3f7; }
 .admin-management-option-icon.admin-reject { color: #c55454; background: #fceeed; }
-.admin-management-option strong { font-size: 13px; }
-.admin-management-option small { color: #7b8274; font-size: 11px; line-height: 1.4; }
-/* [2026-09-16 변경] 설명 줄 수와 무관하게 세 관리 카드의 아이콘·제목 위치를 같게 맞춘다. */
-.admin-management-option small { display: block; min-height: 46px; }
-.admin-management-choice-dialog.is-caregiver .admin-management-option {
-    display: grid;
-    grid-template-rows: 38px 20px 20px;
-    align-content: center;
-    justify-items: center;
-    row-gap: 9px;
-}
-.admin-management-choice-dialog.is-caregiver .admin-management-option strong { line-height: 20px; }
-.admin-management-choice-dialog.is-caregiver .admin-management-option small { min-height: 0; line-height: 20px; }
+.admin-management-option strong { align-self: center; font-size: 13px; line-height: 22px; white-space: nowrap; }
+.admin-management-option small { display: flex; min-height: 46px; align-items: flex-start; justify-content: center; color: #7b8274; font-size: 11px; line-height: 1.4; word-break: keep-all; }
 .admin-management-choice-dialog .admin-primary:disabled { border-color: #e1e6df; background: #e1e6df; color: #9aa69c; cursor: not-allowed; }
 .admin-empty { text-align: center; color: var(--admin-muted); padding: 60px 16px; }
 /* [9.15] 추가내용: 직원 목록과 관리 이력의 페이지 이동 버튼을 공통 스타일로 표시한다. */
@@ -312,7 +304,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
     .admin-search-field { flex: 1; }
     .admin-search input, .admin-tabs { width: 100%; }
     .admin-table { min-width: 620px; }
-    .admin-history-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .admin-history-summary, .admin-history-summary.is-caregiver-history { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     /* [2026.09.16] 고친 내용: 작은 화면에서는 내용이 잘리지 않도록 페이지 스크롤을 사용합니다. */
     #admin-management-page.is-history-page { overflow-y: auto; }
     #admin-management-page.is-history-page .admin-history-wrap { max-height: 360px; flex: none; }
