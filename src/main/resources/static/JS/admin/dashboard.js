@@ -66,6 +66,10 @@ const adminDialogConfirm = document.querySelector("#admin-dialog-confirm");
 const adminDialogCancel = document.querySelector("#admin-dialog-cancel");
 const adminRoomWardField = document.querySelector("#admin-room-ward-field");
 const adminRoomWardSelect = document.querySelector("#admin-room-ward-select");
+const adminRoomWardDropdown = document.querySelector("#admin-room-ward-dropdown");
+const adminRoomWardTrigger = document.querySelector("#admin-room-ward-trigger");
+const adminRoomWardValue = document.querySelector("#admin-room-ward-value");
+const adminRoomWardOptions = document.querySelector("#admin-room-ward-options");
 const adminWardField = document.querySelector("#admin-ward-field");
 const adminWardSelect = document.querySelector("#admin-ward-select");
 const adminActionWardDropdown = document.querySelector("#admin-action-ward-dropdown");
@@ -341,15 +345,59 @@ function renderAdminRoomOptions() {
     renderAdminActionWardDropdown();
 }
 
+function closeAdminRoomWardOptions() {
+    adminRoomWardOptions.hidden = true;
+    adminRoomWardTrigger.setAttribute("aria-expanded", "false");
+    adminDialog.classList.remove("ward-menu-overflow");
+}
+
+function renderAdminRoomWardDropdown() {
+    const selected = adminRoomWardSelect.selectedOptions[0];
+    adminRoomWardValue.textContent = selected?.textContent || "병동을 선택해 주세요";
+    adminRoomWardOptions.replaceChildren();
+    for (const option of adminRoomWardSelect.options) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.textContent = option.textContent;
+        item.dataset.value = option.value;
+        item.setAttribute("aria-selected", String(option.selected));
+        item.addEventListener("click", () => {
+            adminRoomWardSelect.value = option.value;
+            adminRoomWardSelect.dispatchEvent(new Event("change", {bubbles: true}));
+            renderAdminRoomWardDropdown();
+            closeAdminRoomWardOptions();
+            adminRoomWardTrigger.focus();
+        });
+        adminRoomWardOptions.append(item);
+    }
+}
+
 adminRoomWardSelect.addEventListener("change", () => {
     closeAdminActionWardOptions();
+    renderAdminRoomWardDropdown();
     renderAdminRoomOptions();
+});
+
+adminRoomWardTrigger.addEventListener("click", () => {
+    if (!adminRoomWardOptions.hidden) {
+        closeAdminRoomWardOptions();
+        return;
+    }
+    closeAdminActionWardOptions();
+    renderAdminRoomWardDropdown();
+    adminRoomWardOptions.hidden = false;
+    adminRoomWardTrigger.setAttribute("aria-expanded", "true");
+    adminDialog.classList.add("ward-menu-overflow");
 });
 
 function closeAdminActionWardOptions() {
     adminActionWardOptions.hidden = true;
     adminActionWardTrigger.setAttribute("aria-expanded", "false");
     adminActionWardDropdown.classList.remove("open-up");
+    adminActionWardOptions.classList.remove("is-fixed-menu");
+    adminActionWardOptions.style.top = "";
+    adminActionWardOptions.style.left = "";
+    adminActionWardOptions.style.width = "";
     adminActionWardOptions.style.maxHeight = "";
     adminDialog.classList.remove("ward-menu-overflow");
 }
@@ -384,6 +432,20 @@ adminActionWardTrigger.addEventListener("click", () => {
     renderAdminActionWardDropdown();
     adminActionWardOptions.hidden = false;
     adminActionWardTrigger.setAttribute("aria-expanded", "true");
+
+    // [2026.09.22 변경] 간병인 담당 병실 목록은 공간과 관계없이 선택칸 아래로 펼칩니다.
+    if (adminAction === "ASSIGN_ROOM") {
+        adminActionWardDropdown.classList.remove("open-up");
+        const trigger = adminActionWardTrigger.getBoundingClientRect();
+        adminActionWardOptions.classList.add("is-fixed-menu");
+        adminActionWardOptions.style.top = `${Math.round(trigger.bottom + 5)}px`;
+        adminActionWardOptions.style.left = `${Math.round(trigger.left)}px`;
+        adminActionWardOptions.style.width = `${Math.round(trigger.width)}px`;
+        adminActionWardOptions.style.maxHeight = `${Math.max(120, Math.min(240, Math.floor(window.innerHeight - trigger.bottom - 16)))}px`;
+        adminDialog.classList.add("ward-menu-overflow");
+        return;
+    }
+
     const trigger = adminActionWardTrigger.getBoundingClientRect();
     const menuHeight = adminActionWardOptions.getBoundingClientRect().height;
     if (menuHeight <= window.innerHeight - trigger.bottom - 12) {
@@ -397,8 +459,16 @@ adminActionWardTrigger.addEventListener("click", () => {
 
 document.addEventListener("click", event => {
     if (!adminActionWardDropdown.contains(event.target)) closeAdminActionWardOptions();
+    if (!adminRoomWardDropdown.contains(event.target)) closeAdminRoomWardOptions();
 });
 adminDialog.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !adminRoomWardOptions.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeAdminRoomWardOptions();
+        adminRoomWardTrigger.focus();
+        return;
+    }
     if (event.key === "Escape" && !adminActionWardOptions.hidden) {
         event.preventDefault();
         event.stopPropagation();
@@ -788,6 +858,8 @@ function openAdminAction(user, action) {
 
     adminRoomWardField.hidden = true;
     adminRoomWardSelect.value = "";
+    renderAdminRoomWardDropdown();
+    closeAdminRoomWardOptions();
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
     adminWardSelect.required = false;
@@ -824,6 +896,7 @@ function openAdminAction(user, action) {
             adminRoomWardField.hidden = false;
             const currentWardNumber = Math.floor(Number(user.roomNumber) / 100);
             adminRoomWardSelect.value = [1, 2, 3].includes(currentWardNumber) ? String(currentWardNumber) : "";
+            renderAdminRoomWardDropdown();
             adminDialogDescription.textContent = user.name + "님 · 현재 병실: " + (user.roomNumber ? user.roomNumber + "호" : "미배정");
             renderAdminRoomOptions();
             adminWardSelect.value = user.roomNumber ?? "";
@@ -941,7 +1014,11 @@ async function submitAdminAction() {
 
         adminDialog.close();
         if (selectedAction === "DEACTIVATE") {
-            window.location.assign(document.querySelector("#admin-settings").href);
+            // [2026.09.22 변경] 간병인은 간병인 비활성화 목록으로, 간호사는 간호사 비활성화 목록으로 이동합니다.
+            const inactivePath = adminJobType === "CAREGIVER"
+                ? "/admin/caregivers/inactive"
+                : "/admin/admin_de";
+            window.location.assign(inactivePath);
             return;
         }
         await loadAdminData(true);
@@ -1065,8 +1142,10 @@ document.querySelector("#admin-action-form").addEventListener("submit", async ev
 /* 팝업이 닫히면 병동 선택란 초기화 */
 adminDialog.addEventListener("close", () => {
     closeAdminActionWardOptions();
+    closeAdminRoomWardOptions();
     adminRoomWardField.hidden = true;
     adminRoomWardSelect.value = "";
+    renderAdminRoomWardDropdown();
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
     adminWardSelect.required = false;
@@ -1538,6 +1617,19 @@ function setAdminView(view, updateAddress = true) {
     if (historyPasswordCard) historyPasswordCard.hidden = caregiver;
     const historyPhoneCard = document.querySelector("#admin-history-phone-card");
     if (historyPhoneCard) historyPhoneCard.hidden = false;
+    const historyDeactivateCard = document.querySelector("#admin-history-deactivate-card");
+    if (historyDeactivateCard) {
+        const deactivateLabel = historyDeactivateCard.querySelector("small");
+        if (deactivateLabel) deactivateLabel.textContent = caregiver ? "비활성화" : "계정 비활성화";
+    }
+    // [2026-09-22 변경] 간병인 이력은 전화번호 수정 다음에 비활성화 카드를 표시하고 간호사 화면은 기존 순서를 유지합니다.
+    if (historySummary && historyPhoneCard && historyDeactivateCard) {
+        if (caregiver) {
+            historySummary.append(historyPhoneCard, historyDeactivateCard);
+        } else {
+            historySummary.append(historyDeactivateCard, historyPhoneCard);
+        }
+    }
     if (caregiver && adminHistoryFilter === "비밀번호 초기화") {
         filterHistory("전체", true);
     }

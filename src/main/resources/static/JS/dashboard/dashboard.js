@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const detail=document.getElementById("room-detail");
   const dialog=document.getElementById("response-dialog"), form=document.getElementById("response-form");
   const alertPanel=document.querySelector(".alerts-panel");
+  const alertList=document.querySelector(".alert-list")||alertPanel;
   const corridorNode=document.getElementById("central-corridor");
   // [2026.09.16] 추가한 내용: 환자를 특정하지 않아도 위치만으로 표시할 수 있는 복도 낙상 경보 예시입니다.
   // [2026.09.16] 고친 내용: 복도 감지 위치를 화면 방향 대신 고정 방위 표기인 서·화장실 앞으로 표시합니다.
@@ -72,7 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const row=event.target.closest('.cross-page-alert-row');
     const key=row?(row.dataset.location==='corridor'?'corridor':Number(row.dataset.location)):primaryNoticeKey;
     if(key===null)return;
-    if(event.target.closest('[data-action="respond"]')){openResponseRegistration(key);return;}
     setDashboardView('dashboard');
     // 클릭한 위치를 직접 선택하여 이전 선택 상태나 별도 선택 모듈에 영향받지 않게 합니다.
     corridorSelected=key==='corridor';selected=corridorSelected?null:key;render();
@@ -93,7 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if(document.body.dataset.dashboardView!=='records'||!notices.length){
       crossPageAlert.hidden=true;noticeSignature='';clearTimeout(noticeCollapseTimer);return;
     }
-    notices.sort((a,b)=>Number(a.state.status==='caution')-Number(b.state.status==='caution')||a.receivedAt-b.receivedAt);
+    // [2026.09.22 추가] 알림은 낙상 감지, 낙상 의심, 침대 이탈 순서로 표시합니다.
+    const noticePriority={urgent:0,suspected:1,caution:2};
+    notices.sort((a,b)=>(noticePriority[a.state.status]??9)-(noticePriority[b.state.status]??9)||a.receivedAt-b.receivedAt);
     primaryNoticeKey=notices[0].key;
     const signature=notices.map(notice=>notice.id).join('|');
     if(signature===noticeSignature&&!crossPageAlert.hidden)return;
@@ -107,12 +109,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const title=document.createElement('button');title.type='button';title.className='cross-page-alert-location';
       const location=notice.key==='corridor'?notice.state.cameraLocation:`${notice.key}호`;
       title.textContent=`${notice.state.test?'[테스트] ':''}${location} · ${labels[notice.state.status]}`;
-      const response=document.createElement('button');response.type='button';response.textContent='대응 등록';
-      response.dataset.action='respond';
       const locate=document.createElement('button');locate.type='button';locate.textContent='위치 보기';
-      row.append(title,response,locate);crossPageItems.append(row);
+      // [2026.09.22 변경] 대시보드 외 화면의 감지 알림은 위치 확인만 제공하고 대응 등록 버튼은 표시하지 않습니다.
+      row.append(title,locate);crossPageItems.append(row);
     }
     crossPageAlert.classList.toggle('caution',notices[0].state.status==='caution');
+    crossPageAlert.classList.toggle('suspected',notices[0].state.status==='suspected');
     crossPageAlert.hidden=false;setNoticeExpanded(true);
     // [2026.09.17] 추가한 내용: 읽던 화면을 가리지 않도록 8초 뒤 건수 표시로 접고 미처리 알림은 유지합니다.
     clearTimeout(noticeCollapseTimer);noticeCollapseTimer=setTimeout(()=>setNoticeExpanded(false),8000);
@@ -143,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".counts .count").forEach(old=>{
     const button=document.createElement("button");button.type="button";button.className=old.className;
     button.append(...old.childNodes);old.replaceWith(button);
-    const kind=button.classList.contains("all")?"all":button.classList.contains("urgent")?"urgent":button.classList.contains("caution")?"caution":"normal";
+    const kind=button.classList.contains("all")?"all":button.classList.contains("urgent")?"urgent":button.classList.contains("suspected")?"suspected":button.classList.contains("caution")?"caution":"normal";
     button.dataset.filter=kind;button.addEventListener("click",()=>{filter=kind;cardSelected=true;render();});cards.push(button);
   });
   const filterInfo=document.createElement("div");filterInfo.className="filter-info";
@@ -151,12 +153,12 @@ document.addEventListener("DOMContentLoaded", () => {
   filterInfo.innerHTML='<span role="status" aria-live="polite"></span>';
   /* [수정] 강조 상태 안내는 화면에 추가하지 않습니다. */
 
-  /* [2026.09.17] 고친 내용: 낙상과 침대 이탈에 같은 호실별 WAV를 사용하며 종료 후 대기 없이 최대 5회 재생합니다.
+  /* [2026.09.22 변경] 낙상 감지와 낙상 의심에만 같은 호실별 WAV를 사용하며 종료 후 대기 없이 최대 5회 재생합니다.
      대기열은 경보별로 관리하며 한 번에 하나만 재생합니다. */
   const audio=new Audio(), jobs=new Map(), seenEvents=new Set();
   const audioControls=document.createElement("div");audioControls.className="audio-controls";
   /* [수정] 음성 켜기 체크박스 없이 재생 상태만 안내합니다. */
-  audioControls.innerHTML='<span role="status" aria-live="polite">새 낙상 또는 침대 이탈 발생 시 음성으로 안내합니다.</span>';
+  audioControls.innerHTML='<span role="status" aria-live="polite">새 낙상 감지 또는 낙상 의심 발생 시 음성으로 안내합니다.</span>';
   /* [수정] 음성 안내 문구는 화면에 추가하지 않습니다. 재생 기능은 유지합니다. */
   let audioAllowed=true;
   // [2026.09.17] 추가한 내용: 테스트 모드에서는 재생 성공·차단·중지 상태를 직접 확인합니다.
@@ -197,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function resumeAudio(){audioAllowed=true;pump();}
   document.addEventListener("click",resumeAudio);
   document.addEventListener("keydown",resumeAudio);
-  // [2026.09.17] 추가한 내용: 두 감지 유형이 같은 호실 안내와 반복 취소 처리를 공유합니다.
+  // [2026.09.22 변경] 낙상 감지와 낙상 의심만 같은 호실 안내와 반복 취소 처리를 공유합니다.
   function queueRoomAudio(number, fileName=`${number}호즉시확인.wav`, label=`${number}호`){
     cancelAudio(number);
     const job={number,fileName,label,count:0,cancelled:false};
@@ -209,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // [2026.09.20] 중앙 복도 빈 공간은 선택하지 않고 실제 감지 마커에서만 위치 기록을 엽니다.
   const corridorMarker=corridorNode.querySelector('.corridor-alert-marker');
   function chooseCorridor(){
-    if(!['urgent','caution'].includes(corridorAlert.status))return;
+    if(!['urgent','suspected','caution'].includes(corridorAlert.status))return;
     selected=null;corridorSelected=true;render();corridorMarker.focus({preventScroll:true});
   }
   corridorMarker.addEventListener("click",chooseCorridor);
@@ -241,12 +243,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const latest=room ? window.CareGuardRoomStatus.latestTodayEvent(room.number,now) : null;
     detail.innerHTML='<div class="history-heading"><strong class="history-room"></strong><span>오늘의 기록</span></div>'+
       '<div class="history-metric"><span class="room-history-urgent">낙상 감지</span><div><strong class="history-fall"></strong><span>건</span></div></div>'+
+      '<div class="history-metric"><span class="room-history-suspected">낙상 의심</span><div><strong class="history-suspected"></strong><span>건</span></div></div>'+
       '<div class="history-metric"><span class="room-history-caution">침대 이탈</span><div><strong class="history-exit"></strong><span>건</span></div></div>'+
       '<div class="history-recent"><span>최근 기록</span><strong class="history-event"></strong><time></time></div>';
     // [2026.09.17] 고친 내용: 복도 테스트 종류와 실제 선택 위치를 하단 기록에도 동일하게 표시합니다.
     detail.querySelector('.history-room').textContent=corridorSelected ? corridorAlert.cameraLocation : room ? `${room.number}호` : '병실 또는 복도를 선택해 주세요';
     const corridorEventType=corridorAlert.eventType || 'urgent';
     detail.querySelector('.history-fall').textContent=corridorSelected ? String(corridorEventType==='urgent' ? 1 : 0) : counts ? counts.urgent : '—';
+    detail.querySelector('.history-suspected').textContent=corridorSelected ? String(corridorEventType==='suspected' ? 1 : 0) : counts ? counts.suspected : '—';
     detail.querySelector('.history-exit').textContent=corridorSelected ? String(corridorEventType==='caution' ? 1 : 0) : counts ? counts.caution : '—';
     detail.querySelector('.history-event').textContent=corridorSelected ? `${corridorAlert.test ? '테스트 · ' : ''}${labels[corridorEventType]} · ${corridorAlert.cameraLocation}` : latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 위치의 기록을 표시합니다.';
     const time=detail.querySelector('time');
@@ -257,11 +261,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }else time.hidden=true;
   }
   function render(){
-    const counts={all:rooms.size+1,normal:0,caution:0,urgent:0};
+    const counts={all:rooms.size+1,normal:0,caution:0,suspected:0,urgent:0};
     // [2026.09.16] 고친 내용: 하단 카드는 renderRoomHistory에서 선택 병실의 오늘 기록만 표시합니다.
     for(const room of rooms.values()){
       counts[room.status]++;const node=nodes.get(room.number);
-      node.classList.toggle("urgent",room.status==="urgent");node.classList.toggle("caution",room.status==="caution");
+      node.classList.toggle("urgent",room.status==="urgent");node.classList.toggle("suspected",room.status==="suspected");node.classList.toggle("caution",room.status==="caution");
       node.classList.toggle("acknowledged",room.acknowledged);
       node.classList.toggle("filtered-out",filter!=="all"&&room.status!==filter&&room.status!=="urgent");
       /* [수정] 병실 카드에는 상태명만 표시하고 ‘확인 중’ 문구는 숨깁니다. */
@@ -271,6 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     counts[corridorAlert.status]++;
     corridorNode.classList.toggle("urgent",corridorAlert.status==="urgent");
+    corridorNode.classList.toggle("suspected",corridorAlert.status==="suspected");
     corridorNode.classList.toggle("caution",corridorAlert.status==="caution");
     // [2026.09.19] 수정: 기본 복도 감지 표시를 첫 번째 칸인 서쪽 화장실 중앙(5%) 앞으로 옮깁니다.
     corridorNode.style.setProperty("--camera-x",corridorAlert.cameraX || "5%");
@@ -280,36 +285,68 @@ document.addEventListener("DOMContentLoaded", () => {
     corridorNode.classList.toggle("acknowledged",corridorAlert.acknowledged);
     corridorNode.setAttribute("aria-pressed",String(corridorSelected));
     cards.forEach(card=>{card.querySelector("b").textContent=counts[card.dataset.filter];card.setAttribute("aria-pressed",String(cardSelected&&filter===card.dataset.filter));});
-    filterInfo.querySelector("span").textContent=filter==="all"?"전체 병실 표시 중":`${{normal:"정상 병실",caution:"침대 이탈",urgent:"낙상"}[filter]} 강조 중 · 낙상 병실은 항상 표시`;
+    filterInfo.querySelector("span").textContent=filter==="all"?"전체 병실 표시 중":`${{normal:"정상 병실",caution:"침대 이탈",suspected:"낙상 의심",urgent:"낙상"}[filter]} 강조 중 · 낙상 병실은 항상 표시`;
     renderRoomHistory();
     alertPanel.querySelectorAll(".alert-card").forEach(el=>el.remove());
     for(const room of rooms.values()){
       if(room.status==="normal")continue;
-      const card=document.createElement("article");card.className="alert-card"+(room.status==="caution"?" caution":"");
-      card.innerHTML=`<div class="alert-top"><strong>● ${room.status==="urgent"?"긴급":"주의"}</strong></div><h3>${room.number}호 <span class="event-label">${labels[room.status]}</span></h3><p>병실을 확인해주세요.</p><button type="button" class="locate-room">대응 등록</button>`;
+      const card=document.createElement("article");card.className=`alert-card ${room.status}`;
+      const level=room.status==="urgent"?"긴급":room.status==="suspected"?"의심":"주의";
+      const actionButtons=room.status==="suspected"
+        ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응 등록</button></span>'
+        : `<button type="button" class="locate-room" data-action="${room.status==="urgent"?"respond":"confirm"}">${room.status==="urgent"?"대응 등록":"확인"}</button>`;
+      card.innerHTML=`<div class="alert-top"><strong>● ${level}</strong></div><h3>${room.number}호 <span class="event-label">${labels[room.status]}</span></h3><p>병실을 확인해주세요.</p>${actionButtons}`;
       // [2026.09.17] 추가한 내용: 가상 감지 카드에는 테스트 표시를 붙입니다.
       if(room.test)card.querySelector('.alert-top').insertAdjacentHTML('beforeend','<span class="test-alert-badge">테스트</span>');
       /* [2026.09.17] 고친 내용: 알림 카드의 대응 등록 버튼은 해당 병실을 선택하고 등록 창을 바로 엽니다. */
-      card.querySelector("button").setAttribute("aria-pressed",String(selected===room.number));
-      card.querySelector("button").classList.toggle("hover-suppressed",suppressedHoverRoom===room.number);
-      card.querySelector("button").addEventListener("mouseleave",event=>{
-        if(suppressedHoverRoom===room.number)suppressedHoverRoom=null;
-        event.currentTarget.classList.remove("hover-suppressed");
-      });
-      // [2026.09.17] 고친 내용: 중간 화면 재생성이나 이전 선택 상태에 의존하지 않고 버튼의 병실 번호를 등록 창에 직접 전달합니다.
-      card.querySelector("button").addEventListener("click",()=>{suppressedHoverRoom=room.number;openResponseRegistration(room.number);});alertPanel.append(card);
+      card.querySelectorAll("button[data-action]").forEach(button=>{
+        button.setAttribute("aria-pressed",String(selected===room.number));
+        button.classList.toggle("hover-suppressed",suppressedHoverRoom===room.number);
+        button.addEventListener("mouseleave",event=>{
+          if(suppressedHoverRoom===room.number)suppressedHoverRoom=null;
+          event.currentTarget.classList.remove("hover-suppressed");
+        });
+        // [2026.09.22 변경] 낙상 의심은 확인과 대응 등록을 모두 제공하고 침대 이탈은 확인만 제공합니다.
+        button.addEventListener("click",()=>{
+          suppressedHoverRoom=room.number;
+          if(button.dataset.action==="respond")openResponseRegistration(room.number);else acknowledgeAlert(room.number);
+        });
+      });alertList.append(card);
     }
     if(corridorAlert.status!=="normal"){
-      const card=document.createElement("article");card.className="alert-card corridor-alert"+(corridorAlert.status==="caution"?" caution":"");
+      const card=document.createElement("article");card.className=`alert-card corridor-alert ${corridorAlert.status}`;
       // [2026.09.16] 고친 내용: 복도 알림에서는 넓은 구역명보다 실제 발생 위치를 제목으로 크게 표시합니다.
-      card.innerHTML=`<div class="alert-top"><strong>● ${corridorAlert.status==="urgent"?"긴급":"주의"}</strong>${corridorAlert.test?'<span class="test-alert-badge">테스트</span>':''}</div><h3>${corridorAlert.cameraLocation} <span class="event-label">${labels[corridorAlert.status]}</span></h3><p>발생 구역 · ${corridorAlert.location}</p><button type="button" class="locate-room">대응 등록</button>`;
-      card.querySelector("button").setAttribute("aria-pressed",String(corridorSelected));
-      card.querySelector("button").addEventListener("click",()=>openResponseRegistration('corridor'));alertPanel.append(card);
+      const level=corridorAlert.status==="urgent"?"긴급":corridorAlert.status==="suspected"?"의심":"주의";
+      const actionButtons=corridorAlert.status==="suspected"
+        ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응 등록</button></span>'
+        : `<button type="button" class="locate-room" data-action="${corridorAlert.status==="urgent"?"respond":"confirm"}">${corridorAlert.status==="urgent"?"대응 등록":"확인"}</button>`;
+      card.innerHTML=`<div class="alert-top"><strong>● ${level}</strong>${corridorAlert.test?'<span class="test-alert-badge">테스트</span>':''}</div><h3>${corridorAlert.cameraLocation} <span class="event-label">${labels[corridorAlert.status]}</span></h3><p>발생 구역 · ${corridorAlert.location}</p>${actionButtons}`;
+      card.querySelectorAll("button[data-action]").forEach(button=>{
+        button.setAttribute("aria-pressed",String(corridorSelected));
+        button.addEventListener("click",()=>{
+          if(button.dataset.action==="respond")openResponseRegistration('corridor');else acknowledgeAlert('corridor');
+        });
+      });alertList.append(card);
     }
     // [2026.09.17] 고친 내용: 테스트 위치를 포함한 모든 낙상 알림을 침대 이탈보다 먼저 표시합니다.
-    [...alertPanel.querySelectorAll('.alert-card')].sort((a,b)=>Number(a.classList.contains('caution'))-Number(b.classList.contains('caution'))).forEach(card=>alertPanel.append(card));
-    document.getElementById("alert-total").textContent=`${counts.urgent+counts.caution}건`;
+    const cardPriority=card=>card.classList.contains('urgent')?0:card.classList.contains('suspected')?1:2;
+    [...alertList.querySelectorAll('.alert-card')].sort((a,b)=>cardPriority(a)-cardPriority(b)).forEach(card=>alertList.append(card));
+    const pendingAlertCount=counts.urgent+counts.suspected+counts.caution;
+    document.getElementById("alert-total").textContent=`${pendingAlertCount}건`;
+    // [2026.09.22 변경] 알림이 0건이어도 알림 패널과 평면도 너비를 그대로 유지합니다.
     renderCrossPageAlert();
+  }
+
+  // [2026.09.22 변경] 낙상 의심과 침대 이탈은 조치기록 대상이 아니므로 별도 등록 창 없이 확인 처리합니다.
+  function acknowledgeAlert(location){
+    const isCorridor=location==="corridor";
+    const room=isCorridor?corridorAlert:rooms.get(Number(location));
+    if(!room||!["suspected","caution"].includes(room.status))return;
+    cancelAudio(isCorridor?"corridor":Number(location));
+    room.status="normal";room.acknowledged=false;
+    if(isCorridor)corridorSelected=false;
+    else if(selected===Number(location))selected=null;
+    render();
   }
 
   /* [추가] 실제 SSE/WebSocket 수신부에서 아래 함수를 호출하세요.
@@ -321,13 +358,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const number=Number(event.room);
     Object.assign(rooms.get(number),{status:"urgent",acknowledged:false, eventId:id,test:Boolean(event.test)});
     rememberNotice(number);render();queueRoomAudio(number);return true;
+  },receiveSuspectedFallEvent(event){
+    // [2026.09.22 추가] 확정 낙상보다 낮고 침대 이탈보다 높은 우선순위로 낙상 의심을 표시합니다.
+    if(!event||!window.CareGuardRoomStatus.addEvent({...event,type:"suspected"}))return false;
+    const room=rooms.get(Number(event.room));
+    if(room.status!=="urgent")Object.assign(room,{status:"suspected",acknowledged:false,eventId:String(event.id),test:Boolean(event.test)});
+    rememberNotice(Number(event.room));render();queueRoomAudio(Number(event.room));return true;
   },receiveBedExitEvent(event){
     if(!event||!window.CareGuardRoomStatus.addEvent({...event,type:"caution"}))return false;
     const room=rooms.get(Number(event.room));
     // 같은 병실의 미해결 낙상 경보를 주의 상태로 낮추지 않습니다.
-    if(room.status!=="urgent")Object.assign(room,{status:"caution",acknowledged:false,eventId:String(event.id),test:Boolean(event.test)});
-    // [2026.09.17] 추가한 내용: 침대 이탈도 화면 알림 갱신과 함께 해당 호실 음성을 재생합니다.
-    rememberNotice(Number(event.room));render();queueRoomAudio(Number(event.room));return true;
+    if(!["urgent","suspected"].includes(room.status))Object.assign(room,{status:"caution",acknowledged:false,eventId:String(event.id),test:Boolean(event.test)});
+    // [2026.09.22 변경] 침대 이탈은 화면에만 표시하고 음성은 재생하지 않습니다.
+    rememberNotice(Number(event.room));render();return true;
   }};
 
   let registrationRoom=null, registrationEvent=null;
@@ -357,15 +400,17 @@ document.addEventListener("DOMContentLoaded", () => {
         // 현재 도면의 단일 복도 표시를 재사용하므로 이전 복도 음성은 먼저 취소합니다.
         cancelAudio('corridor');
         Object.assign(corridorAlert,corridorLocations[location],{status:type,eventType:type,test:true,eventId:id,occurredAt:new Date().toISOString(),acknowledged:false});
-        rememberNotice('corridor');render();queueRoomAudio('corridor',corridorAlert.fileName,corridorAlert.cameraLocation);
+        rememberNotice('corridor');render();
+        // [2026.09.22 변경] 복도 테스트도 낙상 감지와 낙상 의심일 때만 음성을 재생합니다.
+        if(type!=="caution")queueRoomAudio('corridor',corridorAlert.fileName,corridorAlert.cameraLocation);
       }else{
         const number=Number(location),room=rooms.get(number);
         if(!room)return;
-        if(type==='caution'&&room.status==='urgent'){
-          result.textContent='현재 낙상 알림이 있는 병실입니다. 정상 병실을 선택하거나 테스트 초기화 후 진행해 주세요.';return;
+        if((type==='caution'&&['urgent','suspected'].includes(room.status))||(type==='suspected'&&room.status==='urgent')){
+          result.textContent='현재 더 높은 단계의 낙상 알림이 있는 병실입니다. 다른 병실을 선택하거나 테스트 초기화 후 진행해 주세요.';return;
         }
         if(!originalRooms.has(number))originalRooms.set(number,{...room});
-        const receive=type==='urgent'?window.CareGuard.receiveFallEvent:window.CareGuard.receiveBedExitEvent;
+        const receive=type==='urgent'?window.CareGuard.receiveFallEvent:type==='suspected'?window.CareGuard.receiveSuspectedFallEvent:window.CareGuard.receiveBedExitEvent;
         if(!receive({id,room:number,test:true,occurredAt:Date.now()}))return;
       }
       testIds.add(id);
@@ -415,6 +460,8 @@ document.addEventListener("DOMContentLoaded", () => {
     eventBox.textContent=`${room.test?'테스트 · ':''}${room.cameraLocation ?? `${selected}호`} · ${labels[room.status]}`;
     /* [추가] 침대 이탈 등록 창은 주의 색상 클래스를 적용합니다. */
     eventBox.classList.toggle("caution-event",room.status==="caution");
+    // [2026.09.22 추가] 낙상 의심 대응 창도 보라색 상태로 구분합니다.
+    eventBox.classList.toggle("suspected-event",room.status==="suspected");
     eventBox.classList.toggle("urgent-event",room.status==="urgent");
     // [2026.09.17] 추가한 내용: 낙상 감지 대응 등록 창 전체를 긴급 테두리로 구분합니다.
     dialog.classList.toggle("urgent-response-dialog",room.status==="urgent");

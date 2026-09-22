@@ -8,7 +8,7 @@
   <!-- [2026.09.17] 고친 내용: 화면 최상단 알림 배너 위치가 반영되도록 CSS 캐시 버전을 갱신합니다. -->
   <link
     rel="stylesheet"
-    href="../../../static/css/dashboard/dashboard.css?v=20260920-password-dialog-height" th:href="@{/css/dashboard/dashboard.css(v='20260920-password-dialog-height')}"
+          href="../../../static/css/dashboard/dashboard.css?v=suspected-action-black-20260922" th:href="@{/css/dashboard/dashboard.css(v='suspected-action-black-20260922')}"
   >
   <!-- [09.13]추가내용: 병실 상태와 선택 표시를 기능별 CSS 파일로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
@@ -16,7 +16,7 @@
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=checked-record-20260920" th:href="@{/css/alleyes-theme.css(v='checked-record-20260920')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=keep-empty-alert-panel-20260922" th:href="@{/css/alleyes-theme.css(v='keep-empty-alert-panel-20260922')}">
 </head>
 
 <body data-ward-number="2" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
@@ -114,7 +114,7 @@
     <section id="alert-test-panel" class="panel alert-test-panel" hidden aria-label="알림 테스트">
       <strong>알림 테스트 · DB 저장 없음</strong>
       <label>발생 위치 <select id="alert-test-location"></select></label>
-      <label>감지 종류 <select id="alert-test-type"><option value="urgent">낙상</option><option value="caution">침대 이탈</option></select></label>
+      <label>감지 종류 <select id="alert-test-type"><option value="urgent">낙상 감지</option><option value="suspected">낙상 의심</option><option value="caution">침대 이탈</option></select></label>
       <button type="button" id="alert-test-run">테스트 알림 발생</button>
       <!-- [2026.09.17] 추가한 내용: 다른 화면으로 이동한 뒤 감지 배너를 확인할 수 있도록 5초 후 테스트를 예약합니다. -->
       <button type="button" id="alert-test-delayed">5초 후 알림 발생</button>
@@ -135,13 +135,15 @@
             <span>낙상</span>
             <b id="urgent-count">1</b>
           </div>
+          <!-- [2026.09.22 추가] 낙상 감지 전 확인이 필요한 상태를 보라색으로 구분합니다. -->
+          <div class="count suspected"><span>낙상 의심</span><b id="suspected-count">1</b></div>
           <div class="count caution">
             <span>침대 이탈</span>
             <b id="caution-count">1</b>
           </div>
           <div class="count">
             <span>정상</span>
-            <b id="normal-count">15</b>
+            <b id="normal-count">14</b>
           </div>
         </div>
       </section>
@@ -158,6 +160,7 @@
           <div class="legend">
             <span>정상</span>
             <span class="caution">주의</span>
+            <span class="suspected">의심</span>
             <span class="urgent">긴급</span>
           </div>
           </div>
@@ -206,6 +209,8 @@
             </span>
           </div>
 
+          <!-- [2026.09.22 변경] 제목은 고정하고 알림 카드 목록만 독립적으로 스크롤합니다. -->
+          <div class="alert-list">
           <!-- 낙상 감지 알림 -->
           <article
             class="alert-card"
@@ -257,6 +262,7 @@
               대응 등록
             </button>
           </article>
+          </div>
         </section>
       </aside>
     </div>
@@ -337,9 +343,9 @@
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
   <script src="../../../static/JS/dashboard/session.js" th:src="@{/JS/dashboard/session.js}"></script>
-  <script src="../../../static/JS/dashboard/room-status.js" th:src="@{/JS/dashboard/room-status.js}"></script>
+  <script src="../../../static/JS/dashboard/room-status.js?v=fall-suspected-20260922" th:src="@{/JS/dashboard/room-status.js(v='fall-suspected-20260922')}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <!-- [2026.09.17] 고친 내용: 대응 등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
-  <script src="../../../static/JS/dashboard/dashboard.js?v=20260920-corridor-marker" th:src="@{/JS/dashboard/dashboard.js(v='20260920-corridor-marker')}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js?v=suspected-dual-actions-20260922" th:src="@{/JS/dashboard/dashboard.js(v='suspected-dual-actions-20260922')}"></script>
 </body>
 </html>

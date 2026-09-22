@@ -9,6 +9,10 @@ const createStaffPhoneInput = document.querySelector("#admin-create-staff-phone"
 const createStaffPhoneError = document.querySelector("#admin-create-staff-phone-error");
 const createPhoneInput = document.querySelector("#admin-create-phone");
 const createRoomWardSelect = document.querySelector("#admin-create-room-ward");
+const createRoomWardDropdown = document.querySelector("#admin-create-room-ward-dropdown");
+const createRoomWardTrigger = document.querySelector("#admin-create-room-ward-trigger");
+const createRoomWardOptions = document.querySelector("#admin-create-room-ward-options");
+const createRoomWardLabel = document.querySelector("#admin-create-room-ward-label");
 const createRoomWardError = document.querySelector("#admin-create-room-ward-error");
 const createRoomSelect = document.querySelector("#admin-create-room");
 const createRoomDropdown = document.querySelector("#admin-create-room-dropdown");
@@ -65,6 +69,31 @@ function closeCreateRoomOptions() {
     createDialog.classList.remove("room-menu-open");
 }
 
+function renderCreateRoomWardDropdown() {
+    createRoomWardOptions.replaceChildren();
+    createRoomWardLabel.textContent = createRoomWardSelect.selectedOptions[0]?.textContent
+        || "병동을 선택해 주세요";
+    for (const option of createRoomWardSelect.options) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = option.textContent;
+        button.setAttribute("aria-selected", String(option.value === createRoomWardSelect.value));
+        button.addEventListener("click", () => {
+            createRoomWardSelect.value = option.value;
+            createRoomWardSelect.dispatchEvent(new Event("change", { bubbles: true }));
+            closeCreateRoomWardOptions();
+            createRoomWardTrigger.focus();
+        });
+        createRoomWardOptions.append(button);
+    }
+}
+
+function closeCreateRoomWardOptions() {
+    createRoomWardOptions.hidden = true;
+    createRoomWardTrigger.setAttribute("aria-expanded", "false");
+    createDialog.classList.remove("ward-menu-overflow");
+}
+
 // 프런트 미리보기용 병실 번호이며 DB의 병동·위치 ID로 사용하지 않는다.
 function refreshCreateRooms() {
     const wardNumber = Number(createRoomWardSelect.value);
@@ -83,26 +112,41 @@ function refreshCreateRooms() {
 createRoomWardSelect.addEventListener("change", () => {
     createRoomWardError.textContent = "";
     createRoomError.textContent = "";
+    renderCreateRoomWardDropdown();
     refreshCreateRooms();
+});
+renderCreateRoomWardDropdown();
+createRoomWardTrigger.addEventListener("click", () => {
+    if (!createRoomWardOptions.hidden) return closeCreateRoomWardOptions();
+    closeCreateRoomOptions();
+    renderCreateRoomWardDropdown();
+    createRoomWardDropdown.classList.remove("open-up");
+    createRoomWardOptions.style.maxHeight = "240px";
+    createDialog.classList.add("ward-menu-overflow");
+    createRoomWardOptions.hidden = false;
+    createRoomWardTrigger.setAttribute("aria-expanded", "true");
 });
 refreshCreateRooms();
 createRoomTrigger.addEventListener("click", () => {
     if (!createRoomOptions.hidden) return closeCreateRoomOptions();
+    closeCreateRoomWardOptions();
     renderCreateRoomDropdown();
-    const availableBelow = window.innerHeight - createRoomTrigger.getBoundingClientRect().bottom - 12;
-    createRoomOptions.style.maxHeight = `${Math.max(64, Math.min(240, Math.floor(availableBelow)))}px`;
+    // [2026.09.22 변경] 담당 병실 목록은 팝업 크기를 바꾸지 않고 선택칸 아래에 표시합니다.
+    createRoomDropdown.classList.remove("open-up");
+    createRoomOptions.style.maxHeight = "240px";
     createDialog.classList.add("room-menu-open");
     createRoomOptions.hidden = false;
     createRoomTrigger.setAttribute("aria-expanded", "true");
 });
 document.addEventListener("click", event => {
     if (!createRoomDropdown.contains(event.target)) closeCreateRoomOptions();
+    if (!createRoomWardDropdown.contains(event.target)) closeCreateRoomWardOptions();
 });
 document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && !createRoomOptions.hidden) {
+    if (event.key === "Escape" && (!createRoomOptions.hidden || !createRoomWardOptions.hidden)) {
         event.stopPropagation();
         closeCreateRoomOptions();
-        createRoomTrigger.focus();
+        closeCreateRoomWardOptions();
     }
 }, true);
 
@@ -293,7 +337,9 @@ createAccountButton?.addEventListener("click", async () => {
     if (createPending || createDialog?.open) return;
 
     createForm?.reset();
+    renderCreateRoomWardDropdown();
     refreshCreateRooms();
+    closeCreateRoomWardOptions();
     closeCreateWardOptions();
     closeCreateRoomOptions();
     renderCreateRoomDropdown();
@@ -506,6 +552,9 @@ createForm?.addEventListener("submit", async event => {
 
         createDialog?.close();
         createForm.reset();
+        renderCreateRoomWardDropdown();
+        refreshCreateRooms();
+        closeCreateRoomWardOptions();
         createCompleteDialog?.showModal();
     } catch (error) {
         // [2026-09-18] 중복 아이디 안내를 배경 화면 대신 계정 생성 창의 아이디 입력란 아래에 표시한다.

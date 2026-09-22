@@ -13,19 +13,19 @@
     <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제')))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/dashboard.css?v=caregiver-room-text-offset-20260922"
-          th:href="@{/css/admin/dashboard.css(v='caregiver-room-text-offset-20260922')}">
+          href="../../../static/css/admin/dashboard.css?v=caregiver-room-floating-menu-20260922"
+          th:href="@{/css/admin/dashboard.css(v='caregiver-room-floating-menu-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=nurse-phone-20260922" th:href="@{/css/admin/account-create.css(v='nurse-phone-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=caregiver-room-filter-label-20260922" th:href="@{/css/admin/inactive-users.css(v='caregiver-room-filter-label-20260922')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=history-nurse-search-label-20260922"
-            th:src="@{/JS/admin/dashboard.js(v='history-nurse-search-label-20260922')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=caregiver-history-card-order-20260922"
+            th:src="@{/JS/admin/dashboard.js(v='caregiver-history-card-order-20260922')}"
             defer></script>
     <script src="../../../static/JS/admin/admin-history.js?v=history-nurse-name-20260922"
         th:src="@{/JS/admin/admin-history.js(v='history-nurse-name-20260922')}"
         defer></script>
-    <script src="../../../static/JS/admin/account-create.js?v=nurse-phone-mask-20260922"
-            th:src="@{/JS/admin/account-create.js(v='nurse-phone-mask-20260922')}"
+    <script src="../../../static/JS/admin/account-create.js?v=caregiver-ward-filter-style-20260922"
+            th:src="@{/JS/admin/account-create.js(v='caregiver-ward-filter-style-20260922')}"
             defer></script>
     <script src="../../../static/JS/admin/inactive-users.js?v=caregiver-without-phone-20260922"
             th:src="@{/JS/admin/inactive-users.js(v='caregiver-without-phone-20260922')}"
@@ -220,7 +220,7 @@
             </div>
         </article>
 
-        <article class="history-filter-card"
+        <article class="history-filter-card" id="admin-history-deactivate-card"
                 data-history-filter="계정 비활성화"
                 tabindex="0">
             <span class="history-card-icon disable">
@@ -450,8 +450,16 @@
         </ul>
 
         <div id="admin-room-ward-field" hidden>
-            <label for="admin-room-ward-select">병동</label>
-            <select id="admin-room-ward-select"><option value="">병동을 선택해 주세요</option><option value="1">1병동</option><option value="2">2병동</option><option value="3">3병동</option></select>
+            <label for="admin-room-ward-trigger">병동</label>
+            <!-- [2026.09.22 변경] 담당 병실 변경의 병동 선택도 공통 필터 디자인으로 표시합니다. -->
+            <div class="admin-action-ward-dropdown" id="admin-room-ward-dropdown">
+                <button type="button" id="admin-room-ward-trigger" aria-label="병동 선택" aria-expanded="false" aria-controls="admin-room-ward-options">
+                    <span id="admin-room-ward-value">병동을 선택해 주세요</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="admin-room-ward-options" class="admin-action-ward-options" hidden></div>
+            </div>
+            <select id="admin-room-ward-select" hidden><option value="">병동을 선택해 주세요</option><option value="1">1병동</option><option value="2">2병동</option><option value="3">3병동</option></select>
         </div>
 
         <div id="admin-ward-field" hidden>
@@ -499,7 +507,15 @@
                 <small class="admin-field-error" id="admin-create-ward-error"></small>
             </label>
             <label class="admin-create-caregiver-field admin-create-ward-field" hidden>병동
-                <select id="admin-create-room-ward"><option value="">병동을 선택해 주세요</option><option value="1">1병동</option><option value="2">2병동</option><option value="3">3병동</option></select>
+                <!-- [2026.09.22 변경] 간병인 병동 선택도 담당 병실과 같은 필터 디자인을 사용합니다. -->
+                <span class="admin-create-ward-dropdown" id="admin-create-room-ward-dropdown">
+                    <button type="button" id="admin-create-room-ward-trigger" aria-label="병동 선택" aria-expanded="false" aria-controls="admin-create-room-ward-options">
+                        <span id="admin-create-room-ward-label">병동을 선택해 주세요</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <span class="admin-create-ward-options" id="admin-create-room-ward-options" hidden></span>
+                </span>
+                <select id="admin-create-room-ward" hidden><option value="">병동을 선택해 주세요</option><option value="1">1병동</option><option value="2">2병동</option><option value="3">3병동</option></select>
                 <small class="admin-field-error" id="admin-create-room-ward-error"></small>
             </label>
             <label class="admin-create-caregiver-field admin-create-room-field" hidden>담당 병실

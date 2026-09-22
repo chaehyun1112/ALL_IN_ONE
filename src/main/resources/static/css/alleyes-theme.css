@@ -126,15 +126,15 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .login-button:active { background: #39576d; }
 .password-popup .change-page, .password-popup .change-body { background: #fff; }
 .floor-panel .floor { background: #f4f7fa; border-color: #d5dfe7; }
-.floor .room:not(.urgent):not(.caution):not(.filtered-out) {
+.floor .room:not(.urgent):not(.suspected):not(.caution):not(.filtered-out) {
   background: #edf3f7;
   border-color: #c3d1dc;
   border-top-color: #b8cad8;
   border-left-color: #c3d1dc;
   box-shadow: 3px 5px 0 #526d8214, inset 0 0 0 2px #ffffff80;
 }
-.floor .room:not(.urgent):not(.caution) small { color: #647581; }
-.floor .room:not(.urgent):not(.caution)::after { background: #7b93a5; }
+.floor .room:not(.urgent):not(.suspected):not(.caution) small { color: #647581; }
+.floor .room:not(.urgent):not(.suspected):not(.caution)::after { background: #7b93a5; }
 .floor .room .door { background: #edf3f7; border-color: #8ea4b4; }
 .floor .room .bed { border-color: #b8cad8; }
 .floor .room .bed::after { background: #d5e1ea; }
@@ -145,21 +145,128 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .floor .facility .symbol { color: #71899b; }
 .floor .station { background: #e4edf4; border-color: #b8cad8; }
 .floor .room[aria-pressed="true"], .floor .room:focus-visible { outline-color: #526d82; }
-.page-heading .counts .count:not(.urgent):not(.caution) { background: #edf3f7; border-color: #d5dfe7; color: #526d82; }
-.page-heading .counts .count:not(.urgent):not(.caution) b { color: #526d82; }
+.page-heading .counts .count:not(.urgent):not(.suspected):not(.caution) { background: #edf3f7; border-color: #d5dfe7; color: #526d82; }
+.page-heading .counts .count:not(.urgent):not(.suspected):not(.caution) b { color: #526d82; }
 .page-heading .summary::before, .panel-heading h2::before { background: #71899b; }
 /* [2026.09.20] 안전 현황 카드의 기본·선택 테두리를 각 상태 색으로 표시합니다. */
 .page-heading .counts .count { --count-border: #b8cad8; --count-ring: #526d8280; }
 .page-heading .counts .count.urgent { --count-border: #d9574a; --count-ring: #d9574a60; }
+.page-heading .counts .count.suspected { --count-border: #7c6bc4; --count-ring: #7c6bc460; }
 .page-heading .counts .count.caution { --count-border: #d99a28; --count-ring: #d99a2860; }
-.page-heading .counts .count:not(.urgent):not(.caution) { border-color: var(--count-border); }
+.page-heading .counts .count:not(.urgent):not(.suspected):not(.caution) { border-color: var(--count-border); }
 .counts .count[aria-pressed="true"] { border-color: var(--count-border) !important; box-shadow: 0 0 0 2px var(--count-ring) !important; }
-.legend span:not(.urgent):not(.caution)::before { background: #7b93a5; }
+.legend span:not(.urgent):not(.suspected):not(.caution)::before { background: #7b93a5; }
 .page-heading .counts .count[aria-pressed="true"] { outline-color: var(--count-border); }
+/* [2026.09.22 변경] 다섯 안전 현황 카드를 같은 크기로 맞추고 카드 섹션의 가로 길이를 줄입니다. */
+.page-heading { justify-content:center; }
+/* [2026.09.22 변경] 상단 현황 영역을 아래 관제 카드 전체 폭과 맞추고 다섯 카드를 같은 비율로 늘립니다. */
+.page-heading .summary { flex:1 1 auto; width:100%; max-width:none; }
+.page-heading .counts { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); }
+.page-heading .counts .count { box-sizing:border-box; width:100%; min-width:0; min-height:58px; }
+@media(max-width:900px) {
+  .page-heading .counts { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media(max-width:520px) {
+  .page-heading .counts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+/* [2026.09.22 변경] 알림 패널 높이를 줄여 내부에서 스크롤하고, 평면도 카드는 도면 높이만 사용해 아래 빈 공간을 없앱니다. */
+@media(min-width:1101px) {
+  .layout {
+    --floor-map-height:clamp(360px,49vh,470px);
+    flex:none;
+    align-items:stretch;
+    width:100%;
+    min-width:0;
+    grid-template-columns:minmax(0,72fr) minmax(300px,28fr);
+  }
+  /* [2026.09.22 변경] 전체화면에서도 평면도 행의 비율 계산이 오른쪽 알림 영역을 침범하지 않도록 카드 폭 안에 고정합니다. */
+  .layout > *, .floor-panel, .floor-panel .floor, .floor .room-row { min-width:0; max-width:100%; }
+  .floor-panel { box-sizing:border-box; align-self:start; width:100%; height:auto; overflow:visible; }
+  .floor-panel .floor {
+    box-sizing:border-box;
+    flex:none;
+    width:100%;
+    height:auto;
+    overflow:visible;
+    grid-template-rows:auto auto auto;
+  }
+  .floor .room-row {
+    box-sizing:border-box;
+    width:100%;
+    height:auto;
+    aspect-ratio:7.6 / 1;
+    grid-template-columns:repeat(10,minmax(0,1fr));
+  }
+  .floor .corridor { box-sizing:border-box; width:100%; height:auto; aspect-ratio:12 / 1; }
+  .floor .room-row > * { min-width:0; max-width:100%; }
+  /* [2026.09.22 변경] 알림 카드를 평면도 카드 높이에 맞추고, 초과 알림은 카드 내부에서 스크롤합니다. */
+  .side {
+    position:relative;
+    align-self:stretch;
+    width:100%;
+    min-height:0;
+    overflow:hidden;
+  }
+  .layout > .side > .alerts-panel {
+    box-sizing:border-box;
+    position:absolute;
+    inset:0;
+    width:auto;
+    height:auto;
+    max-height:none;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-color:#8ea6b8 #edf3f7;
+  }
+  .layout > .side > .alerts-panel::-webkit-scrollbar { width:8px; }
+  .layout > .side > .alerts-panel::-webkit-scrollbar-track { background:#edf3f7; border-radius:6px; }
+  .layout > .side > .alerts-panel::-webkit-scrollbar-thumb { background:#8ea6b8; border:2px solid #edf3f7; border-radius:6px; }
+  .layout > .side > .alerts-panel::-webkit-scrollbar-thumb:hover { background:#526d82; }
+  /* [2026.09.22 변경] 내부 스크롤 시 알림 카드가 고정 제목 위로 비쳐 나오지 않게 제목을 스크롤 영역 상단에 붙입니다. */
+  .layout > .side > .alerts-panel > .alert-heading {
+    position:static;
+    z-index:10;
+    margin:0 0 12px;
+    padding:10px 0 12px;
+    background:#fff;
+    box-shadow:0 6px 8px #ffffff;
+  }
+  .layout > .side > .alerts-panel > .alert-list {
+    flex:0 0 auto;
+    min-height:auto;
+    overflow:visible;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .layout > .side > .alerts-panel > .alert-list > .alert-card { margin-bottom:0; }
+  .layout > .side > .alerts-panel > .alert-list:empty::before {
+    content:"확인이 필요한 알림이 없습니다.";
+    display:block;
+    padding:28px 12px;
+    color:#71899b;
+    font-size:13px;
+    text-align:center;
+  }
+}
 .admin-table th, .admin-history-table th { background: #e5edf3; color: #39576d; }
 .record-table th { background: #526d82; color: #fff; }
 .admin-account-guide, .admin-inactive-symbol { background: #edf3f7; }
 .settings-card, .profile-card, .admin-dialog, .page-intro, .search-form { background-color: #fff; }
+/* [2026.09.22 변경] 하단 오늘 기록을 위치·세 상태·최근 기록 순서의 한 줄로 배치합니다. */
+.dashboard-history-card #room-detail {
+  grid-template-columns:minmax(190px,1.1fr) repeat(3,minmax(130px,.75fr)) minmax(240px,1.35fr);
+  justify-content:start;
+}
+.dashboard-history-card #room-detail > * { min-width:0; }
+@media(max-width:1100px) {
+  .dashboard-history-card #room-detail { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dashboard-history-card #room-detail .history-recent { grid-column:1 / -1; }
+}
 /* [2026.09.20] 대응 등록 창의 정보·입력·버튼 영역을 나누고 노트북에서도 간결하게 표시합니다. */
 #response-dialog { width:min(560px,calc(100vw - 32px)); padding:0; background:#fff; color:#29343d; border:2px solid #5f6361; border-radius:18px; box-shadow:0 24px 70px #29343d30; }
 #response-dialog::backdrop { background:#29343d66; }
@@ -169,6 +276,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 #response-dialog .response-body { padding:20px 28px; }
 #response-dialog .response-event { margin:0 0 20px; padding:14px 16px; border-radius:10px; border-width:1px 1px 1px 4px; font-size:15px; font-weight:700; }
 #response-dialog .response-event.urgent-event { background:var(--alert-fall-bg); border-color:var(--alert-fall); color:var(--alert-fall-text); }
+#response-dialog .response-event.suspected-event { background:var(--alert-suspected-bg); border-color:var(--alert-suspected); color:var(--alert-suspected-text); }
 #response-dialog .response-event.caution-event { background:var(--alert-caution-bg); border-color:var(--alert-caution); color:var(--alert-caution-text); }
 #response-dialog .response-people { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 #response-dialog .response-field { min-width:0; }
@@ -234,6 +342,10 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   --alert-fall-bg: #fdebe8;
   --alert-fall: #d9574a;
   --alert-fall-text: #a83228;
+  /* [2026.09.22 변경] 낙상 의심도 낙상 감지와 같은 빨간 계열로 표시합니다. */
+  --alert-suspected-bg: #fdebe8;
+  --alert-suspected: #d9574a;
+  --alert-suspected-text: #a83228;
   --alert-caution-bg: #fff4de;
   --alert-caution: #d99a28;
   --alert-caution-text: #946014;
@@ -241,10 +353,16 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .floor .room.urgent, .floor .room.urgent.acknowledged,
 .floor .room.urgent:not(.acknowledged),
 .page-heading .counts .count.urgent,
-.alerts-panel .alert-card:not(.caution), .response-event.urgent-event,
-.cross-page-alert, .cross-page-alert-row:not(.caution) {
+.alerts-panel .alert-card:not(.suspected):not(.caution), .response-event.urgent-event,
+.cross-page-alert:not(.suspected):not(.caution), .cross-page-alert-row:not(.suspected):not(.caution) {
   background: var(--alert-fall-bg);
   border-color: var(--alert-fall);
+}
+.floor .room.suspected, .page-heading .counts .count.suspected,
+.alerts-panel .alert-card.suspected, .response-event.suspected-event,
+.cross-page-alert.suspected, .cross-page-alert-row.suspected {
+  background: var(--alert-suspected-bg);
+  border-color: var(--alert-suspected);
 }
 .floor .room.caution, .page-heading .counts .count.caution,
 .alerts-panel .alert-card.caution, .response-event.caution-event,
@@ -254,16 +372,21 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 }
 .floor .room.urgent small, .floor .room.urgent:not(.acknowledged) small,
 .page-heading .counts .count.urgent :is(span,b),
-.alerts-panel .alert-card:not(.caution) :is(.alert-top,.event-label,p),
-.response-event.urgent-event, .cross-page-alert, .cross-page-alert-row:not(.caution),
+.alerts-panel .alert-card:not(.suspected):not(.caution) :is(.alert-top,.event-label,p),
+.response-event.urgent-event, .cross-page-alert:not(.suspected):not(.caution), .cross-page-alert-row:not(.suspected):not(.caution),
 #room-detail .room-history-urgent { color: var(--alert-fall-text); }
+.floor .room.suspected small, .page-heading .counts .count.suspected :is(span,b),
+.alerts-panel .alert-card.suspected :is(.alert-top,.event-label,p),
+.response-event.suspected-event, .cross-page-alert.suspected, .cross-page-alert-row.suspected,
+#room-detail .room-history-suspected { color: var(--alert-suspected-text); }
 .floor .room.caution small, .page-heading .counts .count.caution :is(span,b),
 .alerts-panel .alert-card.caution :is(.alert-top,.event-label,p),
 .response-event.caution-event, .cross-page-alert.caution, .cross-page-alert-row.caution,
 #room-detail .room-history-caution { color: var(--alert-caution-text); }
-.alerts-panel .alert-card h3, .alerts-panel .alert-card:not(.caution) h3,
-.alerts-panel .alert-card.caution h3, .floor .room:is(.urgent,.caution) strong { color: #29343d; }
+.alerts-panel .alert-card h3, .alerts-panel .alert-card:not(.suspected):not(.caution) h3,
+.alerts-panel .alert-card:is(.suspected,.caution) h3, .floor .room:is(.urgent,.suspected,.caution) strong { color: #29343d; }
 .legend .urgent::before, .floor .room.urgent::after { background: var(--alert-fall); }
+.legend .suspected::before, .floor .room.suspected::after { background: var(--alert-suspected); }
 .legend .caution::before, .floor .room.caution::after { background: var(--alert-caution); }
 .corridor.urgent .corridor-alert-marker { background: var(--alert-fall); }
 .corridor.urgent .corridor-alert-marker::after { background: var(--alert-fall-text); }
@@ -273,24 +396,64 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .corridor.caution .corridor-alert-marker { background: var(--alert-caution); box-shadow: 0 0 0 5px #d99a2840; }
 .corridor.caution .corridor-alert-marker::after { background: var(--alert-caution-text); }
 .alert-heading .alert-total { background: var(--alert-fall-bg); border-color: #d9574a40; color: var(--alert-fall-text); }
+/* [2026.09.22 추가] 미확인 낙상 의심 위치를 보라색으로 점멸하여 즉시 구분합니다. */
+@media (prefers-reduced-motion:no-preference) {
+  .floor .room.suspected:not(.acknowledged) {
+    animation:careguard-suspected-pulse 1.05s ease-in-out infinite;
+    z-index:3;
+  }
+  .floor .room.suspected:not(.acknowledged)::after {
+    animation:careguard-suspected-dot 1.05s ease-in-out infinite;
+    transform-origin:center;
+  }
+  .corridor.suspected:not(.acknowledged) .corridor-alert-marker {
+    display:block;
+    animation:careguard-suspected-marker 1.05s ease-in-out infinite;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .floor .room.suspected:not(.acknowledged) { box-shadow:0 0 0 3px #7c6bc466; }
+  .corridor.suspected .corridor-alert-marker { display:block; }
+}
+@keyframes careguard-suspected-pulse {
+  0%,100% { background:#f1eeff; border-color:#7c6bc4; box-shadow:0 0 0 2px #7c6bc430,inset 0 0 0 2px #ffffff70; }
+  50% { background:#dcd4ff; border-color:#6b58ad; box-shadow:0 0 0 5px #7c6bc448,0 0 16px #7c6bc438,inset 0 0 0 2px #ffffff50; }
+}
+@keyframes careguard-suspected-dot {
+  0%,100% { background:#7c6bc4; transform:scale(1); }
+  50% { background:#58469b; transform:scale(1.4); }
+}
+@keyframes careguard-suspected-marker {
+  0%,100% { opacity:.68; transform:translate(-50%,-50%) scale(.88); background:#7c6bc4; box-shadow:0 0 0 4px #7c6bc444; }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.16); background:#6b58ad; box-shadow:0 0 0 10px #7c6bc440,0 0 10px #7c6bc466; }
+}
+/* [2026.09.22 변경] 점멸은 낙상 감지에만 사용하고 낙상 의심은 같은 색의 고정 상태로 표시합니다. */
+.floor .room.suspected,
+.floor .room.suspected:not(.acknowledged),
+.floor .room.suspected::after,
+.floor .room.suspected:not(.acknowledged)::after,
+.corridor.suspected .corridor-alert-marker,
+.corridor.suspected:not(.acknowledged) .corridor-alert-marker {
+  animation:none !important;
+}
 /* 기존 점멸 주기와 중지 동작은 유지하고 색상만 새 팔레트에 맞춥니다. */
-/* [2026.09.20] 낙상 점멸만 1.15초에서 0.8초로 조금 빠르게 합니다. 확인 후 중지와 동작 줄이기는 유지합니다. */
+/* [2026.09.22 변경] 낙상 감지 점멸 주기를 0.6초로 줄여 긴급 상태를 더 빠르게 표시합니다. */
 @media (prefers-reduced-motion: no-preference) {
   .floor .room.urgent:not(.acknowledged),
   .floor .room.urgent:not(.acknowledged)::after,
   .corridor.urgent:not(.acknowledged) .corridor-alert-marker {
-    animation-duration: .8s;
+    animation-duration: .6s;
   }
 }
 @keyframes careguard-emergency-pulse {
-  0%,100% { background:#fdebe8; border-color:#d9574a; box-shadow:0 0 0 2px #d9574a30,inset 0 0 0 2px #ffffff70; }
-  50% { background:#f5c4bd; border-color:#d9574a; box-shadow:0 0 0 5px #d9574a50,0 0 16px #d9574a35,inset 0 0 0 2px #ffffff45; }
+  0%,100% { background:#fff3f1; border-color:#d9574a; box-shadow:0 0 0 2px #d9574a35,inset 0 0 0 2px #ffffff80; }
+  50% { background:#ed776c; border-color:#9f241c; box-shadow:0 0 0 7px #d9574a70,0 0 24px 5px #d9574a65,inset 0 0 0 2px #ffffff35; }
 }
 @keyframes careguard-emergency-dot {
-  0%,100% { background:#d9574a; transform:scale(1); }
-  50% { background:#a83228; transform:scale(1.45); }
+  0%,100% { background:#d9574a; transform:scale(.9); box-shadow:0 0 0 0 #d9574a70; }
+  50% { background:#8f1812; transform:scale(1.75); box-shadow:0 0 0 6px #d9574a45; }
 }
 @keyframes corridor-alert-pulse {
-  0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.85); background:#d9574a; box-shadow:0 0 0 4px #d9574a44,0 0 6px 1px #d9574a55; }
-  50% { opacity:1; transform:translate(-50%,-50%) scale(1.18); background:#d9574a; box-shadow:0 0 0 10px #d9574a45,0 0 10px 2px #d9574a77; }
+  0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.78); background:#d9574a; box-shadow:0 0 0 4px #d9574a45,0 0 7px 2px #d9574a60; }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.4); background:#981f18; box-shadow:0 0 0 14px #d9574a55,0 0 18px 5px #d9574a90; }
 }
