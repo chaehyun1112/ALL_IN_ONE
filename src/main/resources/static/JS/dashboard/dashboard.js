@@ -306,7 +306,8 @@ document.addEventListener("DOMContentLoaded", () => {
     for(const room of rooms.values()){
       if(room.status==="normal")continue;
       const card=document.createElement("article");card.className=`alert-card ${room.status}`;
-      const level=room.status==="urgent"?"긴급":room.status==="suspected"?"의심":"주의";
+      // [2026.09.28 변경] 관제 화면 범례와 같은 명칭으로 낙상 상태를 표시합니다.
+      const level=room.status==="urgent"?"낙상":room.status==="suspected"?"의심":"주의";
       // [2026.09.28 변경] 확정 낙상도 낙상 의심과 같이 확인·대응 등록을 모두 제공합니다(확인 = 오경보 처리).
       const actionButtons=(room.status==="suspected"||room.status==="urgent")
         ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응 등록</button></span>'
@@ -332,7 +333,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if(corridorAlert.status!=="normal"){
       const card=document.createElement("article");card.className=`alert-card corridor-alert ${corridorAlert.status}`;
       // [2026.09.16] 고친 내용: 복도 알림에서는 넓은 구역명보다 실제 발생 위치를 제목으로 크게 표시합니다.
-      const level=corridorAlert.status==="urgent"?"긴급":corridorAlert.status==="suspected"?"의심":"주의";
+      // [2026.09.28 변경] 복도 알림도 병실 알림과 같은 상태 명칭을 사용합니다.
+      const level=corridorAlert.status==="urgent"?"낙상":corridorAlert.status==="suspected"?"의심":"주의";
       const actionButtons=(corridorAlert.status==="suspected"||corridorAlert.status==="urgent")
         ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응 등록</button></span>'
         : `<button type="button" class="locate-room" data-action="${corridorAlert.status==="urgent"?"respond":"confirm"}">${corridorAlert.status==="urgent"?"대응 등록":"확인"}</button>`;

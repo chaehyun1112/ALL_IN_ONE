@@ -126,10 +126,10 @@
       <output id="alert-test-result" aria-live="polite">위치와 감지 종류를 선택해 주세요.</output>
       <div id="alert-test-audio-status" role="status" aria-live="polite"></div>
     </section>
-    <!-- 오늘의 안전 현황 -->
+    <!-- [2026.09.28 변경] 현재 표시 중인 병실의 안전 상태를 나타내는 제목으로 변경합니다. -->
     <div class="page-heading">
       <section class="panel summary">
-        <h2>오늘의 안전 현황</h2>
+        <h2>현재 병실 안전 현황</h2>
 
         <div class="counts">
           <!-- [2026.09.16] 고친 내용: 안전 현황 카드의 순서와 문구를 전체·낙상·침대 이탈·정상으로 변경합니다. -->
@@ -164,7 +164,8 @@
             <span>정상</span>
             <span class="caution">주의</span>
             <span class="suspected">의심</span>
-            <span class="urgent">긴급</span>
+            <!-- [2026.09.28 변경] 긴급 상태를 실제 감지 유형인 낙상으로 표시합니다. -->
+            <span class="urgent">낙상</span>
           </div>
           </div>
         </div>
@@ -220,7 +221,8 @@
             data-alert-room="105"
           >
             <div class="alert-top">
-              <strong>● 긴급</strong>
+              <!-- [2026.09.28 변경] 낙상 알림의 상태명도 범례와 일치시킵니다. -->
+              <strong>● 낙상</strong>
               <time>14:28</time>
             </div>
 

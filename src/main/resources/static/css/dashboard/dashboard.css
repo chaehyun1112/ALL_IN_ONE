@@ -1933,12 +1933,12 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 .alert-test-panel p,.alert-test-panel output,.alert-test-panel [role="status"] { margin:0; flex-basis:100%; font-size:13px; }
 .alert-test-mode #dashboard-main { height:auto; min-height:calc(100dvh - 88px); }
 .test-alert-badge { display:inline-block; margin-left:8px; padding:2px 8px; border:1px solid currentColor; border-radius:5px; font-size:12px; }
-/* [2026.09.22 변경] 침대 이탈은 노란색 고정 상태로 표시하며 점멸하지 않습니다. */
-.corridor.caution .corridor-alert-marker { display:block; background:#ca902b; box-shadow:0 0 0 5px #ca902b50; }
-.corridor.caution .corridor-alert-marker::after { background:#8a621f; }
+/* [2026.09.28 변경] 침대 이탈은 낙상 의심의 주황색과 구분되는 선명한 노란색으로 표시합니다. */
+.corridor.caution .corridor-alert-marker { display:block; background:#d6aa00; box-shadow:0 0 0 5px #d6aa0050; }
+.corridor.caution .corridor-alert-marker::after { background:#786000; }
 .corridor.acknowledged .corridor-alert-marker { animation:none; }
-.alert-card.corridor-alert.caution { background:#fff9ed; border-color:#e7c890; border-left-color:#c99537; }
-.alert-card.corridor-alert.caution .alert-top,.alert-card.corridor-alert.caution h3 { color:#8a621f; }
+.alert-card.corridor-alert.caution { background:#fffbe3; border-color:#ead37b; border-left-color:#d6aa00; }
+.alert-card.corridor-alert.caution .alert-top,.alert-card.corridor-alert.caution h3 { color:#786000; }
 .floor .room.caution,.corridor.caution .corridor-alert-marker { animation:none; opacity:1; }
 /* [2026.09.17] 추가한 내용: 공통 상단 바 아래에 감지 배너를 내려서 표시하며 대시보드에서는 반드시 숨깁니다. */
 .cross-page-alert[hidden],body:not([data-dashboard-view="records"]) .cross-page-alert { display:none !important; }
