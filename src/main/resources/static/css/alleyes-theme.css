@@ -152,8 +152,8 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .page-heading .counts .count { --count-border: #b8cad8; --count-ring: #526d8280; }
 /* [2026.09.28 변경] 낙상 감지는 주황 계열과 명확히 구분되도록 붉은 와인색을 사용합니다. */
 .page-heading .counts .count.urgent { --count-border: #9f2224; --count-ring: #9f222460; }
-.page-heading .counts .count.suspected { --count-border: #c75c0a; --count-ring: #c75c0a60; }
-.page-heading .counts .count.caution { --count-border: #d6aa00; --count-ring: #d6aa0060; }
+.page-heading .counts .count.suspected { --count-border: #d86b18; --count-ring: #d86b1860; }
+.page-heading .counts .count.caution { --count-border: #e2b816; --count-ring: #e2b81660; }
 .page-heading .counts .count:not(.urgent):not(.suspected):not(.caution) { border-color: var(--count-border); }
 .counts .count[aria-pressed="true"] { border-color: var(--count-border) !important; box-shadow: 0 0 0 2px var(--count-ring) !important; }
 /* [2026.09.28 변경] 관제 범례의 정상·주의·의심·낙상 상태가 한눈에 구분되도록 색을 조정합니다. */
@@ -352,13 +352,13 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   --alert-fall-bg: #fbe1e0;
   --alert-fall: #9f2224;
   --alert-fall-text: #651316;
-  /* [2026.09.28 변경] 낙상 의심은 침대 이탈의 노란색과 구분되는 진한 주황색으로 표시합니다. */
-  --alert-suspected-bg: #ffe8d6;
-  --alert-suspected: #c75c0a;
-  --alert-suspected-text: #803800;
-  --alert-caution-bg: #fff7cf;
-  --alert-caution: #d6aa00;
-  --alert-caution-text: #786000;
+  /* [2026.09.28 변경] 상단 카드와 같은 밝은 골드·오렌지 계열로 주의와 의심을 구분합니다. */
+  --alert-suspected-bg: #fff0e3;
+  --alert-suspected: #d86b18;
+  --alert-suspected-text: #8c3d00;
+  --alert-caution-bg: #fff9dd;
+  --alert-caution: #e2b816;
+  --alert-caution-text: #7b6400;
 }
 .floor .room.urgent, .floor .room.urgent.acknowledged,
 .floor .room.urgent:not(.acknowledged),
@@ -403,7 +403,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 /* [2026.09.20] 화장실 앞 낙상 위치의 선택 테두리도 코랄 계열로 통일합니다. */
 .corridor.urgent[aria-pressed="true"] .corridor-alert-marker::before { border-color: var(--alert-fall-text); }
 .corridor.urgent > .corridor-alert-marker:focus-visible { outline-color: var(--alert-fall-text); }
-.corridor.caution .corridor-alert-marker { background: var(--alert-caution); box-shadow: 0 0 0 5px #d6aa0040; }
+.corridor.caution .corridor-alert-marker { background: var(--alert-caution); box-shadow: 0 0 0 5px #e2b81640; }
 .corridor.caution .corridor-alert-marker::after { background: var(--alert-caution-text); }
 .alert-heading .alert-total { background: var(--alert-fall-bg); border-color: #9f222440; color: var(--alert-fall-text); }
 /* [2026.09.28 변경] 낙상 의심의 주황색 보조 애니메이션 색상입니다. */
