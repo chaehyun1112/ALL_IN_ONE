@@ -400,26 +400,40 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .legend .caution::before, .floor .room.caution::after { background: var(--alert-caution); }
 .corridor.urgent .corridor-alert-marker { background: var(--alert-fall); }
 .corridor.urgent .corridor-alert-marker::after { background: var(--alert-fall-text); }
-/* [2026.09.28 변경] 발생 위치를 특정할 수 없는 복도 감지는 중앙 복도 텍스트만 상태색으로 점멸시킵니다. */
-.floor .corridor .corridor-status-label { background: transparent; }
+/* [2026.09.28 변경] 발생 위치를 특정할 수 없는 복도 감지는 중앙 복도 텍스트와 양옆 점선을 상태색으로 점멸시킵니다. */
+.floor .corridor .corridor-status-label { background: transparent; font-weight: 800; letter-spacing: .04em; }
 .floor .corridor.urgent:not(.acknowledged) .corridor-status-label {
-  color: var(--alert-fall-text);
+  color: #4b0d10;
   animation: careguard-corridor-fall-text .6s ease-in-out infinite;
 }
 .floor .corridor.suspected:not(.acknowledged) .corridor-status-label {
-  color: var(--alert-suspected-text);
+  color: #703000;
   animation: careguard-corridor-suspected-text .8s ease-in-out infinite;
 }
+.floor .corridor.urgent:not(.acknowledged)::after { animation: careguard-corridor-fall-line .6s ease-in-out infinite; }
+.floor .corridor.suspected:not(.acknowledged)::after { animation: careguard-corridor-suspected-line .8s ease-in-out infinite; }
 @keyframes careguard-corridor-fall-text {
-  0%,100% { color: var(--alert-fall-text); opacity: 1; text-shadow: 0 0 0 transparent; }
-  50% { color: #570d11; opacity: .35; text-shadow: 0 0 8px #9f222480; }
+  0%,100% { color: #4b0d10; opacity: 1; text-shadow: 0 0 2px #9f222440; }
+  50% { color: #651316; opacity: .48; text-shadow: 0 0 8px #9f222480; }
 }
 @keyframes careguard-corridor-suspected-text {
-  0%,100% { color: var(--alert-suspected-text); opacity: 1; text-shadow: 0 0 0 transparent; }
-  50% { color: #b34a00; opacity: .4; text-shadow: 0 0 7px #d86b1870; }
+  0%,100% { color: #703000; opacity: 1; text-shadow: 0 0 2px #d86b1840; }
+  50% { color: #8c3d00; opacity: .52; text-shadow: 0 0 7px #d86b1870; }
+}
+@keyframes careguard-corridor-fall-line {
+  0%,100% { border-color: #9f2224; opacity: 1; }
+  50% { border-color: #9f222460; opacity: .5; }
+}
+@keyframes careguard-corridor-suspected-line {
+  0%,100% { border-color: #d86b18; opacity: 1; }
+  50% { border-color: #d86b1860; opacity: .5; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .floor .corridor :is(.corridor-status-label) { animation: none; opacity: 1; }
+  .floor .corridor .corridor-status-label,
+  .floor .corridor.urgent::after,
+  .floor .corridor.suspected::after { animation: none; opacity: 1; }
+  .floor .corridor.urgent::after { border-color: #9f2224; }
+  .floor .corridor.suspected::after { border-color: #d86b18; }
 }
 /* [2026.09.20] 화장실 앞 낙상 위치의 선택 테두리도 코랄 계열로 통일합니다. */
 .corridor.urgent[aria-pressed="true"] .corridor-alert-marker::before { border-color: var(--alert-fall-text); }
