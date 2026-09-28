@@ -31,7 +31,9 @@
             e.emp_nm AS user_name,
             w.ward_nm AS ward_name,
             h.action_cd AS action_code,
-            h.created_at AS created_at
+            h.created_at AS created_at,
+            e.job_cd AS job_type,
+            e.room_no AS room_number
         FROM tb_admin_history h
         LEFT JOIN tb_emp e
           ON e.hosp_div_id = h.hosp_div_id

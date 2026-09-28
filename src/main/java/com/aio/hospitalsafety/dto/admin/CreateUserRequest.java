@@ -20,6 +20,12 @@ public record CreateUserRequest(
         String userName,
 
         @NotNull(message = "담당 병동을 선택해 주세요.")
-        Long wardId
+        Long wardId,
+
+        // [2026.09.27 추가] 확정 낙상 SMS 는 tb_emp.phone_no 에 번호가 있는 병동 간호사에게 간다(SmsMapper.findWardUsers).
+        // 관리자 화면에서 입력받던 번호를 저장한다. 형식은 간병인 등록과 같다.
+        @NotBlank(message = "전화번호를 입력해 주세요.")
+        @Pattern(regexp = "^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$", message = "휴대전화 번호를 확인해 주세요.")
+        String phoneNumber
 ) {
 }

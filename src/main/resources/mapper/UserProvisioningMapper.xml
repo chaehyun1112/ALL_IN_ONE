@@ -12,6 +12,18 @@
         )
     </select>
 
+    <!-- [2026.09.27] 같은 병원에 이 번호를 쓰는 활성 직원이 있는지 (전화번호 수정 API 와 같은 규칙) -->
+    <select id="existsActivePhone" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM tb_emp
+            WHERE hosp_div_id = #{hospitalId}
+              AND role_cd = 'USER'
+              AND auth_st = 'APPROVED'
+              AND phone_no = #{phoneNumber}
+        )
+    </select>
+
     <select id="existsWardInHospital" resultType="boolean">
         SELECT EXISTS (
             SELECT 1

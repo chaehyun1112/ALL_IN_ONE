@@ -18,17 +18,21 @@
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=nurse-phone-20260922" th:href="@{/css/admin/account-create.css(v='nurse-phone-20260922')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=caregiver-room-filter-label-20260922" th:href="@{/css/admin/inactive-users.css(v='caregiver-room-filter-label-20260922')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=caregiver-history-card-order-20260922"
-            th:src="@{/JS/admin/dashboard.js(v='caregiver-history-card-order-20260922')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=review-fix-20260927"
+            th:src="@{/JS/admin/dashboard.js(v='review-fix-20260927')}"
             defer></script>
-    <script src="../../../static/JS/admin/admin-history.js?v=history-nurse-name-20260922"
-        th:src="@{/JS/admin/admin-history.js(v='history-nurse-name-20260922')}"
+    <script src="../../../static/JS/admin/admin-history.js?v=history-jobtype-20260927"
+        th:src="@{/JS/admin/admin-history.js(v='history-jobtype-20260927')}"
         defer></script>
-    <script src="../../../static/JS/admin/account-create.js?v=caregiver-ward-filter-style-20260922"
-            th:src="@{/JS/admin/account-create.js(v='caregiver-ward-filter-style-20260922')}"
+    <script src="../../../static/JS/admin/account-create.js?v=review-fix-20260927"
+            th:src="@{/JS/admin/account-create.js(v='review-fix-20260927')}"
             defer></script>
     <script src="../../../static/JS/admin/inactive-users.js?v=caregiver-without-phone-20260922"
             th:src="@{/JS/admin/inactive-users.js(v='caregiver-without-phone-20260922')}"
+            defer></script>
+    <!-- [2026.09.27 추가] 관리자 홈 카드(최근 조치기록·실시간 알림·사고 현황)를 서버 기록으로 채웁니다. -->
+    <script src="../../../static/JS/admin/home-records.js?v=review-fix-20260927"
+            th:src="@{/JS/admin/home-records.js(v='review-fix-20260927')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=admin-brand-align-20260920" th:href="@{/css/alleyes-brand.css(v='admin-brand-align-20260920')}">
@@ -92,7 +96,8 @@
     </div>
 </header>
 
-<main class="admin-page admin-home-page" id="admin-home-page" aria-labelledby="admin-home-title" hidden>
+<!-- [2026.09.27] 서버로 연 화면은 아래 주소로 조치기록·병동을 불러와 예시 카드를 채웁니다(home-records.js). -->
+<main class="admin-page admin-home-page" id="admin-home-page" aria-labelledby="admin-home-title" hidden th:attr="data-records-url=@{/api/action-history},data-wards-url=@{/api/admin/wards}">
     <!-- [2026-09-21] 관리자 홈의 한 카드 안에서 활성 간호사와 간병인 수를 함께 확인합니다. -->
     <div class="admin-home-overview">
         <section class="admin-home-intro">

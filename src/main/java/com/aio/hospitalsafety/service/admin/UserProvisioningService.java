@@ -45,8 +45,10 @@ public class UserProvisioningService {
             CreateUserRequest request,
             String jobType
     ) {
+        // [2026.09.27] 간호사 번호도 간병인처럼 하이픈을 빼고 저장한다(확정 낙상 SMS 받는 번호).
+        String phoneNumber = request.phoneNumber().replace("-", "");
         return createAccount(hospitalId, adminId, request.userId(), request.userName(),
-                request.wardId(), jobType, null, null);
+                request.wardId(), jobType, phoneNumber, null);
     }
 
     @Transactional
@@ -57,6 +59,11 @@ public class UserProvisioningService {
     ) {
         String phoneNumber = request.phoneNumber().replace("-", "");
         String userId = "cg." + phoneNumber;
+        // [2026.09.27] 번호를 바꾼 예전 간병인이 이 번호로 만든 아이디(cg.번호)를 이미 쓰고 있으면
+        // 뒤에 -2, -3 … 을 붙여 빈 아이디를 쓴다. (지금 이 번호를 쓰는 직원이 있는지는 createAccount 가 따로 막는다)
+        for (int suffix = 2; suffix <= 9 && userProvisioningMapper.existsUserId(userId); suffix++) {
+            userId = "cg." + phoneNumber + "-" + suffix;
+        }
         Long wardId = userProvisioningMapper.findThirdFloorWardId(hospitalId);
         if (wardId == null) {
             throw new IllegalArgumentException("현재 병원에 3병동이 등록되어 있지 않습니다.");
@@ -94,6 +101,14 @@ public class UserProvisioningService {
                 userName,
                 "직원 이름을 입력해 주세요."
         );
+
+        // [2026.09.27] 같은 번호를 쓰는 활성 직원이 있으면 막는다(전화번호 수정과 같은 규칙, 한 번호로 SMS 두 번 방지).
+        if (phoneNumber != null
+                && userProvisioningMapper.existsActivePhone(normalizedHospitalId, phoneNumber)) {
+            throw new UserConflictException(
+                    "다른 직원이 이미 쓰는 전화번호입니다."
+            );
+        }
 
         if (userProvisioningMapper.existsUserId(normalizedUserId)) {
             throw new UserConflictException(
@@ -134,8 +149,11 @@ public class UserProvisioningService {
                 );
             }
         } catch (DuplicateKeyException exception) {
+            // [2026.09.27] 간병인은 번호에 DB 고유 인덱스(ux_emp_caregiver_phone)가 있어 비활성 간병인과 번호가 같아도 여기서 막힌다.
             throw new UserConflictException(
-                    "이미 사용 중인 직원 아이디입니다."
+                    "CAREGIVER".equals(jobType)
+                            ? "이미 등록된 전화번호입니다. 비활성화된 간병인 목록도 확인해 주세요."
+                            : "이미 사용 중인 직원 아이디입니다."
             );
         }
 
