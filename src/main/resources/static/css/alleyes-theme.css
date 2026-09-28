@@ -337,6 +337,14 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
+/* [2026.09.28 변경] 오경보는 일반 낙상 원형 표시 대신 삼각형으로 구분합니다. */
+.record-table .false-alarm-badge::before {
+  width: .8em;
+  height: .7em;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
 /* [2026.09.20] 블루 그레이 관제 화면의 낙상은 코랄, 주의는 앰버로 통일합니다. */
 :root {
   --alert-fall-bg: #fdebe8;
