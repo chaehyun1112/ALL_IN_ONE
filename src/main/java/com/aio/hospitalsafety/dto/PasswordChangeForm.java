@@ -21,7 +21,7 @@ public class PasswordChangeForm {
 
     // 다른 사람이 로그인된 브라우저를 잠시 사용하더라도 바로 PW를 바꾸지 못하게 현재 PW를 확인한다.
     // @NotBlank는 null, 빈 문자열(""), 공백만 있는 문자열("   ")을 모두 거부한다.
-    @NotBlank(message = "현재 비밀번호를 입력해 주세요.")
+    @NotBlank(message = "비밀번호를 입력해 주세요.")
     private String currentPassword;
 
     @NotBlank(message = "새 비밀번호를 입력해 주세요.")

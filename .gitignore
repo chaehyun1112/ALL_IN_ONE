@@ -35,5 +35,3 @@ build/
 # Local environment / secrets
 .env
 application-local.properties
-
-.metadata/
