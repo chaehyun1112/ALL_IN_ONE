@@ -400,21 +400,27 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .legend .caution::before, .floor .room.caution::after { background: var(--alert-caution); }
 .corridor.urgent .corridor-alert-marker { background: var(--alert-fall); }
 .corridor.urgent .corridor-alert-marker::after { background: var(--alert-fall-text); }
-/* [2026.09.28 변경] 중앙 복도에서 낙상·낙상 의심이 발생하면 복도 구역 전체를 해당 상태 색으로 강조합니다. */
-.floor .corridor.urgent {
-  background: linear-gradient(90deg, #fce9e8, var(--alert-fall-bg) 48%, #fce9e8);
-  border-color: #cf6764;
-  box-shadow: inset 0 0 0 1px #9f222426;
+/* [2026.09.28 변경] 발생 위치를 특정할 수 없는 복도 감지는 중앙 복도 텍스트만 상태색으로 점멸시킵니다. */
+.floor .corridor .corridor-status-label { background: transparent; }
+.floor .corridor.urgent:not(.acknowledged) .corridor-status-label {
+  color: var(--alert-fall-text);
+  animation: careguard-corridor-fall-text .6s ease-in-out infinite;
 }
-.floor .corridor.urgent::after { border-color: #d88985; }
-.floor .corridor.urgent > span { background: var(--alert-fall-bg); color: var(--alert-fall-text); }
-.floor .corridor.suspected {
-  background: linear-gradient(90deg, #fff5ed, var(--alert-suspected-bg) 48%, #fff5ed);
-  border-color: #e7a263;
-  box-shadow: inset 0 0 0 1px #d86b1826;
+.floor .corridor.suspected:not(.acknowledged) .corridor-status-label {
+  color: var(--alert-suspected-text);
+  animation: careguard-corridor-suspected-text .8s ease-in-out infinite;
 }
-.floor .corridor.suspected::after { border-color: #edbd94; }
-.floor .corridor.suspected > span { background: var(--alert-suspected-bg); color: var(--alert-suspected-text); }
+@keyframes careguard-corridor-fall-text {
+  0%,100% { color: var(--alert-fall-text); opacity: 1; text-shadow: 0 0 0 transparent; }
+  50% { color: #570d11; opacity: .35; text-shadow: 0 0 8px #9f222480; }
+}
+@keyframes careguard-corridor-suspected-text {
+  0%,100% { color: var(--alert-suspected-text); opacity: 1; text-shadow: 0 0 0 transparent; }
+  50% { color: #b34a00; opacity: .4; text-shadow: 0 0 7px #d86b1870; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .floor .corridor :is(.corridor-status-label) { animation: none; opacity: 1; }
+}
 /* [2026.09.20] 화장실 앞 낙상 위치의 선택 테두리도 코랄 계열로 통일합니다. */
 .corridor.urgent[aria-pressed="true"] .corridor-alert-marker::before { border-color: var(--alert-fall-text); }
 .corridor.urgent > .corridor-alert-marker:focus-visible { outline-color: var(--alert-fall-text); }
