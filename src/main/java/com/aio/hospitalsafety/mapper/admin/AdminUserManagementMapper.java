@@ -37,6 +37,40 @@ public interface AdminUserManagementMapper {
             @Param("wardId") Long wardId
     );
 
+    // [2026.09.27] 병동 번호(1·2·3)로 현재 병원의 병동 ID 찾기. 병동 이름이 '3병동' 모양이어야 한다.
+    Long findWardIdByNumber(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("wardNumber") int wardNumber
+    );
+
+    // [2026.09.27] 간병인의 담당 병실(과 그 병실의 병동) 변경
+    int updateCaregiverRoom(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId,
+            @Param("wardId") Long wardId,
+            @Param("roomNumber") String roomNumber
+    );
+
+    // [2026.09.27] 직원의 지금 전화번호 (재활성화 전 중복 확인용)
+    String findUserPhone(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId
+    );
+
+    // [2026.09.27] 같은 번호를 쓰는 다른 활성 직원이 있는지 확인
+    boolean existsOtherUserPhone(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId,
+            @Param("phoneNumber") String phoneNumber
+    );
+
+    // [2026.09.27] 활성 직원의 전화번호 변경(확정 낙상 SMS 받는 번호)
+    int updateUserPhone(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId,
+            @Param("phoneNumber") String phoneNumber
+    );
+
     // 비활성화된 일반 사용자 목록 조회
     List<InactiveUserResponse> findInactiveUsers(
             @Param("hospitalDomain") String hospitalDomain,

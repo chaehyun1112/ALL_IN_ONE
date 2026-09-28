@@ -140,8 +140,8 @@
             row.append(
                 createCell(formatCreatedAt(history.createdAt)),
                 createCell(history.adminId),
-                // [2026-09-22 변경] 간병인 관리 이력은 내부 아이디 대신 간병인 이름을 표시합니다.
-                createCell(caregiverHistory ? (history.userName ?? "이름 미확인") : history.userId),
+                // [2026-09-22 변경] 대상 간호사와 간병인은 내부 아이디 대신 이름을 표시합니다.
+                createCell(history.userName || "이름 미확인"),
                 createCell(caregiverHistory ? formatCaregiverLocation(history) : (history.wardName ?? "미확인")),
                 createCell(actionLabel),
                 createManagementCell(history)
@@ -231,48 +231,14 @@
         }
 
         // [2026-09-22 추가] 선택한 직무의 계정 작업 이력만 해당 관리 이력 화면에 표시합니다.
+        // [2026-09-27 변경] 이력 응답의 직무(jobType)로 나눕니다. 전에는 지금 활성·승인 대기 직원 목록과 맞춰 봐서
+        // 비활성화·삭제된 직원의 이력(비활성화 기록 포함)이 빠졌습니다.
+        // 삭제된 직원은 직무가 남아 있지 않아 아이디로 나눕니다(간병인 아이디는 "cg.전화번호" 모양).
         if (document.querySelector("#admin-management-page")?.classList.contains("is-history-page")) {
             const jobType = document.body.dataset.adminJobType === "CAREGIVER" ? "CAREGIVER" : "GENERAL";
-            const [accountResponse, approvedResponse] = await Promise.all([
-                fetch(
-                    `/api/admin/users?jobType=${jobType}`,
-                    { credentials: "same-origin", cache: "no-store", headers: { "Accept": "application/json" } }
-                ),
-                fetch(
-                    `/api/admin/users/approved?jobType=${jobType}`,
-                    { credentials: "same-origin", cache: "no-store", headers: { "Accept": "application/json" } }
-                )
-            ]);
-
-            if (!accountResponse.ok || !approvedResponse.ok) {
-                throw new Error("계정 정보를 불러오지 못했습니다.");
-            }
-
-            const accounts = await accountResponse.json();
-            const approvedAccounts = await approvedResponse.json();
-            const accountIds = new Set(
-                (Array.isArray(accounts) ? accounts : [])
-                    .map(account => account.userId ?? account.phoneNumber)
-                    .filter(Boolean)
-            );
-
-            const approvedById = new Map();
-            for (const account of Array.isArray(approvedAccounts) ? approvedAccounts : []) {
-                if (account.userId) approvedById.set(account.userId, account);
-                if (account.phoneNumber) approvedById.set(account.phoneNumber, account);
-            }
-
-            return histories
-                .filter(history => accountIds.has(history.userId))
-                .map(history => {
-                    if (jobType !== "CAREGIVER") return history;
-                    const account = approvedById.get(history.userId);
-                    return {
-                        ...history,
-                        wardName: account?.wardName ?? history.wardName,
-                        roomNumber: account?.roomNumber ?? history.roomNumber
-                    };
-                });
+            const historyJobType = history => history.jobType
+                ?? (String(history.userId ?? "").startsWith("cg.") ? "CAREGIVER" : "GENERAL");
+            return histories.filter(history => historyJobType(history) === jobType);
         }
 
         return histories;

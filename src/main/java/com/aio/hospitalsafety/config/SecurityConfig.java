@@ -296,6 +296,10 @@ public class SecurityConfig {
                         .invalidateHttpSession(false)
                         .clearAuthentication(true)
                 )
+                // [2026.09.27] 보안 토큰이 오래된 폼(서버 재시작 뒤 로그인·로그아웃 등)은 403 대신 처음 화면으로 보낸다.
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedHandler(new ExpiredFormAccessDeniedHandler())
+                )
                 .sessionManagement(session -> session
                         .maximumSessions(-1)
                         .expiredUrl("/")

@@ -66,6 +66,10 @@ const adminDialogConfirm = document.querySelector("#admin-dialog-confirm");
 const adminDialogCancel = document.querySelector("#admin-dialog-cancel");
 const adminRoomWardField = document.querySelector("#admin-room-ward-field");
 const adminRoomWardSelect = document.querySelector("#admin-room-ward-select");
+const adminRoomWardDropdown = document.querySelector("#admin-room-ward-dropdown");
+const adminRoomWardTrigger = document.querySelector("#admin-room-ward-trigger");
+const adminRoomWardValue = document.querySelector("#admin-room-ward-value");
+const adminRoomWardOptions = document.querySelector("#admin-room-ward-options");
 const adminWardField = document.querySelector("#admin-ward-field");
 const adminWardSelect = document.querySelector("#admin-ward-select");
 const adminActionWardDropdown = document.querySelector("#admin-action-ward-dropdown");
@@ -341,15 +345,59 @@ function renderAdminRoomOptions() {
     renderAdminActionWardDropdown();
 }
 
+function closeAdminRoomWardOptions() {
+    adminRoomWardOptions.hidden = true;
+    adminRoomWardTrigger.setAttribute("aria-expanded", "false");
+    adminDialog.classList.remove("ward-menu-overflow");
+}
+
+function renderAdminRoomWardDropdown() {
+    const selected = adminRoomWardSelect.selectedOptions[0];
+    adminRoomWardValue.textContent = selected?.textContent || "병동을 선택해 주세요";
+    adminRoomWardOptions.replaceChildren();
+    for (const option of adminRoomWardSelect.options) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.textContent = option.textContent;
+        item.dataset.value = option.value;
+        item.setAttribute("aria-selected", String(option.selected));
+        item.addEventListener("click", () => {
+            adminRoomWardSelect.value = option.value;
+            adminRoomWardSelect.dispatchEvent(new Event("change", {bubbles: true}));
+            renderAdminRoomWardDropdown();
+            closeAdminRoomWardOptions();
+            adminRoomWardTrigger.focus();
+        });
+        adminRoomWardOptions.append(item);
+    }
+}
+
 adminRoomWardSelect.addEventListener("change", () => {
     closeAdminActionWardOptions();
+    renderAdminRoomWardDropdown();
     renderAdminRoomOptions();
+});
+
+adminRoomWardTrigger.addEventListener("click", () => {
+    if (!adminRoomWardOptions.hidden) {
+        closeAdminRoomWardOptions();
+        return;
+    }
+    closeAdminActionWardOptions();
+    renderAdminRoomWardDropdown();
+    adminRoomWardOptions.hidden = false;
+    adminRoomWardTrigger.setAttribute("aria-expanded", "true");
+    adminDialog.classList.add("ward-menu-overflow");
 });
 
 function closeAdminActionWardOptions() {
     adminActionWardOptions.hidden = true;
     adminActionWardTrigger.setAttribute("aria-expanded", "false");
     adminActionWardDropdown.classList.remove("open-up");
+    adminActionWardOptions.classList.remove("is-fixed-menu");
+    adminActionWardOptions.style.top = "";
+    adminActionWardOptions.style.left = "";
+    adminActionWardOptions.style.width = "";
     adminActionWardOptions.style.maxHeight = "";
     adminDialog.classList.remove("ward-menu-overflow");
 }
@@ -384,6 +432,20 @@ adminActionWardTrigger.addEventListener("click", () => {
     renderAdminActionWardDropdown();
     adminActionWardOptions.hidden = false;
     adminActionWardTrigger.setAttribute("aria-expanded", "true");
+
+    // [2026.09.22 변경] 간병인 담당 병실 목록은 공간과 관계없이 선택칸 아래로 펼칩니다.
+    if (adminAction === "ASSIGN_ROOM") {
+        adminActionWardDropdown.classList.remove("open-up");
+        const trigger = adminActionWardTrigger.getBoundingClientRect();
+        adminActionWardOptions.classList.add("is-fixed-menu");
+        adminActionWardOptions.style.top = `${Math.round(trigger.bottom + 5)}px`;
+        adminActionWardOptions.style.left = `${Math.round(trigger.left)}px`;
+        adminActionWardOptions.style.width = `${Math.round(trigger.width)}px`;
+        adminActionWardOptions.style.maxHeight = `${Math.max(120, Math.min(240, Math.floor(window.innerHeight - trigger.bottom - 16)))}px`;
+        adminDialog.classList.add("ward-menu-overflow");
+        return;
+    }
+
     const trigger = adminActionWardTrigger.getBoundingClientRect();
     const menuHeight = adminActionWardOptions.getBoundingClientRect().height;
     if (menuHeight <= window.innerHeight - trigger.bottom - 12) {
@@ -397,8 +459,16 @@ adminActionWardTrigger.addEventListener("click", () => {
 
 document.addEventListener("click", event => {
     if (!adminActionWardDropdown.contains(event.target)) closeAdminActionWardOptions();
+    if (!adminRoomWardDropdown.contains(event.target)) closeAdminRoomWardOptions();
 });
 adminDialog.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !adminRoomWardOptions.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeAdminRoomWardOptions();
+        adminRoomWardTrigger.focus();
+        return;
+    }
     if (event.key === "Escape" && !adminActionWardOptions.hidden) {
         event.preventDefault();
         event.stopPropagation();
@@ -715,7 +785,7 @@ adminManagementChoiceConfirm?.addEventListener("click", () => {
     openAdminAction(selectedUser, selectedAction);
 });
 
-/* [2026-09-22 변경] 간호사와 간병인 전화번호는 현재 프런트 목록에서만 수정합니다. */
+/* [2026-09-27 변경] 간호사와 간병인 전화번호를 서버(tb_emp.phone_no)에 저장합니다. */
 function formatPhoneInput(value) {
     const digits = String(value ?? "").replace(/\D/g, "").slice(0, 11);
     if (digits.length <= 3) return digits;
@@ -743,7 +813,8 @@ document.querySelector("#admin-phone-edit-cancel")?.addEventListener("click", ()
     adminPhoneEditDialog.close();
 });
 
-adminPhoneEditForm?.addEventListener("submit", event => {
+// [2026-09-27 변경] 전화번호를 서버에 저장합니다(확정 낙상 SMS 받는 번호). 실패하면 창을 열어 둔 채 안내합니다.
+adminPhoneEditForm?.addEventListener("submit", async event => {
     event.preventDefault();
     if (!adminSelectedUser) return;
     const digits = adminPhoneEditInput.value.replace(/\D/g, "");
@@ -752,11 +823,31 @@ adminPhoneEditForm?.addEventListener("submit", event => {
         adminPhoneEditInput.focus();
         return;
     }
-    adminSelectedUser.phoneNumber = digits;
+    const submitButton = adminPhoneEditForm.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    try {
+        await requestAdminApi(`/api/admin/users/${encodeURIComponent(adminSelectedUser.userId)}/phone`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({phoneNumber: digits})
+        });
+    } catch (error) {
+        adminPhoneEditError.textContent = error.message || "전화번호를 저장하지 못했습니다.";
+        return;
+    } finally {
+        if (submitButton) submitButton.disabled = false;
+    }
     adminPhoneEditDialog.close();
-    renderAdminUsers();
-    showAdminFeedback("전화번호를 화면에 반영했습니다. 새로고침하면 이전 번호로 돌아갑니다.");
-    adminSelectedUser = null;
+    // 저장은 끝났으므로, 목록을 다시 불러오지 못해도 그 사실을 알려 줍니다.
+    try {
+        await loadAdminData(true);
+        showAdminFeedback("전화번호를 변경했습니다.");
+    } catch (error) {
+        console.error(error);
+        showAdminFeedback("전화번호는 변경했지만 목록을 불러오지 못했습니다. 새로고침해 주세요.");
+    } finally {
+        adminSelectedUser = null;
+    }
 });
 
 /**
@@ -788,6 +879,8 @@ function openAdminAction(user, action) {
 
     adminRoomWardField.hidden = true;
     adminRoomWardSelect.value = "";
+    renderAdminRoomWardDropdown();
+    closeAdminRoomWardOptions();
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
     adminWardSelect.required = false;
@@ -824,6 +917,7 @@ function openAdminAction(user, action) {
             adminRoomWardField.hidden = false;
             const currentWardNumber = Math.floor(Number(user.roomNumber) / 100);
             adminRoomWardSelect.value = [1, 2, 3].includes(currentWardNumber) ? String(currentWardNumber) : "";
+            renderAdminRoomWardDropdown();
             adminDialogDescription.textContent = user.name + "님 · 현재 병실: " + (user.roomNumber ? user.roomNumber + "호" : "미배정");
             renderAdminRoomOptions();
             adminWardSelect.value = user.roomNumber ?? "";
@@ -868,19 +962,9 @@ async function submitAdminAction() {
     const selectedUser = adminSelectedUser;
     const selectedAction = adminAction;
 
-    if (selectedAction === "ASSIGN_ROOM") {
-        if (!adminWardSelect.value) {
-            showAdminFeedback("변경할 병실을 선택해 주세요.");
-            adminActionWardTrigger.focus();
-            return;
-        }
-        selectedUser.roomNumber = adminWardSelect.value;
-        selectedUser.ward = `${adminRoomWardSelect.value}병동`;
-        adminDialog.close();
-        renderAdminUsers();
-        showAdminFeedback("담당 병실을 화면에 반영했습니다. 새로고침하면 이전 배정으로 돌아갑니다.");
-        adminSelectedUser = null;
-        adminAction = "";
+    if (selectedAction === "ASSIGN_ROOM" && !adminWardSelect.value) {
+        showAdminFeedback("변경할 병실을 선택해 주세요.");
+        adminActionWardTrigger.focus();
         return;
     }
 
@@ -888,6 +972,13 @@ async function submitAdminAction() {
     let method = "PATCH";
     let body;
     let successMessage = "";
+
+    // [2026-09-27 변경] 간병인 담당 병실을 서버에 저장합니다. 확정 낙상 SMS 가 새 병실의 간병인에게 갑니다.
+    if (selectedAction === "ASSIGN_ROOM") {
+        url = `/api/admin/users/${encodeURIComponent(selectedUser.userId)}/room`;
+        body = JSON.stringify({roomNumber: Number(adminWardSelect.value)});
+        successMessage = "담당 병실을 변경했습니다.";
+    }
 
     if (selectedAction === "APPROVE") {
         url = `/api/admin/users/${encodeURIComponent(selectedUser.userId)}/approve`;
@@ -941,7 +1032,11 @@ async function submitAdminAction() {
 
         adminDialog.close();
         if (selectedAction === "DEACTIVATE") {
-            window.location.assign(document.querySelector("#admin-settings").href);
+            // [2026.09.22 변경] 간병인은 간병인 비활성화 목록으로, 간호사는 간호사 비활성화 목록으로 이동합니다.
+            const inactivePath = adminJobType === "CAREGIVER"
+                ? "/admin/caregivers/inactive"
+                : "/admin/admin_de";
+            window.location.assign(inactivePath);
             return;
         }
         await loadAdminData(true);
@@ -1065,8 +1160,10 @@ document.querySelector("#admin-action-form").addEventListener("submit", async ev
 /* 팝업이 닫히면 병동 선택란 초기화 */
 adminDialog.addEventListener("close", () => {
     closeAdminActionWardOptions();
+    closeAdminRoomWardOptions();
     adminRoomWardField.hidden = true;
     adminRoomWardSelect.value = "";
+    renderAdminRoomWardDropdown();
     adminWardField.hidden = true;
     adminWardSelect.disabled = true;
     adminWardSelect.required = false;
@@ -1111,7 +1208,7 @@ document.querySelector("#admin-deactivate-confirm")?.addEventListener("click", a
 document.querySelector("#admin-event-ward-change")?.addEventListener("click", async event => {
     const button = event.currentTarget;
     if (button.disabled) return;
-    const userId = document.querySelector("#event-target").textContent.trim();
+    const userId = document.querySelector("#event-target")?.dataset.userId;
     button.disabled = true;
     adminSelectedUser = null;
     adminAction = "ASSIGN";
@@ -1243,9 +1340,7 @@ async function resetUserPassword(userId, resetButton, closeHistoryDialog = false
 
 /* [9.15] 수정내용: 관리 이력 상세의 초기화 버튼도 공통 비밀번호 초기화 기능으로 연결한다. */
 document.querySelector("#admin-event-change")?.addEventListener("click", event => {
-    const userId = document.querySelector("#event-target")
-        ?.textContent
-        .trim();
+    const userId = document.querySelector("#event-target")?.dataset.userId;
 
     resetUserPassword(userId, event.currentTarget, true);
 });
@@ -1327,7 +1422,7 @@ function filterHistory(action, resetPage = false) {
 
     for (const row of rows) {
         const cells = row.querySelectorAll("td");
-        const userId = cells[2]?.textContent.trim() ?? "";
+        const userId = row.dataset.userId ?? "";
         const ward = cells[3]?.textContent.trim() ?? "";
 
         const userName =
@@ -1390,7 +1485,9 @@ adminHistoryRows?.addEventListener("click", event => {
     const cells = row.querySelectorAll("td");
     document.querySelector("#event-time").textContent = cells[0].textContent;
     document.querySelector("#event-admin").textContent = cells[1].textContent;
-    document.querySelector("#event-target").textContent = cells[2].textContent;
+    const eventTarget = document.querySelector("#event-target");
+    eventTarget.textContent = cells[2].textContent;
+    eventTarget.dataset.userId = row.dataset.userId ?? "";
     document.querySelector("#event-action").textContent = cells[4].textContent;
     adminHistoryEventDialog.showModal();
 });
@@ -1512,6 +1609,9 @@ function setAdminView(view, updateAddress = true) {
     if (isRecords && !adminRecordFrame.dataset.loaded) {
         adminRecordFrame.src = adminRecordFrame.dataset.src;
         adminRecordFrame.dataset.loaded = "true";
+    } else if (isRecords) {
+        // [2026.09.27 추가] 이미 연 조치기록을 다시 보여 줄 때는 새 낙상·조치가 보이도록 서버 기록을 다시 불러옵니다.
+        adminRecordFrame.contentWindow?.CareGuardRecordPage?.reload();
     }
     if (!isHome && !isInactive && !isRecords) {
         adminPage.classList.toggle("is-history-page", isHistory);
@@ -1522,7 +1622,7 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-title").textContent = view === "history-caregivers" ? "간병인 관리 이력" : view === "history" ? "간호사 관리 이력" : caregiver ? "간병인 관리" : "간호사 관리";
     document.querySelector("#admin-list-title").textContent = isHistory ? (caregiver ? "간병인 관리 이력 검색" : "간호사 관리 이력 검색") : caregiver ? "간병인 목록" : "간호사 목록";
     document.querySelector("#admin-management-page > .admin-heading p").textContent = view === "history-caregivers" ? "관리자가 처리한 간병인 정보와 담당 병실 변경 내역을 조회합니다." : view === "history" ? "관리자가 처리한 간호사 계정 및 병동 변경 내역을 조회합니다." : caregiver ? "간병인 정보를 등록하고 담당 병실 변경과 비활성화를 관리합니다." : "간호사 계정을 생성하고 병동 배정, 전화번호 수정, 비밀번호 초기화, 비활성화를 관리합니다.";
-    document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름, 아이디 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 정보를 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
+    document.querySelector(".admin-management-title p").textContent = isHistory ? (caregiver ? "이름, 전화번호 또는 담당 병실로 처리 이력을 검색합니다." : "이름 또는 병동으로 처리 이력을 검색합니다.") : caregiver ? "간병인 정보를 검색하고 필요한 관리 작업을 진행합니다." : "간호사 계정을 검색하고 필요한 관리 작업을 진행합니다.";
     const historyAssignmentCard = document.querySelector('.history-filter-card[data-history-filter="병동 변경"], .history-filter-card[data-history-filter="병실 변경"]');
     if (historyAssignmentCard) {
         historyAssignmentCard.dataset.historyFilter = caregiver ? "병실 변경" : "병동 변경";
@@ -1538,6 +1638,19 @@ function setAdminView(view, updateAddress = true) {
     if (historyPasswordCard) historyPasswordCard.hidden = caregiver;
     const historyPhoneCard = document.querySelector("#admin-history-phone-card");
     if (historyPhoneCard) historyPhoneCard.hidden = false;
+    const historyDeactivateCard = document.querySelector("#admin-history-deactivate-card");
+    if (historyDeactivateCard) {
+        const deactivateLabel = historyDeactivateCard.querySelector("small");
+        if (deactivateLabel) deactivateLabel.textContent = caregiver ? "비활성화" : "계정 비활성화";
+    }
+    // [2026-09-22 변경] 간병인 이력은 전화번호 수정 다음에 비활성화 카드를 표시하고 간호사 화면은 기존 순서를 유지합니다.
+    if (historySummary && historyPhoneCard && historyDeactivateCard) {
+        if (caregiver) {
+            historySummary.append(historyPhoneCard, historyDeactivateCard);
+        } else {
+            historySummary.append(historyDeactivateCard, historyPhoneCard);
+        }
+    }
     if (caregiver && adminHistoryFilter === "비밀번호 초기화") {
         filterHistory("전체", true);
     }
@@ -1554,12 +1667,17 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-user-id-heading").textContent = caregiver ? "병동" : "아이디";
     document.querySelector("#admin-user-phone-heading").textContent = caregiver ? "담당 병실" : "전화번호";
     document.querySelector("#admin-user-phone-heading").hidden = false;
-    document.querySelector("#admin-search-input").placeholder = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디, 전화번호 또는 병동 검색";
-    document.querySelector('label[for="admin-search-input"]').textContent = caregiver ? "이름 또는 전화번호 검색" : "이름, 아이디, 전화번호 또는 병동 검색";
+    const adminSearchLabel = caregiver
+        ? "이름 또는 전화번호 검색"
+        : isHistory
+            ? "이름, 병동 검색"
+            : "이름, 아이디, 전화번호 또는 병동 검색";
+    document.querySelector("#admin-search-input").placeholder = adminSearchLabel;
+    document.querySelector('label[for="admin-search-input"]').textContent = adminSearchLabel;
     document.querySelector("#admin-assignment-heading").textContent = caregiver ? "전화번호" : "배정 병동";
     document.querySelector("#complete-account-assignment-label").textContent = caregiver ? "담당 병실" : "담당 병동";
     document.querySelector("#admin-user-pagination").setAttribute("aria-label", caregiver ? "간병인 목록 페이지" : "간호사 목록 페이지");
-    document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "비활성화 간병인관리" : "비활성화 간호사 관리";
+    document.querySelector("#admin-settings-title").textContent = view === "inactive-caregivers" ? "간병인 비활성화" : "간호사 비활성화";
     if (jobChanged && !isRecords) {
         adminUsers = [];
         adminUserPage = 1;
@@ -1581,8 +1699,8 @@ function setAdminView(view, updateAddress = true) {
         : view === "history-caregivers" ? "간병인 관리 이력 | 병동 통합 관제"
         : view === "history" ? "간호사 관리 이력 | 병동 통합 관제"
         : view === "caregivers" ? "간병인 관리 | 병동 통합 관제"
-        : view === "inactive-caregivers" ? "비활성화 간병인관리 | 병동 통합 관제"
-        : view === "inactive" ? "비활성화 간호사 관리 | 병동 통합 관제"
+        : view === "inactive-caregivers" ? "간병인 비활성화 | 병동 통합 관제"
+        : view === "inactive" ? "간호사 비활성화 | 병동 통합 관제"
         : "간호사 관리 | 병동 통합 관제";
     if (updateAddress) {
         const path = view === "records" ? "/admin/records" : view === "history-caregivers" ? "/admin/caregivers/history" : view === "history" ? "/admin/history" : view === "inactive" ? "/admin/admin_de" : view === "inactive-caregivers" ? "/admin/caregivers/inactive" : view === "caregivers" ? "/admin/caregivers" : view === "staff" ? "/admin?view=staff" : "/admin";

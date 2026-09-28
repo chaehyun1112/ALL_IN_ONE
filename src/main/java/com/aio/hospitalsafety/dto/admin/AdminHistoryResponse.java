@@ -10,6 +10,11 @@ import java.time.Instant;
  *
  * 삭제된 직원은 TB_EMP에서 조회되지 않을 수 있으므로
  * userName과 wardName은 null일 수 있다.
+ *
+ * [2026.09.27] jobType(GENERAL/CAREGIVER)과 roomNumber 를 더했다.
+ * 관리 이력 화면이 간호사·간병인 이력을 이 값으로 나눈다. 전에는 지금 활성·승인 대기 직원 목록과 맞춰 봐서
+ * 비활성화·삭제된 직원의 이력이 빠졌다. 삭제된 직원은 둘 다 null 이다.
+ * MyBatis 가 SELECT 순서대로 넣으므로 새 칸은 맨 끝에 둔다.
  */
 public record AdminHistoryResponse(
         Long historyId,
@@ -18,6 +23,8 @@ public record AdminHistoryResponse(
         String userName,
         String wardName,
         String actionCode,
-        Instant createdAt
+        Instant createdAt,
+        String jobType,
+        String roomNumber
 ) {
 }

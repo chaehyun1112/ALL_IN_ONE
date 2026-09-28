@@ -9,7 +9,7 @@
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
-    <title>비활성화 직원관리 | 병동 통합 관제</title>
+    <title>간호사 비활성화 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css?v=caregiver-nav-20260921"
@@ -47,11 +47,11 @@
             </div>
             <a href="/admin/history" th:href="@{/admin/history}">관리 이력</a>
             <div class="admin-nav-group">
-                <a href="admin-inactive-users.html" th:href="@{/admin/admin_de}" class="active" aria-current="page">비활성화 직원관리</a>
+                <a href="admin-inactive-users.html" th:href="@{/admin/admin_de}" class="active" aria-current="page">간호사 비활성화</a>
                 <div class="admin-nav-submenu">
-                    <a href="admin.html?view=inactive-caregivers" th:href="@{/admin/caregivers/inactive}" aria-label="비활성화 간병인관리">
+                    <a href="admin.html?view=inactive-caregivers" th:href="@{/admin/caregivers/inactive}" aria-label="간병인 비활성화">
                         <span class="admin-nav-item-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.2"/><path d="M3.5 20c.5-3.7 2.8-5.7 6.5-5.7 1.3 0 2.4.2 3.3.7M16 16l5 5m0-5-5 5"/></svg></span>
-                        <span class="admin-nav-item-copy"><strong>비활성화 간병인관리</strong><small>계정 접근·재활성화 관리</small></span>
+                        <span class="admin-nav-item-copy"><strong>간병인 비활성화</strong><small>사용 상태·재활성화 관리</small></span>
                         <span class="admin-nav-item-arrow" aria-hidden="true">›</span>
                     </a>
                 </div>
@@ -85,7 +85,7 @@
 <main class="admin-page admin-settings-page" id="admin-settings-page" aria-labelledby="admin-settings-title">
     <header class="admin-heading admin-settings-heading">
         <!-- [2026.09.16] 고친 내용: 페이지 제목 위의 관리자 설정·계정 관리 안내 문구를 삭제합니다. -->
-        <h1 id="admin-settings-title" tabindex="-1">비활성화 직원관리</h1>
+        <h1 id="admin-settings-title" tabindex="-1">간호사 비활성화</h1>
         <p>직원의 서비스 이용 상태를 확인하고 계정 접근 권한을 관리합니다.</p>
         <!-- [2026.09.16] 고친 내용: 비활성화 직원 카드를 계정 상태 관리 안내 위로 이동합니다. -->
         <div class="admin-inactive-overview">

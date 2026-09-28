@@ -24,6 +24,8 @@ import com.aio.hospitalsafety.config.HospitalUserDetails;
 import com.aio.hospitalsafety.dto.WardOption;
 import com.aio.hospitalsafety.domain.UserJobType;
 import com.aio.hospitalsafety.dto.admin.ApprovedUserResponse;
+import com.aio.hospitalsafety.dto.admin.ChangeCaregiverRoomRequest;
+import com.aio.hospitalsafety.dto.admin.ChangeUserPhoneRequest;
 import com.aio.hospitalsafety.dto.admin.ChangeUserWardRequest;
 import com.aio.hospitalsafety.dto.admin.InactiveUserResponse;
 import com.aio.hospitalsafety.dto.admin.ResetUserPasswordResponse;
@@ -109,6 +111,48 @@ public class AdminUserManagementController {
                             exception.getMessage()
                     )
             );
+        }
+    }
+
+    // [2026.09.27] 간병인 담당 병실 변경 (확정 낙상 SMS 를 받을 간병인이 바뀐다)
+    @PatchMapping("/users/{userId}/room")
+    public ResponseEntity<Map<String, String>> changeCaregiverRoom(
+            @PathVariable("userId") String userId,
+            @Valid @RequestBody ChangeCaregiverRoomRequest request,
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
+            HttpSession session
+    ) {
+        String hospitalDomain = requireHospitalDomain(session);
+        String adminId = requireAdminId(loginAdmin);
+
+        try {
+            adminUserManagementService.changeCaregiverRoom(hospitalDomain, adminId, userId, request.roomNumber());
+            return ResponseEntity.ok(Map.of("message", "담당 병실이 변경되었습니다."));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(Map.of("message", exception.getMessage()));
+        }
+    }
+
+    // [2026.09.27] 간호사·간병인 전화번호 수정 (확정 낙상 SMS 받는 번호)
+    @PatchMapping("/users/{userId}/phone")
+    public ResponseEntity<Map<String, String>> changeUserPhone(
+            @PathVariable("userId") String userId,
+            @Valid @RequestBody ChangeUserPhoneRequest request,
+            @AuthenticationPrincipal HospitalUserDetails loginAdmin,
+            HttpSession session
+    ) {
+        String hospitalDomain = requireHospitalDomain(session);
+        requireAdminId(loginAdmin);
+
+        try {
+            adminUserManagementService.changeUserPhone(hospitalDomain, userId, request.phoneNumber());
+            return ResponseEntity.ok(Map.of("message", "전화번호가 변경되었습니다."));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(Map.of("message", exception.getMessage()));
+        } catch (DataIntegrityViolationException exception) {
+            // 간병인 번호는 DB 고유 인덱스(ux_emp_caregiver_phone)가 병원·상태와 상관없이 막는다
+            // (비활성 간병인이나 다른 병원 간병인과 같은 번호). 500 대신 이유를 알려 준다.
+            return ResponseEntity.badRequest().body(Map.of("message", "다른 직원이 이미 쓰는 전화번호입니다."));
         }
     }
 
