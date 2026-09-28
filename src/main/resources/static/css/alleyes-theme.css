@@ -150,7 +150,8 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .page-heading .summary::before, .panel-heading h2::before { background: #71899b; }
 /* [2026.09.20] 안전 현황 카드의 기본·선택 테두리를 각 상태 색으로 표시합니다. */
 .page-heading .counts .count { --count-border: #b8cad8; --count-ring: #526d8280; }
-.page-heading .counts .count.urgent { --count-border: #d9574a; --count-ring: #d9574a60; }
+/* [2026.09.28 변경] 낙상 감지는 의심·침대 이탈보다 높은 긴급도를 드러내도록 진한 적색을 사용합니다. */
+.page-heading .counts .count.urgent { --count-border: #b9362e; --count-ring: #b9362e60; }
 .page-heading .counts .count.suspected { --count-border: #e07a1f; --count-ring: #e07a1f60; }
 .page-heading .counts .count.caution { --count-border: #d99a28; --count-ring: #d99a2860; }
 .page-heading .counts .count:not(.urgent):not(.suspected):not(.caution) { border-color: var(--count-border); }
@@ -316,7 +317,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   padding: 0;
   font: inherit;
 }
-.record-table .fall-badge { color: #a83228; }
+.record-table .fall-badge { color: #791f19; }
 .record-table .bed-exit-badge { color: #c45a12; }
 /* [2026.09.20] 유형 글자색과 같은 작은 원을 왼쪽에 표시합니다. */
 .record-table .alert-badge::before {
@@ -347,9 +348,9 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 
 /* [2026.09.20] 블루 그레이 관제 화면의 낙상은 코랄, 주의는 앰버로 통일합니다. */
 :root {
-  --alert-fall-bg: #fdebe8;
-  --alert-fall: #d9574a;
-  --alert-fall-text: #a83228;
+  --alert-fall-bg: #fde3e0;
+  --alert-fall: #b9362e;
+  --alert-fall-text: #791f19;
   /* [2026.09.28 변경] 낙상 의심은 침대 이탈의 노란색과 구분되는 진한 주황색으로 표시합니다. */
   --alert-suspected-bg: #ffe8d6;
   --alert-suspected: #c75c0a;
@@ -403,7 +404,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .corridor.urgent > .corridor-alert-marker:focus-visible { outline-color: var(--alert-fall-text); }
 .corridor.caution .corridor-alert-marker { background: var(--alert-caution); box-shadow: 0 0 0 5px #d99a2840; }
 .corridor.caution .corridor-alert-marker::after { background: var(--alert-caution-text); }
-.alert-heading .alert-total { background: var(--alert-fall-bg); border-color: #d9574a40; color: var(--alert-fall-text); }
+.alert-heading .alert-total { background: var(--alert-fall-bg); border-color: #b9362e40; color: var(--alert-fall-text); }
 /* [2026.09.28 변경] 낙상 의심의 주황색 보조 애니메이션 색상입니다. */
 @media (prefers-reduced-motion:no-preference) {
   .floor .room.suspected:not(.acknowledged) {
@@ -454,14 +455,14 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   }
 }
 @keyframes careguard-emergency-pulse {
-  0%,100% { background:#fff3f1; border-color:#d9574a; box-shadow:0 0 0 2px #d9574a35,inset 0 0 0 2px #ffffff80; }
-  50% { background:#ed776c; border-color:#9f241c; box-shadow:0 0 0 7px #d9574a70,0 0 24px 5px #d9574a65,inset 0 0 0 2px #ffffff35; }
+  0%,100% { background:#fff0ee; border-color:#b9362e; box-shadow:0 0 0 2px #b9362e35,inset 0 0 0 2px #ffffff80; }
+  50% { background:#dd645b; border-color:#791f19; box-shadow:0 0 0 7px #b9362e70,0 0 24px 5px #b9362e65,inset 0 0 0 2px #ffffff35; }
 }
 @keyframes careguard-emergency-dot {
-  0%,100% { background:#d9574a; transform:scale(.9); box-shadow:0 0 0 0 #d9574a70; }
-  50% { background:#8f1812; transform:scale(1.75); box-shadow:0 0 0 6px #d9574a45; }
+  0%,100% { background:#b9362e; transform:scale(.9); box-shadow:0 0 0 0 #b9362e70; }
+  50% { background:#73160f; transform:scale(1.75); box-shadow:0 0 0 6px #b9362e45; }
 }
 @keyframes corridor-alert-pulse {
-  0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.78); background:#d9574a; box-shadow:0 0 0 4px #d9574a45,0 0 7px 2px #d9574a60; }
-  50% { opacity:1; transform:translate(-50%,-50%) scale(1.4); background:#981f18; box-shadow:0 0 0 14px #d9574a55,0 0 18px 5px #d9574a90; }
+  0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.78); background:#b9362e; box-shadow:0 0 0 4px #b9362e45,0 0 7px 2px #b9362e60; }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.4); background:#791f19; box-shadow:0 0 0 14px #b9362e55,0 0 18px 5px #b9362e90; }
 }
