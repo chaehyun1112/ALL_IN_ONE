@@ -28,6 +28,17 @@ button,a {
   font:inherit}
 button {
   cursor:pointer}
+/* [2026.09.28 변경] 실제 클릭 동작이 있는 병실·상태 필터·알림 제어 요소에 손가락 커서를 표시합니다. */
+.room,
+.page-heading .counts .count,
+.alerts-panel .locate-room,
+.corridor > .corridor-alert-marker,
+.cross-page-alert-location,
+.cross-page-alert-row button,
+.room-filters button,
+.filter-info button {
+  cursor: pointer;
+}
 header {
   height:72px;
   display:flex;
