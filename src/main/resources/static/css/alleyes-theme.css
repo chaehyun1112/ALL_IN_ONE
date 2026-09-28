@@ -151,7 +151,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 /* [2026.09.20] 안전 현황 카드의 기본·선택 테두리를 각 상태 색으로 표시합니다. */
 .page-heading .counts .count { --count-border: #b8cad8; --count-ring: #526d8280; }
 .page-heading .counts .count.urgent { --count-border: #d9574a; --count-ring: #d9574a60; }
-.page-heading .counts .count.suspected { --count-border: #7c6bc4; --count-ring: #7c6bc460; }
+.page-heading .counts .count.suspected { --count-border: #e07a1f; --count-ring: #e07a1f60; }
 .page-heading .counts .count.caution { --count-border: #d99a28; --count-ring: #d99a2860; }
 .page-heading .counts .count:not(.urgent):not(.suspected):not(.caution) { border-color: var(--count-border); }
 .counts .count[aria-pressed="true"] { border-color: var(--count-border) !important; box-shadow: 0 0 0 2px var(--count-ring) !important; }
@@ -350,10 +350,10 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   --alert-fall-bg: #fdebe8;
   --alert-fall: #d9574a;
   --alert-fall-text: #a83228;
-  /* [2026.09.22 변경] 낙상 의심도 낙상 감지와 같은 빨간 계열로 표시합니다. */
-  --alert-suspected-bg: #fdebe8;
-  --alert-suspected: #d9574a;
-  --alert-suspected-text: #a83228;
+  /* [2026.09.28 변경] 낙상 의심은 확정 낙상과 구분되는 주황색으로 표시합니다. */
+  --alert-suspected-bg: #fff0df;
+  --alert-suspected: #e07a1f;
+  --alert-suspected-text: #9a5000;
   --alert-caution-bg: #fff4de;
   --alert-caution: #d99a28;
   --alert-caution-text: #946014;
@@ -404,7 +404,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .corridor.caution .corridor-alert-marker { background: var(--alert-caution); box-shadow: 0 0 0 5px #d99a2840; }
 .corridor.caution .corridor-alert-marker::after { background: var(--alert-caution-text); }
 .alert-heading .alert-total { background: var(--alert-fall-bg); border-color: #d9574a40; color: var(--alert-fall-text); }
-/* [2026.09.22 추가] 미확인 낙상 의심 위치를 보라색으로 점멸하여 즉시 구분합니다. */
+/* [2026.09.28 변경] 낙상 의심의 주황색 보조 애니메이션 색상입니다. */
 @media (prefers-reduced-motion:no-preference) {
   .floor .room.suspected:not(.acknowledged) {
     animation:careguard-suspected-pulse 1.05s ease-in-out infinite;
@@ -420,20 +420,20 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   }
 }
 @media (prefers-reduced-motion:reduce) {
-  .floor .room.suspected:not(.acknowledged) { box-shadow:0 0 0 3px #7c6bc466; }
+  .floor .room.suspected:not(.acknowledged) { box-shadow:0 0 0 3px #e07a1f66; }
   .corridor.suspected .corridor-alert-marker { display:block; }
 }
 @keyframes careguard-suspected-pulse {
-  0%,100% { background:#f1eeff; border-color:#7c6bc4; box-shadow:0 0 0 2px #7c6bc430,inset 0 0 0 2px #ffffff70; }
-  50% { background:#dcd4ff; border-color:#6b58ad; box-shadow:0 0 0 5px #7c6bc448,0 0 16px #7c6bc438,inset 0 0 0 2px #ffffff50; }
+  0%,100% { background:#fff0df; border-color:#e07a1f; box-shadow:0 0 0 2px #e07a1f30,inset 0 0 0 2px #ffffff70; }
+  50% { background:#ffe0b8; border-color:#b95f0b; box-shadow:0 0 0 5px #e07a1f48,0 0 16px #e07a1f38,inset 0 0 0 2px #ffffff50; }
 }
 @keyframes careguard-suspected-dot {
-  0%,100% { background:#7c6bc4; transform:scale(1); }
-  50% { background:#58469b; transform:scale(1.4); }
+  0%,100% { background:#e07a1f; transform:scale(1); }
+  50% { background:#9a5000; transform:scale(1.4); }
 }
 @keyframes careguard-suspected-marker {
-  0%,100% { opacity:.68; transform:translate(-50%,-50%) scale(.88); background:#7c6bc4; box-shadow:0 0 0 4px #7c6bc444; }
-  50% { opacity:1; transform:translate(-50%,-50%) scale(1.16); background:#6b58ad; box-shadow:0 0 0 10px #7c6bc440,0 0 10px #7c6bc466; }
+  0%,100% { opacity:.68; transform:translate(-50%,-50%) scale(.88); background:#e07a1f; box-shadow:0 0 0 4px #e07a1f44; }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.16); background:#9a5000; box-shadow:0 0 0 10px #e07a1f40,0 0 10px #e07a1f66; }
 }
 /* [2026.09.22 변경] 점멸은 낙상 감지에만 사용하고 낙상 의심은 같은 색의 고정 상태로 표시합니다. */
 .floor .room.suspected,
