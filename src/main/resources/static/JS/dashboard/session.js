@@ -25,6 +25,11 @@
       // 다른 탭에서 로그아웃하거나 인증이 종료된 세션을 복원하지 않습니다.
       if (response.redirected || response.status === 401 || response.status === 403) {
         signedOut = true;
+        // [2026.09.27 추가] 로그인이 끝나면 실시간 감지 알림도 끊깁니다. 켜진 화면만 믿지 않도록
+        // 새로 고쳐서 서버가 알맞은 화면으로 보내게 합니다.
+        // 403 도 새로 고칩니다. 같은 브라우저 다른 탭에서 관리자로 로그인하면 이 탭의 세션도 관리자가 되어
+        // 병동 알림이 끊기는데, 새로 고치면 서버가 관리자 화면으로 보냅니다(같은 화면이 되풀이되지 않음).
+        window.location.reload();
       } else if (response.ok) {
         const ward = await response.json();
         if (String(ward.wardId ?? "") !== document.body.dataset.wardId ||

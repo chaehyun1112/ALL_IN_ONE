@@ -501,8 +501,8 @@ createForm?.addEventListener("submit", async event => {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(caregiver
                 ? { userName, phoneNumber, roomNumber }
-                // [2026-09-22 프런트 전용] 간호사 전화번호는 화면 예시에만 사용하고 서버 요청에는 포함하지 않습니다.
-                : { userId, userName, wardId: Number(selectedWard.wardId) })
+                // [2026-09-27 변경] 간호사 전화번호도 서버에 저장합니다. 확정 낙상 SMS 를 이 번호로 받습니다.
+                : { userId, userName, wardId: Number(selectedWard.wardId), phoneNumber: staffPhoneNumber })
         });
 
         if (
@@ -558,9 +558,11 @@ createForm?.addEventListener("submit", async event => {
         createCompleteDialog?.showModal();
     } catch (error) {
         // [2026-09-18] 중복 아이디 안내를 배경 화면 대신 계정 생성 창의 아이디 입력란 아래에 표시한다.
+        // [2026-09-27] 간호사도 번호가 겹치면 409 가 오므로, 안내에 '전화번호'가 들어 있으면 전화번호 칸 아래에 표시한다.
+        const phoneConflict = caregiver || String(error.message ?? "").includes("전화번호");
         const fieldErrorDisplayed = showCreateFieldErrors(
             error.status === 409
-                ? caregiver
+                ? phoneConflict
                     ? {phoneNumber: error.message || "이미 등록된 전화번호입니다."}
                     : {userId: error.message || "이미 사용 중인 직원 아이디입니다."}
                 : error.body

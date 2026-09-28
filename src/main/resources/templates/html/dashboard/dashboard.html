@@ -4,6 +4,9 @@
   <!-- [2026.09.19] 수정: 화면의 서비스 이름을 ALLEYES로 통일합니다. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- [2026.09.26 추가] 대응 등록 저장(POST)에 쓰는 CSRF 토큰입니다. -->
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
   <title>ALLEYES · 병동 통합 관제</title>
   <!-- [2026.09.17] 고친 내용: 화면 최상단 알림 배너 위치가 반영되도록 CSS 캐시 버전을 갱신합니다. -->
   <link
@@ -19,7 +22,7 @@
     <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=keep-empty-alert-panel-20260922" th:href="@{/css/alleyes-theme.css(v='keep-empty-alert-panel-20260922')}">
 </head>
 
-<body data-ward-number="3" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
+<body data-ward-number="3" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-events-url=@{/api/dashboard/events},data-event-api-base=@{/api/events/},data-ws-url=@{/ws},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
   <!-- 상단 헤더 -->
   <header>
     <!-- [2026.09.17] 고친 내용: 조치기록에서 대시보드로 돌아가는 버튼을 왼쪽 상단에 배치합니다. -->
@@ -75,7 +78,7 @@
         <nav
           class="header-menu-list"
           id="header-menu-list"
-          aria-label="대시보드 메뉴"ㄴ
+          aria-label="대시보드 메뉴"
           hidden
         >
           <!-- [2026.09.17] 고친 내용: 메뉴 클릭 즉시 대시보드 안의 조치기록 본문으로 전환해 전체화면을 유지합니다. -->
@@ -342,11 +345,13 @@
   </dialog>
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
-  <script src="../../../static/JS/dashboard/session.js" th:src="@{/JS/dashboard/session.js}"></script>
-  <script src="../../../static/JS/dashboard/room-status.js?v=fall-suspected-20260922" th:src="@{/JS/dashboard/room-status.js(v='fall-suspected-20260922')}"></script>
+  <script src="../../../static/JS/dashboard/session.js?v=review-fix-20260927" th:src="@{/JS/dashboard/session.js(v='review-fix-20260927')}"></script>
+  <script src="../../../static/JS/dashboard/room-status.js?v=server-link-20260926" th:src="@{/JS/dashboard/room-status.js(v='server-link-20260926')}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <!-- [2026.09.17] 고친 내용: 대응 등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
-  <script src="../../../static/JS/dashboard/dashboard.js?v=suspected-dual-actions-20260922" th:src="@{/JS/dashboard/dashboard.js(v='suspected-dual-actions-20260922')}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js?v=review2-20260927" th:src="@{/JS/dashboard/dashboard.js(v='review2-20260927')}"></script>
+  <!-- [2026.09.26 추가] 서버 감지 알림 연결(오늘 이벤트 불러오기 + 실시간 구독). dashboard.js 다음에 불러옵니다. -->
+  <script src="../../../static/JS/dashboard/server-events.js?v=review-fix-20260927" th:src="@{/JS/dashboard/server-events.js(v='review-fix-20260927')}"></script>
 </body>
 </html>
 

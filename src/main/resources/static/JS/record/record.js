@@ -7,6 +7,8 @@
 /*
  * true: 화면 확인용 예시 데이터 사용
  * false: 서버 API 사용
+ * [2026.09.27] 서버(Spring Boot)로 연 화면은 initializePage 에서 false 로 바꿉니다.
+ *              Live Server 미리보기는 그대로 예시 데이터를 씁니다.
  */
 const settings = {
   useDemoData: true,
@@ -18,7 +20,8 @@ const settings = {
  * 실제 병원 병실 구성에 맞게 수정하세요.
  */
 // [2026.09.17] 고친 내용: 병실 필터를 317호까지 확장하고 두 화장실 앞 감지 위치를 추가합니다.
-const roomNumbers = [
+// [2026.09.27] 예시 데이터(Live Server)에서 쓰는 목록입니다. 서버 기록은 기록에 있는 병실로 목록을 만듭니다.
+const defaultRoomNumbers = [
   "301호", "302호", "303호", "304호",
   "305호", "306호", "307호", "308호",
   "309호", "310호", "311호", "312호",
@@ -82,6 +85,11 @@ function initializePage() {
   const tableScroll = document.querySelector(".table-scroll");
   const recordPagination = document.querySelector("#record-pagination");
   const periodFilter = document.querySelector("#period-filter");
+
+  // [2026.09.27 추가] 서버가 그린 화면에만 data-server-mode 가 있습니다. 이때는 서버 기록을 불러옵니다.
+  if (historyPage.dataset.serverMode === "true") {
+    settings.useDemoData = false;
+  }
 
   /* 기간 달력 */
   const calendarDialog = document.querySelector("#calendar-dialog");
@@ -256,7 +264,8 @@ function initializePage() {
      ================================================== */
 
   /* 병실 목록을 버튼으로 만듭니다. */
-  function renderRoomOptions() {
+  // [2026.09.27] 서버 기록을 쓸 때는 기록에 있는 병실·위치 목록을 받아서 만듭니다.
+  function renderRoomOptions(roomNumbers = defaultRoomNumbers) {
     const roomOptions = document.querySelector("#room-options");
 
     roomOptions.replaceChildren();
@@ -588,6 +597,7 @@ function initializePage() {
         selectedOnly ? "선택한 조치 기록이 없습니다." : "검색 조건에 맞는 조치 기록이 없습니다."
       );
       recordPagination.replaceChildren();
+      appendLimitNotice();
       return;
     }
 
@@ -650,6 +660,15 @@ function initializePage() {
 
     resultMessage.textContent =
       selectedOnly ? `선택한 조치 기록 ${records.length}건입니다.` : `총 ${records.length}건의 조치 기록이 검색되었습니다.`;
+    appendLimitNotice();
+  }
+
+  // [2026.09.27 추가] 서버는 최신 1000건까지만 돌려줍니다(EventActionService.HISTORY_LIMIT). 잘렸으면 알려 줍니다.
+  // 결과가 0건일 때(오래된 기간을 고른 경우)에도 붙여서, 기록이 없던 것으로 오해하지 않게 합니다.
+  function appendLimitNotice() {
+    if (!settings.useDemoData && allRecords.length >= 1000) {
+      resultMessage.textContent += " (최근 1000건까지만 불러와 그보다 오래된 기록은 보이지 않습니다.)";
+    }
   }
 
   /* ==================================================
@@ -1291,6 +1310,25 @@ function initializePage() {
         .filter(record => record.type === "낙상 감지")
         .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
 
+      if (!settings.useDemoData) {
+        // [2026.09.27 추가] 병실 필터를 실제 기록의 병실·위치로 만듭니다(1·2병동, 관리자 전체 병동도 맞게 나옵니다).
+        const rooms = [...new Set(allRecords.map(record => record.room))]
+          .sort((a, b) => a.localeCompare(b, "ko", { numeric: true }));
+        renderRoomOptions(rooms);
+        const roomFilter = document.querySelector("#room-filter");
+        if (!rooms.includes(roomFilter.value)) {
+          roomFilter.value = "all";
+          document.querySelector("#room-dropdown .choice-label").textContent = "전체 병실·위치";
+        }
+
+        // [2026.09.27 추가] 다시 불러와도 선택한 기록은 유지합니다. 같은 기록은 eventId 로 찾습니다.
+        const selectedIds = new Set([...selectedRecords].map(record => record.eventId).filter(Boolean));
+        selectedRecords.clear();
+        allRecords
+          .filter(record => selectedIds.has(record.eventId))
+          .forEach(record => selectedRecords.add(record));
+      }
+
       isLoading = false;
       applyFilters();
     } catch (error) {
@@ -1472,4 +1510,11 @@ function initializePage() {
   setInterval(updateClock, 30000);
 
   loadRecords();
+
+  // [2026.09.27 추가] 대시보드가 조치기록 화면을 다시 열 때 새 기록을 불러오도록 부르는 함수입니다.
+  window.CareGuardRecordPage = {
+    reload() {
+      if (!settings.useDemoData && !isLoading) loadRecords();
+    }
+  };
 }

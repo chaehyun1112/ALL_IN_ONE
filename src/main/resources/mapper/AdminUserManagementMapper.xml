@@ -119,6 +119,61 @@
           AND auth_st = 'APPROVED'
     </update>
 
+    <!-- [2026.09.27] 병동 번호로 병동 ID 찾기. 대시보드와 같이 이름이 '3병동'(띄어쓰기 무시) 모양인 병동 -->
+    <select id="findWardIdByNumber" resultType="java.lang.Long">
+        SELECT ward_id
+        FROM tb_ward
+        WHERE hosp_div_id = #{hospitalDomain}
+          AND REPLACE(ward_nm, ' ', '') = CONCAT(#{wardNumber}, '병동')
+        ORDER BY ward_id
+        LIMIT 1
+    </select>
+
+    <!-- [2026.09.27] 간병인 담당 병실 변경. 확정 낙상 SMS 는 이 room_no 로 담당 간병인을 찾는다(SmsMapper). -->
+    <update id="updateCaregiverRoom">
+        UPDATE tb_emp
+        SET ward_id = #{wardId,jdbcType=BIGINT},
+            room_no = #{roomNumber},
+            upd_dt = NOW()
+        WHERE hosp_div_id = #{hospitalDomain}
+          AND emp_id = #{userId}
+          AND role_cd = 'USER'
+          AND job_cd = 'CAREGIVER'
+          AND auth_st = 'APPROVED'
+    </update>
+
+    <!-- [2026.09.27] 직원의 지금 전화번호 (재활성화 전 중복 확인용) -->
+    <select id="findUserPhone" resultType="string">
+        SELECT phone_no
+        FROM tb_emp
+        WHERE hosp_div_id = #{hospitalDomain}
+          AND emp_id = #{userId}
+    </select>
+
+    <!-- [2026.09.27] 이 직원 말고 같은 번호를 쓰는 활성 직원이 있는지 (같은 번호로 SMS 가 두 번 가지 않게) -->
+    <select id="existsOtherUserPhone" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM tb_emp
+            WHERE hosp_div_id = #{hospitalDomain}
+              AND emp_id &lt;&gt; #{userId}
+              AND role_cd = 'USER'
+              AND auth_st = 'APPROVED'
+              AND phone_no = #{phoneNumber}
+        )
+    </select>
+
+    <!-- [2026.09.27] 활성 직원의 전화번호 변경 -->
+    <update id="updateUserPhone">
+        UPDATE tb_emp
+        SET phone_no = #{phoneNumber},
+            upd_dt = NOW()
+        WHERE hosp_div_id = #{hospitalDomain}
+          AND emp_id = #{userId}
+          AND role_cd = 'USER'
+          AND auth_st = 'APPROVED'
+    </update>
+
     <!-- 4번 팝업: 계정 비활성화 -->
     <update id="deactivateUser">
 

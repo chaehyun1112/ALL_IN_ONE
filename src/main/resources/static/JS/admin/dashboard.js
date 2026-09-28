@@ -785,7 +785,7 @@ adminManagementChoiceConfirm?.addEventListener("click", () => {
     openAdminAction(selectedUser, selectedAction);
 });
 
-/* [2026-09-22 변경] 간호사와 간병인 전화번호는 현재 프런트 목록에서만 수정합니다. */
+/* [2026-09-27 변경] 간호사와 간병인 전화번호를 서버(tb_emp.phone_no)에 저장합니다. */
 function formatPhoneInput(value) {
     const digits = String(value ?? "").replace(/\D/g, "").slice(0, 11);
     if (digits.length <= 3) return digits;
@@ -813,7 +813,8 @@ document.querySelector("#admin-phone-edit-cancel")?.addEventListener("click", ()
     adminPhoneEditDialog.close();
 });
 
-adminPhoneEditForm?.addEventListener("submit", event => {
+// [2026-09-27 변경] 전화번호를 서버에 저장합니다(확정 낙상 SMS 받는 번호). 실패하면 창을 열어 둔 채 안내합니다.
+adminPhoneEditForm?.addEventListener("submit", async event => {
     event.preventDefault();
     if (!adminSelectedUser) return;
     const digits = adminPhoneEditInput.value.replace(/\D/g, "");
@@ -822,11 +823,31 @@ adminPhoneEditForm?.addEventListener("submit", event => {
         adminPhoneEditInput.focus();
         return;
     }
-    adminSelectedUser.phoneNumber = digits;
+    const submitButton = adminPhoneEditForm.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    try {
+        await requestAdminApi(`/api/admin/users/${encodeURIComponent(adminSelectedUser.userId)}/phone`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({phoneNumber: digits})
+        });
+    } catch (error) {
+        adminPhoneEditError.textContent = error.message || "전화번호를 저장하지 못했습니다.";
+        return;
+    } finally {
+        if (submitButton) submitButton.disabled = false;
+    }
     adminPhoneEditDialog.close();
-    renderAdminUsers();
-    showAdminFeedback("전화번호를 화면에 반영했습니다. 새로고침하면 이전 번호로 돌아갑니다.");
-    adminSelectedUser = null;
+    // 저장은 끝났으므로, 목록을 다시 불러오지 못해도 그 사실을 알려 줍니다.
+    try {
+        await loadAdminData(true);
+        showAdminFeedback("전화번호를 변경했습니다.");
+    } catch (error) {
+        console.error(error);
+        showAdminFeedback("전화번호는 변경했지만 목록을 불러오지 못했습니다. 새로고침해 주세요.");
+    } finally {
+        adminSelectedUser = null;
+    }
 });
 
 /**
@@ -941,19 +962,9 @@ async function submitAdminAction() {
     const selectedUser = adminSelectedUser;
     const selectedAction = adminAction;
 
-    if (selectedAction === "ASSIGN_ROOM") {
-        if (!adminWardSelect.value) {
-            showAdminFeedback("변경할 병실을 선택해 주세요.");
-            adminActionWardTrigger.focus();
-            return;
-        }
-        selectedUser.roomNumber = adminWardSelect.value;
-        selectedUser.ward = `${adminRoomWardSelect.value}병동`;
-        adminDialog.close();
-        renderAdminUsers();
-        showAdminFeedback("담당 병실을 화면에 반영했습니다. 새로고침하면 이전 배정으로 돌아갑니다.");
-        adminSelectedUser = null;
-        adminAction = "";
+    if (selectedAction === "ASSIGN_ROOM" && !adminWardSelect.value) {
+        showAdminFeedback("변경할 병실을 선택해 주세요.");
+        adminActionWardTrigger.focus();
         return;
     }
 
@@ -961,6 +972,13 @@ async function submitAdminAction() {
     let method = "PATCH";
     let body;
     let successMessage = "";
+
+    // [2026-09-27 변경] 간병인 담당 병실을 서버에 저장합니다. 확정 낙상 SMS 가 새 병실의 간병인에게 갑니다.
+    if (selectedAction === "ASSIGN_ROOM") {
+        url = `/api/admin/users/${encodeURIComponent(selectedUser.userId)}/room`;
+        body = JSON.stringify({roomNumber: Number(adminWardSelect.value)});
+        successMessage = "담당 병실을 변경했습니다.";
+    }
 
     if (selectedAction === "APPROVE") {
         url = `/api/admin/users/${encodeURIComponent(selectedUser.userId)}/approve`;
@@ -1591,6 +1609,9 @@ function setAdminView(view, updateAddress = true) {
     if (isRecords && !adminRecordFrame.dataset.loaded) {
         adminRecordFrame.src = adminRecordFrame.dataset.src;
         adminRecordFrame.dataset.loaded = "true";
+    } else if (isRecords) {
+        // [2026.09.27 추가] 이미 연 조치기록을 다시 보여 줄 때는 새 낙상·조치가 보이도록 서버 기록을 다시 불러옵니다.
+        adminRecordFrame.contentWindow?.CareGuardRecordPage?.reload();
     }
     if (!isHome && !isInactive && !isRecords) {
         adminPage.classList.toggle("is-history-page", isHistory);

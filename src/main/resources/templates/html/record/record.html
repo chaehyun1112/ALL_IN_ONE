@@ -37,8 +37,8 @@
     defer
   ></script>
   <script
-    src="../../../static/JS/record/record.js?v=20260922-fall-only"
-    th:src="@{/JS/record/record.js(v='20260922-fall-only')}"
+    src="../../../static/JS/record/record.js?v=review2-20260927"
+    th:src="@{/JS/record/record.js(v='review2-20260927')}"
     defer
   ></script>
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
@@ -73,14 +73,14 @@
 
   <!--
     백엔드 API 주소입니다.
-    JS에서 useDemoData를 false로 변경하면
-    이 주소로 조치 기록을 조회합니다.
+    서버로 연 화면(data-server-mode)은
+    이 주소로 조치 기록을 조회합니다(2026.09.27).
   -->
   <main
     class="page-content"
     id="history-page"
     data-api-url="/api/action-history"
-    th:attr="data-api-url=@{/api/action-history}"
+    th:attr="data-api-url=@{/api/action-history},data-server-mode='true'"
   >
     <!-- 화면 제목 -->
     <section

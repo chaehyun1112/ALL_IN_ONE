@@ -3,11 +3,15 @@
 /* [09.13]추가내용: 병실 상태 데이터와 상태명을 대시보드 공통 설정으로 분리합니다. */
 const dashboardWardNumber = Number(document.body.dataset.wardNumber);
 const dashboardRoomStart = dashboardWardNumber * 100 + 1;
+// [2026.09.26 추가] 서버로 연 화면(로그인 세션 주소가 주입됨)은 예시 경보 없이 모두 정상으로 시작하고,
+// 서버의 오늘 감지 이벤트로 상태를 채웁니다(server-events.js). Live Server 미리보기는 기존 예시 상태를 유지합니다.
+const dashboardServerMode = Boolean(document.body.dataset.sessionUrl);
 window.CareGuardRoomStatus = {
   roomStart: dashboardRoomStart,
+  serverMode: dashboardServerMode,
   rooms: new Map(Array.from({length:[1,2,3].includes(dashboardWardNumber)?17:0}, (_,i) => [dashboardRoomStart+i, {
     // [2026.09.22 추가] 8번째 병실을 보라색 '낙상 의심' 예시 상태로 표시합니다.
-    number:dashboardRoomStart+i, status:i===4?"urgent":i===7?"suspected":i===11?"caution":"normal", acknowledged:false
+    number:dashboardRoomStart+i, status:dashboardServerMode?"normal":i===4?"urgent":i===7?"suspected":i===11?"caution":"normal", acknowledged:false
   }])),
   labels: {normal:"정상", caution:"침대 이탈", suspected:"낙상 의심", urgent:"낙상 감지"}
 };

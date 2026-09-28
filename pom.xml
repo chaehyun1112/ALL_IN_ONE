@@ -79,6 +79,17 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		<!-- 젯슨 감지 이벤트를 대시보드로 실시간 전달(STOMP over WebSocket) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		<!-- 확정 낙상 SMS 발송(요구사항 AIO_035, SOLAPI). 예전 net.nurigo:sdk 는 유지보수가 끝나 새 SDK를 쓴다 -->
+		<dependency>
+			<groupId>com.solapi</groupId>
+			<artifactId>sdk</artifactId>
+			<version>1.2.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
