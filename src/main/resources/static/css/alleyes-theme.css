@@ -350,10 +350,10 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   --alert-fall-bg: #fdebe8;
   --alert-fall: #d9574a;
   --alert-fall-text: #a83228;
-  /* [2026.09.28 변경] 낙상 의심은 확정 낙상과 구분되는 주황색으로 표시합니다. */
-  --alert-suspected-bg: #fff0df;
-  --alert-suspected: #e07a1f;
-  --alert-suspected-text: #9a5000;
+  /* [2026.09.28 변경] 낙상 의심은 침대 이탈의 노란색과 구분되는 진한 주황색으로 표시합니다. */
+  --alert-suspected-bg: #ffe8d6;
+  --alert-suspected: #c75c0a;
+  --alert-suspected-text: #803800;
   --alert-caution-bg: #fff4de;
   --alert-caution: #d99a28;
   --alert-caution-text: #946014;

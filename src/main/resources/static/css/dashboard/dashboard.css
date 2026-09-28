@@ -1961,54 +1961,54 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 .cross-page-alert #cross-page-alert-summary { flex:1; border:0; background:transparent; color:inherit; font-weight:700; text-align:left; padding:0; }
 .cross-page-alert-row.caution { background:#fff8e9; color:#805f21; border-color:#ecdfc4; }
 
-/* [2026.09.28 변경] '낙상 의심'은 확정 낙상과 구분되는 주황색으로 표시합니다. */
+/* [2026.09.28 변경] '낙상 의심'은 침대 이탈의 노란색과 구분되는 진한 주황색으로 표시합니다. */
 .page-heading .count.suspected {
-  background:linear-gradient(110deg,#fff0df,#fffaf4);
-  border-color:#f0b36f;
-  color:#9a5000;
+  background:linear-gradient(110deg,#ffe8d6,#fff7f0);
+  border-color:#de8b4f;
+  color:#803800;
 }
-.legend .suspected:before { background:#e07a1f; }
+.legend .suspected:before { background:#c75c0a; }
 .room.suspected {
-  border-color:#e89a49;
-  background:#fff0df;
-  color:#9a5000;
+  border-color:#d97a32;
+  background:#ffe8d6;
+  color:#803800;
 }
-.room.suspected small { color:#b95f0b; }
-.room.suspected:after { background:#e07a1f; }
+.room.suspected small { color:#a94700; }
+.room.suspected:after { background:#c75c0a; }
 .corridor.suspected .corridor-alert-marker {
-  border-color:#e07a1f;
-  background:#fff0df;
-  color:#9a5000;
+  border-color:#c75c0a;
+  background:#ffe8d6;
+  color:#803800;
 }
 .alert-card.suspected {
-  border-color:#f0b36f;
+  border-color:#de8b4f;
   background:#fff7ed;
-  color:#9a5000;
+  color:#803800;
 }
 .alert-card.suspected .alert-top strong,
-.alert-card.suspected .event-label { color:#9a5000; }
+.alert-card.suspected .event-label { color:#803800; }
 .alert-card.suspected .locate-room {
-  border-color:#f0b36f;
-  color:#9a5000;
+  border-color:#de8b4f;
+  color:#803800;
 }
 /* [2026.09.22 변경] 낙상 의심 카드의 두 버튼을 정렬하고 버튼 문구를 검정색으로 통일합니다. */
 .alert-card-actions { display:flex; justify-content:flex-end; gap:8px; }
 .alert-card.suspected .alert-card-actions .locate-room { color:#111; }
 .response-event.suspected-event {
-  border-color:#f0b36f;
-  background:#fff0df;
-  color:#9a5000;
+  border-color:#de8b4f;
+  background:#ffe8d6;
+  color:#803800;
 }
-#room-detail .room-history-suspected { color:#b95f0b; }
+#room-detail .room-history-suspected { color:#a94700; }
 .cross-page-alert.suspected {
-  border-color:#e89a49;
+  border-color:#d97a32;
   background:#fff7ed;
-  color:#9a5000;
+  color:#803800;
 }
 .cross-page-alert-row.suspected {
-  border-color:#f0b36f;
-  background:#fff0df;
-  color:#9a5000;
+  border-color:#de8b4f;
+  background:#ffe8d6;
+  color:#803800;
 }
 @keyframes cross-page-alert-enter { from { opacity:0; transform:translate(-50%,-20px); } to { opacity:1; transform:translate(-50%,0); } }
 @media (prefers-reduced-motion:no-preference) { .cross-page-alert { animation:cross-page-alert-enter .25s ease-out; } }
