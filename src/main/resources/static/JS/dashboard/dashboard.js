@@ -47,7 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const alertList=document.querySelector(".alert-list")||alertPanel;
   const corridorNode=document.getElementById("central-corridor");
   // [2026.09.28 변경] 복도 감지는 세부 발생 지점 대신 중앙 복도 전체 상태로 표시합니다.
-  const corridorAlert={location:"중앙 복도",cameraId:"C-02",cameraLocation:"중앙 복도",status:"urgent",acknowledged:false,eventId:"corridor-fall-001",occurredAt:"2026-09-16T14:33:00+09:00"};
+  // [2026.09.28 변경] 복도 감지는 중앙 복도 공용 안내 음성을 재생합니다.
+  const corridorAlert={location:"중앙 복도",cameraId:"C-02",cameraLocation:"중앙 복도",fileName:"중앙복도즉시확인.mp3",status:"urgent",acknowledged:false,eventId:"corridor-fall-001",occurredAt:"2026-09-16T14:33:00+09:00"};
   if (!rooms.size) corridorAlert.status = "normal";
   // [2026.09.26 추가] 서버로 연 화면은 복도 예시 경보 없이 시작합니다. 공용 공간 감지는 서버 알림으로 채웁니다.
   const serverMode=window.CareGuardRoomStatus.serverMode;
@@ -155,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
   filterInfo.innerHTML='<span role="status" aria-live="polite"></span>';
   /* [수정] 강조 상태 안내는 화면에 추가하지 않습니다. */
 
-  /* [2026.09.22 변경] 낙상 감지와 낙상 의심에만 같은 호실별 WAV를 사용하며 종료 후 대기 없이 최대 5회 재생합니다.
+  /* [2026.09.28 변경] 낙상 감지와 낙상 의심에만 병실별 WAV 또는 중앙 복도 MP3를 사용하며 종료 후 대기 없이 최대 5회 재생합니다.
      대기열은 경보별로 관리하며 한 번에 하나만 재생합니다. */
   const audio=new Audio(), jobs=new Map(), seenEvents=new Set();
   const audioControls=document.createElement("div");audioControls.className="audio-controls";
@@ -458,12 +459,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const audioKey=key==="corridor"?"corridor":Number(key);
     cancelAudio(audioKey);
     if(!next){Object.assign(state,{status:"normal",acknowledged:false});return;}
-    if(key==="corridor")Object.assign(corridorAlert,{cameraLocation:"중앙 복도",fileName:null,eventType:next.type,occurredAt:next.occurredAt});
+    if(key==="corridor")Object.assign(corridorAlert,{cameraLocation:"중앙 복도",fileName:"중앙복도즉시확인.mp3",eventType:next.type,occurredAt:next.occurredAt});
     Object.assign(state,{status:next.type,acknowledged:false,eventId:next.id,test:false});
     // 다시 띄운 경보도 아직 처리하지 않은 경보이므로 배너와 음성(낙상 감지·의심)으로 알립니다.
     rememberNotice(audioKey);
     if(key==="corridor")cancelAudio(`corridor:${next.locationName}`);   // 가려졌을 때 따로 울리던 음성은 끄고 아래에서 다시 울립니다
-    if(next.type!=="caution"&&key!=="corridor")queueRoomAudio(audioKey);
+    // [2026.09.28 변경] 낙상 감지·낙상 의심은 복도에서도 공용 안내 음성을 재생합니다.
+    if(next.type!=="caution")queueRoomAudio(audioKey,key==="corridor"?corridorAlert.fileName:undefined,key==="corridor"?corridorAlert.location:undefined);
   }
   // [2026.09.26 추가] 공용 공간(room=null) 감지는 도면의 복도 표시에 띄웁니다. 병실과 같이 더 높은 단계의 미처리 경보는 낮추지 않습니다.
   function receiveCorridorEvent(event,type){
@@ -476,11 +478,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const shown=rank[corridorAlert.status]<=rank[type];
     if(shown){
       cancelAudio("corridor");
-      Object.assign(corridorAlert,{cameraLocation:"중앙 복도",fileName:null,status:type,eventType:type,test:false,eventId:id,occurredAt:event.occurredAt,acknowledged:false});
+      Object.assign(corridorAlert,{cameraLocation:"중앙 복도",fileName:"중앙복도즉시확인.mp3",status:type,eventType:type,test:false,eventId:id,occurredAt:event.occurredAt,acknowledged:false});
     }
     if(!restoring){
       rememberNotice("corridor");render();
-      // [2026.09.28 변경] 복도 위치별 음성은 사용하지 않고 중앙 복도 상태를 화면으로 안내합니다.
+      // [2026.09.28 변경] 복도 낙상 감지·의심은 중앙 복도 공용 안내 음성을 재생합니다.
+      if(type!=="caution"&&shown)queueRoomAudio("corridor",corridorAlert.fileName,corridorAlert.location);
     }
     return true;
   }
@@ -590,7 +593,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const testIds=new Set();
     let delayedTestTimer=null;
     // [2026.09.28 변경] 복도 테스트도 중앙 복도 전체에 한 건으로 표시합니다.
-    const corridorLocations={corridor:{cameraLocation:"중앙 복도",fileName:null}};
+    // [2026.09.28 변경] 복도 테스트도 실제 공용 안내 음성을 사용합니다.
+    const corridorLocations={corridor:{cameraLocation:"중앙 복도",fileName:"중앙복도즉시확인.mp3"}};
     for(const number of rooms.keys())locationSelect.add(new Option(`${number}호`,String(number)));
     for(const [id,location] of Object.entries(corridorLocations))locationSelect.add(new Option(location.cameraLocation,id));
     panel.hidden=false;
