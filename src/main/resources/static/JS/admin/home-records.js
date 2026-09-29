@@ -86,7 +86,7 @@
     list.replaceChildren();
     const since = seoulMinute(new Date(Date.now() - 24 * 60 * 60 * 1000));
     const pending = records.filter(record => record.status !== "완료" && record.occurredAt >= since).slice(0, 3);
-    if (!pending.length) list.append(element("div", "admin-home-record-row", "지금 확인이 필요한 낙상 알림이 없습니다."));
+    if (!pending.length) list.append(element("div", "admin-home-record-row", "현재 발생한 낙상 알림이 없습니다."));
     for (const record of pending) {
       const row = element("div", "admin-home-alert-row");
       const indicator = element("span", "admin-home-alert-indicator");
