@@ -31,7 +31,8 @@
 .admin-accident-player { display: flex; flex-direction: column; padding: 16px; }
 .admin-accident-player header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .admin-accident-player h3 { margin: 0; color: var(--admin-text); font-size: 15px; }
-#admin-accident-video, .admin-accident-video-empty { width: 100%; height: clamp(220px, 30vh, 360px); min-height: 0; border-radius: 8px; }
+/* [2026.09.29 변경] 선택 영상 영역은 카드 안의 남는 높이를 채우되 일반 창에서 과도하게 커지지 않게 제한합니다. */
+#admin-accident-video, .admin-accident-video-empty { width: 100%; min-height: 260px; max-height: 440px; flex: 1 1 auto; border-radius: 8px; }
 #admin-accident-video { background: #152534; object-fit: contain; }
 .admin-accident-video-empty { display: grid; place-items: center; padding: 24px; box-sizing: border-box; border: 1px dashed #c5d4e0; background: #eef4f8; color: #61788a; text-align: center; font-size: 13px; line-height: 1.6; }
 .admin-accident-list-column { display: flex; min-height: 0; flex-direction: column; overflow: hidden; }
@@ -76,5 +77,5 @@
   .admin-accident-page::-webkit-scrollbar { width: 0; height: 0; display: none; }
   .admin-accident-panel { min-height: 0; }
   #admin-accident-video,
-  .admin-accident-video-empty { height: min(29vh, 250px); min-height: 180px; }
+  .admin-accident-video-empty { height: min(29vh, 250px); min-height: 180px; flex: 0 0 auto; }
 }
