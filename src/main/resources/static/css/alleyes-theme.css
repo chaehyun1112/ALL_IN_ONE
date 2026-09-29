@@ -541,6 +541,11 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 
 /* [2026.09.29 변경] PC에서도 노트북과 같은 병실·복도 비율을 유지하고, 화면 바깥 가로 여백만 줄여 관제 도면의 폭을 충분히 확보합니다. */
 @media (min-width:1000px) and (min-height:851px) {
+  body[data-dashboard-view="dashboard"] > main#dashboard-main {
+    height:calc(100dvh - var(--dashboard-header-height));
+    min-height:0;
+    overflow:hidden;
+  }
   body[data-dashboard-view="dashboard"] #dashboard-main > .layout {
     flex:0 0 auto;
     grid-template-rows:auto;
@@ -558,4 +563,12 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   }
   body[data-dashboard-view="dashboard"] .floor .room-row { aspect-ratio:7.6 / 1; }
   body[data-dashboard-view="dashboard"] .floor .corridor { aspect-ratio:12 / 1; }
+  /* [2026.09.29 변경] 평면도 비율은 고정하고, PC에서 남는 세로 공간은 하단 오늘의 기록 카드가 사용합니다. */
+  body[data-dashboard-view="dashboard"] .dashboard-history-card {
+    display:flex;
+    min-height:0;
+    flex:1 1 auto;
+    align-items:center;
+  }
+  body[data-dashboard-view="dashboard"] .dashboard-history-card #room-detail { width:100%; }
 }
