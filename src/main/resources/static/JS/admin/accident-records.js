@@ -15,9 +15,7 @@
   const searchInput = document.querySelector("#admin-accident-search");
   const resetButton = document.querySelector("#admin-accident-reset");
   const pagination = document.querySelector("#admin-accident-pagination");
-  const total = document.querySelector("#admin-accident-total");
   const videoCount = document.querySelector("#admin-accident-video-count");
-  const missingVideo = document.querySelector("#admin-accident-missing-video");
   const video = document.querySelector("#admin-accident-video");
   const videoEmpty = document.querySelector("#admin-accident-video-empty");
   const playerStatus = document.querySelector("#admin-accident-player-status");
@@ -51,9 +49,7 @@
 
   function updateSummary() {
     const savedVideos = allRecords.filter(hasVideo).length;
-    total.textContent = allRecords.length;
     videoCount.textContent = savedVideos;
-    missingVideo.textContent = allRecords.length - savedVideos;
   }
 
   function clearPlayer() {

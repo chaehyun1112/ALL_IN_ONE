@@ -35,8 +35,8 @@
             th:src="@{/JS/admin/home-records.js(v='scrollable-alert-list-20260929')}"
             defer></script>
     <!-- [2026.09.29 변경] 관리자 사고 영상 보관함의 조회·선택·재생을 처리합니다. -->
-    <script src="../../../static/JS/admin/accident-records.js?v=accident-video-archive-20260929"
-            th:src="@{/JS/admin/accident-records.js(v='accident-video-archive-20260929')}"
+    <script src="../../../static/JS/admin/accident-records.js?v=accident-video-layout-20260929"
+            th:src="@{/JS/admin/accident-records.js(v='accident-video-layout-20260929')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=admin-brand-align-20260920" th:href="@{/css/alleyes-brand.css(v='admin-brand-align-20260920')}">
@@ -47,7 +47,7 @@
     <!-- [2026.09.29 변경] 관리자 홈 실시간 알림의 카드 간격·숨김 스크롤 CSS를 최신 버전으로 불러옵니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/home.css?v=scrollable-alert-list-20260929" th:href="@{/css/admin/home.css(v='scrollable-alert-list-20260929')}">
     <!-- [2026.09.29 변경] 사고 영상 보관함의 영상 재생·목록 레이아웃을 제공합니다. -->
-    <link rel="stylesheet" href="../../../static/css/admin/accident-records.css?v=accident-video-archive-20260929" th:href="@{/css/admin/accident-records.css(v='accident-video-archive-20260929')}">
+    <link rel="stylesheet" href="../../../static/css/admin/accident-records.css?v=accident-video-layout-20260929" th:href="@{/css/admin/accident-records.css(v='accident-video-layout-20260929')}">
 </head>
 
 <body>
@@ -362,13 +362,14 @@
     <header class="admin-heading admin-accident-heading">
         <h1 id="admin-accident-title" tabindex="-1">사고 영상 보관함</h1>
         <p>발생한 낙상 사고 영상을 보관하고 발생 시각, 위치와 처리 상태를 확인합니다.</p>
+        <!-- [2026.09.29 변경] 상단 요약 카드를 제거하고 비활성화 관리와 같은 우측 현황 카드로 보관 건수만 표시합니다. -->
+        <div class="admin-accident-overview">
+            <section class="admin-accident-stat" aria-labelledby="admin-accident-stat-title">
+                <span class="admin-accident-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3Z"/></svg></span>
+                <div><h2 id="admin-accident-stat-title">보관 영상</h2><strong id="admin-accident-video-count">—<span>건</span></strong></div>
+            </section>
+        </div>
     </header>
-
-    <section class="admin-accident-summary" aria-label="사고 영상 보관 현황">
-        <article><span>전체 사고</span><strong id="admin-accident-total">—</strong><small>건</small></article>
-        <article><span>보관 영상</span><strong id="admin-accident-video-count">—</strong><small>건</small></article>
-        <article><span>영상 미보관</span><strong id="admin-accident-missing-video">—</strong><small>건</small></article>
-    </section>
 
     <section class="admin-panel admin-accident-panel" aria-labelledby="admin-accident-list-title">
         <header class="admin-panel-heading">
