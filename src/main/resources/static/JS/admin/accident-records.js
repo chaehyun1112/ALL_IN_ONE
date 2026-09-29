@@ -19,9 +19,6 @@
   const video = document.querySelector("#admin-accident-video");
   const videoEmpty = document.querySelector("#admin-accident-video-empty");
   const playerStatus = document.querySelector("#admin-accident-player-status");
-  const playerTime = document.querySelector("#admin-accident-video-time");
-  const playerLocation = document.querySelector("#admin-accident-video-location");
-  const playerState = document.querySelector("#admin-accident-video-state");
   const recordsPerPage = 12;
   let allRecords = [];
   let filteredRecords = [];
@@ -60,16 +57,10 @@
     video.hidden = true;
     videoEmpty.hidden = false;
     playerStatus.textContent = "영상 선택 대기";
-    playerTime.textContent = "-";
-    playerLocation.textContent = "-";
-    playerState.textContent = "-";
   }
 
   function showVideo(record) {
     selectedEventId = record.eventId;
-    playerTime.textContent = displayDateTime(record.occurredAt);
-    playerLocation.textContent = [record.wardName, record.room].filter(Boolean).join(" · ") || "-";
-    playerState.textContent = record.status === "완료" ? "처리 완료" : "미확인";
     if (!hasVideo(record)) {
       video.pause();
       video.removeAttribute("src");

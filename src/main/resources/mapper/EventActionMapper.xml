@@ -111,4 +111,13 @@
         ON CONFLICT (event_id) DO NOTHING
     </insert>
 
+    <!-- [2026.09.29 변경] 낙상 의심의 대응 등록은 실제 낙상으로 확정해 조치기록·사고 영상 보관함에 포함합니다. -->
+    <update id="promoteSuspectedFall">
+        UPDATE tb_detection_event
+        SET decision_st = 'CONFIRMED'
+        WHERE event_id = CAST(#{eventId} AS UUID)
+          AND event_type = 'FALL'
+          AND decision_st = 'SUSPECTED'
+    </update>
+
 </mapper>
