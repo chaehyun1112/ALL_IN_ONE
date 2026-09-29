@@ -1229,3 +1229,35 @@ select:focus-visible,
 }
 
 /* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */
+
+/* [2026.09.29 변경] PC·노트북의 세로 해상도 차이에도 조치기록 패널이 남은 높이를 사용하고, 표 영역에서만 스크롤되도록 구성합니다. */
+@media (min-width:1000px) {
+  html,
+  body { min-height:100%; }
+  /* [2026.09.29 변경] 조치기록은 휠·터치패드 스크롤을 유지하고, 화면 스크롤바는 표시하지 않습니다. */
+  body { min-height:100dvh; display:flex; flex-direction:column; scrollbar-width:none; -ms-overflow-style:none; }
+  body::-webkit-scrollbar { display:none; }
+  .page-header { flex:0 0 auto; }
+  .page-content {
+    display:flex;
+    min-height:0;
+    flex:1 1 auto;
+    flex-direction:column;
+  }
+  .record-panel {
+    display:flex;
+    min-height:0;
+    flex:1 1 auto;
+    flex-direction:column;
+  }
+  .record-panel .table-scroll {
+    min-height:0;
+    flex:1 1 auto;
+    overflow-y:auto;
+    /* [2026.09.29 변경] 표 영역도 스크롤은 가능하지만 별도 스크롤바 UI는 노출하지 않습니다. */
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .record-panel .table-scroll::-webkit-scrollbar { display:none; }
+  .record-panel .record-pagination { flex:0 0 auto; margin-top:auto; }
+}

@@ -28,6 +28,17 @@ button,a {
   font:inherit}
 button {
   cursor:pointer}
+/* [2026.09.28 변경] 실제 클릭 동작이 있는 병실·상태 필터·알림 제어 요소에 손가락 커서를 표시합니다. */
+.room,
+.page-heading .counts .count,
+.alerts-panel .locate-room,
+.corridor > .corridor-alert-marker,
+.cross-page-alert-location,
+.cross-page-alert-row button,
+.room-filters button,
+.filter-info button {
+  cursor: pointer;
+}
 header {
   height:72px;
   display:flex;
@@ -1922,12 +1933,12 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 .alert-test-panel p,.alert-test-panel output,.alert-test-panel [role="status"] { margin:0; flex-basis:100%; font-size:13px; }
 .alert-test-mode #dashboard-main { height:auto; min-height:calc(100dvh - 88px); }
 .test-alert-badge { display:inline-block; margin-left:8px; padding:2px 8px; border:1px solid currentColor; border-radius:5px; font-size:12px; }
-/* [2026.09.22 변경] 침대 이탈은 노란색 고정 상태로 표시하며 점멸하지 않습니다. */
-.corridor.caution .corridor-alert-marker { display:block; background:#ca902b; box-shadow:0 0 0 5px #ca902b50; }
-.corridor.caution .corridor-alert-marker::after { background:#8a621f; }
+/* [2026.09.28 변경] 침대 이탈은 상단 상태 카드와 같은 밝은 골드색으로 표시합니다. */
+.corridor.caution .corridor-alert-marker { display:block; background:#e2b816; box-shadow:0 0 0 5px #e2b81650; }
+.corridor.caution .corridor-alert-marker::after { background:#7b6400; }
 .corridor.acknowledged .corridor-alert-marker { animation:none; }
-.alert-card.corridor-alert.caution { background:#fff9ed; border-color:#e7c890; border-left-color:#c99537; }
-.alert-card.corridor-alert.caution .alert-top,.alert-card.corridor-alert.caution h3 { color:#8a621f; }
+.alert-card.corridor-alert.caution { background:#fff9dd; border-color:#ead37b; border-left-color:#e2b816; }
+.alert-card.corridor-alert.caution .alert-top,.alert-card.corridor-alert.caution h3 { color:#7b6400; }
 .floor .room.caution,.corridor.caution .corridor-alert-marker { animation:none; opacity:1; }
 /* [2026.09.17] 추가한 내용: 공통 상단 바 아래에 감지 배너를 내려서 표시하며 대시보드에서는 반드시 숨깁니다. */
 .cross-page-alert[hidden],body:not([data-dashboard-view="records"]) .cross-page-alert { display:none !important; }
@@ -1950,54 +1961,54 @@ main{height:auto;min-height:calc(100dvh - 72px)}
 .cross-page-alert #cross-page-alert-summary { flex:1; border:0; background:transparent; color:inherit; font-weight:700; text-align:left; padding:0; }
 .cross-page-alert-row.caution { background:#fff8e9; color:#805f21; border-color:#ecdfc4; }
 
-/* [2026.09.22 추가] '낙상 의심'은 침대 이탈의 노란색 및 낙상 감지의 빨간색과 구분되는 보라색으로 표시합니다. */
+/* [2026.09.28 변경] 낙상 의심은 상단 상태 카드와 같은 선명한 오렌지색으로 표시합니다. */
 .page-heading .count.suspected {
-  background:linear-gradient(110deg,#f1eeff,#faf8ff);
-  border-color:#c7bdf2;
-  color:#58469b;
+  background:linear-gradient(110deg,#fff0e3,#fff8f1);
+  border-color:#e7a263;
+  color:#8c3d00;
 }
-.legend .suspected:before { background:#7c6bc4; }
+.legend .suspected:before { background:#d86b18; }
 .room.suspected {
-  border-color:#9b8bd5;
-  background:#f1eeff;
-  color:#58469b;
+  border-color:#e18a45;
+  background:#fff0e3;
+  color:#8c3d00;
 }
-.room.suspected small { color:#6b58ad; }
-.room.suspected:after { background:#7c6bc4; }
+.room.suspected small { color:#b34a00; }
+.room.suspected:after { background:#d86b18; }
 .corridor.suspected .corridor-alert-marker {
-  border-color:#7c6bc4;
-  background:#f1eeff;
-  color:#58469b;
+  border-color:#d86b18;
+  background:#fff0e3;
+  color:#8c3d00;
 }
 .alert-card.suspected {
-  border-color:#c7bdf2;
-  background:#f7f4ff;
-  color:#58469b;
+  border-color:#e7a263;
+  background:#fff8f1;
+  color:#8c3d00;
 }
 .alert-card.suspected .alert-top strong,
-.alert-card.suspected .event-label { color:#58469b; }
+.alert-card.suspected .event-label { color:#8c3d00; }
 .alert-card.suspected .locate-room {
-  border-color:#c7bdf2;
-  color:#58469b;
+  border-color:#e7a263;
+  color:#8c3d00;
 }
 /* [2026.09.22 변경] 낙상 의심 카드의 두 버튼을 정렬하고 버튼 문구를 검정색으로 통일합니다. */
 .alert-card-actions { display:flex; justify-content:flex-end; gap:8px; }
 .alert-card.suspected .alert-card-actions .locate-room { color:#111; }
 .response-event.suspected-event {
-  border-color:#c7bdf2;
-  background:#f1eeff;
-  color:#58469b;
+  border-color:#e7a263;
+  background:#fff0e3;
+  color:#8c3d00;
 }
-#room-detail .room-history-suspected { color:#6b58ad; }
+#room-detail .room-history-suspected { color:#b34a00; }
 .cross-page-alert.suspected {
-  border-color:#9b8bd5;
-  background:#f7f4ff;
-  color:#58469b;
+  border-color:#e18a45;
+  background:#fff8f1;
+  color:#8c3d00;
 }
 .cross-page-alert-row.suspected {
-  border-color:#c7bdf2;
-  background:#f1eeff;
-  color:#58469b;
+  border-color:#e7a263;
+  background:#fff0e3;
+  color:#8c3d00;
 }
 @keyframes cross-page-alert-enter { from { opacity:0; transform:translate(-50%,-20px); } to { opacity:1; transform:translate(-50%,0); } }
 @media (prefers-reduced-motion:no-preference) { .cross-page-alert { animation:cross-page-alert-enter .25s ease-out; } }
