@@ -35,4 +35,7 @@ public interface EventActionMapper {
             @Param("handlerId") String handlerId,
             @Param("patientName") String patientName,
             @Param("actionContent") String actionContent);
+
+    /** 낙상 의심 경보에 대응 등록하면 확정 낙상으로 승격해 사고 영상 보관함에 남긴다. */
+    int promoteSuspectedFall(@Param("eventId") String eventId);
 }

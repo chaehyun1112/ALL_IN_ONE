@@ -68,5 +68,13 @@ public class AdminController {
         model.addAttribute("adminRecordPage", true);
         return "html/record/record";
     }
+
+    @GetMapping({"/admin/accidents", "/admin/accidents/"})
+    public String adminAccidentRecords(Authentication authentication, Model model) {
+        // [2026.09.29 변경] 사고 기록을 새로고침해도 관리자 공통 상단 메뉴와 내부 화면 전환을 유지합니다.
+        model.addAttribute("adminId", authentication == null ? "admin01" : authentication.getName());
+        model.addAttribute("pageMode", "accidents");
+        return "html/admin/admin";
+    }
 }
 
