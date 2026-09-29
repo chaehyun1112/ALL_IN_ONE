@@ -657,10 +657,9 @@ document.addEventListener("DOMContentLoaded", () => {
     corridorSelected=location==='corridor';
     selected=corridorSelected?null:Number(location);
     const room=corridorSelected ? corridorAlert : rooms.get(selected);if(!room||room.status==="normal")return;
-    registrationRoom=corridorSelected ? "corridor" : selected;registrationEvent=room.eventId;room.acknowledged=true;
-    // [2026.09.17] 고친 내용: 복도에서도 대응 등록 클릭 즉시 음성과 남은 반복을 중지합니다.
-    cancelAudio(corridorSelected ? "corridor" : selected);
-    soundInfo.textContent=`${corridorSelected ? corridorAlert.location : `${selected}호`} 대응 시작 · 음성과 남은 반복 중지`;
+    registrationRoom=corridorSelected ? "corridor" : selected;registrationEvent=room.eventId;
+    // [2026.09.29 변경] 대응 등록 창을 여는 행위는 완료 처리가 아니므로 취소·ESC·창 닫기 후에도 음성과 점멸을 유지합니다.
+    soundInfo.textContent=`${corridorSelected ? corridorAlert.location : `${selected}호`} 대응 등록 입력 중 · 등록 완료 전까지 음성과 점멸이 유지됩니다.`;
     form.reset();document.getElementById("response-title").textContent=`${labels[room.status]} 대응 등록`;
     const eventBox=document.getElementById("response-event");
     eventBox.textContent=`${room.test?'테스트 · ':''}${corridorSelected ? corridorAlert.location : `${selected}호`} · ${labels[room.status]}`;
@@ -721,7 +720,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     // 조치 내용 등록은 조치 완료로 처리합니다.
-    room.status="normal";room.acknowledged=false;if(registrationRoom!=="corridor")cancelAudio(room.number);
+    // [2026.09.29 변경] 로컬 테스트 경보도 실제 대응 등록이 저장된 경우에만 음성과 점멸을 종료합니다.
+    room.status="normal";room.acknowledged=false;cancelAudio(registrationRoom==="corridor" ? "corridor" : room.number);
     dialog.close();render();
   });
   const toggle=document.getElementById("profile-toggle"),menu=document.getElementById("header-menu-list");

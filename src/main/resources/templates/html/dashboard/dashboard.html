@@ -351,7 +351,8 @@
   <script src="../../../static/JS/dashboard/room-status.js?v=server-link-20260926" th:src="@{/JS/dashboard/room-status.js(v='server-link-20260926')}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <!-- [2026.09.17] 고친 내용: 대응 등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
-  <script src="../../../static/JS/dashboard/dashboard.js?v=review2-20260927" th:src="@{/JS/dashboard/dashboard.js(v='review2-20260927')}"></script>
+  <!-- [2026.09.29 변경] 대응 등록 취소·닫기 시 경보 음성과 점멸을 유지하도록 최신 스크립트를 불러옵니다. -->
+  <script src="../../../static/JS/dashboard/dashboard.js?v=response-cancel-alert-20260929" th:src="@{/JS/dashboard/dashboard.js(v='response-cancel-alert-20260929')}"></script>
   <!-- [2026.09.26 추가] 서버 감지 알림 연결(오늘 이벤트 불러오기 + 실시간 구독). dashboard.js 다음에 불러옵니다. -->
   <script src="../../../static/JS/dashboard/server-events.js?v=review-fix-20260927" th:src="@{/JS/dashboard/server-events.js(v='review-fix-20260927')}"></script>
 </body>
