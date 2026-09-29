@@ -544,8 +544,14 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   body[data-dashboard-view="dashboard"] > main#dashboard-main {
     height:calc(100dvh - var(--dashboard-header-height));
     min-height:0;
-    overflow:hidden;
+    /* [2026.09.29 변경] 작은 세로 화면에서는 하단 기록을 자르지 않고 휠·터치패드로만 스크롤합니다. */
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
   }
+  /* [2026.09.29 변경] 스크롤 기능은 유지하되 관제 화면에는 스크롤바를 표시하지 않습니다. */
+  body[data-dashboard-view="dashboard"] > main#dashboard-main::-webkit-scrollbar { display:none; }
   body[data-dashboard-view="dashboard"] #dashboard-main > .layout {
     flex:0 0 auto;
     grid-template-rows:auto;
