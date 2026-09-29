@@ -1835,11 +1835,11 @@ main{height:auto;min-height:calc(100dvh - 72px)}
     min-height: 48px;
     padding: 8px clamp(10px, 1vw, 16px);
   }
-  /* [2026.09.16] 고친 내용: 좌우 영역을 약 72:28 비율로 유지하고 고정 너비로 인한 배치 변화를 줄입니다. */
+  /* [2026.09.29 변경] 오른쪽 확인 알림 영역을 조금 넓혀 긴 위치명과 두 개의 버튼도 안정적으로 표시합니다. */
   main > .layout {
     flex: 0 0 auto;
     min-height: 0;
-    grid-template-columns: minmax(0, 72fr) minmax(260px, 28fr);
+    grid-template-columns: minmax(0, 70fr) minmax(300px, 30fr);
     grid-template-rows: minmax(0, 1fr);
     gap: var(--dashboard-gap);
   }
