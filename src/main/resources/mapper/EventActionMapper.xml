@@ -22,7 +22,9 @@
             h.emp_nm AS staff_name,
             a.crt_dt AS action_at,
             a.action_content,
-            w.ward_nm AS ward_name
+            w.ward_nm AS ward_name,
+            <!-- [2026.09.29 변경] event_detail 에 보관한 영상 URL은 사고 영상 보관함에서만 사용합니다. -->
+            COALESCE(e.event_detail ->> 'video_url', e.event_detail ->> 'videoUrl', '') AS video_url
         FROM tb_detection_event e
         JOIN tb_location l
           ON l.location_id = e.location_id
@@ -108,5 +110,14 @@
         )
         ON CONFLICT (event_id) DO NOTHING
     </insert>
+
+    <!-- [2026.09.29 변경] 낙상 의심의 대응 등록은 실제 낙상으로 확정해 조치기록·사고 영상 보관함에 포함합니다. -->
+    <update id="promoteSuspectedFall">
+        UPDATE tb_detection_event
+        SET decision_st = 'CONFIRMED'
+        WHERE event_id = CAST(#{eventId} AS UUID)
+          AND event_type = 'FALL'
+          AND decision_st = 'SUSPECTED'
+    </update>
 
 </mapper>

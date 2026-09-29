@@ -91,6 +91,8 @@ public class EventActionService {
         if (inserted == 0) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 조치가 등록된 이벤트입니다.");
         }
+        // [2026.09.29 변경] 낙상 의심은 대응 등록이 완료된 경우에만 확정 낙상으로 바꿔 사고 영상 보관함에 남깁니다.
+        eventActionMapper.promoteSuspectedFall(eventId);
     }
 
     private ActionHistoryResponse toResponse(ActionHistoryRow row) {
@@ -107,7 +109,9 @@ public class EventActionService {
                 done ? "완료" : "미확인",
                 SeoulTimes.screenMinute(row.actionAt()),
                 nullToEmpty(row.actionContent()),
-                nullToEmpty(row.wardName()));
+                nullToEmpty(row.wardName()),
+                // [2026.09.29 변경] 영상이 없는 기존 사고도 동일한 API로 조회할 수 있도록 빈 값으로 반환합니다.
+                nullToEmpty(row.videoUrl()));
     }
 
     private String nullToEmpty(String value) {
