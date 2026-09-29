@@ -107,7 +107,9 @@ public class EventActionService {
                 done ? "완료" : "미확인",
                 SeoulTimes.screenMinute(row.actionAt()),
                 nullToEmpty(row.actionContent()),
-                nullToEmpty(row.wardName()));
+                nullToEmpty(row.wardName()),
+                // [2026.09.29 변경] 영상이 없는 기존 사고도 동일한 API로 조회할 수 있도록 빈 값으로 반환합니다.
+                nullToEmpty(row.videoUrl()));
     }
 
     private String nullToEmpty(String value) {

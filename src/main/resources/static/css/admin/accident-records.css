@@ -1,59 +1,20 @@
 @charset "UTF-8";
 
-/* [2026.09.29 변경] 관리자 사고 기록을 기존 관리 화면과 같은 블루 그레이 톤·표 구조로 표시합니다. */
-.admin-accident-page {
-  gap: 0;
-  overflow-y: hidden;
-}
+/* [2026.09.29 변경] 사고 기록을 보관 영상 선택·재생 중심의 관리자 영상 보관함으로 구성합니다. */
+.admin-accident-page { gap: 0; overflow-y: hidden; }
 .admin-accident-heading { flex: 0 0 auto; }
-.admin-accident-summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  flex: 0 0 auto;
-  margin: 0 0 18px;
-}
-.admin-accident-summary article {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: end;
-  min-height: 92px;
-  padding: 18px 20px;
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  background: var(--admin-surface);
-}
+.admin-accident-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; flex: 0 0 auto; margin: 0 0 18px; }
+.admin-accident-summary article { display: grid; grid-template-columns: 1fr auto auto; align-items: end; min-height: 92px; padding: 18px 20px; border: 1px solid var(--admin-border); border-radius: 12px; background: var(--admin-surface); }
 .admin-accident-summary span { align-self: start; color: var(--admin-muted); font-size: 12px; font-weight: 700; }
 .admin-accident-summary strong { color: var(--admin-text); font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
 .admin-accident-summary small { margin-left: 4px; color: var(--admin-muted); font-size: 12px; }
 .admin-accident-summary article:nth-child(2) strong { color: #b6453d; }
-.admin-accident-summary article:nth-child(3) strong { color: #526d82; }
+.admin-accident-summary article:nth-child(3) strong { color: #7b8792; }
 
-.admin-accident-panel {
-  display: flex;
-  min-height: 0;
-  flex: 1 1 auto;
-  flex-direction: column;
-  padding-bottom: 16px;
-}
-.admin-accident-filters {
-  display: flex;
-  align-items: end;
-  gap: 8px;
-  flex: 0 0 auto;
-  margin: 18px 0 10px;
-}
+.admin-accident-panel { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; padding-bottom: 16px; }
+.admin-accident-filters { display: flex; align-items: end; gap: 8px; flex: 0 0 auto; margin: 18px 0 10px; }
 .admin-accident-filters label { display: grid; gap: 6px; color: var(--admin-muted); font-size: 11px; font-weight: 700; }
-.admin-accident-filters select,
-.admin-accident-filters input,
-.admin-accident-filters button {
-  height: 38px;
-  border: 1px solid var(--admin-border);
-  border-radius: 7px;
-  background: #fff;
-  color: var(--admin-text);
-  font-size: 12px;
-}
+.admin-accident-filters select, .admin-accident-filters input, .admin-accident-filters button { height: 38px; border: 1px solid var(--admin-border); border-radius: 7px; background: #fff; color: var(--admin-text); font-size: 12px; }
 .admin-accident-filters select { min-width: 122px; padding: 0 9px; }
 .admin-accident-search-field { flex: 1 1 220px; }
 .admin-accident-filters input { width: 100%; padding: 0 11px; }
@@ -61,22 +22,33 @@
 .admin-accident-filters button:first-of-type { border-color: #526d82; background: #526d82; color: #fff; font-weight: 700; }
 .admin-accident-filters button:hover { filter: brightness(.97); }
 .admin-accident-result { flex: 0 0 auto; margin: 0 0 10px; color: var(--admin-muted); font-size: 11px; }
-.admin-accident-table-wrap { min-height: 0; flex: 1 1 auto; overflow: auto; border: 1px solid #dbe4ec; border-radius: 9px; }
-.admin-accident-table { width: 100%; min-width: 760px; border-collapse: collapse; table-layout: fixed; text-align: center; font-size: 12px; }
-.admin-accident-table th { position: sticky; top: 0; z-index: 1; height: 44px; background: #e5eef5; color: #47627a; font-weight: 800; }
-.admin-accident-table th:nth-child(1) { width: 18%; }
-.admin-accident-table th:nth-child(2) { width: 11%; }
-.admin-accident-table th:nth-child(3) { width: 15%; }
-.admin-accident-table th:nth-child(4) { width: 13%; }
-.admin-accident-table th:nth-child(5) { width: 14%; }
-.admin-accident-table th:nth-child(6) { width: 13%; }
-.admin-accident-table th:nth-child(7) { width: 16%; }
-.admin-accident-table td { height: 48px; padding: 8px; border-top: 1px solid #e7edf2; color: #52606d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.admin-accident-table tr:hover td { background: #f7fafc; }
-.admin-accident-table .admin-accident-type { color: #a6342b; font-weight: 800; }
-.admin-accident-table .is-pending { color: #b6453d; font-weight: 800; }
-.admin-accident-table .is-completed { color: #526d82; font-weight: 800; }
-.admin-accident-table .admin-accident-empty { height: 180px; color: var(--admin-muted); }
+
+.admin-accident-archive { display: grid; grid-template-columns: minmax(380px, 1.2fr) minmax(310px, .8fr); gap: 16px; min-height: 0; flex: 1 1 auto; }
+.admin-accident-player, .admin-accident-list { min-height: 0; border: 1px solid #dbe4ec; border-radius: 10px; background: #fbfdff; }
+.admin-accident-player { display: flex; flex-direction: column; padding: 16px; }
+.admin-accident-player header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.admin-accident-player h3 { margin: 0; color: var(--admin-text); font-size: 15px; }
+.admin-accident-player header span { color: #526d82; font-size: 11px; font-weight: 700; }
+#admin-accident-video, .admin-accident-video-empty { width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; }
+#admin-accident-video { background: #152534; object-fit: contain; }
+.admin-accident-video-empty { display: grid; place-items: center; padding: 24px; box-sizing: border-box; border: 1px dashed #c5d4e0; background: #eef4f8; color: #61788a; text-align: center; font-size: 13px; line-height: 1.6; }
+.admin-accident-video-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0 0; }
+.admin-accident-video-details div { min-width: 0; padding: 10px; border-radius: 7px; background: #f1f6fa; }
+.admin-accident-video-details dt { color: var(--admin-muted); font-size: 10px; font-weight: 700; }
+.admin-accident-video-details dd { margin: 5px 0 0; overflow: hidden; color: var(--admin-text); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
+.admin-accident-list { display: grid; align-content: start; gap: 9px; overflow-y: auto; padding: 12px; }
+.admin-accident-video-card { display: grid; gap: 7px; width: 100%; padding: 13px 14px; border: 1px solid #d7e2ea; border-radius: 8px; background: #fff; color: var(--admin-text); cursor: pointer; text-align: left; }
+.admin-accident-video-card:hover { border-color: #8ba7bb; background: #f6faff; }
+.admin-accident-video-card.is-selected { border-color: #526d82; box-shadow: 0 0 0 2px rgba(82, 109, 130, .13); }
+.admin-accident-video-card.is-missing { background: #fcfcfc; }
+.admin-accident-video-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--admin-muted); font-size: 11px; }
+.admin-accident-video-meta strong { font-size: 11px; }
+.admin-accident-video-meta .is-pending { color: #b6453d; }
+.admin-accident-video-meta .is-completed { color: #526d82; }
+.admin-accident-video-title { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.admin-accident-video-subtitle { color: var(--admin-muted); font-size: 11px; }
+.admin-accident-empty { margin: 0; padding: 58px 16px; color: var(--admin-muted); font-size: 12px; text-align: center; }
 .admin-accident-pagination { display: flex; justify-content: center; gap: 6px; flex: 0 0 auto; min-height: 34px; margin-top: 12px; }
 .admin-accident-pagination button { min-width: 30px; height: 30px; border: 1px solid #d3e0ea; border-radius: 7px; background: #fff; color: #526d82; cursor: pointer; }
 .admin-accident-pagination button[aria-current="page"] { border-color: #526d82; background: #526d82; color: #fff; font-weight: 800; }
@@ -87,5 +59,7 @@
   .admin-accident-filters { align-items: stretch; flex-wrap: wrap; }
   .admin-accident-filters label { flex: 1 1 150px; }
   .admin-accident-filters button { margin-top: 18px; }
-  .admin-accident-panel { min-height: 600px; }
+  .admin-accident-panel { min-height: 720px; }
+  .admin-accident-archive { grid-template-columns: 1fr; }
+  .admin-accident-list { max-height: 420px; }
 }

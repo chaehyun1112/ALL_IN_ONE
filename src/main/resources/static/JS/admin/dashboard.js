@@ -1711,7 +1711,7 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-inactive-submenu")?.previousElementSibling?.classList.toggle("active", view === "inactive" || view === "inactive-caregivers");
     document.querySelector("#admin-history-submenu")?.previousElementSibling?.classList.toggle("active", isHistory);
     document.title = isHome ? "관리자 홈 | 병동 통합 관제"
-        : view === "accidents" ? "사고 기록 | 병동 통합 관제"
+        : view === "accidents" ? "사고 영상 보관함 | 병동 통합 관제"
         : view === "records" ? "관리자 조치기록 | 병동 통합 관제"
         : view === "history-caregivers" ? "간병인 관리 이력 | 병동 통합 관제"
         : view === "history" ? "간호사 관리 이력 | 병동 통합 관제"
