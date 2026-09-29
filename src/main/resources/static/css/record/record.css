@@ -605,9 +605,9 @@ select:focus-visible,
   border-radius: 0 5.51px 5.51px 0;
 }
 
-/* 완료 기록 배경 */
+/* 완료 여부와 관계없이 기록 배경을 흰색으로 표시합니다. */
 .record-table .completed-row td {
-  background: #eae8df;
+  background: #fff;
 }
 
 /* 알림 유형 배지 */

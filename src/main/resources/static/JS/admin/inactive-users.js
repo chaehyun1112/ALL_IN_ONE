@@ -300,8 +300,9 @@ function getAdminCurrentPageUsers() {
 
 function renderAdminInactivePagination(totalUsers) {
     adminInactivePagination.replaceChildren();
-    const totalPages = Math.ceil(totalUsers / ADMIN_INACTIVE_PAGE_SIZE);
-    if (totalPages <= 1) {
+    const caregiver = document.body.dataset.adminJobType === "CAREGIVER";
+    const totalPages = Math.max(1, Math.ceil(totalUsers / ADMIN_INACTIVE_PAGE_SIZE));
+    if (totalPages <= 1 && !caregiver) {
         adminInactivePagination.hidden = true;
         return;
     }
