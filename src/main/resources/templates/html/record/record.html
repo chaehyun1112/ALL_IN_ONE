@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- [2026.09.17] 고친 내용: 관리자 메뉴에서 열 때도 화면 역할이 제목에 반영되게 합니다. -->
-  <title th:text="${adminRecordPage} ? '관리자 조치기록 | 병동 통합 관제' : '조치 기록 | 병동 통합 관제'">조치 기록 | 병동 통합 관제</title>
+  <!-- [2026.09.29 변경] 간호사·관리자 공통 화면 제목을 낙상 조치 기록으로 표시합니다. -->
+  <title th:text="${adminRecordPage} ? '관리자 낙상 조치 기록 | 병동 통합 관제' : '낙상 조치 기록 | 병동 통합 관제'">낙상 조치 기록 | 병동 통합 관제</title>
 
   <!-- Excel 파일 생성 라이브러리 -->
   <script
@@ -18,8 +18,8 @@
   <!-- CSS 연결 -->
   <link
     rel="stylesheet"
-    href="../../../static/css/record/record.css"
-    th:href="@{/css/record/record.css}"
+    href="../../../static/css/record/record.css?v=hidden-record-scroll-20260929"
+    th:href="@{/css/record/record.css(v='hidden-record-scroll-20260929')}"
   >
   <!-- [09.13]추가내용: 기록 필터와 내보내기 스타일을 기능별 CSS로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/record/record-filter.css" th:href="@{/css/record/record-filter.css}">
@@ -37,8 +37,8 @@
     defer
   ></script>
   <script
-    src="../../../static/JS/record/record.js?v=review2-20260927"
-    th:src="@{/JS/record/record.js(v='review2-20260927')}"
+    src="../../../static/JS/record/record.js?v=record-page-18-20260929"
+    th:src="@{/JS/record/record.js(v='record-page-18-20260929')}"
     defer
   ></script>
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
@@ -91,7 +91,7 @@
         class="page-title"
         id="page-title"
       >
-        조치 기록
+        낙상 조치 기록
       </h1>
 
       <p class="page-description">
@@ -103,7 +103,7 @@
     <form
       class="search-form"
       id="search-form"
-      aria-label="조치 기록 검색"
+      aria-label="낙상 조치 기록 검색"
     >
       <!-- 기간 필터 -->
       <div
@@ -374,7 +374,7 @@
       </div>
     </form>
 
-    <!-- 전체 조치 기록 표 -->
+    <!-- [2026.09.29 변경] 확정 낙상 이력만 다루는 표임을 제목으로 명확히 표시합니다. -->
     <section
       class="record-panel"
       aria-labelledby="record-title"
@@ -383,7 +383,7 @@
         class="record-title"
         id="record-title"
       >
-        전체 안전 조치 기록
+        전체 낙상 조치 기록
       </h2>
 
       <!-- [2026-09-18] 추가 내용: 검색과 별개로 선택을 유지하고 모아보기·선택 해제를 제공합니다. -->
@@ -397,7 +397,7 @@
         class="table-scroll"
         tabindex="0"
         role="region"
-        aria-label="전체 안전 조치 기록 표"
+        aria-label="전체 낙상 조치 기록 표"
       >
         <table class="record-table">
           <!-- 각 열의 너비는 CSS에서 지정합니다. -->
@@ -442,7 +442,7 @@
       <nav
         class="record-pagination"
         id="record-pagination"
-        aria-label="조치 기록 페이지"
+        aria-label="낙상 조치 기록 페이지"
       ></nav>
     </section>
 
@@ -456,7 +456,7 @@
 
     <!-- JS가 꺼져 있을 때 표시합니다. -->
     <noscript>
-      조치 기록을 표시하려면 JavaScript를 활성화해주세요.
+      낙상 조치 기록을 표시하려면 JavaScript를 활성화해주세요.
     </noscript>
   </main>
 
@@ -551,7 +551,7 @@
       <header class="export-header">
         <div>
           <h2 id="export-title">
-            조치 기록 내보내기
+            낙상 조치 기록 내보내기
           </h2>
 
           <p>

@@ -341,6 +341,38 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-inactive-management-link:hover { border-color: var(--admin-green); background: #f5f8f3; }
 .admin-inactive-management-link:focus-visible { outline: 2px solid var(--admin-green); outline-offset: 3px; }
 
+/* [2026.09.29 변경] 관리자 관리·이력·비활성화 화면도 넓은 PC에서 좌우 여백을 줄여 화면 폭을 충분히 사용합니다. */
+@media (min-width:801px) {
+  .admin-page {
+    left:0;
+    box-sizing:border-box;
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding:clamp(18px,1.4vw,28px) clamp(14px,1.4vw,24px) clamp(24px,2vw,36px);
+  }
+}
+
+/* [2026.09.29 변경] PC에서도 목록 카드가 헤더 아래 남은 높이를 채우고, 표만 내부에서 늘어나거나 스크롤되도록 세로 flex 흐름을 명확히 합니다. */
+#admin-management-page {
+  height:calc(100dvh - var(--admin-topbar-height));
+  min-height:0;
+}
+#admin-management-page > .admin-panel {
+  display:flex;
+  min-height:0;
+  flex:1 1 auto;
+  flex-direction:column;
+}
+#admin-management-page > .admin-panel > .admin-table-wrap {
+  flex:1 1 auto;
+  min-height:0;
+}
+#admin-management-page > .admin-panel > #admin-user-pagination {
+  flex:0 0 auto;
+  margin-top:auto;
+}
+
 
 /* 직원 계정 관리 검색창과 결과 안내 */
 #admin-management-page .admin-search { flex-wrap: wrap; }

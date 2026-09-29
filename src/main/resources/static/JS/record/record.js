@@ -155,8 +155,8 @@ function initializePage() {
     renderRecords(filteredRecords);
   }
 
-  /* [9.15] 수정내용: 조치 기록은 한 페이지에 최대 10건씩 표시합니다. */
-  const recordsPerPage = 10;
+  /* [2026.09.29 변경] 전체화면에서 목록 여백을 줄이고 충분한 기록을 한 번에 확인하도록 18건씩 표시합니다. */
+  const recordsPerPage = 18;
   let currentPage = 1;
 
   /* 조회 상태 */
@@ -624,6 +624,13 @@ function initializePage() {
       badge.className = "alert-badge";
 
       badge.classList.add("fall-badge");
+
+      // [2026.09.28 변경] 오경보로 확인한 낙상은 일반 낙상과 구분할 수 있도록
+      // 조치기록의 표시 아이콘을 원형 대신 삼각형으로 보여줍니다.
+      const isFalseAlarm = record.patient === "오경보" || record.actionContent === "오경보 확인";
+      if (isFalseAlarm) {
+        badge.classList.add("false-alarm-badge");
+      }
 
       // [2026.09.20] 별도 점·배지 없이 유형명과 글자색만으로 구분합니다.
       badge.textContent = record.type;

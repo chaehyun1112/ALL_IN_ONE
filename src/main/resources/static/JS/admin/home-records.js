@@ -81,10 +81,12 @@
 
   function renderAlerts(records) {
     const section = home.querySelector(".admin-home-alerts");
-    section.querySelectorAll(".admin-home-alert-row, .admin-home-record-row").forEach(node => node.remove());
+    const list = section.querySelector(".admin-home-alert-list");
+    // [2026.09.29 변경] 실시간 알림 카드는 제목과 분리한 숨김 스크롤 목록 안에서만 교체합니다.
+    list.replaceChildren();
     const since = seoulMinute(new Date(Date.now() - 24 * 60 * 60 * 1000));
     const pending = records.filter(record => record.status !== "완료" && record.occurredAt >= since).slice(0, 3);
-    if (!pending.length) section.append(element("div", "admin-home-record-row", "지금 확인이 필요한 낙상 알림이 없습니다."));
+    if (!pending.length) list.append(element("div", "admin-home-record-row", "지금 확인이 필요한 낙상 알림이 없습니다."));
     for (const record of pending) {
       const row = element("div", "admin-home-alert-row");
       const indicator = element("span", "admin-home-alert-indicator");
@@ -94,7 +96,7 @@
       const time = element("time", "", record.occurredAt.slice(11, 16));
       time.dateTime = record.occurredAt;
       row.append(indicator, details, time);
-      section.append(row);
+      list.append(row);
     }
     hideDemoBadge(section);
   }
