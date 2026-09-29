@@ -10,7 +10,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <!-- [9.15] 수정내용: 직원 관리와 관리 이력 화면에서 브라우저 제목도 현재 화면에 맞게 표시한다. -->
-    <title th:text="${pageMode == 'records'} ? '관리자 조치기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제')))">간호사 관리 | 병동 통합 관제</title>
+    <title th:text="${pageMode == 'records'} ? '관리자 낙상 조치 기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제')))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
           href="../../../static/css/admin/dashboard.css?v=wide-admin-pages-20260929"
@@ -344,8 +344,9 @@
 </main>
 
 <!-- [2026.09.17] 추가한 내용: 조치기록을 관리자 문서 안에서 열어 전체화면 상태를 유지합니다. -->
-<section class="admin-record-view" id="admin-record-view" aria-label="조치기록" hidden th:hidden="${pageMode != 'records'}">
-    <iframe id="admin-record-frame" title="조치기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/admin/records/content}"></iframe>
+<!-- [2026.09.29 변경] 관리자 계정에서 여는 공용 낙상 조치 기록 화면의 접근성 제목을 통일합니다. -->
+<section class="admin-record-view" id="admin-record-view" aria-label="낙상 조치 기록" hidden th:hidden="${pageMode != 'records'}">
+    <iframe id="admin-record-frame" title="낙상 조치 기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/admin/records/content}"></iframe>
 </section>
 
 <!-- [2026.09.16] 추가한 내용: 전체화면을 해제하지 않고 본문만 전환할 수 있도록 비활성화 직원관리 화면을 같은 관리자 문서에 둡니다. -->
