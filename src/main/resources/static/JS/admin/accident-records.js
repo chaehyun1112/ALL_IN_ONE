@@ -8,22 +8,22 @@
 
   const recordsUrl = page.dataset.recordsUrl;
   const list = document.querySelector("#admin-accident-rows");
-  const result = document.querySelector("#admin-accident-result");
   const form = document.querySelector("#admin-accident-filter-form");
-  const statusFilter = document.querySelector("#admin-accident-status");
   const wardFilter = document.querySelector("#admin-accident-ward");
   const searchInput = document.querySelector("#admin-accident-search");
   const resetButton = document.querySelector("#admin-accident-reset");
   const pagination = document.querySelector("#admin-accident-pagination");
-  const videoCount = document.querySelector("#admin-accident-video-count");
+  const pendingVideoCount = document.querySelector("#admin-accident-pending-video-count");
+  const completedVideoCount = document.querySelector("#admin-accident-completed-video-count");
+  const videoStatusCards = Array.from(document.querySelectorAll("[data-video-status]"));
   const video = document.querySelector("#admin-accident-video");
   const videoEmpty = document.querySelector("#admin-accident-video-empty");
-  const playerStatus = document.querySelector("#admin-accident-player-status");
   const recordsPerPage = 12;
   let allRecords = [];
   let filteredRecords = [];
   let currentPage = 1;
   let selectedEventId = "";
+  let selectedVideoStatus = "all";
 
   const demoRecords = [
     { eventId: "demo-video-1", occurredAt: "2026-09-29T10:12", wardName: "3병동", room: "302호", patient: "김OO", type: "낙상 감지", status: "미확인", completedAt: "", videoUrl: "" },
@@ -45,8 +45,17 @@
   }
 
   function updateSummary() {
-    const savedVideos = allRecords.filter(hasVideo).length;
-    videoCount.textContent = savedVideos;
+    // [2026.09.29 변경] 상단 카드는 실제 재생 가능한 미확인·완료 영상을 각각 집계합니다.
+    pendingVideoCount.textContent = allRecords.filter(record => hasVideo(record) && record.status === "미확인").length;
+    completedVideoCount.textContent = allRecords.filter(record => hasVideo(record) && record.status === "완료").length;
+  }
+
+  function renderVideoStatusCards() {
+    videoStatusCards.forEach(card => {
+      const selected = card.dataset.videoStatus === selectedVideoStatus;
+      card.classList.toggle("is-selected", selected);
+      card.setAttribute("aria-pressed", String(selected));
+    });
   }
 
   function clearPlayer() {
@@ -56,7 +65,8 @@
     video.load();
     video.hidden = true;
     videoEmpty.hidden = false;
-    playerStatus.textContent = "영상 선택 대기";
+    videoEmpty.querySelector("strong").textContent = "사고 영상을 선택해 주세요.";
+    videoEmpty.querySelector("span").textContent = "선택한 영상이 이 영역에서 재생됩니다.";
   }
 
   function showVideo(record) {
@@ -67,14 +77,14 @@
       video.load();
       video.hidden = true;
       videoEmpty.hidden = false;
-      playerStatus.textContent = "영상 미보관";
+      videoEmpty.querySelector("strong").textContent = "재생할 영상이 없습니다.";
+      videoEmpty.querySelector("span").textContent = "저장된 영상이 등록되면 이 영역에서 재생됩니다.";
       renderCards();
       return;
     }
     video.src = record.videoUrl;
     video.hidden = false;
     videoEmpty.hidden = true;
-    playerStatus.textContent = "보관 영상";
     video.load();
     renderCards();
   }
@@ -86,7 +96,7 @@
     card.classList.toggle("is-selected", record.eventId === selectedEventId);
     card.classList.toggle("is-missing", !hasVideo(record));
     card.setAttribute("aria-pressed", String(record.eventId === selectedEventId));
-    card.setAttribute("aria-label", `${displayDateTime(record.occurredAt)} ${text(record.room)} 사고 영상 ${hasVideo(record) ? "재생" : "미보관"}`);
+    card.setAttribute("aria-label", `${displayDateTime(record.occurredAt)} ${text(record.room)} 사고 영상 선택`);
 
     const metadata = document.createElement("span");
     metadata.className = "admin-accident-video-meta";
@@ -103,7 +113,7 @@
     title.textContent = `${[record.wardName, record.room].filter(Boolean).join(" · ") || "위치 미정"} · ${text(record.type || "낙상 감지")}`;
     const subtitle = document.createElement("span");
     subtitle.className = "admin-accident-video-subtitle";
-    subtitle.textContent = `${text(record.patient)} · ${hasVideo(record) ? "영상 보관" : "영상 미보관"}`;
+    subtitle.textContent = text(record.patient);
     card.append(metadata, title, subtitle);
     card.addEventListener("click", () => showVideo(record));
     return card;
@@ -141,7 +151,6 @@
     } else {
       pageRecords.forEach(record => list.append(createCard(record)));
     }
-    result.textContent = `사고 ${filteredRecords.length}건 · 보관 영상 ${filteredRecords.filter(hasVideo).length}건`;
     renderPagination();
   }
 
@@ -156,7 +165,7 @@
   function applyFilters() {
     const query = searchInput.value.trim().toLowerCase();
     filteredRecords = allRecords.filter(record => {
-      const sameStatus = statusFilter.value === "all" || record.status === statusFilter.value;
+      const sameStatus = selectedVideoStatus === "all" || (record.status === selectedVideoStatus && hasVideo(record));
       const sameWard = wardFilter.value === "all" || record.wardName === wardFilter.value;
       const searchable = [record.room, record.patient, record.wardName, record.type]
         .filter(Boolean).join(" ").toLowerCase();
@@ -168,7 +177,6 @@
   }
 
   async function reload() {
-    result.textContent = "사고 영상을 불러오는 중입니다.";
     try {
       const response = await fetch(recordsUrl, {
         credentials: "same-origin",
@@ -184,17 +192,32 @@
     }
     updateSummary();
     updateWardOptions();
+    renderVideoStatusCards();
     applyFilters();
   }
 
   form.addEventListener("submit", event => { event.preventDefault(); applyFilters(); });
-  statusFilter.addEventListener("change", applyFilters);
   wardFilter.addEventListener("change", applyFilters);
   searchInput.addEventListener("input", applyFilters);
   resetButton.addEventListener("click", () => {
-    statusFilter.value = "all";
+    selectedVideoStatus = "all";
+    renderVideoStatusCards();
     wardFilter.value = "all";
     searchInput.value = "";
+    applyFilters();
+  });
+
+  videoStatusCards.forEach(card => card.addEventListener("click", event => {
+    event.stopPropagation();
+    selectedVideoStatus = selectedVideoStatus === card.dataset.videoStatus ? "all" : card.dataset.videoStatus;
+    renderVideoStatusCards();
+    applyFilters();
+  }));
+  // [2026.09.29 변경] 카드 밖의 빈 화면을 누르면 상태별 목록을 닫고 전체 목록으로 되돌립니다.
+  document.addEventListener("click", event => {
+    if (selectedVideoStatus === "all" || event.target.closest(".admin-accident-overview, .admin-accident-list-column, .admin-accident-player, .admin-accident-filters")) return;
+    selectedVideoStatus = "all";
+    renderVideoStatusCards();
     applyFilters();
   });
 
