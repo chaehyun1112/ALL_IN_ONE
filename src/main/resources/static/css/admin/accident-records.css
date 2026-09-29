@@ -34,7 +34,8 @@
 /* [2026.09.29 변경] 선택 영상 영역은 카드 안의 남는 높이를 채우되 일반 창에서 과도하게 커지지 않게 제한합니다. */
 #admin-accident-video, .admin-accident-video-empty { width: 100%; min-height: 260px; max-height: 440px; flex: 1 1 auto; border-radius: 8px; }
 #admin-accident-video { background: #152534; object-fit: contain; }
-.admin-accident-video-empty { display: grid; place-items: center; padding: 24px; box-sizing: border-box; border: 1px dashed #c5d4e0; background: #eef4f8; color: #61788a; text-align: center; font-size: 13px; line-height: 1.6; }
+/* [2026.09.29 변경] 선택 전에는 점선 영역을 없애고 사고 영상 안내 문구만 표시합니다. */
+.admin-accident-video-empty { display: grid; place-items: center; padding: 24px; box-sizing: border-box; color: #61788a; text-align: center; font-size: 13px; line-height: 1.6; }
 .admin-accident-list-column { display: flex; min-height: 0; flex-direction: column; overflow: hidden; }
 /* [2026.09.29 변경] 오른쪽 목록·페이지 영역을 하나의 카드로 묶어 선택 영상 카드와 상단·높이를 맞춥니다. */
 .admin-accident-list { display: block; min-height: 0; flex: 1 1 auto; overflow-y: auto; padding: 12px; -ms-overflow-style: none; scrollbar-width: none; }
