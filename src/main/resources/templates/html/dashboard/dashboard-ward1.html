@@ -278,8 +278,9 @@
   </main>
 
   <!-- [2026.09.17] 추가한 내용: 조치기록을 대시보드 안에서 열어 전체화면 상태를 유지합니다. -->
-  <section id="dashboard-record-view" aria-label="조치기록" hidden th:hidden="${recordMode != 'records'}">
-    <iframe id="dashboard-record-frame" title="조치기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/Record/content}"></iframe>
+  <!-- [2026.09.29 변경] 간호사 계정에서 여는 공용 낙상 조치 기록 화면의 접근성 제목을 통일합니다. -->
+  <section id="dashboard-record-view" aria-label="낙상 조치 기록" hidden th:hidden="${recordMode != 'records'}">
+    <iframe id="dashboard-record-frame" title="낙상 조치 기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/Record/content}"></iframe>
   </section>
 
   <!-- [2026.09.17] 추가한 내용: 기존 비밀번호 변경 화면을 팝업 안에 열어 현재 페이지와 음성 상태를 유지합니다. -->
