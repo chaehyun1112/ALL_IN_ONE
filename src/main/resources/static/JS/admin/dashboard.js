@@ -56,6 +56,8 @@ let adminUserPage = 1;
 let adminHistoryPage = 1;
 const ADMIN_LIST_PAGE_SIZE = 10;
 const ADMIN_USER_PAGE_SIZE = 5;
+// [2026.09.29 변경] 간병인 관리 이력은 더 짧은 단위로 나누어 1·2·3 페이지 이동을 쉽게 확인합니다.
+const ADMIN_CAREGIVER_HISTORY_PAGE_SIZE = 5;
 
 const adminRows = document.querySelector("#admin-user-rows");
 const adminTabs = Array.from(document.querySelectorAll("[data-status]"));
@@ -1442,17 +1444,20 @@ function filterHistory(action, resetPage = false) {
         }
     }
 
-    // [9.15] 추가내용: 필터링된 관리 이력은 10건 단위로 나누어 표시한다.
-    const totalPages = Math.max(1, Math.ceil(matchedRows.length / ADMIN_LIST_PAGE_SIZE));
+    // [2026.09.29 변경] 간병인 관리 이력은 5건씩 표시하여 페이지 번호로 목록을 이동합니다.
+    const historyPageSize = document.body.dataset.adminJobType === "CAREGIVER"
+        ? ADMIN_CAREGIVER_HISTORY_PAGE_SIZE
+        : ADMIN_LIST_PAGE_SIZE;
+    const totalPages = Math.max(1, Math.ceil(matchedRows.length / historyPageSize));
     adminHistoryPage = Math.min(adminHistoryPage, totalPages);
-    const firstIndex = (adminHistoryPage - 1) * ADMIN_LIST_PAGE_SIZE;
+    const firstIndex = (adminHistoryPage - 1) * historyPageSize;
 
     rows.forEach(row => {
         row.hidden = !matchedRows.includes(row);
     });
 
     matchedRows.forEach((row, index) => {
-        row.hidden = index < firstIndex || index >= firstIndex + ADMIN_LIST_PAGE_SIZE;
+        row.hidden = index < firstIndex || index >= firstIndex + historyPageSize;
     });
 
     renderAdminPagination(adminHistoryPagination, adminHistoryPage, totalPages, page => {
@@ -1634,6 +1639,11 @@ function setAdminView(view, updateAddress = true) {
     if (historyHeaders[3]) historyHeaders[3].textContent = caregiver ? "병동 / 담당 병실" : "담당 병동";
     const historySummary = document.querySelector("#admin-history-summary");
     if (historySummary) historySummary.classList.toggle("is-caregiver-history", caregiver);
+    // [2026.09.29 변경] 현재 이력 화면의 페이지 이동 영역을 직무별로 구분해 안내합니다.
+    if (adminHistoryPagination) adminHistoryPagination.setAttribute(
+        "aria-label",
+        caregiver ? "간병인 관리 이력 페이지" : "간호사 관리 이력 페이지"
+    );
     const historyPasswordCard = document.querySelector("#admin-history-password-card");
     if (historyPasswordCard) historyPasswordCard.hidden = caregiver;
     const historyPhoneCard = document.querySelector("#admin-history-phone-card");
