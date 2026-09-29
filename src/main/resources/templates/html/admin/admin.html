@@ -47,7 +47,7 @@
     <!-- [2026.09.29 변경] 관리자 홈 실시간 알림의 카드 간격·숨김 스크롤 CSS를 최신 버전으로 불러옵니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/home.css?v=scrollable-alert-list-20260929" th:href="@{/css/admin/home.css(v='scrollable-alert-list-20260929')}">
     <!-- [2026.09.29 변경] 사고 영상 보관함의 영상 재생·목록 레이아웃을 제공합니다. -->
-    <link rel="stylesheet" href="../../../static/css/admin/accident-records.css?v=compact-video-layout-20260929" th:href="@{/css/admin/accident-records.css(v='compact-video-layout-20260929')}">
+    <link rel="stylesheet" href="../../../static/css/admin/accident-records.css?v=responsive-video-archive-20260929" th:href="@{/css/admin/accident-records.css(v='responsive-video-archive-20260929')}">
 </head>
 
 <body>
@@ -366,11 +366,11 @@
         <div class="admin-accident-overview">
             <!-- [2026.09.29 변경] 상태 카드를 누르면 해당 상태의 확정 낙상 영상만 조회합니다. -->
             <button type="button" class="admin-accident-stat" data-video-status="미확인" aria-pressed="false" aria-label="미확인 영상만 보기">
-                <span class="admin-accident-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3Z"/></svg></span>
+                <span class="admin-accident-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span>
                 <div><h2>미확인 영상</h2><strong id="admin-accident-pending-video-count">—<span>건</span></strong></div>
             </button>
             <button type="button" class="admin-accident-stat" data-video-status="완료" aria-pressed="false" aria-label="확인 완료 영상만 보기">
-                <span class="admin-accident-symbol admin-accident-complete-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m8 12 3 3 5-6"/></svg></span>
+                <span class="admin-accident-symbol admin-accident-complete-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m8.5 12 2.3 2.3 4.7-5"/></svg></span>
                 <div><h2>확인 완료 영상</h2><strong id="admin-accident-completed-video-count">—<span>건</span></strong></div>
             </button>
         </div>

@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 /* [2026.09.29 변경] 사고 기록을 보관 영상 선택·재생 중심의 관리자 영상 보관함으로 구성합니다. */
-.admin-accident-page { gap: 0; overflow-y: hidden; }
+.admin-accident-page { box-sizing: border-box; gap: 0; overflow-x: hidden; overflow-y: hidden; }
 .admin-accident-heading { position: relative; flex: 0 0 auto; margin-bottom: 14px; }
 /* [2026.09.29 변경] 비활성화 페이지와 같은 작은 우측 카드로 미확인·완료 영상 수를 빠르게 확인합니다. */
 .admin-accident-overview { display: flex; justify-content: flex-end; gap: 10px; }
@@ -11,6 +11,7 @@
 .admin-accident-stat strong { color: var(--admin-text); font-size: 22px; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .admin-accident-stat strong span { margin-left: 4px; color: #647581; font-size: 12px; font-weight: 400; }
 .admin-accident-symbol { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #edf3f7; color: #526d82; }
+.admin-accident-complete-symbol { background: #eef5f0; color: #4f7b62; }
 .admin-accident-symbol svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 @media (min-width: 801px) { .admin-accident-overview { position: absolute; top: 0; right: 0; } }
 
@@ -19,14 +20,14 @@
 .admin-accident-filters label { display: grid; gap: 6px; color: var(--admin-muted); font-size: 11px; font-weight: 700; }
 .admin-accident-filters select, .admin-accident-filters input, .admin-accident-filters button { height: 38px; border: 1px solid var(--admin-border); border-radius: 7px; background: #fff; color: var(--admin-text); font-size: 12px; }
 .admin-accident-filters select { min-width: 122px; padding: 0 9px; }
-.admin-accident-search-field { flex: 1 1 220px; }
+.admin-accident-search-field { min-width: 0; flex: 1 1 220px; }
 .admin-accident-filters input { width: 100%; padding: 0 11px; }
 .admin-accident-filters button { min-width: 72px; padding: 0 12px; cursor: pointer; }
 .admin-accident-filters button:first-of-type { border-color: #526d82; background: #526d82; color: #fff; font-weight: 700; }
 .admin-accident-filters button:hover { filter: brightness(.97); }
 
-.admin-accident-archive { display: grid; grid-template-columns: minmax(380px, 1.2fr) minmax(310px, .8fr); gap: 16px; min-height: 0; flex: 1 1 auto; }
-.admin-accident-player, .admin-accident-list-column { min-height: 0; border: 1px solid #dbe4ec; border-radius: 10px; background: #fbfdff; }
+.admin-accident-archive { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 16px; min-height: 0; flex: 1 1 auto; width: 100%; }
+.admin-accident-player, .admin-accident-list-column { min-width: 0; min-height: 0; border: 1px solid #dbe4ec; border-radius: 10px; background: #fbfdff; }
 .admin-accident-player { display: flex; flex-direction: column; padding: 16px; }
 .admin-accident-player header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .admin-accident-player h3 { margin: 0; color: var(--admin-text); font-size: 15px; }
@@ -66,10 +67,14 @@
 }
 
 /* [2026.09.29 변경] 일반 창처럼 세로 공간이 낮을 때도 영상 영역을 줄여 화면 아래로 밀리지 않게 합니다. */
+@media (min-width: 901px) and (max-width: 1200px) {
+  .admin-accident-archive { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+
 @media (min-width: 901px) and (max-height: 820px) {
-  html:not(:fullscreen) .admin-accident-page { overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; }
-  html:not(:fullscreen) .admin-accident-page::-webkit-scrollbar { width: 0; height: 0; display: none; }
-  html:not(:fullscreen) .admin-accident-panel { min-height: 0; }
-  html:not(:fullscreen) #admin-accident-video,
-  html:not(:fullscreen) .admin-accident-video-empty { height: min(29vh, 250px); min-height: 180px; aspect-ratio: auto; }
+  .admin-accident-page { overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; }
+  .admin-accident-page::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  .admin-accident-panel { min-height: 0; }
+  #admin-accident-video,
+  .admin-accident-video-empty { height: min(29vh, 250px); min-height: 180px; aspect-ratio: auto; }
 }
