@@ -79,3 +79,13 @@
   #admin-accident-video,
   .admin-accident-video-empty { height: min(29vh, 250px); min-height: 180px; flex: 0 0 auto; }
 }
+
+/* [2026.09.29 변경] documentElement 전체화면에서는 점선 영역을 화면 높이에 맞춘 별도 높이로 고정해 카드 밖으로 밀리지 않게 합니다. */
+html:fullscreen .admin-accident-page { overflow-y: hidden; }
+html:fullscreen #admin-accident-video,
+html:fullscreen .admin-accident-video-empty {
+  height: clamp(300px, 44vh, 520px);
+  min-height: 0;
+  max-height: none;
+  flex: 0 0 auto;
+}
