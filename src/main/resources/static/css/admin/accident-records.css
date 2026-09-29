@@ -26,14 +26,15 @@
 .admin-accident-filters button:hover { filter: brightness(.97); }
 
 .admin-accident-archive { display: grid; grid-template-columns: minmax(380px, 1.2fr) minmax(310px, .8fr); gap: 16px; min-height: 0; flex: 1 1 auto; }
-.admin-accident-player, .admin-accident-list { min-height: 0; border: 1px solid #dbe4ec; border-radius: 10px; background: #fbfdff; }
+.admin-accident-player, .admin-accident-list-column { min-height: 0; border: 1px solid #dbe4ec; border-radius: 10px; background: #fbfdff; }
 .admin-accident-player { display: flex; flex-direction: column; padding: 16px; }
 .admin-accident-player header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .admin-accident-player h3 { margin: 0; color: var(--admin-text); font-size: 15px; }
 #admin-accident-video, .admin-accident-video-empty { width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; }
 #admin-accident-video { background: #152534; object-fit: contain; }
 .admin-accident-video-empty { display: grid; place-items: center; padding: 24px; box-sizing: border-box; border: 1px dashed #c5d4e0; background: #eef4f8; color: #61788a; text-align: center; font-size: 13px; line-height: 1.6; }
-.admin-accident-list-column { display: flex; min-height: 0; flex-direction: column; }
+.admin-accident-list-column { display: flex; min-height: 0; flex-direction: column; overflow: hidden; }
+/* [2026.09.29 변경] 오른쪽 목록·페이지 영역을 하나의 카드로 묶어 선택 영상 카드와 상단·높이를 맞춥니다. */
 .admin-accident-list { display: block; min-height: 0; flex: 1 1 auto; overflow-y: auto; padding: 12px; }
 .admin-accident-list #admin-accident-rows { display: grid; align-content: start; gap: 9px; }
 .admin-accident-video-card { display: grid; gap: 7px; width: 100%; padding: 13px 14px; border: 1px solid #d7e2ea; border-radius: 8px; background: #fff; color: var(--admin-text); cursor: pointer; text-align: left; }
@@ -42,13 +43,12 @@
 .admin-accident-video-card.is-missing { background: #fcfcfc; }
 .admin-accident-video-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--admin-muted); font-size: 11px; }
 .admin-accident-video-meta strong { font-size: 11px; }
-.admin-accident-video-meta .admin-accident-patient-name { color: #526d82; }
 .admin-accident-video-meta .is-pending { color: #b6453d; }
 .admin-accident-video-meta .is-completed { color: #526d82; }
 .admin-accident-video-title { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .admin-accident-video-subtitle { color: var(--admin-muted); font-size: 11px; }
 .admin-accident-empty { margin: 0; padding: 58px 16px; color: var(--admin-muted); font-size: 12px; text-align: center; }
-.admin-accident-pagination { display: flex; justify-content: center; gap: 6px; flex: 0 0 auto; min-height: 34px; margin-top: 10px; }
+.admin-accident-pagination { display: flex; justify-content: center; gap: 6px; flex: 0 0 auto; min-height: 34px; margin: 0; padding: 8px 12px 12px; }
 .admin-accident-pagination button { min-width: 30px; height: 30px; border: 1px solid #d3e0ea; border-radius: 7px; background: #fff; color: #526d82; cursor: pointer; }
 .admin-accident-pagination button[aria-current="page"] { border-color: #526d82; background: #526d82; color: #fff; font-weight: 800; }
 

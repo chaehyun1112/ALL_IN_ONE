@@ -103,18 +103,17 @@
     const timestamp = document.createElement("time");
     timestamp.dateTime = record.occurredAt || "";
     timestamp.textContent = displayDateTime(record.occurredAt);
-    const patientName = document.createElement("strong");
-    patientName.className = "admin-accident-patient-name";
-    // [2026.09.29 변경] 영상 목록은 대응 등록 때 입력한 환자명을 상태 대신 바로 확인할 수 있게 표시합니다.
-    patientName.textContent = `환자명 · ${text(record.patient)}`;
-    metadata.append(timestamp, patientName);
+    const state = document.createElement("strong");
+    state.className = record.status === "완료" ? "is-completed" : "is-pending";
+    state.textContent = record.status === "완료" ? "완료" : "미확인";
+    metadata.append(timestamp, state);
 
     const title = document.createElement("strong");
     title.className = "admin-accident-video-title";
     title.textContent = `${[record.wardName, record.room].filter(Boolean).join(" · ") || "위치 미정"} · ${text(record.type || "낙상 감지")}`;
     const subtitle = document.createElement("span");
     subtitle.className = "admin-accident-video-subtitle";
-    subtitle.textContent = "조치 등록 완료";
+    subtitle.textContent = text(record.patient);
     card.append(metadata, title, subtitle);
     card.addEventListener("click", () => showVideo(record));
     return card;
