@@ -21,8 +21,8 @@
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
     <!-- [2026.09.29 변경] 노트북·PC 반응형 레이아웃 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
     <!-- [2026.09.29 변경] PC에서도 노트북과 같은 관제 도면 비율을 유지하도록 캐시 버전을 갱신합니다. -->
-    <!-- [2026.09.29 변경] PC 하단 기록 카드의 남은 높이 사용 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=fill-dashboard-history-20260929" th:href="@{/css/alleyes-theme.css(v='fill-dashboard-history-20260929')}">
+    <!-- [2026.09.29 변경] PC 하단 오늘의 기록 카드의 최소 높이 보정 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=fix-history-card-height-20260929" th:href="@{/css/alleyes-theme.css(v='fix-history-card-height-20260929')}">
 </head>
 
 <body data-ward-number="3" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-events-url=@{/api/dashboard/events},data-event-api-base=@{/api/events/},data-ws-url=@{/ws},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">

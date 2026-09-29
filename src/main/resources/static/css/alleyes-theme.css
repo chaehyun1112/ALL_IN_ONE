@@ -566,9 +566,13 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   /* [2026.09.29 변경] 평면도 비율은 고정하고, PC에서 남는 세로 공간은 하단 오늘의 기록 카드가 사용합니다. */
   body[data-dashboard-view="dashboard"] .dashboard-history-card {
     display:flex;
-    min-height:0;
-    flex:1 1 auto;
+    /* [2026.09.29 변경] 남는 높이를 사용하되, 오늘의 기록 항목이 찌그러지지 않는 최소 높이는 유지합니다. */
+    min-height:124px !important;
+    flex:1 0 124px;
     align-items:center;
   }
-  body[data-dashboard-view="dashboard"] .dashboard-history-card #room-detail { width:100%; }
+  body[data-dashboard-view="dashboard"] .dashboard-history-card #room-detail {
+    width:100%;
+    min-height:88px !important;
+  }
 }
