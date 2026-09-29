@@ -75,6 +75,7 @@
             </div>
             <!-- [2026.09.17] 추가한 내용: 비활성화 직원관리 옆에서 전체 조치기록을 조회하는 관리자 메뉴를 제공합니다. -->
             <a href="../record/record.html" th:href="@{/admin/records}" data-admin-view="records" th:classappend="${pageMode == 'records'} ? ' active'">조치기록</a>
+            <a style="cursor: default;">사고기록</a>
         </nav>
     </div>
 
@@ -152,7 +153,7 @@
         <!-- [2026-09-21] 관리자 관점에 맞춰 병동별 사고 건수를 세로 막대그래프로 표시합니다. -->
         <section class="admin-home-ward-summary" aria-labelledby="admin-home-ward-title">
             <div class="admin-home-section-heading">
-                <h2 id="admin-home-ward-title">병동별 사고 발생 현황</h2>
+                <h2 id="admin-home-ward-title">병동별 낙상 현황</h2>
                 <div class="admin-home-accident-legend" aria-label="사고 유형 범례">
                     <span><i class="is-fall" aria-hidden="true"></i>낙상</span>
                     <span class="admin-home-alert-demo">화면 예시</span>
@@ -167,7 +168,7 @@
         <!-- [2026-09-21] 달력 대신 관리자 인력 배치 판단에 필요한 시간대별 사고 추이를 표시합니다. -->
         <section class="admin-home-time-summary" aria-labelledby="admin-home-time-title">
             <div class="admin-home-section-heading">
-                <div><h2 id="admin-home-time-title">시간대별 사고 발생 현황</h2><p>오늘 발생한 사고 기준</p></div>
+                <div><h2 id="admin-home-time-title">시간대별 낙상 현황</h2><p>오늘 발생한 사고 집계</p></div>
                 <div class="admin-home-accident-legend" aria-label="사고 유형 범례">
                     <span><i class="is-fall" aria-hidden="true"></i>낙상</span>
                     <span class="admin-home-alert-demo">화면 예시</span>
