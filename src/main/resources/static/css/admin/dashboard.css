@@ -341,6 +341,15 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-inactive-management-link:hover { border-color: var(--admin-green); background: #f5f8f3; }
 .admin-inactive-management-link:focus-visible { outline: 2px solid var(--admin-green); outline-offset: 3px; }
 
+/* [2026.09.29 변경] 넓은 PC에서 관리자 본문이 과도하게 넓어지거나 오른쪽으로 치우치지 않도록 최대 폭과 여백을 화면 크기에 맞춥니다. */
+@media (min-width:801px) {
+  .admin-page {
+    left:0;
+    width:min(100%,1680px);
+    padding:clamp(18px,2vw,28px) clamp(18px,2vw,32px) clamp(24px,2.5vw,40px);
+  }
+}
+
 
 /* 직원 계정 관리 검색창과 결과 안내 */
 #admin-management-page .admin-search { flex-wrap: wrap; }
