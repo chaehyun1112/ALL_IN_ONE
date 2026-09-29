@@ -508,7 +508,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   body[data-dashboard-view="dashboard"] {
     --dashboard-header-height:80px;
     --dashboard-gap:clamp(12px,1.25vw,20px);
-    --dashboard-padding:clamp(14px,1.6vw,28px);
+    --dashboard-padding:clamp(10px,.8vw,16px);
   }
   body[data-dashboard-view="dashboard"] > main#dashboard-main {
     height:auto;
@@ -539,34 +539,23 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   body[data-dashboard-view="dashboard"] .dashboard-history-card { padding:14px 20px; }
 }
 
-/* [2026.09.29 변경] 큰 PC 화면에서 하단 배경 여백이 남지 않도록 평면도·알림 영역이 하단 기록 카드 전까지의 높이를 모두 사용합니다. */
+/* [2026.09.29 변경] PC에서도 노트북과 같은 병실·복도 비율을 유지하고, 화면 바깥 가로 여백만 줄여 관제 도면의 폭을 충분히 확보합니다. */
 @media (min-width:1000px) and (min-height:851px) {
-  body[data-dashboard-view="dashboard"] > main#dashboard-main {
-    height:calc(100dvh - var(--dashboard-header-height));
-    min-height:0;
-    overflow:hidden;
-  }
   body[data-dashboard-view="dashboard"] #dashboard-main > .layout {
-    flex:1 1 auto;
-    min-height:0;
-    grid-template-rows:minmax(0,1fr);
-    align-items:stretch;
+    flex:0 0 auto;
+    grid-template-rows:auto;
+    align-items:start;
   }
   body[data-dashboard-view="dashboard"] .layout > .floor-panel,
   body[data-dashboard-view="dashboard"] .layout > .side {
-    align-self:stretch;
-    min-height:0;
+    align-self:start;
   }
   body[data-dashboard-view="dashboard"] .layout > .floor-panel > .floor {
-    flex:1 1 auto;
-    height:auto;
-    min-height:0;
-    aspect-ratio:auto;
-    grid-template-rows:minmax(0,1fr) minmax(64px,.85fr) minmax(0,1fr);
-  }
-  body[data-dashboard-view="dashboard"] .floor .room-row,
-  body[data-dashboard-view="dashboard"] .floor .corridor {
+    flex:0 0 auto;
     height:auto;
     aspect-ratio:auto;
+    grid-template-rows:auto auto auto;
   }
+  body[data-dashboard-view="dashboard"] .floor .room-row { aspect-ratio:7.6 / 1; }
+  body[data-dashboard-view="dashboard"] .floor .corridor { aspect-ratio:12 / 1; }
 }
