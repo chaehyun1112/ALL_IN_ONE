@@ -21,6 +21,14 @@
         -ms-overflow-style: none;
     }
     .admin-home-page::-webkit-scrollbar { display: none; }
+    /* [2026.09.29 변경] 홈 하단의 두 현황 행이 남는 세로 공간을 나누어 사용해 화면 아래 빈 여백을 없앱니다. */
+    .admin-home-overview { flex: 0 0 auto; }
+    .admin-home-content {
+        min-height: 686px;
+        flex: 1 0 686px;
+        grid-auto-rows: minmax(335px, 1fr);
+    }
+    .admin-home-content > section { height: 100%; }
 }
 /* [2026-09-21] 인사말과 인원 현황 카드가 아래 콘텐츠와 같은 열 너비를 사용합니다. */
 .admin-home-overview, .admin-home-content { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); align-items: stretch; gap: 16px; }
