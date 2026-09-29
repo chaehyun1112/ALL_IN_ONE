@@ -538,3 +538,35 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   body[data-dashboard-view="dashboard"] .floor .corridor { min-height:42px; }
   body[data-dashboard-view="dashboard"] .dashboard-history-card { padding:14px 20px; }
 }
+
+/* [2026.09.29 변경] 큰 PC 화면에서 하단 배경 여백이 남지 않도록 평면도·알림 영역이 하단 기록 카드 전까지의 높이를 모두 사용합니다. */
+@media (min-width:1000px) and (min-height:851px) {
+  body[data-dashboard-view="dashboard"] > main#dashboard-main {
+    height:calc(100dvh - var(--dashboard-header-height));
+    min-height:0;
+    overflow:hidden;
+  }
+  body[data-dashboard-view="dashboard"] #dashboard-main > .layout {
+    flex:1 1 auto;
+    min-height:0;
+    grid-template-rows:minmax(0,1fr);
+    align-items:stretch;
+  }
+  body[data-dashboard-view="dashboard"] .layout > .floor-panel,
+  body[data-dashboard-view="dashboard"] .layout > .side {
+    align-self:stretch;
+    min-height:0;
+  }
+  body[data-dashboard-view="dashboard"] .layout > .floor-panel > .floor {
+    flex:1 1 auto;
+    height:auto;
+    min-height:0;
+    aspect-ratio:auto;
+    grid-template-rows:minmax(0,1fr) minmax(64px,.85fr) minmax(0,1fr);
+  }
+  body[data-dashboard-view="dashboard"] .floor .room-row,
+  body[data-dashboard-view="dashboard"] .floor .corridor {
+    height:auto;
+    aspect-ratio:auto;
+  }
+}

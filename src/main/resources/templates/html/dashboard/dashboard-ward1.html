@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
     <!-- [2026.09.29 변경] 노트북·PC 반응형 레이아웃 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=desktop-responsive-layout-20260929" th:href="@{/css/alleyes-theme.css(v='desktop-responsive-layout-20260929')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=fill-dashboard-height-20260929" th:href="@{/css/alleyes-theme.css(v='fill-dashboard-height-20260929')}">
 </head>
 
 <body data-ward-number="1" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-events-url=@{/api/dashboard/events},data-event-api-base=@{/api/events/},data-ws-url=@{/ws},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
