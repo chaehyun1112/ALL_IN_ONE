@@ -155,8 +155,8 @@ function initializePage() {
     renderRecords(filteredRecords);
   }
 
-  /* [9.15] 수정내용: 조치 기록은 한 페이지에 최대 10건씩 표시합니다. */
-  const recordsPerPage = 10;
+  /* [2026.09.29 변경] 전체화면에서 목록 여백을 줄이고 충분한 기록을 한 번에 확인하도록 25건씩 표시합니다. */
+  const recordsPerPage = 25;
   let currentPage = 1;
 
   /* 조회 상태 */
