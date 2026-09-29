@@ -31,8 +31,8 @@
             th:src="@{/JS/admin/inactive-users.js(v='caregiver-without-phone-20260922')}"
             defer></script>
     <!-- [2026.09.27 추가] 관리자 홈 카드(최근 조치기록·실시간 알림·사고 현황)를 서버 기록으로 채웁니다. -->
-    <script src="../../../static/JS/admin/home-records.js?v=review-fix-20260927"
-            th:src="@{/JS/admin/home-records.js(v='review-fix-20260927')}"
+    <script src="../../../static/JS/admin/home-records.js?v=scrollable-alert-list-20260929"
+            th:src="@{/JS/admin/home-records.js(v='scrollable-alert-list-20260929')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=admin-brand-align-20260920" th:href="@{/css/alleyes-brand.css(v='admin-brand-align-20260920')}">
@@ -40,8 +40,8 @@
     <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=checked-record-20260920" th:href="@{/css/alleyes-theme.css(v='checked-record-20260920')}">
     <!-- [2026.09.29 변경] 노트북·PC 공통 상단 메뉴 높이가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/navigation.css?v=desktop-responsive-layout-20260929" th:href="@{/css/admin/navigation.css(v='desktop-responsive-layout-20260929')}">
-    <!-- [2026.09.29 변경] 관리자 홈의 하단 여백 제거 및 숨김 스크롤 CSS를 최신 버전으로 불러옵니다. -->
-    <link rel="stylesheet" href="../../../static/css/admin/home.css?v=fill-home-height-20260929" th:href="@{/css/admin/home.css(v='fill-home-height-20260929')}">
+    <!-- [2026.09.29 변경] 관리자 홈 실시간 알림의 카드 간격·숨김 스크롤 CSS를 최신 버전으로 불러옵니다. -->
+    <link rel="stylesheet" href="../../../static/css/admin/home.css?v=scrollable-alert-list-20260929" th:href="@{/css/admin/home.css(v='scrollable-alert-list-20260929')}">
 </head>
 
 <body>
@@ -138,13 +138,15 @@
                 <h2 id="admin-home-alerts-title">실시간 알림</h2>
                 <span class="admin-home-alert-demo">화면 예시</span>
             </div>
-            <div class="admin-home-alert-row">
-                <span class="admin-home-alert-indicator" aria-hidden="true"></span>
-                <div class="admin-home-alert-details">
-                    <strong>1병동 301호</strong>
-                    <span>낙상 감지</span>
+            <div class="admin-home-alert-list" aria-label="실시간 알림 목록">
+                <div class="admin-home-alert-row">
+                    <span class="admin-home-alert-indicator" aria-hidden="true"></span>
+                    <div class="admin-home-alert-details">
+                        <strong>1병동 301호</strong>
+                        <span>낙상 감지</span>
+                    </div>
+                    <time datetime="2026-08-25T14:41">14:41</time>
                 </div>
-                <time datetime="2026-08-25T14:41">14:41</time>
             </div>
         </section>
         <!-- [2026-09-21] 관리자 관점에 맞춰 병동별 사고 건수를 세로 막대그래프로 표시합니다. -->
