@@ -55,7 +55,8 @@ let adminToastTimer = null;
 let adminUserPage = 1;
 let adminHistoryPage = 1;
 const ADMIN_LIST_PAGE_SIZE = 10;
-const ADMIN_USER_PAGE_SIZE = 5;
+// [2026.09.29 변경] 간호사·간병인 관리 목록은 15명까지 표시하고, 16명부터 다음 페이지로 이동합니다.
+const ADMIN_USER_PAGE_SIZE = 15;
 // [2026.09.29 변경] 간병인 관리 이력은 더 짧은 단위로 나누어 1·2·3 페이지 이동을 쉽게 확인합니다.
 const ADMIN_CAREGIVER_HISTORY_PAGE_SIZE = 5;
 
