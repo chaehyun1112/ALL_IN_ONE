@@ -45,9 +45,9 @@
   }
 
   function updateSummary() {
-    // [2026.09.29 변경] 상단 카드는 실제 재생 가능한 미확인·완료 영상을 각각 집계합니다.
-    pendingVideoCount.textContent = allRecords.filter(record => hasVideo(record) && record.status === "미확인").length;
-    completedVideoCount.textContent = allRecords.filter(record => hasVideo(record) && record.status === "완료").length;
+    // [2026.09.29 변경] 영상 보관함의 상태 카드는 저장 주소 유무와 관계없이 미확인·확인 완료 사고 건수를 각각 표시합니다.
+    pendingVideoCount.textContent = allRecords.filter(record => record.status === "미확인").length;
+    completedVideoCount.textContent = allRecords.filter(record => record.status === "완료").length;
   }
 
   function renderVideoStatusCards() {
@@ -165,7 +165,7 @@
   function applyFilters() {
     const query = searchInput.value.trim().toLowerCase();
     filteredRecords = allRecords.filter(record => {
-      const sameStatus = selectedVideoStatus === "all" || (record.status === selectedVideoStatus && hasVideo(record));
+      const sameStatus = selectedVideoStatus === "all" || record.status === selectedVideoStatus;
       const sameWard = wardFilter.value === "all" || record.wardName === wardFilter.value;
       const searchable = [record.room, record.patient, record.wardName, record.type]
         .filter(Boolean).join(" ").toLowerCase();
