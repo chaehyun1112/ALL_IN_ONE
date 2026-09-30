@@ -90,3 +90,22 @@ html:fullscreen .admin-accident-video-empty {
   max-height: none;
   flex: 0 0 auto;
 }
+
+/* [2026.09.29] 영상 가운데 큰 재생 버튼(accident-records.js 가 만든다). 멈춰 있을 때만 보인다. */
+.admin-accident-player { position: relative; }
+.admin-accident-big-play { position: absolute; z-index: 2; width: 72px; height: 72px; padding: 0; border: 0; border-radius: 50%; background: rgba(15, 30, 45, 0.72); color: #fff; cursor: pointer; transform: translate(-50%, -50%); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28); transition: background 0.15s ease, transform 0.15s ease; }
+.admin-accident-big-play:hover, .admin-accident-big-play:focus-visible { background: rgba(15, 30, 45, 0.9); transform: translate(-50%, -50%) scale(1.06); outline: none; }
+.admin-accident-big-play[hidden] { display: none; }
+.admin-accident-big-play svg { width: 34px; height: 34px; margin-left: 4px; fill: currentColor; }
+
+/* [2026.09.29] 영상 틀을 영상 비율(16:9)에 맞춰 위아래 빈 띠가 생기지 않게 한다.
+   기존 높이 제한(일반 440px, 낮은 창 min(29vh, 250px), 전체화면 clamp(300px, 44vh, 520px))은 그대로 두고,
+   그 높이를 넘지 않는 너비(높이 × 16/9)까지만 넓어지게 한 뒤 가로 가운데, 제목 바로 아래에 둔다. */
+#admin-accident-video,
+.admin-accident-video-empty { width: 100%; height: auto; min-height: 0; max-height: none; aspect-ratio: 16 / 9; flex: 0 0 auto; align-self: center; margin-block: 0; max-width: calc(440px * 16 / 9); }
+@media (min-width: 901px) and (max-height: 820px) {
+  #admin-accident-video,
+  .admin-accident-video-empty { height: auto; min-height: 0; max-width: calc(min(29vh, 250px) * 16 / 9); }
+}
+html:fullscreen #admin-accident-video,
+html:fullscreen .admin-accident-video-empty { height: auto; max-width: calc(clamp(300px, 44vh, 520px) * 16 / 9); }

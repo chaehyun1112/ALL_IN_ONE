@@ -24,6 +24,13 @@ const createWardDropdown = document.querySelector("#admin-create-ward-dropdown")
 const createWardTrigger = document.querySelector("#admin-create-ward-trigger");
 const createWardOptions = document.querySelector("#admin-create-ward-options");
 const createWardLabel = document.querySelector("#admin-create-ward-label");
+// [2026.09.30 추가] 간호사 담당 병실(선택 사항, 여러 개 선택)
+const createStaffRoomDropdown = document.querySelector("#admin-create-staff-room-dropdown");
+const createStaffRoomTrigger = document.querySelector("#admin-create-staff-room-trigger");
+const createStaffRoomOptions = document.querySelector("#admin-create-staff-room-options");
+const createStaffRoomLabel = document.querySelector("#admin-create-staff-room-label");
+const createStaffRoomError = document.querySelector("#admin-create-staff-room-error");
+const createStaffRooms = new Set();
 const createSubmitButton = createForm?.querySelector('button[type="submit"]');
 const createCompleteDialog = document.querySelector("#admin-create-complete-dialog");
 const createNameError = document.querySelector("#admin-create-name-error");
@@ -91,7 +98,9 @@ function renderCreateRoomWardDropdown() {
 function closeCreateRoomWardOptions() {
     createRoomWardOptions.hidden = true;
     createRoomWardTrigger.setAttribute("aria-expanded", "false");
-    createDialog.classList.remove("ward-menu-overflow");
+    // [2026.09.30 수정] 간호사 담당 병동 목록과 같은 표시(ward-menu-overflow)를 쓰므로, 그 목록이 열려 있으면 떼지 않는다.
+    // (담당 병동 버튼을 누른 클릭이 문서까지 전달되어 이 함수가 방금 붙인 표시를 떼면 팝업에 스크롤이 생겨 찌그러졌다)
+    if (createWardOptions?.hidden !== false) createDialog.classList.remove("ward-menu-overflow");
 }
 
 // 프런트 미리보기용 병실 번호이며 DB의 병동·위치 ID로 사용하지 않는다.
@@ -150,12 +159,84 @@ document.addEventListener("keydown", event => {
     }
 }, true);
 
+// [2026.09.30 추가] 간호사 담당 병실 선택. 간병인 담당 병실과 같은 필터 디자인이며, 여러 병실을 눌러 고르고 다시 누르면 빠집니다.
+// 한 병실을 여러 간호사가 담당할 수 있어, 다른 간호사가 담당 중인 병실도 고를 수 있습니다(그 이름만 흐리게 함께 표시).
+function renderCreateStaffRoomDropdown() {
+    if (!createStaffRoomTrigger || !createStaffRoomOptions || !createStaffRoomLabel) return;
+    const wardName = createWardSelect?.value ? createWardSelect.selectedOptions[0]?.textContent : "";
+    const wardNumber = window.adminStaffRooms?.wardNumber(wardName);
+    createStaffRoomOptions.replaceChildren();
+    createStaffRoomTrigger.disabled = !wardNumber;
+    createStaffRoomLabel.textContent = !createWardSelect?.value ? "담당 병동을 먼저 선택해 주세요"
+        : !wardNumber ? "이 병동은 담당 병실을 지정하지 않습니다"
+        : createStaffRooms.size ? window.adminStaffRooms.format(createStaffRooms) : "담당 병실 없음 (선택 사항)";
+    if (!wardNumber) return;
+    const owners = window.adminStaffRooms.owners(createWardSelect.value, null);
+    for (const room of window.adminStaffRooms.roomsOf(wardNumber)) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("role", "option");
+        window.adminStaffRooms.optionContent(button, room, owners.get(room));
+        button.setAttribute("aria-selected", String(createStaffRooms.has(room)));
+        button.addEventListener("click", () => {
+            if (createStaffRooms.has(room)) createStaffRooms.delete(room);
+            else createStaffRooms.add(room);
+            button.setAttribute("aria-selected", String(createStaffRooms.has(room)));
+            createStaffRoomLabel.textContent = createStaffRooms.size
+                ? window.adminStaffRooms.format(createStaffRooms) : "담당 병실 없음 (선택 사항)";
+            if (createStaffRoomError) createStaffRoomError.textContent = "";
+        });
+        createStaffRoomOptions.append(button);
+    }
+}
+
+function closeCreateStaffRoomOptions() {
+    if (!createStaffRoomOptions || !createStaffRoomTrigger) return;
+    createStaffRoomOptions.hidden = true;
+    createStaffRoomTrigger.setAttribute("aria-expanded", "false");
+    createStaffRoomDropdown?.classList.remove("open-up");
+    createStaffRoomOptions.style.removeProperty("max-height");
+    createDialog?.classList.remove("staff-room-menu-open");
+}
+
+if (createStaffRoomTrigger && createStaffRoomOptions && createStaffRoomDropdown) {
+    createStaffRoomTrigger.addEventListener("click", () => {
+        if (createStaffRoomTrigger.disabled) return;
+        if (!createStaffRoomOptions.hidden) {
+            closeCreateStaffRoomOptions();
+            return;
+        }
+        createStaffRoomOptions.hidden = false;
+        createStaffRoomTrigger.setAttribute("aria-expanded", "true");
+        createDialog?.classList.add("staff-room-menu-open");
+        // 아래 공간이 부족하면(낮은 화면) 담당 병동 목록처럼 위로 펼치고 팝업 안에 들어가게 줄입니다.
+        const triggerBounds = createStaffRoomTrigger.getBoundingClientRect();
+        const menuHeight = createStaffRoomOptions.getBoundingClientRect().height;
+        if (menuHeight > window.innerHeight - triggerBounds.bottom - 12) {
+            const dialogBounds = createDialog.getBoundingClientRect();
+            createStaffRoomDropdown.classList.add("open-up");
+            createStaffRoomOptions.style.maxHeight = `${Math.max(96, Math.floor(triggerBounds.top - dialogBounds.top - 12))}px`;
+        }
+    });
+    document.addEventListener("click", event => {
+        if (!createStaffRoomDropdown.contains(event.target)) closeCreateStaffRoomOptions();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !createStaffRoomOptions.hidden) {
+            event.stopPropagation();
+            closeCreateStaffRoomOptions();
+            createStaffRoomTrigger.focus();
+        }
+    }, true);
+}
+
 function closeCreateWardOptions() {
     if (!createWardOptions || !createWardTrigger) return;
     createWardOptions.hidden = true;
     createWardTrigger.setAttribute("aria-expanded", "false");
     createWardDropdown?.classList.remove("open-up");
-    createDialog?.classList.remove("ward-menu-overflow");
+    // [2026.09.30 수정] 간병인 병동 목록이 열려 있으면 같은 표시를 떼지 않는다(위 closeCreateRoomWardOptions 와 같은 이유).
+    if (createRoomWardOptions?.hidden !== false) createDialog?.classList.remove("ward-menu-overflow");
     createWardOptions.style.removeProperty("max-height");
 }
 
@@ -203,6 +284,12 @@ if (createWardTrigger && createWardOptions && createWardDropdown) {
         }
     });
     createWardSelect.addEventListener("change", renderCreateWardDropdown);
+    // [2026.09.30 추가] 담당 병동이 바뀌면 그 병동의 병실로 다시 고릅니다.
+    createWardSelect.addEventListener("change", () => {
+        createStaffRooms.clear();
+        if (createStaffRoomError) createStaffRoomError.textContent = "";
+        renderCreateStaffRoomDropdown();
+    });
     document.addEventListener("click", event => {
         if (!createWardDropdown.contains(event.target)) closeCreateWardOptions();
     });
@@ -258,6 +345,11 @@ function showCreateFieldErrors(errorBody) {
     }
     if (typeof errorBody.roomNumber === "string" && createRoomError) {
         createRoomError.textContent = errorBody.roomNumber;
+        displayed = true;
+    }
+    // [2026.09.30 추가] 간호사 담당 병실 안내(병실 번호 범위 등)
+    if (typeof errorBody.staffRooms === "string" && createStaffRoomError) {
+        createStaffRoomError.textContent = errorBody.staffRooms;
         displayed = true;
     }
     return displayed;
@@ -344,6 +436,9 @@ createAccountButton?.addEventListener("click", async () => {
     closeCreateRoomOptions();
     renderCreateRoomDropdown();
     clearCreateErrors();
+    createStaffRooms.clear();
+    closeCreateStaffRoomOptions();
+    renderCreateStaffRoomDropdown();
     availableWards = [];
     const caregiver = isCaregiverCreation();
     document.querySelectorAll(".admin-create-staff-field").forEach(field => { field.hidden = caregiver; });
@@ -502,14 +597,16 @@ createForm?.addEventListener("submit", async event => {
             body: JSON.stringify(caregiver
                 ? { userName, phoneNumber, roomNumber }
                 // [2026-09-27 변경] 간호사 전화번호도 서버에 저장합니다. 확정 낙상 SMS 를 이 번호로 받습니다.
-                : { userId, userName, wardId: Number(selectedWard.wardId), phoneNumber: staffPhoneNumber })
+                // [2026.09.30 추가] 담당 병실(선택 사항)도 함께 보냅니다. 비워 두면 담당 병실 없이 생성합니다.
+                : { userId, userName, wardId: Number(selectedWard.wardId), phoneNumber: staffPhoneNumber,
+                    roomNumbers: [...createStaffRooms].map(Number) })
         });
 
         if (
             !created ||
             (caregiver ? !created.userId : created.userId !== userId) ||
-            typeof created.temporaryPassword !== "string" ||
-            !created.temporaryPassword
+            // [2026.09.30 변경] 간병인은 로그인 계정이 아니라(명세 TB_CAREGIVER) 임시 비밀번호가 없습니다.
+            (!caregiver && (typeof created.temporaryPassword !== "string" || !created.temporaryPassword))
         ) {
             throw new Error("계정 생성 결과를 확인할 수 없습니다.");
         }
@@ -523,7 +620,8 @@ createForm?.addEventListener("submit", async event => {
         if (completeName) completeName.textContent = created.userName;
         if (completePhone) completePhone.textContent = maskCompletePhone(caregiver ? phoneNumber : staffPhoneNumber);
         if (completeUserId) completeUserId.textContent = caregiver ? "" : created.userId;
-        if (completeWard) completeWard.textContent = caregiver ? `${roomNumber}호` : selectedWard.wardName;
+        if (completeWard) completeWard.textContent = caregiver ? `${roomNumber}호`
+            : [selectedWard.wardName, window.adminStaffRooms?.format(createStaffRooms)].filter(Boolean).join(" · ");
         if (completePassword) completePassword.textContent = caregiver ? "" : created.temporaryPassword;
         document.querySelector("#complete-account-phone-row").hidden = false;
         document.querySelector("#complete-account-user-id-row").hidden = caregiver;
@@ -543,7 +641,8 @@ createForm?.addEventListener("submit", async event => {
                     wardId: created.wardId,
                     ward: caregiver ? "3병동" : selectedWard.wardName,
                     phoneNumber: caregiver ? phoneNumber : staffPhoneNumber,
-                    roomNumber: caregiver ? String(roomNumber) : null
+                    roomNumber: caregiver ? String(roomNumber) : null,
+                    assignedRooms: caregiver ? [] : [...createStaffRooms]
                 });
             }
 
@@ -560,8 +659,16 @@ createForm?.addEventListener("submit", async event => {
         // [2026-09-18] 중복 아이디 안내를 배경 화면 대신 계정 생성 창의 아이디 입력란 아래에 표시한다.
         // [2026-09-27] 간호사도 번호가 겹치면 409 가 오므로, 안내에 '전화번호'가 들어 있으면 전화번호 칸 아래에 표시한다.
         const phoneConflict = caregiver || String(error.message ?? "").includes("전화번호");
+        // [2026.09.30 추가] 담당 병실 안내(병실 번호 범위 등)는 담당 병실 칸 아래에 표시한다.
+        const staffRoomProblem = !caregiver && String(error.message ?? "").includes("병실");
+        // [2026.09.30 추가] 간병인 병실 안내(이미 담당 간병인이 있는 병실 등)는 담당 병실 칸 아래에 표시한다.
+        const caregiverRoomProblem = caregiver && String(error.message ?? "").includes("병실");
         const fieldErrorDisplayed = showCreateFieldErrors(
-            error.status === 409
+            staffRoomProblem
+                ? {staffRooms: error.message}
+                : caregiverRoomProblem
+                ? {roomNumber: error.message}
+                : error.status === 409
                 ? phoneConflict
                     ? {phoneNumber: error.message || "이미 등록된 전화번호입니다."}
                     : {userId: error.message || "이미 사용 중인 직원 아이디입니다."}

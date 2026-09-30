@@ -1,5 +1,7 @@
 package com.aio.hospitalsafety.dto.admin;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -26,6 +28,8 @@ public record CreateUserRequest(
         // 관리자 화면에서 입력받던 번호를 저장한다. 형식은 간병인 등록과 같다.
         @NotBlank(message = "전화번호를 입력해 주세요.")
         @Pattern(regexp = "^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$", message = "휴대전화 번호를 확인해 주세요.")
-        String phoneNumber
+        String phoneNumber,
+        // [2026.09.30 추가] 담당 병실(선택 사항, 여러 개 가능). 병실 낙상 SMS 는 담당 간호사에게 간다(UserRoomService, SmsService).
+        List<Integer> roomNumbers
 ) {
 }

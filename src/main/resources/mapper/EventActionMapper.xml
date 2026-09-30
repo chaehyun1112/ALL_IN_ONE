@@ -24,7 +24,16 @@
             a.action_content,
             w.ward_nm AS ward_name,
             <!-- [2026.09.29 변경] event_detail 에 보관한 영상 URL은 사고 영상 보관함에서만 사용합니다. -->
-            COALESCE(e.event_detail ->> 'video_url', e.event_detail ->> 'videoUrl', '') AS video_url
+            <!-- [2026.09.29 병합] 젯슨이 올린 전후 영상(tb_event_media, READY)이 있으면 관리자 전용 영상 주소를 준다(AdminEventMediaController). -->
+            CASE WHEN m.media_st = 'READY'
+                 THEN '/api/admin/events/' || CAST(e.event_id AS VARCHAR) || '/media'
+                 ELSE COALESCE(e.event_detail ->> 'video_url', e.event_detail ->> 'videoUrl', '')
+            END AS video_url,
+            <!-- [2026.09.29] 관리자가 영상 보관함에서 재생한 적이 있는지(tb_event_media.viewed_at). 영상 보관함의 미확인/확인 완료에 쓴다. -->
+            (m.viewed_at IS NOT NULL) AS video_viewed,
+            <!-- [2026.09.28] 대시보드 '확인' 버튼 기록인지. 문구는 dashboard.js 의 FALSE_ALARM_BODY·confirmServerAlerts 와 같아야 한다 -->
+            COALESCE(a.patient_nm IN ('오경보', '확인')
+                     AND a.action_content IN ('오경보 확인', '낙상 의심 확인', '침대 이탈 확인'), FALSE) AS dismissed
         FROM tb_detection_event e
         JOIN tb_location l
           ON l.location_id = e.location_id
@@ -34,9 +43,19 @@
           ON a.event_id = e.event_id
         LEFT JOIN tb_emp h
           ON h.emp_id = a.handler_id
+        LEFT JOIN tb_event_media m
+          ON m.event_id = e.event_id
         WHERE w.hosp_div_id = #{hospitalId}
           AND e.event_type = 'FALL'
+        <choose>
+          <!-- [2026.09.28] 관리자 홈 사고 현황: 확정 낙상 + 조치가 등록된 낙상 의심 -->
+          <when test="includeSuspected">
+          AND (e.decision_st = 'CONFIRMED' OR (e.decision_st = 'SUSPECTED' AND a.action_id IS NOT NULL))
+          </when>
+          <otherwise>
           AND e.decision_st = 'CONFIRMED'
+          </otherwise>
+        </choose>
           AND (e.event_detail ->> 'duplicate_of') IS NULL
         <if test="wardId != null">
           AND w.ward_id = #{wardId}
@@ -48,9 +67,12 @@
     <!--
         병동의 오늘 감지 이벤트 (한국 시각 0시부터), 오래된 순.
         handled: 조치가 등록됐으면 TRUE
+        dismissed: [2026.09.28] 그 조치가 대시보드 '확인'(확정 낙상은 오경보) 기록이면 TRUE. 화면의 낙상 감지·의심 건수와 최근 기록에서 뺀다(침대 이탈 건수는 그대로)
         같은 낙상의 반복 알림(duplicate_of)은 뺀다(실시간 알림과 같은 규칙).
         [2026.09.27] 조치가 없는 확정 낙상은 최근 24시간까지 함께 돌려준다.
         (23:50 에 난 낙상을 조치하지 않았는데 0시가 지나 대시보드를 새로 열면 사라지던 문제. 오늘 건수는 화면이 날짜로 거른다)
+        [2026.09.28] 24시간 안 확정 낙상은 조치가 있어도 돌려준다(handled=true). 연결이 끊긴 동안 다른 화면이 어제 경보를
+        처리하면, 다시 접속해 불러올 때 이 줄로 그 경보를 끈다. 전에는 조치가 생기면 이 줄이 빠져 경보가 남았다.
     -->
     <select id="findTodayEvents" resultType="com.aio.hospitalsafety.dto.action.TodayEventRow">
         SELECT
@@ -60,7 +82,10 @@
             e.event_at,
             l.location_nm AS location_name,
             l.location_type,
-            (a.action_id IS NOT NULL) AS handled
+            (a.action_id IS NOT NULL) AS handled,
+            <!-- [2026.09.28] 판정 문구는 위 findActionHistory 의 dismissed, EventActionService.isDismissal 과 같아야 한다 -->
+            COALESCE(a.patient_nm IN ('오경보', '확인')
+                     AND a.action_content IN ('오경보 확인', '낙상 의심 확인', '침대 이탈 확인'), FALSE) AS dismissed
         FROM tb_detection_event e
         JOIN tb_location l
           ON l.location_id = e.location_id
@@ -72,8 +97,7 @@
           AND w.ward_id = #{wardId}
           AND (
                 e.event_at &gt;= (DATE_TRUNC('day', NOW() AT TIME ZONE 'Asia/Seoul') AT TIME ZONE 'Asia/Seoul')
-                OR (a.action_id IS NULL
-                    AND e.event_type = 'FALL'
+                OR (e.event_type = 'FALL'
                     AND e.decision_st = 'CONFIRMED'
                     AND e.event_at &gt;= NOW() - INTERVAL '24 hours')
               )

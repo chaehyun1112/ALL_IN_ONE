@@ -22,7 +22,7 @@
     <!-- [2026.09.29 변경] 노트북·PC 반응형 레이아웃 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
     <!-- [2026.09.29 변경] PC에서도 노트북과 같은 관제 도면 비율을 유지하도록 캐시 버전을 갱신합니다. -->
     <!-- [2026.09.29 변경] PC 대시보드의 숨김 스크롤 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=hidden-dashboard-scroll-20260929" th:href="@{/css/alleyes-theme.css(v='hidden-dashboard-scroll-20260929')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=corridor-merge-20260930" th:href="@{/css/alleyes-theme.css(v='corridor-merge-20260930')}">
 </head>
 
 <body data-ward-number="1" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-events-url=@{/api/dashboard/events},data-event-api-base=@{/api/events/},data-ws-url=@{/ws},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
@@ -348,12 +348,12 @@
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
   <script src="../../../static/JS/dashboard/session.js?v=review-fix-20260927" th:src="@{/JS/dashboard/session.js(v='review-fix-20260927')}"></script>
-  <script src="../../../static/JS/dashboard/room-status.js?v=server-link-20260926" th:src="@{/JS/dashboard/room-status.js(v='server-link-20260926')}"></script>
+  <script src="../../../static/JS/dashboard/room-status.js?v=room-history-20260928" th:src="@{/JS/dashboard/room-status.js(v='room-history-20260928')}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <!-- [2026.09.17] 고친 내용: 대응 등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
   <!-- [2026.09.29 변경] 대응 등록 취소·닫기 시 경보 음성과 점멸을 유지하도록 최신 스크립트를 불러옵니다. -->
-  <script src="../../../static/JS/dashboard/dashboard.js?v=response-cancel-alert-20260929" th:src="@{/JS/dashboard/dashboard.js(v='response-cancel-alert-20260929')}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js?v=merge-20260930" th:src="@{/JS/dashboard/dashboard.js(v='merge-20260930')}"></script>
   <!-- [2026.09.26 추가] 서버 감지 알림 연결(오늘 이벤트 불러오기 + 실시간 구독). dashboard.js 다음에 불러옵니다. -->
-  <script src="../../../static/JS/dashboard/server-events.js?v=review-fix-20260927" th:src="@{/JS/dashboard/server-events.js(v='review-fix-20260927')}"></script>
+  <script src="../../../static/JS/dashboard/server-events.js?v=live-reload-20260929" th:src="@{/JS/dashboard/server-events.js(v='live-reload-20260929')}"></script>
 </body>
 </html>

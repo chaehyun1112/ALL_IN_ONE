@@ -50,8 +50,6 @@
             ward_id,
             emp_nm,
             phone_no,
-            room_no,
-            job_cd,
             role_cd,
             auth_st,
             must_change_password
@@ -63,8 +61,6 @@
             #{wardId},
             #{userName},
             #{phoneNumber,jdbcType=VARCHAR},
-            #{roomNumber,jdbcType=VARCHAR},
-            #{jobType},
             'USER',
             'APPROVED',
             TRUE

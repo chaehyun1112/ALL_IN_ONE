@@ -95,7 +95,8 @@ public class AdminUserManagementController {
                     hospitalDomain,
                     adminId,
                     userId,
-                    request.wardId()
+                    request.wardId(),
+                    request.roomNumbers()
             );
 
             return ResponseEntity.ok(
@@ -142,10 +143,11 @@ public class AdminUserManagementController {
             HttpSession session
     ) {
         String hospitalDomain = requireHospitalDomain(session);
-        requireAdminId(loginAdmin);
+        // [2026.09.30 변경] 전화번호 수정도 관리 이력(CHANGE_PHONE)에 작업 관리자를 남긴다.
+        String adminId = requireAdminId(loginAdmin);
 
         try {
-            adminUserManagementService.changeUserPhone(hospitalDomain, userId, request.phoneNumber());
+            adminUserManagementService.changeUserPhone(hospitalDomain, adminId, userId, request.phoneNumber());
             return ResponseEntity.ok(Map.of("message", "전화번호가 변경되었습니다."));
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest().body(Map.of("message", exception.getMessage()));

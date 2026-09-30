@@ -19,7 +19,9 @@ public interface EventActionMapper {
     List<ActionHistoryRow> findActionHistory(
             @Param("hospitalId") String hospitalId,
             @Param("wardId") Long wardId,
-            @Param("limit") int limit);
+            @Param("limit") int limit,
+            // [2026.09.28] true 면 낙상 의심 가운데 조치가 등록된 것도 함께 돌려준다(관리자 홈 사고 현황용)
+            @Param("includeSuspected") boolean includeSuspected);
 
     /** 병동의 오늘(한국 시각 0시부터) 감지 이벤트, 오래된 순 */
     List<TodayEventRow> findTodayEvents(

@@ -18,6 +18,9 @@ public class AdminHistoryService {
 
     public static final String CREATE = "CREATE";
     public static final String CHANGE_WARD = "CHANGE_WARD";
+    // [2026.09.30 추가] 병실 변경, 전화번호 수정(공용 DB ck_admin_history_action 에 함께 추가함)
+    public static final String CHANGE_ROOM = "CHANGE_ROOM";
+    public static final String CHANGE_PHONE = "CHANGE_PHONE";
     public static final String RESET_PASSWORD = "RESET_PASSWORD";
     public static final String DEACTIVATE = "DEACTIVATE";
     public static final String ACTIVATE = "ACTIVATE";
@@ -29,6 +32,8 @@ public class AdminHistoryService {
     private static final Set<String> ALLOWED_ACTION_CODES = Set.of(
             CREATE,
             CHANGE_WARD,
+            CHANGE_ROOM,
+            CHANGE_PHONE,
             RESET_PASSWORD,
             DEACTIVATE,
             ACTIVATE,
@@ -50,6 +55,21 @@ public class AdminHistoryService {
             String adminId,
             String userId,
             String actionCode
+    ) {
+        record(hospitalDomain, adminId, userId, actionCode, null);
+    }
+
+    /**
+     * [2026.09.30 추가] 처리 내용(변경 전 → 후)을 함께 남긴다. 예: '담당 병실 301호 → 301·302호'.
+     * 전화번호는 끝 4자리만 넘긴다. 200자를 넘으면 자른다(TB_ADMIN_HISTORY.ACTION_DETAIL).
+     */
+    @Transactional
+    public void record(
+            String hospitalDomain,
+            String adminId,
+            String userId,
+            String actionCode,
+            String actionDetail
     ) {
         String normalizedHospitalDomain = requireText(
                 hospitalDomain,
@@ -77,11 +97,15 @@ public class AdminHistoryService {
             );
         }
 
+        String normalizedDetail = actionDetail == null || actionDetail.isBlank() ? null
+                : actionDetail.length() > 200 ? actionDetail.substring(0, 200) : actionDetail;
+
         int insertedRows = adminHistoryMapper.insertHistory(
                 normalizedHospitalDomain,
                 normalizedAdminId,
                 normalizedUserId,
-                normalizedActionCode
+                normalizedActionCode,
+                normalizedDetail
         );
 
         if (insertedRows != 1) {

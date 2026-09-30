@@ -46,10 +46,11 @@ public class DashboardEventPushService {
     /**
      * [2026.09.27] 조치가 등록됐다고 같은 병동 대시보드에 알린다.
      * 다른 화면에 떠 있던 같은 경보와 반복 음성을 끄는 데 쓴다(server-events.js → dashboard.js).
+     * [2026.09.28] dismissed: '확인'(확정 낙상은 오경보) 기록이면 true. 화면이 낙상 감지·의심 건수와 최근 기록에서 뺀다(침대 이탈 건수는 그대로).
      */
-    public void sendActionRegistered(Long wardId, String eventId) {
+    public void sendActionRegistered(Long wardId, String eventId, boolean dismissed) {
         String topic = "/topic/wards/" + wardId + "/events";
-        messagingTemplate.convertAndSend(topic, new DashboardActionMessage(eventId, true));
-        log.info("대시보드 조치 등록 알림 전송 eventId={} wardId={}", eventId, wardId);
+        messagingTemplate.convertAndSend(topic, new DashboardActionMessage(eventId, true, dismissed));
+        log.info("대시보드 조치 등록 알림 전송 eventId={} wardId={} dismissed={}", eventId, wardId, dismissed);
     }
 }

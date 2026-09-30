@@ -5,6 +5,8 @@
    - 최근 조치기록: 최신 2건
    - 실시간 알림: 최근 24시간 안에 발생했고 아직 조치가 없는(미확인) 낙상, 최신 3건 (자정 직전 낙상이 0시에 사라지지 않게)
    - 병동별·시간대별 사고 발생 현황: 오늘 발생한 낙상 건수
+     [2026.09.28 변경] 사고로 세는 것 = 확정 낙상 중 오경보('확인' 버튼)가 아닌 것(아직 조치 전인 것 포함)
+                                     + 낙상 의심 중 대응 등록한 것. 낙상 의심 '확인'과 확정 낙상 '오경보'는 세지 않습니다.
    관리자 홈이 보이는 동안 15초마다 다시 불러옵니다.
    Live Server 미리보기(서버 주소 없음)에서는 HTML 의 예시를 그대로 둡니다. */
 (() => {
@@ -159,13 +161,18 @@
     clearTimeout(timer);
     try {
       if (!wards) wards = await getJson(wardsUrl);
-      const records = await getJson(recordsUrl);
+      // [2026.09.28] 조치가 등록된 낙상 의심도 함께 받습니다(includeSuspected). 서버가 '확인' 버튼 기록에 dismissed=true 를 붙입니다.
+      const records = await getJson(`${recordsUrl}${recordsUrl.includes("?") ? "&" : "?"}includeSuspected=true`);
+      const confirmedFalls = records.filter(record => record.type === "낙상 감지");
       const today = todayKey();
-      const todayFalls = records.filter(record => record.occurredAt.startsWith(today));
-      renderRecentRecords(records);
-      renderAlerts(records);
-      renderWardChart(todayFalls, wards);
-      renderTimeChart(todayFalls);
+      const todayIncidents = records.filter(record => record.occurredAt.startsWith(today)
+        && !record.dismissed
+        && (record.type === "낙상 감지" || record.status === "완료"));
+      // 최근 조치기록·실시간 알림 카드는 지금처럼 확정 낙상만 보여 줍니다.
+      renderRecentRecords(confirmedFalls);
+      renderAlerts(confirmedFalls);
+      renderWardChart(todayIncidents, wards);
+      renderTimeChart(todayIncidents);
     } catch (error) {
       console.warn("관리자 홈 기록을 불러오지 못했습니다.", error);
     } finally {

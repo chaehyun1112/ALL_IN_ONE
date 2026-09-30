@@ -17,7 +17,6 @@
         WHERE hosp_div_id = #{hospitalId}
           AND ward_id = #{wardId}
           AND role_cd = 'USER'
-          AND job_cd = 'GENERAL'
           AND auth_st = 'APPROVED'
           AND phone_no IS NOT NULL
           AND TRIM(phone_no) &lt;&gt; ''
@@ -25,24 +24,47 @@
     </select>
 
     <!--
-        해당 병실에 배정된 활성 상태의 담당 간병인.
-        간병인은 지금 코드처럼 tb_emp 에서 job_cd = 'CAREGIVER', room_no(예: 301)로 찾는다.
-        (명세에는 TB_CAREGIVER 가 있지만 지금 관리자 화면은 간병인을 tb_emp 에 만든다. SMS 기록의 USER_ID 도 emp_id 다)
+        [2026.09.30 추가] 해당 병실의 담당 간호사 전원(tb_emp_location → tb_location). 여러 명일 수 있고, 담당 병실은 선택 사항이다.
+        없으면(병실 담당을 두지 않는 병원 등) SmsService 가 병동 간호사 전원(findWardUsers)에게 보낸다.
+    -->
+    <select id="findRoomUsers" resultType="com.aio.hospitalsafety.dto.sms.SmsRecipient">
+        SELECT
+            'EMP' AS user_type,
+            e.emp_id AS user_id,
+            e.phone_no AS phone_number
+        FROM tb_emp_location el
+        JOIN tb_location l
+          ON l.location_id = el.location_id
+        JOIN tb_emp e
+          ON e.emp_id = el.emp_id
+        WHERE e.hosp_div_id = #{hospitalId}
+          AND l.ward_id = #{wardId}
+          AND l.location_nm = #{locationName}
+          AND e.role_cd = 'USER'
+          AND e.auth_st = 'APPROVED'
+          AND e.phone_no IS NOT NULL
+          AND TRIM(e.phone_no) &lt;&gt; ''
+        ORDER BY e.emp_id
+    </select>
+
+    <!--
+        [2026.09.30 변경] 해당 병실의 활성 담당 간병인(명세 TB_CAREGIVER). 병실 하나의 활성 간병인은 1명이다.
+        병실은 병동 + 위치 이름('302호')으로 찾는다. SMS 기록의 USER_ID 는 'cg:' + CAREGIVER_ID 다(CaregiverIds).
     -->
     <select id="findRoomCaregivers" resultType="com.aio.hospitalsafety.dto.sms.SmsRecipient">
         SELECT
             'CAREGIVER' AS user_type,
-            emp_id AS user_id,
-            phone_no AS phone_number
-        FROM tb_emp
-        WHERE hosp_div_id = #{hospitalId}
-          AND room_no = #{roomNumber}
-          AND role_cd = 'USER'
-          AND job_cd = 'CAREGIVER'
-          AND auth_st = 'APPROVED'
-          AND phone_no IS NOT NULL
-          AND TRIM(phone_no) &lt;&gt; ''
-        ORDER BY emp_id
+            CONCAT('cg:', c.caregiver_id) AS user_id,
+            c.phone_no AS phone_number
+        FROM tb_caregiver c
+        JOIN tb_location l
+          ON l.location_id = c.location_id
+        WHERE c.hosp_div_id = #{hospitalId}
+          AND l.ward_id = #{wardId}
+          AND l.location_nm = #{locationName}
+          AND c.use_yn = 'Y'
+          AND TRIM(c.phone_no) &lt;&gt; ''
+        ORDER BY c.caregiver_id
     </select>
 
     <!-- 같은 감지 이벤트로 이 사람에게 보낸 기록이 있으면 true (1인 1회, 재발송 없음, FR-AD-601) -->

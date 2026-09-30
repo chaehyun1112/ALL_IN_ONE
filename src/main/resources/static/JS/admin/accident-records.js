@@ -26,9 +26,9 @@
   let selectedVideoStatus = "all";
 
   const demoRecords = [
-    { eventId: "demo-video-1", occurredAt: "2026-09-29T10:12", wardName: "3병동", room: "302호", patient: "김OO", type: "낙상 감지", status: "미확인", completedAt: "", videoUrl: "" },
-    { eventId: "demo-video-2", occurredAt: "2026-09-29T08:44", wardName: "2병동", room: "205호", patient: "이OO", type: "낙상 감지", status: "완료", completedAt: "2026-09-29T08:51", videoUrl: "" },
-    { eventId: "demo-video-3", occurredAt: "2026-09-28T19:26", wardName: "1병동", room: "107호", patient: "박OO", type: "낙상 감지", status: "완료", completedAt: "2026-09-28T19:33", videoUrl: "" }
+    { eventId: "demo-video-1", occurredAt: "2026-09-29T10:12", wardName: "3병동", room: "302호", patient: "김OO", type: "낙상 감지", status: "미확인", completedAt: "", videoUrl: "", videoViewed: false },
+    { eventId: "demo-video-2", occurredAt: "2026-09-29T08:44", wardName: "2병동", room: "205호", patient: "이OO", type: "낙상 감지", status: "완료", completedAt: "2026-09-29T08:51", videoUrl: "", videoViewed: true },
+    { eventId: "demo-video-3", occurredAt: "2026-09-28T19:26", wardName: "1병동", room: "107호", patient: "박OO", type: "낙상 감지", status: "완료", completedAt: "2026-09-28T19:33", videoUrl: "", videoViewed: true }
   ];
 
   function displayDateTime(value) {
@@ -44,10 +44,44 @@
     return Boolean(record.videoUrl?.trim());
   }
 
+  // [2026.09.29] 영상 보관함의 미확인·확인 완료는 관리자가 재생 버튼을 누른 적이 있는지(videoViewed)로 정합니다.
+  // record.status(대응 등록 기준)는 조치기록 화면용이라 여기서는 쓰지 않습니다.
+  function videoStatus(record) {
+    return record.videoViewed ? "완료" : "미확인";
+  }
+
   function updateSummary() {
     // [2026.09.29 변경] 영상 보관함의 상태 카드는 저장 주소 유무와 관계없이 미확인·확인 완료 사고 건수를 각각 표시합니다.
-    pendingVideoCount.textContent = allRecords.filter(record => record.status === "미확인").length;
-    completedVideoCount.textContent = allRecords.filter(record => record.status === "완료").length;
+    pendingVideoCount.textContent = allRecords.filter(record => videoStatus(record) === "미확인").length;
+    completedVideoCount.textContent = allRecords.filter(record => videoStatus(record) === "완료").length;
+  }
+
+  // [2026.09.29] 재생 버튼을 처음 누르면 서버에 확인 완료로 남깁니다(tb_event_media.viewed_at).
+  async function markViewed(record) {
+    if (!record || record.videoViewed || !hasVideo(record)) return;
+    if (location.protocol === "file:" || location.port === "5500") {
+      record.videoViewed = true;
+    } else {
+      if (!record.videoUrl.startsWith("/api/admin/events/")) return;
+      const headers = { Accept: "application/json" };
+      const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+      if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+      try {
+        const response = await fetch(`/api/admin/events/${encodeURIComponent(record.eventId)}/media/viewed`, {
+          method: "POST",
+          credentials: "same-origin",
+          headers
+        });
+        if (!response.ok || response.redirected) throw new Error(`영상 확인 기록 실패: ${response.status}`);
+        record.videoViewed = true;
+      } catch (error) {
+        console.warn(error);
+        return;
+      }
+    }
+    updateSummary();
+    renderCards();
   }
 
   function renderVideoStatusCards() {
@@ -87,6 +121,7 @@
     videoEmpty.hidden = true;
     video.load();
     renderCards();
+    placeBigPlay();
   }
 
   function createCard(record) {
@@ -104,8 +139,8 @@
     timestamp.dateTime = record.occurredAt || "";
     timestamp.textContent = displayDateTime(record.occurredAt);
     const state = document.createElement("strong");
-    state.className = record.status === "완료" ? "is-completed" : "is-pending";
-    state.textContent = record.status === "완료" ? "완료" : "미확인";
+    state.className = videoStatus(record) === "완료" ? "is-completed" : "is-pending";
+    state.textContent = videoStatus(record) === "완료" ? "완료" : "미확인";
     metadata.append(timestamp, state);
 
     const title = document.createElement("strong");
@@ -165,7 +200,7 @@
   function applyFilters() {
     const query = searchInput.value.trim().toLowerCase();
     filteredRecords = allRecords.filter(record => {
-      const sameStatus = selectedVideoStatus === "all" || record.status === selectedVideoStatus;
+      const sameStatus = selectedVideoStatus === "all" || videoStatus(record) === selectedVideoStatus;
       const sameWard = wardFilter.value === "all" || record.wardName === wardFilter.value;
       const searchable = [record.room, record.patient, record.wardName, record.type]
         .filter(Boolean).join(" ").toLowerCase();
@@ -196,7 +231,65 @@
     applyFilters();
   }
 
+  // [2026.09.29] 영상 가운데 큰 재생 버튼. 멈춰 있을 때만 보이고, 누르면 재생합니다(재생하면 확인 완료로 남습니다).
+  // 영상 영역의 배치는 바꾸지 않도록 버튼만 영상 위에 겹쳐 띄웁니다.
+  const player = video.closest(".admin-accident-player");
+  const bigPlay = document.createElement("button");
+  bigPlay.type = "button";
+  bigPlay.className = "admin-accident-big-play";
+  bigPlay.setAttribute("aria-label", "사고 영상 재생");
+  bigPlay.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+  bigPlay.hidden = true;
+  player.append(bigPlay);
+
+  function placeBigPlay() {
+    const show = !video.hidden && Boolean(video.getAttribute("src")) && video.paused;
+    bigPlay.hidden = !show;
+    if (!show) return;
+    bigPlay.style.left = `${video.offsetLeft + video.offsetWidth / 2}px`;
+    bigPlay.style.top = `${video.offsetTop + video.offsetHeight / 2}px`;
+  }
+
+  // [2026.09.29] 전체화면에서는 영상 패널에 들어가는 가장 큰 16:9 크기로 영상을 키워 양옆 여백을 없앱니다.
+  // 패널 높이는 화면 높이로 정해지므로(.admin-accident-archive) 그 높이에서 제목·여백을 뺀 만큼을 씁니다. 일반 창에서는 CSS 크기 그대로입니다.
+  const archive = player.closest(".admin-accident-archive");
+  const playerHeader = player.querySelector("header");
+  function fitVideoToPanel() {
+    const boxes = [video, videoEmpty];
+    if (!document.fullscreenElement) {
+      boxes.forEach(box => { box.style.width = ""; box.style.height = ""; box.style.maxWidth = ""; });
+      return;
+    }
+    const style = getComputedStyle(player);
+    const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+    const headerSpace = playerHeader.offsetHeight + parseFloat(getComputedStyle(playerHeader).marginBottom);
+    const availableWidth = player.clientWidth - padX;
+    const availableHeight = archive.clientHeight - padY - headerSpace;
+    const width = Math.max(0, Math.floor(Math.min(availableWidth, availableHeight * 16 / 9)));
+    boxes.forEach(box => {
+      box.style.maxWidth = "none";
+      box.style.width = `${width}px`;
+      box.style.height = `${Math.floor(width * 9 / 16)}px`;
+    });
+  }
+
+  function layoutPlayer() {
+    fitVideoToPanel();
+    placeBigPlay();
+  }
+
+  bigPlay.addEventListener("click", () => video.play().catch(error => console.warn(error)));
+  ["play", "playing", "pause", "ended", "emptied", "loadedmetadata"].forEach(name => video.addEventListener(name, placeBigPlay));
+  window.addEventListener("resize", layoutPlayer);
+  document.addEventListener("fullscreenchange", () => requestAnimationFrame(layoutPlayer));
+  if (window.ResizeObserver) {
+    new ResizeObserver(placeBigPlay).observe(video);
+    new ResizeObserver(() => requestAnimationFrame(layoutPlayer)).observe(archive);
+  }
+
   form.addEventListener("submit", event => { event.preventDefault(); applyFilters(); });
+  video.addEventListener("play", () => markViewed(allRecords.find(record => record.eventId === selectedEventId)));
   wardFilter.addEventListener("change", applyFilters);
   searchInput.addEventListener("input", applyFilters);
   resetButton.addEventListener("click", () => {
