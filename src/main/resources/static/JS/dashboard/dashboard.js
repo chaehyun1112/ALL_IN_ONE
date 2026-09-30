@@ -212,6 +212,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // [09.13]수정내용: 병실 선택 처리를 전용 모듈에 위임하고 현재 화면 상태만 전달합니다.
   function choose(number){corridorSelected=false;window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);}
+  // [2026.09.30 변경] 중앙 복도를 누르거나 키보드로 선택하면 하단 오늘의 기록을 복도 기준으로 갱신합니다.
+  function chooseCorridor(){
+    selected=null;
+    corridorSelected=true;
+    render();
+  }
+  corridorNode.addEventListener("click", event=>{
+    event.stopPropagation();
+    chooseCorridor();
+  });
+  corridorNode.addEventListener("keydown", event=>{
+    if(event.key!=="Enter"&&event.key!==" ")return;
+    event.preventDefault();
+    event.stopPropagation();
+    chooseCorridor();
+  });
   /* [추가] 전체/상태 카드가 아닌 화면을 클릭하면 카드 선택 테두리를 제거합니다. */
   document.addEventListener("click", event => {
     if (event.target.closest(".counts .count")) return;
@@ -253,14 +269,18 @@ document.addEventListener("DOMContentLoaded", () => {
       for(const item of corridorHistory.values())if(window.CareGuardRoomStatus.dayKey(item.occurredAt)===today)corridorCounts[item.type]++;
     }
     const corridorCount=type=>String(serverMode ? corridorCounts[type] : (corridorEventType===type ? 1 : 0));
+    // [2026.09.30 변경] 복도를 선택했을 때 오늘 기록이 없으면 실제 기록이 없는 상태를 안내합니다.
+    const hasCorridorEvent=corridorSelected&&(serverMode
+      ? Object.values(corridorCounts).some(count=>count>0)
+      : corridorAlert.status!=="normal");
     detail.querySelector('.history-fall').textContent=corridorSelected ? corridorCount('urgent') : counts ? counts.urgent : '—';
     detail.querySelector('.history-suspected').textContent=corridorSelected ? corridorCount('suspected') : counts ? counts.suspected : '—';
     detail.querySelector('.history-exit').textContent=corridorSelected ? corridorCount('caution') : counts ? counts.caution : '—';
-
-    detail.querySelector('.history-event').textContent=corridorSelected ? `${corridorAlert.test ? '테스트 · ' : ''}${labels[corridorEventType]} · ${corridorAlert.location}` : latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 위치의 기록을 표시합니다.';
-
+    detail.querySelector('.history-event').textContent=corridorSelected
+      ? (hasCorridorEvent ? `${corridorAlert.test ? '테스트 · ' : ''}${labels[corridorEventType]} · ${corridorAlert.location}` : '오늘 감지된 이벤트가 없습니다.')
+      : latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 위치의 기록을 표시합니다.';      
     const time=detail.querySelector('time');
-    const occurredAt=corridorSelected ? corridorAlert.occurredAt : latest?.occurredAt;
+    const occurredAt=corridorSelected&&hasCorridorEvent ? corridorAlert.occurredAt : latest?.occurredAt;
     if(occurredAt){
       time.dateTime=new Date(occurredAt).toISOString();
       time.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(occurredAt));

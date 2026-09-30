@@ -157,7 +157,8 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .page-heading .counts .count:not(.urgent):not(.suspected):not(.caution) { border-color: var(--count-border); }
 .counts .count[aria-pressed="true"] { border-color: var(--count-border) !important; box-shadow: 0 0 0 2px var(--count-ring) !important; }
 /* [2026.09.28 변경] 관제 범례의 정상·주의·의심·낙상 상태가 한눈에 구분되도록 색을 조정합니다. */
-.legend span:not(.urgent):not(.suspected):not(.caution)::before { background: #557b95; }
+/* [2026.09.30 변경] 정상 범례 점도 정상 카드와 같은 기존 블루그레이 색으로 통일합니다. */
+.legend span:not(.urgent):not(.suspected):not(.caution)::before { background: #526d82; }
 .page-heading .counts .count[aria-pressed="true"] { outline-color: var(--count-border); }
 /* [2026.09.22 변경] 다섯 안전 현황 카드를 같은 크기로 맞추고 카드 섹션의 가로 길이를 줄입니다. */
 .page-heading { justify-content:center; }
@@ -491,6 +492,29 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   .corridor.urgent:not(.acknowledged) .corridor-alert-marker {
     animation-duration: .6s;
   }
+}
+
+/* [2026.09.30 변경] 복도 낙상 감지는 위치를 특정할 수 없으므로 복도 전체를 낙상색으로 점멸해 즉시 확인하도록 합니다. */
+.floor .corridor { cursor:pointer; transition:background-color .2s ease,border-color .2s ease,box-shadow .2s ease; }
+.floor .corridor:focus-visible { outline:3px solid #526d82; outline-offset:3px; }
+.floor .corridor.urgent:not(.acknowledged) {
+  background:#ffe3e4;
+  border-color:#9f2224;
+  box-shadow:0 0 0 2px #9f222435,0 0 18px #9f222450;
+  animation:careguard-corridor-full-fall .6s ease-in-out infinite;
+}
+.floor .corridor.urgent:not(.acknowledged) > span { background:transparent; color:#4b0d10; }
+.floor .corridor.urgent:not(.acknowledged)::after { border-color:#9f2224; animation:none; }
+/* 낙상 의심도 복도 전체를 주황색으로 표시하되, 기존 정책대로 점멸은 확정 낙상에만 적용합니다. */
+.floor .corridor.suspected:not(.acknowledged) { background:#fff0e3; border-color:#d86b18; box-shadow:0 0 0 2px #d86b1830; }
+.floor .corridor.suspected:not(.acknowledged) > span { background:transparent; color:#703000; }
+.floor .corridor.suspected:not(.acknowledged)::after { border-color:#d86b18; animation:none; }
+@keyframes careguard-corridor-full-fall {
+  0%,100% { background:#ffe3e4; border-color:#9f2224; box-shadow:0 0 0 2px #9f222435,0 0 12px #9f222445; }
+  50% { background:#f6aeb1; border-color:#6e1115; box-shadow:0 0 0 5px #9f222450,0 0 26px #9f222470; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .floor .corridor.urgent:not(.acknowledged) { animation:none; background:#ffe3e4; border-color:#9f2224; }
 }
 @keyframes careguard-emergency-pulse {
   0%,100% { background:#fff1f0; border-color:#9f2224; box-shadow:0 0 0 2px #9f222435,inset 0 0 0 2px #ffffff80; }
