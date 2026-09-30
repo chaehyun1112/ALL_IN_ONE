@@ -162,14 +162,13 @@
         <div class="panel-heading">
           <h2 th:text="${dashboardWard.wardName + ' 안전 상태'}">1병동 안전 상태</h2>
 
-          <!-- [09.13]수정내용: 범례와 등록 버튼을 오른쪽 세로 영역으로 묶습니다. -->
+          <!-- [2026.09.30 변경] 위험도 높은 순서로 낙상·의심·이탈·정상을 표시해 현장 확인 우선순위를 맞춥니다. -->
           <div class="room-heading-actions">
           <div class="legend">
-            <span>정상</span>
-            <span class="caution">주의</span>
-            <span class="suspected">의심</span>
-            <!-- [2026.09.28 변경] 긴급 상태를 실제 감지 유형인 낙상으로 표시합니다. -->
             <span class="urgent">낙상</span>
+            <span class="suspected">의심</span>
+            <span class="caution">이탈</span>
+            <span>정상</span>
           </div>
           </div>
         </div>
@@ -183,8 +182,8 @@
             id="upper-rooms"
           ></div>
 
-          <!-- [2026.09.28 변경] 복도 내 세부 위치를 표시하지 않고 중앙 복도 텍스트로 감지 상태를 안내합니다. -->
-          <div class="corridor" id="central-corridor">
+          <!-- [2026.09.30 변경] 복도도 선택 가능한 위치로 제공해 오늘의 기록을 바로 확인합니다. -->
+          <div class="corridor" id="central-corridor" role="button" tabindex="0">
             <span>←</span>
             <span class="corridor-status-label">중앙 복도</span>
             <span>→</span>

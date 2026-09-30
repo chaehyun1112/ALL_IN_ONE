@@ -65,8 +65,8 @@
     video.load();
     video.hidden = true;
     videoEmpty.hidden = false;
-    videoEmpty.querySelector("strong").textContent = "사고 영상을 선택해 주세요.";
-    videoEmpty.querySelector("span").textContent = "선택한 영상이 이 영역에서 재생됩니다.";
+    // [2026.09.30 변경] 선택 전 안내는 한 문장만 표시해 빈 영상 영역을 간결하게 유지합니다.
+    videoEmpty.textContent = "사고 영상을 선택해 주세요.";
   }
 
   function showVideo(record) {
@@ -77,8 +77,8 @@
       video.load();
       video.hidden = true;
       videoEmpty.hidden = false;
-      videoEmpty.querySelector("strong").textContent = "재생할 영상이 없습니다.";
-      videoEmpty.querySelector("span").textContent = "저장된 영상이 등록되면 이 영역에서 재생됩니다.";
+      // [2026.09.30 변경] 보관 영상이 없는 경우에도 한 문장으로 중앙 안내를 표시합니다.
+      videoEmpty.textContent = "선택한 영상이 없습니다.";
       renderCards();
       return;
     }
