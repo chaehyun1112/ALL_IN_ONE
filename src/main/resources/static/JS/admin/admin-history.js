@@ -12,6 +12,9 @@
     const actionLabels = {
         CREATE: "계정 생성",
         CHANGE_WARD: "병동 변경",
+        // [2026.09.30 추가] 병실 변경, 전화번호 수정(공용 DB 작업 코드에 추가함)
+        CHANGE_ROOM: "병실 변경",
+        CHANGE_PHONE: "전화번호 수정",
         RESET_PASSWORD: "비밀번호 초기화",
         DEACTIVATE: "계정 비활성화",
         ACTIVATE: "계정 재활성화",
@@ -56,6 +59,32 @@
             return "병실 변경";
         }
         return actionLabels[actionCode] ?? actionCode ?? "알 수 없음";
+    }
+
+    /**
+     * [2026.09.30 추가] 상단 카드 필터에 쓰는 이름. 간호사 화면은 병동 변경과 병실 변경을 '병동·병실 변경' 카드 하나로,
+     * 간병인 화면은 '병실 변경' 카드로 셉니다(예전 간병인 이력은 병실 변경도 CHANGE_WARD 로 남아 있습니다).
+     */
+    function getFilterLabel(actionCode) {
+        if (actionCode === "CHANGE_WARD" || actionCode === "CHANGE_ROOM") {
+            return document.body.dataset.adminJobType === "CAREGIVER" ? "병실 변경" : "병동·병실 변경";
+        }
+        return getActionLabel(actionCode);
+    }
+
+    /**
+     * [2026.09.30 추가] 처리 내용 셀: 작업 이름 아래에 변경 전 → 후를 작은 글씨로 한 줄 덧붙입니다.
+     */
+    function createActionCell(label, detail) {
+        const cell = createCell(label);
+        if (detail) {
+            const detailText = document.createElement("small");
+            detailText.className = "history-action-detail";
+            detailText.textContent = detail;
+            cell.append(detailText);
+            cell.title = `${label} · ${detail}`;
+        }
+        return cell;
     }
 
     /**
@@ -131,7 +160,10 @@
             const actionLabel = getActionLabel(history.actionCode);
 
             row.dataset.historyId = String(history.historyId ?? "");
-            row.dataset.historyAction = actionLabel;
+            // [2026.09.30 변경] 카드 필터 이름(간호사 '병동·병실 변경')과 표에 보이는 작업 이름을 나눠 둡니다.
+            row.dataset.historyAction = getFilterLabel(history.actionCode);
+            row.dataset.actionLabel = actionLabel;
+            row.dataset.actionDetail = history.actionDetail ?? "";
             row.dataset.actionCode = history.actionCode ?? "";
             row.dataset.userId = history.userId ?? "";
             row.dataset.userName = history.userName ?? "";
@@ -143,7 +175,7 @@
                 // [2026-09-22 변경] 대상 간호사와 간병인은 내부 아이디 대신 이름을 표시합니다.
                 createCell(history.userName || "이름 미확인"),
                 createCell(caregiverHistory ? formatCaregiverLocation(history) : (history.wardName ?? "미확인")),
-                createCell(actionLabel),
+                createActionCell(actionLabel, history.actionDetail),
                 createManagementCell(history)
             );
 
@@ -175,7 +207,7 @@
             const count = filter === "전체"
                 ? histories.length
                 : histories.filter(history =>
-                    getActionLabel(history.actionCode) === filter
+                    getFilterLabel(history.actionCode) === filter
                 ).length;
 
             countElement.textContent = `${count}건`;

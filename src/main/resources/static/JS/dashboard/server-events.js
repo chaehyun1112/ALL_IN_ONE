@@ -3,6 +3,7 @@
 /* [2026.09.26 추가] 대시보드와 서버의 감지 알림 연결입니다.
    1) 화면을 열면 GET /api/dashboard/events 로 우리 병동의 오늘 감지 이벤트를 불러와 상태를 되살립니다(음성 없음).
       [2026.09.27] 조치가 없는 확정 낙상은 어제 것이라도 24시간 안이면 함께 옵니다. 실패하면 5초 뒤 다시 불러옵니다.
+      [2026.09.28] 24시간 안 확정 낙상은 조치가 있어도 함께 옵니다(끊긴 동안 다른 화면이 처리한 어제 경보를 끄려고).
    2) /ws 에 접속해 /topic/wards/{병동ID}/events 를 구독하고, 새 알림을 window.CareGuard.receiveServerEvent 로 넘깁니다.
    3) 연결이 끊기면 1초, 2초, 4초 … 최대 30초 뒤 다시 접속하고, 끊긴 동안 놓친 이벤트를 다시 불러와 채웁니다.
    STOMP 는 글자로 된 약속이라 별도 라이브러리 없이 필요한 명령(CONNECT, SUBSCRIBE)만 직접 보냅니다.
@@ -57,6 +58,19 @@ document.addEventListener("DOMContentLoaded", () => {
     return loading;
   }
 
+  // [2026.09.29] 조치기록(대시보드 안의 iframe)은 실시간 알림을 직접 받지 않으므로, 알림이 오면 여기서 다시 불러오게 합니다.
+  // 서버가 이벤트를 저장한 뒤 알리지만 여러 건이 몰릴 수 있어 1초 모아서 한 번만 부릅니다. 닫혀 있으면 다시 열 때 dashboard.js 가 불러옵니다.
+  let recordReloadTimer = null;
+  function scheduleRecordReload() {
+    clearTimeout(recordReloadTimer);
+    recordReloadTimer = setTimeout(() => {
+      const recordView = document.getElementById("dashboard-record-view");
+      const recordFrame = document.getElementById("dashboard-record-frame");
+      if (!recordView || recordView.hidden || !recordFrame?.dataset.loaded) return;
+      recordFrame.contentWindow?.CareGuardRecordPage?.reload({ silent: true });
+    }, 1000);
+  }
+
   function frame(command, headers) {
     return `${command}\n${Object.entries(headers).map(([name, value]) => `${name}:${value}`).join("\n")}\n\n\u0000`;
   }
@@ -76,7 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => { if (socket && active) loadTodayEvents(); }, 3000);
     } else if (command === "MESSAGE") {
       try {
-        careGuard.receiveServerEvent(JSON.parse(body));
+        const event = JSON.parse(body);
+        careGuard.receiveServerEvent(event);
+        // [2026.09.29] 조치기록 화면이 열려 있으면 새 낙상·조치 등록 알림 때 목록을 바로 다시 불러옵니다(침대 이탈은 조치기록에 없어서 제외).
+        if (event?.eventType !== "BED_EXIT") scheduleRecordReload();
       } catch (error) {
         console.warn("감지 알림을 읽지 못했습니다.", error);
       }
@@ -128,6 +145,9 @@ document.addEventListener("DOMContentLoaded", () => {
     retryDelay = 1000;
     connect();
   });
+
+  // [2026.09.28 추가] 대시보드가 409(다른 직원이 먼저 조치 등록) 뒤 오늘 기록을 서버와 맞출 때 부릅니다(dashboard.js reloadAfterConflict).
+  window.CareGuardServerEvents = { reload: loadTodayEvents };
 
   loadTodayEvents();
   connect();

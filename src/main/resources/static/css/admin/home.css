@@ -9,6 +9,27 @@
 .admin-topbar .admin-brand-home:focus-visible { outline: 2px solid #526d82; outline-offset: 4px; border-radius: 4px; }
 
 .admin-home-page { gap: 18px; width: 100%; padding-top: 34px; }
+/* [2026.09.29 변경] 관리자 홈은 넓은 화면에서 좌우 여백을 줄여 현황 카드를 충분한 폭으로 표시합니다. 스크롤은 유지하되 스크롤바는 노출하지 않습니다. */
+@media (min-width: 801px) {
+    .admin-home-page {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: clamp(18px, 1.4vw, 28px) clamp(14px, 1.4vw, 24px) clamp(24px, 2vw, 36px);
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .admin-home-page::-webkit-scrollbar { display: none; }
+    /* [2026.09.29 변경] 홈 하단의 두 현황 행이 남는 세로 공간을 나누어 사용해 화면 아래 빈 여백을 없앱니다. */
+    .admin-home-overview { flex: 0 0 auto; }
+    .admin-home-content {
+        min-height: 686px;
+        flex: 1 0 686px;
+        grid-auto-rows: minmax(335px, 1fr);
+    }
+    .admin-home-content > section { height: 100%; }
+}
 /* [2026-09-21] 인사말과 인원 현황 카드가 아래 콘텐츠와 같은 열 너비를 사용합니다. */
 .admin-home-overview, .admin-home-content { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); align-items: stretch; gap: 16px; }
 .admin-home-intro {
@@ -88,9 +109,12 @@
 .admin-home-record-row .is-complete { background: #eef2f5; color: #687b88; }
 
 /* 실시간 연동 전 예시 알림: 위치·유형·발생 시각이 한 줄에서 읽히도록 구성합니다. */
-.admin-home-alerts { min-width: 0; min-height: 335px; padding: 22px 24px; border: 1px solid #d5e0e8; border-radius: 18px; background: #fff; }
+.admin-home-alerts { display:flex; flex-direction:column; min-width: 0; min-height: 335px; padding: 22px 24px; border: 1px solid #d5e0e8; border-radius: 18px; background: #fff; }
 .admin-home-alerts .admin-home-section-heading { align-items: center; }
 .admin-home-alert-demo { padding: 5px 9px; border-radius: 7px; background: #f0f4f7; color: #6b7d8b; font-size: 11px; font-weight: 700; }
+/* [2026.09.29 변경] 실시간 알림은 카드 간격을 두고, 알림이 많으면 목록 안에서 스크롤하되 스크롤바는 표시하지 않습니다. */
+.admin-home-alert-list { display:grid; flex:1 1 auto; min-height:0; gap:14px; margin-top:4px; padding:2px 4px 2px 0; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; -ms-overflow-style:none; }
+.admin-home-alert-list::-webkit-scrollbar { display:none; }
 .admin-home-alert-row { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid #ecd4d0; border-left: 4px solid #bd5c50; border-radius: 11px; background: #fff8f7; }
 .admin-home-alert-indicator { flex: none; width: 10px; height: 10px; border-radius: 50%; background: #bd5c50; }
 .admin-home-alert-details { display: grid; gap: 7px; min-width: 0; }

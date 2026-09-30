@@ -5,6 +5,8 @@
    - 최근 조치기록: 최신 2건
    - 실시간 알림: 최근 24시간 안에 발생했고 아직 조치가 없는(미확인) 낙상, 최신 3건 (자정 직전 낙상이 0시에 사라지지 않게)
    - 병동별·시간대별 사고 발생 현황: 오늘 발생한 낙상 건수
+     [2026.09.28 변경] 사고로 세는 것 = 확정 낙상 중 오경보('확인' 버튼)가 아닌 것(아직 조치 전인 것 포함)
+                                     + 낙상 의심 중 대응 등록한 것. 낙상 의심 '확인'과 확정 낙상 '오경보'는 세지 않습니다.
    관리자 홈이 보이는 동안 15초마다 다시 불러옵니다.
    Live Server 미리보기(서버 주소 없음)에서는 HTML 의 예시를 그대로 둡니다. */
 (() => {
@@ -81,10 +83,12 @@
 
   function renderAlerts(records) {
     const section = home.querySelector(".admin-home-alerts");
-    section.querySelectorAll(".admin-home-alert-row, .admin-home-record-row").forEach(node => node.remove());
+    const list = section.querySelector(".admin-home-alert-list");
+    // [2026.09.29 변경] 실시간 알림 카드는 제목과 분리한 숨김 스크롤 목록 안에서만 교체합니다.
+    list.replaceChildren();
     const since = seoulMinute(new Date(Date.now() - 24 * 60 * 60 * 1000));
     const pending = records.filter(record => record.status !== "완료" && record.occurredAt >= since).slice(0, 3);
-    if (!pending.length) section.append(element("div", "admin-home-record-row", "지금 확인이 필요한 낙상 알림이 없습니다."));
+    if (!pending.length) list.append(element("div", "admin-home-record-row", "현재 발생한 낙상 알림이 없습니다."));
     for (const record of pending) {
       const row = element("div", "admin-home-alert-row");
       const indicator = element("span", "admin-home-alert-indicator");
@@ -94,7 +98,7 @@
       const time = element("time", "", record.occurredAt.slice(11, 16));
       time.dateTime = record.occurredAt;
       row.append(indicator, details, time);
-      section.append(row);
+      list.append(row);
     }
     hideDemoBadge(section);
   }
@@ -157,13 +161,18 @@
     clearTimeout(timer);
     try {
       if (!wards) wards = await getJson(wardsUrl);
-      const records = await getJson(recordsUrl);
+      // [2026.09.28] 조치가 등록된 낙상 의심도 함께 받습니다(includeSuspected). 서버가 '확인' 버튼 기록에 dismissed=true 를 붙입니다.
+      const records = await getJson(`${recordsUrl}${recordsUrl.includes("?") ? "&" : "?"}includeSuspected=true`);
+      const confirmedFalls = records.filter(record => record.type === "낙상 감지");
       const today = todayKey();
-      const todayFalls = records.filter(record => record.occurredAt.startsWith(today));
-      renderRecentRecords(records);
-      renderAlerts(records);
-      renderWardChart(todayFalls, wards);
-      renderTimeChart(todayFalls);
+      const todayIncidents = records.filter(record => record.occurredAt.startsWith(today)
+        && !record.dismissed
+        && (record.type === "낙상 감지" || record.status === "완료"));
+      // 최근 조치기록·실시간 알림 카드는 지금처럼 확정 낙상만 보여 줍니다.
+      renderRecentRecords(confirmedFalls);
+      renderAlerts(confirmedFalls);
+      renderWardChart(todayIncidents, wards);
+      renderTimeChart(todayIncidents);
     } catch (error) {
       console.warn("관리자 홈 기록을 불러오지 못했습니다.", error);
     } finally {

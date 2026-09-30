@@ -30,6 +30,11 @@
 .settings-header .back-link:hover { color: #fff; background: transparent; text-decoration: none; }
 .settings-header .back-link:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 .settings-header .back-link svg { flex-shrink: 0; width: 16px; height: 16px; stroke-width: 1.8; }
+/* [2026.09.29 변경] 설정 화면도 데스크톱에서 고정 최대 폭을 제거해 좌우 여백을 줄이고 카드 영역을 넓게 사용합니다. */
+@media (min-width: 701px) {
+  .settings-page { padding-inline: clamp(14px, 1.4vw, 24px); }
+  .settings-layout { max-width: none; }
+}
 @media (max-width: 800px) {
   .settings-header .back-link { padding: 4px 0; font-size: 11px; }
 }

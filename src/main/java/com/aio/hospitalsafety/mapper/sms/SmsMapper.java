@@ -18,10 +18,18 @@ public interface SmsMapper {
             @Param("wardId") Long wardId
     );
 
-    /** 해당 병실에 배정된 활성 상태의 담당 간병인(전화번호가 있는 사람만). */
+    /** [2026.09.30 추가] 해당 병실의 담당 간호사 전원(tb_emp_location → tb_location, 활성·전화번호가 있는 사람만). */
+    List<SmsRecipient> findRoomUsers(
+            @Param("hospitalId") String hospitalId,
+            @Param("wardId") Long wardId,
+            @Param("locationName") String locationName
+    );
+
+    /** [2026.09.30 변경] 해당 병실의 활성 담당 간병인(TB_CAREGIVER, 병실당 1명). 병실은 병동 + 위치 이름('302호')으로 찾는다. */
     List<SmsRecipient> findRoomCaregivers(
             @Param("hospitalId") String hospitalId,
-            @Param("roomNumber") String roomNumber
+            @Param("wardId") Long wardId,
+            @Param("locationName") String locationName
     );
 
     /**

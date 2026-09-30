@@ -155,8 +155,8 @@ function initializePage() {
     renderRecords(filteredRecords);
   }
 
-  /* [9.15] 수정내용: 조치 기록은 한 페이지에 최대 10건씩 표시합니다. */
-  const recordsPerPage = 10;
+  /* [2026.09.29 변경] 전체화면에서 목록 여백을 줄이고 충분한 기록을 한 번에 확인하도록 18건씩 표시합니다. */
+  const recordsPerPage = 18;
   let currentPage = 1;
 
   /* 조회 상태 */
@@ -624,6 +624,13 @@ function initializePage() {
       badge.className = "alert-badge";
 
       badge.classList.add("fall-badge");
+
+      // [2026.09.28 변경] 오경보로 확인한 낙상은 일반 낙상과 구분할 수 있도록
+      // 조치기록의 표시 아이콘을 원형 대신 삼각형으로 보여줍니다.
+      const isFalseAlarm = record.patient === "오경보" || record.actionContent === "오경보 확인";
+      if (isFalseAlarm) {
+        badge.classList.add("false-alarm-badge");
+      }
 
       // [2026.09.20] 별도 점·배지 없이 유형명과 글자색만으로 구분합니다.
       badge.textContent = record.type;
@@ -1247,13 +1254,16 @@ function initializePage() {
      서버 데이터 조회
      ================================================== */
 
-  async function loadRecords() {
+  // [2026.09.29] silent=true: 대시보드가 새 낙상·조치 알림을 받아 부를 때. 로딩 문구 없이 다시 불러오고 보던 페이지·보기를 유지합니다.
+  async function loadRecords({ silent = false } = {}) {
     isLoading = true;
     loadFailed = false;
 
-    showTableMessage(
-      "조치 기록을 불러오는 중입니다."
-    );
+    if (!silent) {
+      showTableMessage(
+        "조치 기록을 불러오는 중입니다."
+      );
+    }
 
     try {
       let records = demoRecords;
@@ -1306,8 +1316,13 @@ function initializePage() {
 
       // [2026.09.22] 관리자·간호사 공용 조치기록에는 낙상 감지만 남깁니다.
       // 서버가 침대 이탈 기록을 함께 반환해도 화면과 내보내기 대상에서 제외합니다.
+      // [2026.09.28] 대시보드에서 오경보로 확인한 낙상(서버 dismissed=true)은 환자명을 비우고 알림 유형을 '오경보'로 표시합니다(09-29 사용자 요청으로 '낙상 오경보' → '오경보').
+      // (오경보 확인 때 환자명 칸에 저장되는 '오경보'는 환자 이름이 아니기 때문입니다. 표·검색·내보내기 모두 이 값을 씁니다.)
       allRecords = records
         .filter(record => record.type === "낙상 감지")
+        .map(record => record.dismissed === true
+          ? { ...record, patient: "", type: "오경보" }
+          : record)
         .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
 
       if (!settings.useDemoData) {
@@ -1330,7 +1345,7 @@ function initializePage() {
       }
 
       isLoading = false;
-      applyFilters();
+      applyFilters(silent ? { keepView: true, keepPage: true } : {});
     } catch (error) {
       isLoading = false;
       loadFailed = true;
@@ -1513,8 +1528,8 @@ function initializePage() {
 
   // [2026.09.27 추가] 대시보드가 조치기록 화면을 다시 열 때 새 기록을 불러오도록 부르는 함수입니다.
   window.CareGuardRecordPage = {
-    reload() {
-      if (!settings.useDemoData && !isLoading) loadRecords();
+    reload({ silent = false } = {}) {
+      if (!settings.useDemoData && !isLoading) loadRecords({ silent });
     }
   };
 }

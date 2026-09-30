@@ -53,3 +53,9 @@
 
 
 /* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */
+
+/* [2026.09.30 추가] 간호사 담당 병실(여러 개 선택). 목록이 열리면 팝업 밖으로 보이게 하고, 고른 병실에는 오른쪽에 체크를 표시합니다. */
+.admin-create-dialog.staff-room-menu-open { overflow: visible; }
+.admin-create-staff-room-options button[aria-selected="true"]::after { content: "✓"; float: right; font-weight: 700; }
+/* 다른 간호사가 담당 중인 병실은 이름만 흐리게 덧붙입니다(고를 수 있음). */
+.admin-create-staff-room-options .admin-staff-room-owner { color: #8a98a3; font-size: 10px; }

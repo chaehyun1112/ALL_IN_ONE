@@ -24,7 +24,6 @@ public interface AdminMapper {
                 ON ward.ward_id = user_account.ward_id
             WHERE user_account.hosp_div_id = #{hospitalDomain}
               AND user_account.role_cd = 'USER'
-              AND user_account.job_cd = #{jobType}
               AND user_account.auth_st IN ('PENDING', 'APPROVED')
             ORDER BY
                 user_account.crt_dt DESC NULLS LAST,

@@ -100,3 +100,10 @@
   .admin-page-nav { flex-wrap: wrap; max-width: calc(100vw - 32px); white-space: normal; }
   .admin-nav-submenu { width: min(190px, calc(100vw - 40px)); }
 }
+
+/* [2026.09.29 변경] 일반 노트북 이상에서는 동일한 한 줄 상단 메뉴 높이를 사용해 화면 폭에 따른 본문 시작 위치 변화를 없앱니다. */
+@media (min-width:1000px) {
+  :root { --admin-topbar-height:80px; }
+  .admin-topbar { height:80px; min-height:80px; align-items:center; padding-top:0; }
+  .admin-page-nav { top:50%; left:50%; max-width:calc(100% - 48px); transform:translate(-50%,-50%); }
+}
