@@ -23,9 +23,9 @@
 @media (min-width: 801px) {
     .admin-settings-heading .admin-inactive-overview { position: absolute; top: 0; right: 0; margin: 0; }
 }
-.admin-guide-heading { display: flex; align-items: center; gap: 9px; color: #526d82; font-size: 14px; }
+.admin-guide-heading { display: flex; align-items: center; gap: 9px; color: #526d82; font-size: 16px; }
 .admin-guide-heading svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.admin-account-guide p { margin: 8px 0 0; color: #586a77; font-size: 12px; line-height: 1.7; }
+.admin-account-guide p { margin: 8px 0 0; color: #586a77; font-size: 14px; line-height: 1.7; }
 .admin-account-guide p strong { color: #526d82; }
 .admin-inactive-panel { padding-bottom: 0; }
 .admin-inactive-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -66,11 +66,16 @@
 .admin-inactive-table th:nth-child(3) { width: 24%; }
 .admin-inactive-table th:nth-child(4) { width: 20%; }
 .admin-inactive-table th:nth-child(5) { width: 20%; }
+/* 간병인 목록은 아이디 열이 없으므로 표시되는 다섯 열에 맞춰 너비를 배분합니다. */
+body[data-admin-job-type="CAREGIVER"] .admin-inactive-table th:nth-child(2) { width: 24%; }
+body[data-admin-job-type="CAREGIVER"] .admin-inactive-table #admin-inactive-assignment-heading { width: 24%; }
+body[data-admin-job-type="CAREGIVER"] .admin-inactive-table th:nth-child(5) { width: 24%; }
+body[data-admin-job-type="CAREGIVER"] .admin-inactive-table th:last-child { width: calc(28% - 48px); }
 .admin-inactive-table { font-family: Inter, "Noto Sans KR", "Malgun Gothic", sans-serif; font-size: 11px; }
 .admin-inactive-table th,
 .admin-inactive-table td { font-size: 11px; line-height: 1.5; }
 .admin-inactive-table td { height: 68px; color: #647581; font-size: 13px; }
-.admin-inactive-table td:nth-child(2) { font-weight: 600; color: #565d4f; }
+.admin-inactive-table td:nth-child(2) { font-weight: 400; color: #565d4f; }
 .admin-inactive-table tbody tr:hover { background: #eef4f8; }
 .admin-inactive-table tbody tr:has(.admin-inactive-checkbox:checked):hover { background: #e5eef5; }
 .admin-inactive-table time { font-variant-numeric: tabular-nums; }
@@ -124,3 +129,122 @@
 }
 
 /* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */
+/* [2026.10.01 변경] 비활성화 관리 화면은 기존 목록 구조를 유지하고 페이지 번호 모양만 다른 목록과 통일합니다. */
+#admin-inactive-view .admin-inactive-pagination {
+  display: flex;
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  align-self: stretch !important;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  width: 100%;
+  margin: 12px auto 0;
+  padding: 0;
+}
+
+#admin-inactive-view .admin-inactive-pagination button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #d5dfe7;
+  border-radius: 5px;
+  background: #fff;
+  color: #586a77;
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+}
+
+#admin-inactive-view .admin-inactive-pagination button:hover,
+#admin-inactive-view .admin-inactive-pagination button:focus-visible,
+#admin-inactive-view .admin-inactive-pagination button[aria-current="page"] {
+  border-color: #526d82;
+  background: #526d82;
+  color: #fff;
+  font-weight: 700;
+  outline: 0;
+}
+/* [2026.10.01 변경] 비활성화 목록의 흰색 카드 아래 경계와 페이지 번호만 아래로 내립니다. */
+#admin-inactive-view .admin-inactive-footer {
+  display: none !important;
+}
+
+#admin-inactive-view .admin-inactive-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: calc(100dvh - var(--admin-topbar-height) - 160px) !important;
+  overflow: visible !important;
+  padding-bottom: 24px !important;
+}
+
+#admin-inactive-view #admin-inactive-list {
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+}
+
+#admin-inactive-view #admin-inactive-pagination {
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
+}
+/* [2026.10.01 변경] 비활성화 페이지 번호가 카드 경계에 붙지 않도록 안쪽 여백과 버튼 표시를 보정합니다. */
+#admin-inactive-view .admin-inactive-panel {
+  padding-bottom: 34px !important;
+}
+
+#admin-inactive-view #admin-inactive-pagination {
+  margin-top: auto !important;
+  padding-top: 20px !important;
+  margin-bottom: 8px !important;
+}
+
+/* 간호사 페이지 이동은 동일한 크기의 셀을 카드 중앙에 배치합니다. */
+body[data-admin-job-type="GENERAL"] #admin-inactive-view #admin-inactive-pagination {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 26px;
+  grid-template-rows: 26px;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 46px;
+  column-gap: 6px;
+}
+
+body[data-admin-job-type="GENERAL"] #admin-inactive-view #admin-inactive-pagination > button {
+  box-sizing: border-box;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+body[data-admin-job-type="CAREGIVER"] #admin-inactive-view #admin-inactive-pagination {
+  padding-top: 28px !important;
+  margin-bottom: 0 !important;
+}
+
+#admin-inactive-view #admin-inactive-pagination button {
+  opacity: 1 !important;
+}
+
+#admin-inactive-view #admin-inactive-pagination button:disabled {
+  color: #b8cad8 !important;
+  background: #fff !important;
+  border-color: #e3ebf0 !important;
+  opacity: .65 !important;
+}

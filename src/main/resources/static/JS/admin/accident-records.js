@@ -11,6 +11,18 @@
   const form = document.querySelector("#admin-accident-filter-form");
   const wardFilter = document.querySelector("#admin-accident-ward");
   const searchInput = document.querySelector("#admin-accident-search");
+  const dateStartFilter = document.querySelector("#admin-accident-date-start");
+  const dateEndFilter = document.querySelector("#admin-accident-date-end");
+  const dateTrigger = document.querySelector("#admin-accident-date-trigger");
+  const dateLabel = document.querySelector("#admin-accident-date-label");
+  const dateHelp = document.querySelector("#admin-accident-calendar-help");
+  const datePopover = document.querySelector("#admin-accident-date-popover");
+  const dateMonthLabel = document.querySelector("#admin-accident-calendar-month");
+  const dateDays = document.querySelector("#admin-accident-date-days");
+  const prevMonthButton = document.querySelector("#admin-accident-prev-month");
+  const nextMonthButton = document.querySelector("#admin-accident-next-month");
+  const clearDateButton = document.querySelector("#admin-accident-date-clear");
+  const confirmDateButton = document.querySelector("#admin-accident-date-confirm");
   const resetButton = document.querySelector("#admin-accident-reset");
   const pagination = document.querySelector("#admin-accident-pagination");
   const pendingVideoCount = document.querySelector("#admin-accident-pending-video-count");
@@ -18,12 +30,19 @@
   const videoStatusCards = Array.from(document.querySelectorAll("[data-video-status]"));
   const video = document.querySelector("#admin-accident-video");
   const videoEmpty = document.querySelector("#admin-accident-video-empty");
+  const listDescription = document.querySelector("#admin-accident-list-description");
   const recordsPerPage = 12;
+  const defaultListDescription = "병동, 위치 또는 환자명으로 확정 낙상 영상을 찾습니다.";
   let allRecords = [];
   let filteredRecords = [];
   let currentPage = 1;
   let selectedEventId = "";
   let selectedVideoStatus = "all";
+  let wardDropdown;
+  let wardDropdownButton;
+  let wardDropdownList;
+  let draftStartDate = "";
+  let draftEndDate = "";
 
   const demoRecords = [
     { eventId: "demo-video-1", occurredAt: "2026-09-29T10:12", wardName: "3병동", room: "302호", patient: "김OO", type: "낙상 감지", status: "미확인", completedAt: "", videoUrl: "", videoViewed: false },
@@ -39,9 +58,97 @@
   function text(value) {
     return value?.trim() || "-";
   }
+  function dateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function dateLabelText(startValue, endValue) {
+    if (startValue && endValue) return `${startValue.replaceAll("-", ".")} ~ ${endValue.replaceAll("-", ".")}`;
+    if (startValue) return `${startValue.replaceAll("-", ".")} ~ 종료일`;
+    if (endValue) return `시작일 ~ ${endValue.replaceAll("-", ".")}`;
+    return "전체 날짜";
+  }
+
+  let calendarMonthDate = new Date();
+
+  function updateDateLabel() {
+    const startValue = dateStartFilter?.value || "";
+    const endValue = dateEndFilter?.value || "";
+    if (dateLabel) dateLabel.textContent = dateLabelText(startValue, endValue);
+  }
+
+  function updateDraftDateState() {
+    if (confirmDateButton) confirmDateButton.disabled = !draftStartDate || !draftEndDate;
+    if (!dateHelp) return;
+    if (!draftStartDate) {
+      dateHelp.textContent = "시작일과 종료일을 차례로 선택하세요.";
+    } else if (!draftEndDate) {
+      dateHelp.textContent = `${draftStartDate.replaceAll("-", ".")}부터 · 종료일을 선택하세요.`;
+    } else {
+      dateHelp.textContent = `${draftStartDate.replaceAll("-", ".")} ~ ${draftEndDate.replaceAll("-", ".")}`;
+    }
+  }
+
+  function closeDatePopover() {
+    if (!datePopover) return;
+    datePopover.hidden = true;
+    dateTrigger?.setAttribute("aria-expanded", "false");
+  }
+
+  function renderDateCalendar() {
+    if (!dateDays || !dateMonthLabel) return;
+    const year = calendarMonthDate.getFullYear();
+    const month = calendarMonthDate.getMonth();
+    dateMonthLabel.textContent = `${year}년 ${month + 1}월`;
+    dateDays.replaceChildren();
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    for (let i = 0; i < firstDay; i += 1) dateDays.append(document.createElement("span"));
+    for (let day = 1; day <= lastDate; day += 1) {
+      const key = dateKey(new Date(year, month, day));
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = day;
+      button.dataset.date = key;
+      if (key === draftStartDate || key === draftEndDate) button.setAttribute("aria-pressed", "true");
+      if (draftStartDate && draftEndDate && key > draftStartDate && key < draftEndDate) button.classList.add("is-in-range");
+      button.addEventListener("click", () => {
+        if (!draftStartDate || draftEndDate) {
+          draftStartDate = key;
+          draftEndDate = "";
+        } else {
+          [draftStartDate, draftEndDate] = [draftStartDate, key].sort();
+        }
+        updateDraftDateState();
+        renderDateCalendar();
+      });
+      dateDays.append(button);
+    }
+  }
+
+  /**
+   * [2026.10.01 변경] 오경보는 실제 환자 이름이 아니므로 사고 영상 안내 문구에서 환자명으로 표시하지 않습니다.
+   */
+  function patientNameText(value) {
+    const name = String(value ?? "").trim();
+    return name && name !== "오경보" ? name : "";
+  }
 
   function hasVideo(record) {
     return Boolean(record.videoUrl?.trim());
+  }
+  /**
+   * [2026.10.01 변경] 사고 영상 보관함은 조치 등록이 끝나 환자명이 확인된 영상만 표시합니다.
+   */
+  function hasPatientName(record) {
+    return Boolean(patientNameText(record.patient));
+  }
+
+  function visibleAccidentRecords(records) {
+    return records.filter(hasPatientName);
   }
 
   // [2026.09.29] 영상 보관함의 미확인·확인 완료는 관리자가 재생 버튼을 누른 적이 있는지(videoViewed)로 정합니다.
@@ -52,8 +159,8 @@
 
   function updateSummary() {
     // [2026.09.29 변경] 영상 보관함의 상태 카드는 저장 주소 유무와 관계없이 미확인·확인 완료 사고 건수를 각각 표시합니다.
-    pendingVideoCount.textContent = allRecords.filter(record => videoStatus(record) === "미확인").length;
-    completedVideoCount.textContent = allRecords.filter(record => videoStatus(record) === "완료").length;
+    pendingVideoCount.innerHTML = `${allRecords.filter(record => videoStatus(record) === "미확인").length}<span>건</span>`;
+    completedVideoCount.innerHTML = `${allRecords.filter(record => videoStatus(record) === "완료").length}<span>건</span>`;
   }
 
   // [2026.09.29] 재생 버튼을 처음 누르면 서버에 확인 완료로 남깁니다(tb_event_media.viewed_at).
@@ -94,6 +201,7 @@
 
   function clearPlayer() {
     selectedEventId = "";
+    if (listDescription) listDescription.textContent = defaultListDescription;
     video.pause();
     video.removeAttribute("src");
     video.load();
@@ -105,6 +213,13 @@
 
   function showVideo(record) {
     selectedEventId = record.eventId;
+    // [2026.10.01 변경] 사고 영상 목록에서 항목을 선택하면 검색 안내 문구 자리에 해당 환자명을 표시합니다.
+    const patientName = patientNameText(record.patient);
+    if (listDescription) {
+      listDescription.textContent = patientName
+        ? `${patientName}님 사고 영상을 확인합니다.`
+        : defaultListDescription;
+    }
     if (!hasVideo(record)) {
       video.pause();
       video.removeAttribute("src");
@@ -140,7 +255,7 @@
     timestamp.textContent = displayDateTime(record.occurredAt);
     const state = document.createElement("strong");
     state.className = videoStatus(record) === "완료" ? "is-completed" : "is-pending";
-    state.textContent = videoStatus(record) === "완료" ? "완료" : "미확인";
+    state.textContent = videoStatus(record) === "완료" ? "완료" : "미확인 영상";
     metadata.append(timestamp, state);
 
     const title = document.createElement("strong");
@@ -148,7 +263,7 @@
     title.textContent = `${[record.wardName, record.room].filter(Boolean).join(" · ") || "위치 미정"} · ${text(record.type || "낙상 감지")}`;
     const subtitle = document.createElement("span");
     subtitle.className = "admin-accident-video-subtitle";
-    subtitle.textContent = text(record.patient);
+    subtitle.textContent = patientNameText(record.patient);
     card.append(metadata, title, subtitle);
     card.addEventListener("click", () => showVideo(record));
     return card;
@@ -170,6 +285,80 @@
       });
       pagination.append(button);
     }
+  }
+
+  /**
+   * [2026.10.01 변경] 기본 select의 펼침 목록은 브라우저 기본 UI라 디자인 통일이 어려워 버튼형 병동 필터를 대신 표시합니다.
+   */
+  function createWardDropdown() {
+    if (!wardFilter || wardDropdown) return;
+
+    wardFilter.hidden = true;
+    wardDropdown = document.createElement("div");
+    wardDropdown.className = "admin-accident-ward-dropdown";
+    wardDropdownButton = document.createElement("button");
+    wardDropdownButton.type = "button";
+    wardDropdownButton.className = "admin-accident-ward-trigger";
+    wardDropdownButton.setAttribute("aria-haspopup", "listbox");
+    wardDropdownButton.setAttribute("aria-expanded", "false");
+    wardDropdownList = document.createElement("div");
+    wardDropdownList.className = "admin-accident-ward-options";
+    wardDropdownList.setAttribute("role", "listbox");
+    wardDropdownList.hidden = true;
+    wardDropdown.append(wardDropdownButton, wardDropdownList);
+    wardFilter.after(wardDropdown);
+    wardDropdownButton.addEventListener("click", event => {
+      event.stopPropagation();
+      const open = wardDropdownList.hidden;
+      wardDropdownList.hidden = !open;
+      wardDropdownButton.setAttribute("aria-expanded", String(open));
+    });
+  }
+
+  function closeWardDropdown() {
+    if (!wardDropdownList) return;
+    wardDropdownList.hidden = true;
+    wardDropdownButton?.setAttribute("aria-expanded", "false");
+  }
+
+  function renderWardDropdown() {
+    createWardDropdown();
+    if (!wardDropdownList || !wardDropdownButton) return;
+
+    const selected = wardFilter.selectedOptions[0]?.textContent || "전체 병동";
+    wardDropdownButton.replaceChildren();
+    const label = document.createElement("span");
+    label.textContent = selected;
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("class", "admin-accident-ward-icon");
+    icon.setAttribute("viewBox", "0 0 12 12");
+    icon.setAttribute("aria-hidden", "true");
+    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrow.setAttribute("d", "M3 4.5 6 7.5 9 4.5");
+    arrow.setAttribute("fill", "none");
+    arrow.setAttribute("stroke", "currentColor");
+    arrow.setAttribute("stroke-width", "1.4");
+    arrow.setAttribute("stroke-linecap", "round");
+    arrow.setAttribute("stroke-linejoin", "round");
+    icon.append(arrow);
+    wardDropdownButton.append(label, icon);
+    wardDropdownList.replaceChildren();
+    Array.from(wardFilter.options).forEach(option => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "admin-accident-ward-option";
+      item.textContent = option.textContent;
+      item.setAttribute("role", "option");
+      item.setAttribute("aria-selected", String(option.value === wardFilter.value));
+      item.addEventListener("click", event => {
+        event.stopPropagation();
+        wardFilter.value = option.value;
+        renderWardDropdown();
+        closeWardDropdown();
+        applyFilters();
+      });
+      wardDropdownList.append(item);
+    });
   }
 
   function renderCards() {
@@ -195,22 +384,26 @@
     wardFilter.replaceChildren(new Option("전체 병동", "all"));
     wards.forEach(ward => wardFilter.add(new Option(ward, ward)));
     wardFilter.value = wards.includes(selectedValue) ? selectedValue : "all";
+    renderWardDropdown();
   }
 
   function applyFilters() {
     const query = searchInput.value.trim().toLowerCase();
+    const selectedStartDate = dateStartFilter?.value || "";
+    const selectedEndDate = dateEndFilter?.value || "";
     filteredRecords = allRecords.filter(record => {
       const sameStatus = selectedVideoStatus === "all" || videoStatus(record) === selectedVideoStatus;
       const sameWard = wardFilter.value === "all" || record.wardName === wardFilter.value;
+      const recordDate = record.occurredAt?.slice(0, 10) || "";
+      const sameDate = (!selectedStartDate || recordDate >= selectedStartDate) && (!selectedEndDate || recordDate <= selectedEndDate);
       const searchable = [record.room, record.patient, record.wardName, record.type]
         .filter(Boolean).join(" ").toLowerCase();
-      return sameStatus && sameWard && (!query || searchable.includes(query));
+      return sameStatus && sameWard && sameDate && (!query || searchable.includes(query));
     });
     currentPage = 1;
     clearPlayer();
     renderCards();
   }
-
   async function reload() {
     try {
       const response = await fetch(recordsUrl, {
@@ -219,10 +412,10 @@
         headers: { Accept: "application/json" }
       });
       if (!response.ok || response.redirected) throw new Error(`사고 영상 조회 실패: ${response.status}`);
-      allRecords = await response.json();
+      allRecords = visibleAccidentRecords(await response.json());
     } catch (error) {
       // [2026.09.29 변경] Live Server 미리보기에서는 저장소 연결 없이 보관함 UI를 확인할 수 있습니다.
-      if (location.protocol === "file:" || location.port === "5500") allRecords = demoRecords;
+      if (location.protocol === "file:" || location.port === "5500") allRecords = visibleAccidentRecords(demoRecords);
       else allRecords = [];
     }
     updateSummary();
@@ -292,11 +485,38 @@
   video.addEventListener("play", () => markViewed(allRecords.find(record => record.eventId === selectedEventId)));
   wardFilter.addEventListener("change", applyFilters);
   searchInput.addEventListener("input", applyFilters);
+  dateTrigger?.addEventListener("click", event => {
+    event.stopPropagation();
+    if (!datePopover) return;
+    const open = datePopover.hidden || dateTrigger.getAttribute("aria-expanded") !== "true";
+    if (open) {
+      draftStartDate = dateStartFilter?.value || "";
+      draftEndDate = dateEndFilter?.value || "";
+      const initialDate = draftStartDate || dateKey(new Date());
+      const [year, month] = initialDate.split("-").map(Number);
+      calendarMonthDate = new Date(year, month - 1, 1);
+    }
+    datePopover.hidden = !open;
+    dateTrigger.setAttribute("aria-expanded", String(open));
+    updateDraftDateState();
+    renderDateCalendar();
+  });
+  prevMonthButton?.addEventListener("click", () => { calendarMonthDate = new Date(calendarMonthDate.getFullYear(), calendarMonthDate.getMonth() - 1, 1); renderDateCalendar(); });
+  nextMonthButton?.addEventListener("click", () => { calendarMonthDate = new Date(calendarMonthDate.getFullYear(), calendarMonthDate.getMonth() + 1, 1); renderDateCalendar(); });
+  clearDateButton?.addEventListener("click", () => { draftStartDate = dateStartFilter?.value || ""; draftEndDate = dateEndFilter?.value || ""; updateDraftDateState(); renderDateCalendar(); closeDatePopover(); });
+  datePopover?.addEventListener("click", event => event.stopPropagation());
+  confirmDateButton?.addEventListener("click", event => { event.stopPropagation(); if (!dateStartFilter || !dateEndFilter || !draftStartDate || !draftEndDate) return; dateStartFilter.value = draftStartDate; dateEndFilter.value = draftEndDate; updateDateLabel(); closeDatePopover(); applyFilters(); });
   resetButton.addEventListener("click", () => {
     selectedVideoStatus = "all";
     renderVideoStatusCards();
     wardFilter.value = "all";
+    renderWardDropdown();
     searchInput.value = "";
+    if (dateStartFilter) dateStartFilter.value = "";
+    if (dateEndFilter) dateEndFilter.value = "";
+    draftStartDate = "";
+    draftEndDate = "";
+    updateDateLabel();
     applyFilters();
   });
 
@@ -308,6 +528,8 @@
   }));
   // [2026.09.29 변경] 카드 밖의 빈 화면을 누르면 상태별 목록을 닫고 전체 목록으로 되돌립니다.
   document.addEventListener("click", event => {
+    if (!event.target.closest(".admin-accident-ward-dropdown")) closeWardDropdown();
+    if (!event.target.closest(".admin-accident-date-field")) closeDatePopover();
     if (selectedVideoStatus === "all" || event.target.closest(".admin-accident-overview, .admin-accident-list-column, .admin-accident-player, .admin-accident-filters")) return;
     selectedVideoStatus = "all";
     renderVideoStatusCards();
@@ -316,5 +538,6 @@
 
   // [2026.09.29 변경] 상단 메뉴의 사고 기록을 다시 선택하면 저장된 영상 목록을 최신 상태로 갱신합니다.
   window.AdminAccidentRecords = { reload };
+  updateDateLabel();
   if (!page.hidden) reload();
 })();

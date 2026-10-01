@@ -22,6 +22,20 @@
   --text-color: #29343d;
 }
 body { background-color: #e9f0f5; color: #29343d; }
+/* [2026.10.01 변경] 검색창 입력값과 안내 문구의 글씨 두께를 모든 화면에서 동일하게 맞춥니다. */
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="search"],
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="text"].search-input,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-search input,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-accident-filters input {
+  font-weight: 400;
+}
+
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="search"]::placeholder,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="text"].search-input::placeholder,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-search input::placeholder,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-accident-filters input::placeholder {
+  font-weight: 400;
+}
 /* [2026.09.20] 관리 이력 카드의 선택·마우스·키보드 강조 테두리를 블루 그레이로 표시합니다. */
 .admin-history-summary .history-filter-card:hover,
 .admin-history-summary .history-filter-card:focus-visible,
@@ -792,4 +806,39 @@ body[data-dashboard-view],
   .dashboard-record-page #record-selection-summary {
     font-size: 13px !important;
   }
+}
+/* [2026.10.01 변경] 관리자·간호사 상단바 글씨를 한 단계 키워 가독성을 높입니다. */
+.admin-topbar .admin-brand > span,
+.admin-topbar .admin-page-nav a,
+.admin-topbar time,
+.admin-topbar .admin-logout,
+.admin-topbar .admin-settings,
+body[data-dashboard-view] > header .brand > span,
+body[data-dashboard-view] > header .header-actions time,
+body[data-dashboard-view] > header .profile-copy strong {
+  font-size: 14px;
+}
+
+.admin-topbar .alleyes-brand,
+.page-header .dashboard-link.alleyes-record-link,
+body[data-dashboard-view] > header .alleyes-brand {
+  font-size: 19px;
+}
+
+body[data-dashboard-view] > header .profile-copy small,
+.record-service-label,
+.page-header .hospital-name {
+  font-size: 12px;
+}
+/* [2026.10.01 변경] 관리자 상단 메뉴 항목을 더 크게 표시합니다. */
+.admin-topbar .admin-page-nav a,
+.admin-topbar .admin-nav-trigger {
+  font-size: 15px;
+}
+/* [2026.10.01 변경] 관리자 상단 드롭다운 안의 하위 메뉴 문구는 얇게 표시합니다. */
+.admin-topbar .admin-nav-submenu a,
+.admin-topbar .admin-nav-submenu a.active,
+.admin-topbar .admin-nav-submenu a:hover,
+.admin-topbar .admin-nav-submenu a:focus-visible {
+  font-weight: 400;
 }

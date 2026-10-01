@@ -179,7 +179,7 @@ public class AdminUserManagementService {
      * [2026.09.27] 간호사·간병인 전화번호 수정 (확정 낙상 SMS 받는 번호).
      * 같은 번호를 쓰는 다른 활성 직원이 있으면 막는다(한 번호로 문자가 두 번 가지 않게).
      * [2026.09.30 변경] 공용 DB 작업 코드에 CHANGE_PHONE 을 추가해 '전화번호 수정' 이력을 남긴다.
-     * 처리 내용에는 번호 끝 4자리만 적는다(예: '끝자리 1234 → 5678').
+     * 처리 내용에는 변경 전·후 전체 전화번호를 적는다(예: '010-1234-5678 → 010-9876-5432').
      */
     @Transactional
     public void changeUserPhone(
@@ -214,16 +214,22 @@ public class AdminUserManagementService {
         }
 
         adminHistoryService.record(hospitalDomain, adminId, userId, AdminHistoryService.CHANGE_PHONE,
-                "끝자리 " + lastFour(previousPhone) + " → " + lastFour(digits));
+                formatPhoneForHistory(previousPhone) + " → " + formatPhoneForHistory(digits));
     }
 
-    // 관리 이력에는 전화번호 끝 4자리만 남긴다.
-    private static String lastFour(String phoneNumber) {
+    // [2026.10.01 변경] 전화번호 수정 이력에는 비교 확인이 가능하도록 전체 번호를 남깁니다.
+    private static String formatPhoneForHistory(String phoneNumber) {
         if (phoneNumber == null || phoneNumber.isBlank()) {
             return "없음";
         }
         String digits = phoneNumber.replaceAll("[^0-9]", "");
-        return digits.length() <= 4 ? digits : digits.substring(digits.length() - 4);
+        if (digits.length() == 11) {
+            return digits.substring(0, 3) + "-" + digits.substring(3, 7) + "-" + digits.substring(7);
+        }
+        if (digits.length() == 10) {
+            return digits.substring(0, 3) + "-" + digits.substring(3, 6) + "-" + digits.substring(6);
+        }
+        return digits.isBlank() ? "없음" : digits;
     }
 
     // 비활성화된 일반 사용자 목록 조회

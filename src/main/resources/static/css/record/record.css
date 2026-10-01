@@ -178,12 +178,12 @@ select:focus-visible,
 }
 
 /* 제목 아래 설명 */
-.page-description {
-  /* [2026.09.16] 고친 내용: 조치 이력 제목과 안내 문구 사이의 세로 간격을 넓힙니다. */
-  margin: 8px 0 0;
+.page-intro .page-description {
+  /* 안내 문구를 조금 올려 제목 카드의 아래쪽 여백을 확보합니다. */
+  margin: 4px 0 0;
   color: #586a77;
-  font-size: 8.95px;
-  line-height: 14px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 /* ==================================================
@@ -552,10 +552,15 @@ body::-webkit-scrollbar,
   justify-content: center;
   gap: 6px;
   min-height: 34px;
-  padding-top: 8px;
+  width: 100%;
+  margin: 12px auto 0;
+  padding: 0;
 }
 
 .record-pagination button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 26px;
   height: 26px;
   padding: 0;
@@ -564,6 +569,8 @@ body::-webkit-scrollbar,
   background: #fff;
   color: #586a77;
   font-size: 10px;
+  line-height: 1;
+  text-align: center;
 }
 
 .record-pagination button:hover,
@@ -571,6 +578,7 @@ body::-webkit-scrollbar,
   border-color: #526d82;
   background: #526d82;
   color: #fff;
+  font-weight: 700;
 }
 
 /* 표 */

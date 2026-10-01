@@ -59,3 +59,25 @@
 .admin-create-staff-room-options button[aria-selected="true"]::after { content: "✓"; float: right; font-weight: 700; }
 /* 다른 간호사가 담당 중인 병실은 이름만 흐리게 덧붙입니다(고를 수 있음). */
 .admin-create-staff-room-options .admin-staff-room-owner { color: #8a98a3; font-size: 10px; }
+/* [2026.10.01 변경] 계정 생성·간병인 등록 팝업의 안내 문구와 입력 포커스를 부드럽게 정리합니다. */
+.admin-create-dialog p,
+.admin-create-grid label,
+.admin-create-grid small,
+.admin-create-ward-dropdown > button {
+  font-weight: 400;
+}
+
+.admin-create-dialog h2 {
+  font-weight: 600;
+}
+
+.admin-create-grid input:focus,
+.admin-create-grid input:focus-visible,
+.admin-create-grid select:focus,
+.admin-create-grid select:focus-visible,
+.admin-create-ward-dropdown > button:focus,
+.admin-create-ward-dropdown > button:focus-visible {
+  border-color: #b8cad8;
+  outline: 0;
+  box-shadow: none;
+}

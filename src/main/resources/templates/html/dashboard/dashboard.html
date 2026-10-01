@@ -11,7 +11,7 @@
   <!-- [2026.09.17] 고친 내용: 화면 최상단 알림 배너 위치가 반영되도록 CSS 캐시 버전을 갱신합니다. -->
   <link
     rel="stylesheet"
-          href="../../../static/css/dashboard/dashboard.css?v=action-history-label-20261001" th:href="@{/css/dashboard/dashboard.css(v='action-history-label-20261001')}"
+          href="../../../static/css/dashboard/dashboard.css?v=dashboard-alert-button-weight-20261001" th:href="@{/css/dashboard/dashboard.css(v='dashboard-alert-button-weight-20261001')}"
   >
   <!-- [09.13]추가내용: 병실 상태와 선택 표시를 기능별 CSS 파일로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
@@ -22,7 +22,7 @@
     <!-- [2026.09.29 변경] 노트북·PC 반응형 레이아웃 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
     <!-- [2026.09.29 변경] PC에서도 노트북과 같은 관제 도면 비율을 유지하도록 캐시 버전을 갱신합니다. -->
     <!-- [2026.09.29 변경] PC 대시보드의 숨김 스크롤 CSS가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=action-history-label-20261001" th:href="@{/css/alleyes-theme.css(v='action-history-label-20261001')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=topbar-font-up-20261001" th:href="@{/css/alleyes-theme.css(v='topbar-font-up-20261001')}">
 </head>
 
 <body data-ward-number="3" th:attr="data-ward-number=${dashboardWard.wardNumber},data-ward-id=${dashboardWard.wardId ?: ''},data-ward-name=${dashboardWard.wardName},data-session-url=@{/api/dashboard/session},data-events-url=@{/api/dashboard/events},data-event-api-base=@{/api/events/},data-ws-url=@{/ws},data-dashboard-view=${recordMode == 'records'} ? 'records' : 'dashboard'">
