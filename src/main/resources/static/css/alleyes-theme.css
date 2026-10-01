@@ -22,6 +22,20 @@
   --text-color: #29343d;
 }
 body { background-color: #e9f0f5; color: #29343d; }
+/* [2026.10.01 변경] 검색창 입력값과 안내 문구의 글씨 두께를 모든 화면에서 동일하게 맞춥니다. */
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="search"],
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="text"].search-input,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-search input,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-accident-filters input {
+  font-weight: 400;
+}
+
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="search"]::placeholder,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) input[type="text"].search-input::placeholder,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-search input::placeholder,
+:is(.admin-page, .record-page, .admin-record-page, .dashboard-record-page) .admin-accident-filters input::placeholder {
+  font-weight: 400;
+}
 /* [2026.09.20] 관리 이력 카드의 선택·마우스·키보드 강조 테두리를 블루 그레이로 표시합니다. */
 .admin-history-summary .history-filter-card:hover,
 .admin-history-summary .history-filter-card:focus-visible,
@@ -32,12 +46,10 @@ body { background-color: #e9f0f5; color: #29343d; }
   outline: 0;
 }
 /* [2026.09.20] 관리자 관리 이력의 스크롤바를 블루 그레이로 통일합니다. */
-.admin-history-wrap { scrollbar-color: #8ea6b8 #edf3f7; scrollbar-width: thin; }
-.admin-history-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
-.admin-history-wrap::-webkit-scrollbar-track { background: #edf3f7; border-radius: 6px; }
-.admin-history-wrap::-webkit-scrollbar-thumb { background: #8ea6b8; border: 2px solid #edf3f7; border-radius: 6px; }
-.admin-history-wrap::-webkit-scrollbar-thumb:hover { background: #526d82; }
-/* [2026.09.20] 조치기록 검색 도구를 아이콘이 있는 한 줄 구성으로 정리합니다. 좁은 화면에서는 줄바꿈합니다. */
+/* [2026.10.01 변경] 관리 이력 목록은 스크롤 기능은 유지하고 스크롤바 UI는 숨깁니다. */
+.admin-history-wrap { scrollbar-width: none; -ms-overflow-style: none; }
+.admin-history-wrap::-webkit-scrollbar { display: none; }
+/* [2026.09.20] 조치 이력 검색 도구를 아이콘이 있는 한 줄 구성으로 정리합니다. 좁은 화면에서는 줄바꿈합니다. */
 .search-form { gap:8px; padding:12px; min-height:60px; border:1px solid #e0e8ef; border-radius:9px; box-shadow:0 3px 12px #526d8208; }
 .search-form .period-button, .search-form .choice-button {
   height:34px; min-height:34px; padding-left:9px; gap:6px;
@@ -64,7 +76,7 @@ body { background-color: #e9f0f5; color: #29343d; }
   .search-form .record-search-actions { width:100%; }
   .search-form .record-search-actions button { flex:1; }
 }
-/* [2026.09.20] 조치기록 필터의 마우스·선택 강조를 블루 그레이로 통일합니다. */
+/* [2026.09.20] 조치 이력 필터의 마우스·선택 강조를 블루 그레이로 통일합니다. */
 .period-button:hover, .choice-button:hover,
 .period-button:focus-visible, .choice-button:focus-visible,
 .period-button[aria-expanded="true"], .choice-button[aria-expanded="true"] {
@@ -113,10 +125,9 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   }
 }
 .settings-header .back-link:hover { color: #39576d; }
-.page-header .dashboard-link, .page-header time, .page-header .fullscreen-toggle,
+.page-header .dashboard-link, .page-header time,
 .page-header .profile-toggle, .page-header .profile-copy small { color: #29343d; }
 .page-header .dashboard-link:hover { color: #39576d; }
-.page-header .fullscreen-toggle { border-color: #526d8260; }
 /* 도메인·로그인·비밀번호 변경 화면의 배경 이미지를 동일하게 유지합니다. */
 .domain-page, .login-page, .change-page {
   background: #e9f0f5 url('../image/login.png') center 34.85% / cover no-repeat;
@@ -160,11 +171,17 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 /* [2026.09.30 변경] 정상 범례 점도 정상 카드와 같은 기존 블루그레이 색으로 통일합니다. */
 .legend span:not(.urgent):not(.suspected):not(.caution)::before { background: #526d82; }
 .page-heading .counts .count[aria-pressed="true"] { outline-color: var(--count-border); }
+
+/* [2026.10.01 변경] 병동 안전 현황 카드는 클릭 필터가 아닌 통계 카드라 선택 효과를 표시하지 않습니다. */
+.page-heading .counts .count[aria-pressed="true"] {
+  box-shadow: none !important;
+  outline: 0 !important;
+}
 /* [2026.09.22 변경] 다섯 안전 현황 카드를 같은 크기로 맞추고 카드 섹션의 가로 길이를 줄입니다. */
 .page-heading { justify-content:center; }
 /* [2026.09.22 변경] 상단 현황 영역을 아래 관제 카드 전체 폭과 맞추고 다섯 카드를 같은 비율로 늘립니다. */
 .page-heading .summary { flex:1 1 auto; width:100%; max-width:none; }
-.page-heading .counts { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); }
+.page-heading .counts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
 .page-heading .counts .count { box-sizing:border-box; width:100%; min-width:0; min-height:58px; }
 @media(max-width:900px) {
   .page-heading .counts { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -262,12 +279,12 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 .settings-card, .profile-card, .admin-dialog, .page-intro, .search-form { background-color: #fff; }
 /* [2026.09.22 변경] 하단 오늘 기록을 위치·세 상태·최근 기록 순서의 한 줄로 배치합니다. */
 .dashboard-history-card #room-detail {
-  grid-template-columns:minmax(190px,1.1fr) repeat(3,minmax(130px,.75fr)) minmax(240px,1.35fr);
+  grid-template-columns:repeat(3,minmax(0,1fr));
   justify-content:start;
 }
 .dashboard-history-card #room-detail > * { min-width:0; }
 @media(max-width:1100px) {
-  .dashboard-history-card #room-detail { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dashboard-history-card #room-detail { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .dashboard-history-card #room-detail .history-recent { grid-column:1 / -1; }
 }
 /* [2026.09.20] 대응 등록 창의 정보·입력·버튼 영역을 나누고 노트북에서도 간결하게 표시합니다. */
@@ -300,12 +317,19 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   #response-dialog .response-actions { padding:14px 18px; }
   #response-dialog .response-people { grid-template-columns:1fr; gap:14px; }
 }
-/* 기록 목록의 기본 글씨는 완료 여부와 관계없이 부드러운 짙은 회색으로 통일합니다. */
-.record-table { --text-color: #4b5863; color: var(--text-color); }
+/* 기록 목록의 기본 글씨는 완료 여부와 관계없이 부드러운 회색으로 통일합니다. */
+.record-table { --text-color: #667785; color: var(--text-color); }
 /* 완료 기록도 미완료 기록과 같은 흰색 배경을 사용합니다. */
 .record-table .completed-row td { background-color: #fff; color: var(--text-color); }
 .record-table .completed-row .alert-badge { color: var(--text-color); }
-.record-table .record-complete-label { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 6px; background: #edf2f6; color: var(--text-color); font-weight: 700; white-space: nowrap; }
+.record-table .record-complete-label { display: inline; padding: 0; border-radius: 0; background: transparent; color: var(--text-color); font-weight: 500; white-space: nowrap; }
+/* [2026.10.01 변경] 미확인 상태는 점 없이 부드러운 붉은 글씨로 표시해 목록을 읽기 편하게 정리합니다. */
+.record-table .record-pending-label {
+  display: inline;
+  color: #b94a3a;
+  font-weight: 600;
+  white-space: nowrap;
+}
 /* 체크된 기록은 완료 여부와 관계없이 선택 색을 우선 보여 줍니다. */
 .record-table tbody tr:has(.record-checkbox:checked) td { background-color: #dceaf5; color: var(--text-color); }
 .record-table tbody tr:has(.record-checkbox:checked) td:first-child { border-left: 3px solid #526d82; }
@@ -321,7 +345,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   padding: 0;
   font: inherit;
 }
-.record-table .fall-badge { color: #e53935; }
+.record-table .fall-badge { color: var(--text-color); }
 .record-table .bed-exit-badge { color: #9a7900; }
 /* [2026.09.20] 유형 글자색과 같은 작은 원을 왼쪽에 표시합니다. */
 .record-table .alert-badge::before {
@@ -348,6 +372,20 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   height: .7em;
   border-radius: 0;
   clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* [2026.10.01 변경] 낙상 감지는 글씨 대신 앞 원형 표시만 빨간색으로 보여 미확인 기록을 빠르게 구분합니다. */
+.record-table .fall-badge::before,
+.admin-record-page .record-table .fall-badge::before {
+  background: #d71920;
+}
+
+/* [2026.10.01 변경] 완료된 기록의 낙상 감지·오경보 도형은 글자색과 같은 회색으로 낮춰 표시합니다. */
+.record-table .completed-row .fall-badge::before,
+.record-table .completed-row .false-alarm-badge::before,
+.admin-record-page .record-table .completed-row .fall-badge::before,
+.admin-record-page .record-table .completed-row .false-alarm-badge::before {
+  background: currentColor;
 }
 
 /* [2026.09.20] 블루 그레이 관제 화면의 낙상은 코랄, 주의는 앰버로 통일합니다. */
@@ -516,6 +554,68 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
 @media (prefers-reduced-motion:reduce) {
   .floor .corridor.urgent:not(.acknowledged) { animation:none; background:#ffe3e4; border-color:#9f2224; }
 }
+
+/* [2026.10.01 변경] 전체 화면의 작은 텍스트를 과하지 않게 키워 가독성을 맞춥니다. */
+:is(
+  .admin-page,
+  .admin-dialog,
+  .admin-create-dialog,
+  .admin-record-page,
+  .record-page,
+  .settings-page,
+  .change-page,
+  .login-card,
+  .domain-card
+) {
+  font-size: 14px;
+}
+:is(
+  .admin-page,
+  .admin-dialog,
+  .admin-create-dialog,
+  .record-page,
+  .settings-page,
+  .change-page,
+  .login-card,
+  .domain-card
+) :is(button, input, select, textarea) {
+  font-size: 14px;
+}
+:is(
+  .admin-page,
+  .admin-dialog,
+  .admin-create-dialog,
+  .record-page,
+  .settings-page,
+  .change-page,
+  .login-card,
+  .domain-card
+) :is(label, small, p, span, td, th, li) {
+  font-size: max(12px, 1em);
+}
+.admin-topbar :is(a, button, time, span),
+.page-header :is(a, button, time, span),
+body[data-dashboard-view] > header :is(time, .profile-copy strong, .profile-copy small, .record-service-label) {
+  font-size: max(12px, 1em);
+}
+:is(.admin-table, .admin-history-table, .record-table) {
+  font-size: 12px;
+}
+:is(.admin-table, .admin-history-table, .record-table) :is(th, td) {
+  font-size: 12px;
+}
+:is(.admin-heading p, .admin-home-section-heading p, .admin-home-stat p, .admin-history-summary small, .admin-accident-stat h2, .admin-accident-video-subtitle, .admin-accident-video-meta) {
+  font-size: 12px;
+}
+:is(.admin-heading h1, .page-intro h1, .settings-page h1, .domain-heading h1, .login-content h1) {
+  letter-spacing: -0.02em;
+}
+/* [2026.10.01 변경] 조치 이력의 낙상 감지 문구는 표의 다른 글씨와 같은 연한 색으로 표시합니다. */
+.record-table .fall-badge,
+.admin-record-page .record-table .fall-badge {
+  color: var(--text-color, #667785);
+  font-weight: 500;
+}
 @keyframes careguard-emergency-pulse {
   0%,100% { background:#fff1f0; border-color:#9f2224; box-shadow:0 0 0 2px #9f222435,inset 0 0 0 2px #ffffff80; }
   50% { background:#c94447; border-color:#651316; box-shadow:0 0 0 7px #9f222470,0 0 24px 5px #9f222465,inset 0 0 0 2px #ffffff35; }
@@ -562,7 +662,7 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   body[data-dashboard-view="dashboard"] .layout > .floor-panel > .floor { margin-top:12px; padding:14px 12px; }
   body[data-dashboard-view="dashboard"] .floor .room-row { min-height:76px; }
   body[data-dashboard-view="dashboard"] .floor .corridor { min-height:42px; }
-  body[data-dashboard-view="dashboard"] .dashboard-history-card { padding:14px 20px; }
+  body[data-dashboard-view="dashboard"] .dashboard-history-card { padding:14px 16px; }
 }
 
 /* [2026.09.29 변경] PC에서도 노트북과 같은 병실·복도 비율을 유지하고, 화면 바깥 가로 여백만 줄여 관제 도면의 폭을 충분히 확보합니다. */
@@ -595,16 +695,150 @@ body[data-dashboard-view] > header .dashboard-back-link { margin-left: 0; }
   }
   body[data-dashboard-view="dashboard"] .floor .room-row { aspect-ratio:7.6 / 1; }
   body[data-dashboard-view="dashboard"] .floor .corridor { aspect-ratio:12 / 1; }
-  /* [2026.09.29 변경] 평면도 비율은 고정하고, PC에서 남는 세로 공간은 하단 오늘의 기록 카드가 사용합니다. */
+  /* [2026.10.01 변경] 오늘의 기록은 병실 옆 팝업으로 표시하므로 PC에서 남는 세로 공간을 차지하지 않습니다. */
   body[data-dashboard-view="dashboard"] .dashboard-history-card {
-    display:flex;
-    /* [2026.09.29 변경] 남는 높이를 사용하되, 오늘의 기록 항목이 찌그러지지 않는 최소 높이는 유지합니다. */
-    min-height:124px !important;
-    flex:1 0 124px;
-    align-items:center;
+    min-height:0 !important;
+    flex:none;
   }
   body[data-dashboard-view="dashboard"] .dashboard-history-card #room-detail {
     width:100%;
-    min-height:88px !important;
+    min-height:0 !important;
   }
+}
+
+/* [2026.10.01 변경] 전체 화면의 글씨체를 한 계열로 통일해 페이지별 폰트 차이를 줄입니다. */
+:root {
+  --alleyes-font-family: "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+dialog,
+table,
+th,
+td,
+a,
+p,
+span,
+strong,
+small,
+label,
+li,
+dt,
+dd {
+  font-family: var(--alleyes-font-family) !important;
+}
+
+body[data-dashboard-view],
+.admin-page,
+.admin-topbar,
+.record-page,
+.admin-record-page,
+.dashboard-record-page,
+.settings-page,
+.change-page,
+.login-page,
+.domain-page,
+.login-card,
+.domain-card {
+  font-family: var(--alleyes-font-family) !important;
+}
+
+/* [2026.10.01 변경] 간호사 조치 이력도 관리자 조치 이력처럼 여백과 카드 간격이 보이도록 최종 테마에서 한 번 더 맞춥니다. */
+.dashboard-record-page .page-content {
+  padding: 20px 18px 18px;
+}
+
+.dashboard-record-page .page-intro,
+.dashboard-record-page .search-form,
+.dashboard-record-page .record-panel {
+  border-radius: 9px;
+}
+
+.dashboard-record-page .search-form,
+.dashboard-record-page .record-panel {
+  margin-top: 18px;
+}
+
+.dashboard-record-page .record-selection-toolbar {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+/* [2026.10.01 변경] 간호사 조치 이력의 선택 툴바 버튼과 안내 문구 크기를 관리자 조치 이력과 동일하게 맞춥니다. */
+.dashboard-record-page .record-selection-toolbar button {
+  min-height: 34px;
+  padding: 7px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dashboard-record-page #record-selection-summary {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (min-width: 1000px) {
+  /* [2026.10.01 변경] 큰 화면에서 뒤쪽 미디어 쿼리가 간호사 조치 이력 여백을 덮지 않도록 관리자 조치 이력과 같은 간격을 고정합니다. */
+  .dashboard-record-page .page-content {
+    padding: 20px 18px 18px !important;
+  }
+
+  .dashboard-record-page .record-panel {
+    padding: 10px 13px 16px !important;
+  }
+
+  .dashboard-record-page .record-selection-toolbar {
+    margin: 0 0 12px !important;
+    padding: 10px 12px !important;
+  }
+
+  .dashboard-record-page .record-selection-toolbar button {
+    min-height: 34px !important;
+    padding: 7px 12px !important;
+    font-size: 14px !important;
+  }
+
+  .dashboard-record-page #record-selection-summary {
+    font-size: 13px !important;
+  }
+}
+/* [2026.10.01 변경] 관리자·간호사 상단바 글씨를 한 단계 키워 가독성을 높입니다. */
+.admin-topbar .admin-brand > span,
+.admin-topbar .admin-page-nav a,
+.admin-topbar time,
+.admin-topbar .admin-logout,
+.admin-topbar .admin-settings,
+body[data-dashboard-view] > header .brand > span,
+body[data-dashboard-view] > header .header-actions time,
+body[data-dashboard-view] > header .profile-copy strong {
+  font-size: 14px;
+}
+
+.admin-topbar .alleyes-brand,
+.page-header .dashboard-link.alleyes-record-link,
+body[data-dashboard-view] > header .alleyes-brand {
+  font-size: 19px;
+}
+
+body[data-dashboard-view] > header .profile-copy small,
+.record-service-label,
+.page-header .hospital-name {
+  font-size: 12px;
+}
+/* [2026.10.01 변경] 관리자 상단 메뉴 항목을 더 크게 표시합니다. */
+.admin-topbar .admin-page-nav a,
+.admin-topbar .admin-nav-trigger {
+  font-size: 15px;
+}
+/* [2026.10.01 변경] 관리자 상단 드롭다운 안의 하위 메뉴 문구는 얇게 표시합니다. */
+.admin-topbar .admin-nav-submenu a,
+.admin-topbar .admin-nav-submenu a.active,
+.admin-topbar .admin-nav-submenu a:hover,
+.admin-topbar .admin-nav-submenu a:focus-visible {
+  font-weight: 400;
 }

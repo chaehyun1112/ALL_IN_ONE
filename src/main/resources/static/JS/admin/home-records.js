@@ -2,7 +2,7 @@
 
 /* [2026.09.27 추가] 관리자 홈의 예시 카드 4개를 서버 데이터로 채웁니다.
    데이터: /api/action-history (병원 전체 확정 낙상, 최신순, 조치 여부 포함), /api/admin/wards (병동 목록)
-   - 최근 조치기록: 최신 2건
+   - 최근 조치 이력: 최신 2건
    - 실시간 알림: 최근 24시간 안에 발생했고 아직 조치가 없는(미확인) 낙상, 최신 3건 (자정 직전 낙상이 0시에 사라지지 않게)
    - 병동별·시간대별 사고 발생 현황: 오늘 발생한 낙상 건수
      [2026.09.28 변경] 사고로 세는 것 = 확정 낙상 중 오경보('확인' 버튼)가 아닌 것(아직 조치 전인 것 포함)
@@ -16,8 +16,9 @@
   if (!recordsUrl || !wardsUrl) return;
 
   const REFRESH_MS = 15_000;
-  // 시간대 구간은 화면 디자인(팀원 담당)의 세 구간 그대로 둡니다. 00~06시 낙상은 이 차트에 들어가지 않습니다(2026.09.28 되돌림).
+  // [2026.10.01 변경] 0~6시 구간을 포함해 하루 전체 낙상 현황을 시간 순서대로 표시합니다.
   const TIME_SLOTS = [
+    { label: "새벽", range: "00–06시", from: 0, to: 6 },
     { label: "오전", range: "06–12시", from: 6, to: 12 },
     { label: "오후", range: "12–18시", from: 12, to: 18 },
     { label: "저녁", range: "18–24시", from: 18, to: 24 }
@@ -168,7 +169,7 @@
       const todayIncidents = records.filter(record => record.occurredAt.startsWith(today)
         && !record.dismissed
         && (record.type === "낙상 감지" || record.status === "완료"));
-      // 최근 조치기록·실시간 알림 카드는 지금처럼 확정 낙상만 보여 줍니다.
+      // 최근 조치 이력·실시간 알림 카드는 지금처럼 확정 낙상만 보여 줍니다.
       renderRecentRecords(confirmedFalls);
       renderAlerts(confirmedFalls);
       renderWardChart(todayIncidents, wards);

@@ -1,10 +1,10 @@
 package com.aio.hospitalsafety.dto.action;
 
 /**
- * 조치기록 화면(record.js)이 받는 한 줄. 화면 계약에 맞춰 모두 문자열이다.
+ * 조치 이력 화면(record.js)이 받는 한 줄. 화면 계약에 맞춰 모두 문자열이다.
  *
  * occurredAt, completedAt: "2026-09-25T14:30" (한국 시각, 없으면 "")
- * type: "낙상 감지"(확정 낙상). 관리자 홈이 includeSuspected=true 로 부르면 대응 등록한 "낙상 의심"도 온다(조치기록 화면은 낙상 감지만 받는다)
+ * type: "낙상 감지"(확정 낙상). 관리자 홈이 includeSuspected=true 로 부르면 대응 등록한 "낙상 의심"도 온다(조치 이력 화면은 낙상 감지만 받는다)
  * status: "완료"(조치 등록됨) / "미확인"
  */
 public record ActionHistoryResponse(

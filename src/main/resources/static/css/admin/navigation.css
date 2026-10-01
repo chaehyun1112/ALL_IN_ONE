@@ -5,7 +5,7 @@
 .admin-page-nav {
   z-index: 1;
   align-items: center;
-  gap: 14px;
+  gap: 38px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -17,12 +17,12 @@
   display: inline-flex;
   align-items: center;
   min-height: 35px;
-  padding: 0 8px;
+  padding: 0 12px;
   border: 0;
   border-radius: 6px;
   background: transparent;
   color: #29343d;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   font-family: inherit;
   white-space: nowrap;
@@ -106,4 +106,22 @@
   :root { --admin-topbar-height:80px; }
   .admin-topbar { height:80px; min-height:80px; align-items:center; padding-top:0; }
   .admin-page-nav { top:50%; left:50%; max-width:calc(100% - 48px); transform:translate(-50%,-50%); }
+}
+
+/* [2026.10.01 변경] 관리자 상단 메뉴 문구만 더 잘 보이도록 키웁니다. */
+.admin-topbar .admin-page-nav > a,
+.admin-topbar .admin-page-nav .admin-nav-trigger {
+  font-size: 14px;
+}
+.admin-topbar .admin-page-nav > a.active,
+.admin-topbar .admin-page-nav .admin-nav-trigger.active {
+  font-size: 14px;
+}
+
+/* [2026.10.01 변경] 관리자 상단 메뉴 문구 사이 간격을 넓혀 가독성을 높입니다. */
+.admin-page-nav { gap: 38px; }
+.admin-topbar .admin-page-nav > a,
+.admin-topbar .admin-page-nav .admin-nav-trigger {
+  padding-left: 12px;
+  padding-right: 12px;
 }

@@ -64,7 +64,7 @@ public class AdminController {
 
     @GetMapping("/admin/records/content")
     public String adminActionRecordsContent(Model model) {
-        // [2026.09.17] 추가한 내용: 관리자 화면 내부에 표시할 조치기록 본문을 별도 주소로 제공합니다.
+        // [2026.09.17] 추가한 내용: 관리자 화면 내부에 표시할 조치 이력 본문을 별도 주소로 제공합니다.
         model.addAttribute("adminRecordPage", true);
         return "html/record/record";
     }
@@ -77,4 +77,3 @@ public class AdminController {
         return "html/admin/admin";
     }
 }
-
