@@ -2171,3 +2171,10 @@ body[data-dashboard-view="dashboard"] #room-detail .history-metric strong {
     min-height: 100%;
   }
 }
+
+/* [2026.10.01 변경] 확인이 필요한 알림 카드의 확인·대응등록 버튼 문구를 얇게 표시합니다. */
+body[data-dashboard-view="dashboard"] .alerts-panel .alert-card .locate-room,
+body[data-dashboard-view="dashboard"] .alerts-panel .alert-card .locate-room[aria-pressed="true"],
+body[data-dashboard-view="dashboard"] .alerts-panel .alert-card .alert-card-actions .locate-room {
+  font-weight: 400;
+}

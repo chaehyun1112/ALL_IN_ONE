@@ -552,10 +552,15 @@ body::-webkit-scrollbar,
   justify-content: center;
   gap: 6px;
   min-height: 34px;
-  padding-top: 8px;
+  width: 100%;
+  margin: 12px auto 0;
+  padding: 0;
 }
 
 .record-pagination button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 26px;
   height: 26px;
   padding: 0;
@@ -564,6 +569,8 @@ body::-webkit-scrollbar,
   background: #fff;
   color: #586a77;
   font-size: 10px;
+  line-height: 1;
+  text-align: center;
 }
 
 .record-pagination button:hover,
@@ -571,6 +578,7 @@ body::-webkit-scrollbar,
   border-color: #526d82;
   background: #526d82;
   color: #fff;
+  font-weight: 700;
 }
 
 /* 표 */
