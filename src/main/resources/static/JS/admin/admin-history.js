@@ -11,9 +11,9 @@
 
     const actionLabels = {
         CREATE: "계정 생성",
-        CHANGE_WARD: "병동 변경",
+        CHANGE_WARD: "병동 · 병실 변경",
         // [2026.09.30 추가] 병실 변경, 전화번호 수정(공용 DB 작업 코드에 추가함)
-        CHANGE_ROOM: "병실 변경",
+        CHANGE_ROOM: "병동 · 병실 변경",
         CHANGE_PHONE: "전화번호 수정",
         RESET_PASSWORD: "비밀번호 초기화",
         DEACTIVATE: "계정 비활성화",
@@ -55,8 +55,8 @@
      * 감사 코드에 해당하는 화면 표시 문구를 반환한다.
      */
     function getActionLabel(actionCode) {
-        if (actionCode === "CHANGE_WARD" && document.body.dataset.adminJobType === "CAREGIVER") {
-            return "병실 변경";
+        if (actionCode === "CHANGE_WARD" || actionCode === "CHANGE_ROOM") {
+            return "병동 · 병실 변경";
         }
         return actionLabels[actionCode] ?? actionCode ?? "알 수 없음";
     }
@@ -64,24 +64,68 @@
     /**
      * [2026.10.01 변경] 전화번호 수정 이력의 처리 내용을 목록과 상세에서 읽기 쉬운 문구로 정리합니다.
      */
+    function wardNameFromRoomText(value) {
+        const roomMatch = String(value ?? "").match(/(\d{3})호/);
+        if (!roomMatch) return "";
+        const wardNumber = Math.floor(Number(roomMatch[1]) / 100);
+        return wardNumber ? `${wardNumber}병동` : "";
+    }
+
+    function normalizeAssignmentDetailPart(part) {
+        const value = String(part ?? "").trim().replace(/^담당\s+/, "");
+        if (!value) return [];
+
+        const arrowMatch = value.match(/^(.*?)\s*→\s*(.*?)$/);
+        if (arrowMatch) {
+            const beforeRaw = arrowMatch[1].trim().replace(/^(병동|병실|위치)\s+/, "");
+            const afterRaw = arrowMatch[2].trim();
+            const beforeWard = wardNameFromRoomText(beforeRaw);
+            const afterWard = wardNameFromRoomText(afterRaw);
+            const isWardChange = value.includes("병동") || beforeRaw.includes("병동") || afterRaw.includes("병동");
+            const lines = [];
+
+            if (isWardChange) {
+                lines.push(`변경된 병동 ${beforeRaw || "미확인"} → ${afterRaw || "미확인"}`);
+            } else {
+                if (beforeWard && afterWard && beforeWard !== afterWard) {
+                    lines.push(`변경된 병동 ${beforeWard} → ${afterWard}`);
+                }
+                lines.push(`변경된 병실 ${beforeRaw || "없음"} → ${afterRaw || "없음"}`);
+            }
+
+            return lines;
+        }
+
+        const normalized = value.replace(/^(병동|병실|위치)\s+/, "");
+        const label = value.includes("병동") ? "변경된 병동" : value.includes("병실") || value.includes("위치") || /\d{3}호/.test(value) ? "변경된 병실" : "변경 내용";
+        return [`${label} ${normalized}`];
+    }
+
+    /**
+     * [2026.10.01 변경] 전화번호 수정과 병동·병실 변경 이력의 처리 내용을 목록과 상세에서 읽기 쉽게 정리합니다.
+     */
     function formatActionDetail(actionCode, detail) {
         const value = String(detail ?? "").trim();
 
         if (!value) return "";
 
         if (actionCode === "CHANGE_PHONE") {
-            return value.includes("→")
-                ? `이전 번호 ${value}`
-                : `변경 번호 ${value}`;
+            const phoneValue = value.replace(/^끝자리\s+/, "");
+            return phoneValue.includes("→")
+                ? `수정 번호 ${phoneValue}`
+                : `수정 번호 ${phoneValue}`;
         }
 
-        if (actionCode === "CHANGE_WARD") {
-            const [wardDetail, ...otherDetails] = value.split(",").map(part => part.trim()).filter(Boolean);
-            const normalizedWardDetail = wardDetail.startsWith("담당 병동")
-                ? wardDetail
-                : `담당 병동 ${wardDetail}`;
-
-            return [normalizedWardDetail, ...otherDetails].join(", ");
+        if (actionCode === "CHANGE_WARD" || actionCode === "CHANGE_ROOM") {
+            const lines = value
+                .split(",")
+                .flatMap(normalizeAssignmentDetailPart)
+                .filter(Boolean);
+            const hasWardLine = lines.some(line => line.startsWith("변경된 병동 "));
+            return lines
+                .filter((line, index) => !(line.startsWith("변경된 병동 ") && hasWardLine && lines.findIndex(item => item === line) !== index))
+                .filter((line, index, allLines) => !(line.startsWith("변경된 병동 ") && allLines.findIndex(item => item.startsWith("변경된 병동 ")) !== index))
+                .join(", ");
         }
 
         return value;
@@ -98,12 +142,12 @@
         if (history.actionCode === "CHANGE_WARD") {
             const wardName = String(history.wardName ?? "").trim();
             return wardName
-                ? `담당 병동 미확인 → ${wardName}`
-                : "담당 병동 미확인 → 현재 병동 미확인";
+                ? `변경된 병동 ${wardName}`
+                : "변경된 병동 변경값 미확인";
         }
 
         if (history.actionCode === "CHANGE_ROOM") {
-            return `담당 위치 ${formatCaregiverLocation(history)}`;
+            return `변경된 병실 ${formatCaregiverLocation(history)}`;
         }
 
         return "";
@@ -115,7 +159,7 @@
      */
     function getFilterLabel(actionCode) {
         if (actionCode === "CHANGE_WARD" || actionCode === "CHANGE_ROOM") {
-            return document.body.dataset.adminJobType === "CAREGIVER" ? "병실 변경" : "병동·병실 변경";
+            return "병동 · 병실 변경";
         }
         return getActionLabel(actionCode);
     }
@@ -141,9 +185,24 @@
         popover.className = "history-action-popover";
         popover.setAttribute("role", "dialog");
         popover.setAttribute("aria-label", `${label} 수정 내용`);
-        popover.innerHTML = `<strong></strong><p></p>`;
+        popover.innerHTML = `<strong></strong><div class="history-action-detail-lines"></div>`;
         popover.querySelector("strong").textContent = label;
-        popover.querySelector("p").textContent = detail;
+        const detailLines = popover.querySelector(".history-action-detail-lines");
+        String(detail)
+            .split(",")
+            .map(part => part.trim())
+            .filter(Boolean)
+            .forEach(part => {
+                const namedChange = part.match(/^(변경된\s+(?:병동|병실)|수정\s+번호)\s+(.+)$/);
+                const firstSpace = part.indexOf(" ");
+                const name = namedChange ? namedChange[1] : firstSpace > -1 ? part.slice(0, firstSpace).trim() : "변경 내용";
+                const change = namedChange ? namedChange[2] : firstSpace > -1 ? part.slice(firstSpace + 1).trim() : part;
+                const line = document.createElement("p");
+                line.innerHTML = `<span></span><b></b>`;
+                line.querySelector("span").textContent = name;
+                line.querySelector("b").textContent = change;
+                detailLines.append(line);
+            });
         document.body.append(popover);
 
         const rect = button.getBoundingClientRect();

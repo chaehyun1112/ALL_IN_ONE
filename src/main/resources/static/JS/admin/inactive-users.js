@@ -84,7 +84,7 @@ let adminPendingStatusChange = null;
 let adminBusy = false;
 let adminLoading = false;
 let adminLoadFailed = false;
-const ADMIN_INACTIVE_PAGE_SIZE = 5;
+const ADMIN_INACTIVE_PAGE_SIZE = 10;
 let adminInactiveCurrentPage = 1;
 
 function closeAdminWardOptions() {

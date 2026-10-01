@@ -11,16 +11,18 @@
   const form = document.querySelector("#admin-accident-filter-form");
   const wardFilter = document.querySelector("#admin-accident-ward");
   const searchInput = document.querySelector("#admin-accident-search");
-  const dateFilter = document.querySelector("#admin-accident-date");
+  const dateStartFilter = document.querySelector("#admin-accident-date-start");
+  const dateEndFilter = document.querySelector("#admin-accident-date-end");
   const dateTrigger = document.querySelector("#admin-accident-date-trigger");
   const dateLabel = document.querySelector("#admin-accident-date-label");
+  const dateHelp = document.querySelector("#admin-accident-calendar-help");
   const datePopover = document.querySelector("#admin-accident-date-popover");
   const dateMonthLabel = document.querySelector("#admin-accident-calendar-month");
   const dateDays = document.querySelector("#admin-accident-date-days");
   const prevMonthButton = document.querySelector("#admin-accident-prev-month");
   const nextMonthButton = document.querySelector("#admin-accident-next-month");
   const clearDateButton = document.querySelector("#admin-accident-date-clear");
-  const todayDateButton = document.querySelector("#admin-accident-date-today");
+  const confirmDateButton = document.querySelector("#admin-accident-date-confirm");
   const resetButton = document.querySelector("#admin-accident-reset");
   const pagination = document.querySelector("#admin-accident-pagination");
   const pendingVideoCount = document.querySelector("#admin-accident-pending-video-count");
@@ -39,6 +41,8 @@
   let wardDropdown;
   let wardDropdownButton;
   let wardDropdownList;
+  let draftStartDate = "";
+  let draftEndDate = "";
 
   const demoRecords = [
     { eventId: "demo-video-1", occurredAt: "2026-09-29T10:12", wardName: "3병동", room: "302호", patient: "김OO", type: "낙상 감지", status: "미확인", completedAt: "", videoUrl: "", videoViewed: false },
@@ -61,14 +65,31 @@
     return `${year}-${month}-${day}`;
   }
 
-  function dateLabelText(value) {
-    return value ? value.replaceAll("-", ".") : "전체 날짜";
+  function dateLabelText(startValue, endValue) {
+    if (startValue && endValue) return `${startValue.replaceAll("-", ".")} ~ ${endValue.replaceAll("-", ".")}`;
+    if (startValue) return `${startValue.replaceAll("-", ".")} ~ 종료일`;
+    if (endValue) return `시작일 ~ ${endValue.replaceAll("-", ".")}`;
+    return "전체 날짜";
   }
 
   let calendarMonthDate = new Date();
 
   function updateDateLabel() {
-    if (dateLabel) dateLabel.textContent = dateLabelText(dateFilter?.value || "");
+    const startValue = dateStartFilter?.value || "";
+    const endValue = dateEndFilter?.value || "";
+    if (dateLabel) dateLabel.textContent = dateLabelText(startValue, endValue);
+  }
+
+  function updateDraftDateState() {
+    if (confirmDateButton) confirmDateButton.disabled = !draftStartDate || !draftEndDate;
+    if (!dateHelp) return;
+    if (!draftStartDate) {
+      dateHelp.textContent = "시작일과 종료일을 차례로 선택하세요.";
+    } else if (!draftEndDate) {
+      dateHelp.textContent = `${draftStartDate.replaceAll("-", ".")}부터 · 종료일을 선택하세요.`;
+    } else {
+      dateHelp.textContent = `${draftStartDate.replaceAll("-", ".")} ~ ${draftEndDate.replaceAll("-", ".")}`;
+    }
   }
 
   function closeDatePopover() {
@@ -92,12 +113,17 @@
       button.type = "button";
       button.textContent = day;
       button.dataset.date = key;
-      if (dateFilter?.value === key) button.setAttribute("aria-pressed", "true");
+      if (key === draftStartDate || key === draftEndDate) button.setAttribute("aria-pressed", "true");
+      if (draftStartDate && draftEndDate && key > draftStartDate && key < draftEndDate) button.classList.add("is-in-range");
       button.addEventListener("click", () => {
-        if (dateFilter) dateFilter.value = key;
-        updateDateLabel();
-        closeDatePopover();
-        applyFilters();
+        if (!draftStartDate || draftEndDate) {
+          draftStartDate = key;
+          draftEndDate = "";
+        } else {
+          [draftStartDate, draftEndDate] = [draftStartDate, key].sort();
+        }
+        updateDraftDateState();
+        renderDateCalendar();
       });
       dateDays.append(button);
     }
@@ -133,8 +159,8 @@
 
   function updateSummary() {
     // [2026.09.29 변경] 영상 보관함의 상태 카드는 저장 주소 유무와 관계없이 미확인·확인 완료 사고 건수를 각각 표시합니다.
-    pendingVideoCount.textContent = allRecords.filter(record => videoStatus(record) === "미확인").length;
-    completedVideoCount.textContent = allRecords.filter(record => videoStatus(record) === "완료").length;
+    pendingVideoCount.innerHTML = `${allRecords.filter(record => videoStatus(record) === "미확인").length}<span>건</span>`;
+    completedVideoCount.innerHTML = `${allRecords.filter(record => videoStatus(record) === "완료").length}<span>건</span>`;
   }
 
   // [2026.09.29] 재생 버튼을 처음 누르면 서버에 확인 완료로 남깁니다(tb_event_media.viewed_at).
@@ -363,11 +389,13 @@
 
   function applyFilters() {
     const query = searchInput.value.trim().toLowerCase();
-    const selectedDate = dateFilter?.value || "";
+    const selectedStartDate = dateStartFilter?.value || "";
+    const selectedEndDate = dateEndFilter?.value || "";
     filteredRecords = allRecords.filter(record => {
       const sameStatus = selectedVideoStatus === "all" || videoStatus(record) === selectedVideoStatus;
       const sameWard = wardFilter.value === "all" || record.wardName === wardFilter.value;
-      const sameDate = !selectedDate || record.occurredAt?.slice(0, 10) === selectedDate;
+      const recordDate = record.occurredAt?.slice(0, 10) || "";
+      const sameDate = (!selectedStartDate || recordDate >= selectedStartDate) && (!selectedEndDate || recordDate <= selectedEndDate);
       const searchable = [record.room, record.patient, record.wardName, record.type]
         .filter(Boolean).join(" ").toLowerCase();
       return sameStatus && sameWard && sameDate && (!query || searchable.includes(query));
@@ -457,26 +485,37 @@
   video.addEventListener("play", () => markViewed(allRecords.find(record => record.eventId === selectedEventId)));
   wardFilter.addEventListener("change", applyFilters);
   searchInput.addEventListener("input", applyFilters);
-  dateFilter?.addEventListener("change", () => { updateDateLabel(); applyFilters(); });
   dateTrigger?.addEventListener("click", event => {
     event.stopPropagation();
-    const open = datePopover?.hidden;
     if (!datePopover) return;
+    const open = datePopover.hidden || dateTrigger.getAttribute("aria-expanded") !== "true";
+    if (open) {
+      draftStartDate = dateStartFilter?.value || "";
+      draftEndDate = dateEndFilter?.value || "";
+      const initialDate = draftStartDate || dateKey(new Date());
+      const [year, month] = initialDate.split("-").map(Number);
+      calendarMonthDate = new Date(year, month - 1, 1);
+    }
     datePopover.hidden = !open;
     dateTrigger.setAttribute("aria-expanded", String(open));
+    updateDraftDateState();
     renderDateCalendar();
   });
   prevMonthButton?.addEventListener("click", () => { calendarMonthDate = new Date(calendarMonthDate.getFullYear(), calendarMonthDate.getMonth() - 1, 1); renderDateCalendar(); });
   nextMonthButton?.addEventListener("click", () => { calendarMonthDate = new Date(calendarMonthDate.getFullYear(), calendarMonthDate.getMonth() + 1, 1); renderDateCalendar(); });
-  clearDateButton?.addEventListener("click", () => { dateFilter.value = ""; updateDateLabel(); closeDatePopover(); applyFilters(); });
-  todayDateButton?.addEventListener("click", () => { const today = new Date(); calendarMonthDate = new Date(today.getFullYear(), today.getMonth(), 1); dateFilter.value = dateKey(today); updateDateLabel(); closeDatePopover(); applyFilters(); });
+  clearDateButton?.addEventListener("click", () => { draftStartDate = dateStartFilter?.value || ""; draftEndDate = dateEndFilter?.value || ""; updateDraftDateState(); renderDateCalendar(); closeDatePopover(); });
+  datePopover?.addEventListener("click", event => event.stopPropagation());
+  confirmDateButton?.addEventListener("click", event => { event.stopPropagation(); if (!dateStartFilter || !dateEndFilter || !draftStartDate || !draftEndDate) return; dateStartFilter.value = draftStartDate; dateEndFilter.value = draftEndDate; updateDateLabel(); closeDatePopover(); applyFilters(); });
   resetButton.addEventListener("click", () => {
     selectedVideoStatus = "all";
     renderVideoStatusCards();
     wardFilter.value = "all";
     renderWardDropdown();
     searchInput.value = "";
-    if (dateFilter) dateFilter.value = "";
+    if (dateStartFilter) dateStartFilter.value = "";
+    if (dateEndFilter) dateEndFilter.value = "";
+    draftStartDate = "";
+    draftEndDate = "";
     updateDateLabel();
     applyFilters();
   });

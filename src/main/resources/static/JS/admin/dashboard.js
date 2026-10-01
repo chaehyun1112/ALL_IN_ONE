@@ -18,7 +18,7 @@ const ADMIN_LIST_PAGE_SIZE = 10;
 // [2026.09.29 변경] 간호사·간병인 관리 목록은 15명까지 표시하고, 16명부터 다음 페이지로 이동합니다.
 const ADMIN_USER_PAGE_SIZE = 15;
 // [2026.09.29 변경] 간병인 관리 이력은 더 짧은 단위로 나누어 1·2·3 페이지 이동을 쉽게 확인합니다.
-const ADMIN_CAREGIVER_HISTORY_PAGE_SIZE = 5;
+const ADMIN_CAREGIVER_HISTORY_PAGE_SIZE = 10;
 
 const adminRows = document.querySelector("#admin-user-rows");
 const adminTabs = Array.from(document.querySelectorAll("[data-status]"));
@@ -86,7 +86,7 @@ const csrfToken = document.querySelector('meta[name="_csrf"]')?.content ?? "";
 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content ?? "X-CSRF-TOKEN";
 
 /* [9.15] 추가내용: 목록 화면에서 공통으로 사용하는 페이지 번호 버튼을 만든다. */
-function renderAdminPagination(container, currentPage, totalPages, onPageChange, showSinglePage = false) {
+function renderAdminPagination(container, currentPage, totalPages, onPageChange, showSinglePage = false, currentOnly = false) {
     if (!container) return;
 
     container.replaceChildren();
@@ -1540,7 +1540,7 @@ function filterHistory(action, resetPage = false) {
         }
     }
 
-    // [2026.09.29 변경] 간병인 관리 이력은 5건씩 표시하여 페이지 번호로 목록을 이동합니다.
+    // [2026.10.01 변경] 간병인 관리 이력은 10건씩 표시하여 페이지 번호로 목록을 이동합니다.
     const historyPageSize = document.body.dataset.adminJobType === "CAREGIVER"
         ? ADMIN_CAREGIVER_HISTORY_PAGE_SIZE
         : ADMIN_LIST_PAGE_SIZE;

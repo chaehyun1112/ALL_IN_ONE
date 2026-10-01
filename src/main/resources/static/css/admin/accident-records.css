@@ -133,7 +133,7 @@
   background-size: 12px 12px;
 }
 .admin-accident-date-trigger > span[aria-hidden="true"] { display: none; }
-.admin-accident-date-icon { width: 15px; height: 15px; flex: 0 0 15px; color: currentColor; }
+.admin-accident-date-icon { width: 15px; height: 15px; flex: 0 0 15px; color: #526d82; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .admin-accident-date-trigger:hover,
 .admin-accident-date-trigger:focus-visible,
 .admin-accident-date-trigger[aria-expanded="true"] { border-color: #b8cad8; background-color: #e9f0f5; color: #36566f; outline: 0; box-shadow: none; }
@@ -186,7 +186,6 @@
 .admin-accident-date-days button:focus-visible { background: #e0ede5; color: #36566f; outline: 0; }
 .admin-accident-date-days button[aria-pressed="true"] { background: #526d82; color: #fff; }
 .admin-accident-date-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.admin-accident-date-actions #admin-accident-date-today { background: #526d82; border-color: #526d82; color: #fff; }
 .admin-accident-date-actions button:hover,
 .admin-accident-date-actions button:focus-visible { outline: 0; filter: brightness(.97); }
 .admin-accident-search-field { min-width: 0; flex: 1 1 220px; }
@@ -312,3 +311,86 @@ html:fullscreen .admin-accident-video-empty {
 }
 html:fullscreen #admin-accident-video,
 html:fullscreen .admin-accident-video-empty { height: auto; max-width: calc(clamp(300px, 44vh, 520px) * 16 / 9); }
+
+/* [2026.10.01 변경] 사고 기록 날짜 필터의 달력 아이콘을 선형 아이콘으로 또렷하게 표시합니다. */
+.admin-accident-date-icon rect,
+.admin-accident-date-icon path {
+  fill: none;
+  stroke: currentColor;
+}
+
+/* [2026.10.01 변경] 사고 기록 날짜 범위 선택 시 시작일과 종료일 사이를 연하게 표시합니다. */
+.admin-accident-date-days button.is-in-range {
+  background: #eef3f6;
+  color: #36566f;
+}
+
+/* [2026.10.01 변경] 사고 기록 날짜 범위의 시작일과 종료일을 같은 달력 안에서 바로 선택합니다. */
+.admin-accident-date-range-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.admin-accident-date-range-summary button {
+  display: grid;
+  gap: 3px;
+  min-height: 42px;
+  padding: 7px 9px;
+  border: 1px solid #d4e0e8;
+  border-radius: 8px;
+  background: #f7fafc;
+  color: #647581;
+  font-size: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-accident-date-range-summary button.is-active {
+  border-color: #526d82;
+  background: #e9f0f5;
+  color: #36566f;
+}
+.admin-accident-date-range-summary strong {
+  color: #29343d;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+
+/* [2026.10.01 변경] 사고 기록 날짜 필터를 기본 달력 대신 공통 스타일 버튼과 팝업으로 표시합니다. */
+.admin-accident-date-field .admin-accident-date-trigger {
+  min-width: 142px;
+}
+.admin-accident-date-field .admin-accident-date-trigger[aria-expanded="true"] {
+  border-color: #b8cad8;
+  background-color: #e9f0f5;
+  color: #36566f;
+}
+
+/* [2026.10.01 변경] 사고 기록 날짜를 조치 이력처럼 하나의 달력에서 시작일과 종료일을 이어서 선택합니다. */
+.admin-accident-date-field {
+  min-width: 148px;
+}
+
+.admin-accident-date-field .admin-accident-date-trigger {
+  min-width: 148px;
+}
+
+.admin-accident-calendar-help {
+  min-height: 32px;
+  margin: 0 0 12px;
+  color: #586a77;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.admin-accident-date-actions #admin-accident-date-confirm {
+  background: #526d82;
+  border-color: #526d82;
+  color: #fff;
+}
+
+.admin-accident-date-actions #admin-accident-date-confirm:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

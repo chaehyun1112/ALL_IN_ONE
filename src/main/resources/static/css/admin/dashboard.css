@@ -56,6 +56,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focu
 .admin-heading { padding: 0 12px; margin-bottom: 20px; }
 .admin-heading h1 { margin: 0 0 8px; font-size: 28px; line-height: 1.35; letter-spacing: -1px; }
 .admin-heading p { margin: 0; font-size: 13px; color: var(--admin-muted); }
+body[data-admin-job-type="GENERAL"] #admin-management-page.is-staff-page > .admin-heading > p,
+#admin-management-page.is-history-page > .admin-heading > p,
+#admin-inactive-view > .admin-heading > p,
+#admin-accident-view > .admin-heading > p {
+  font-size: 14px;
+  line-height: 1.6;
+}
 /* [2026.09.16] 고친 내용: 계정 생성 요약 카드를 제거하고 남은 네 카드의 너비·높이·내용 정렬을 동일하게 맞춥니다. */
 .admin-history-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 0 0 18px; }
 /* [2026-09-22 변경] 간병인 이력은 비밀번호 초기화 대신 전화번호 수정 카드를 표시하고 네 칸을 균등 배치합니다. */
@@ -142,7 +149,7 @@ body[data-admin-job-type="CAREGIVER"] #admin-list .admin-table td:nth-child(3) {
   text-indent: 8px;
 }
 /* [09.13]수정내용: 마지막 행도 공통 td의 동일한 하단 테두리를 사용하도록 중복 규칙을 제거한다. */
-.admin-table td:first-child { font-weight: 600; color: #565d4f; }
+.admin-table td:first-child { font-weight: 400; color: #565d4f; }
 .admin-row-actions { position: relative; display: flex; justify-content: center; gap: 8px; }
 .admin-row-actions button { padding: 5px 13px; border: 0; font-size: 12px; white-space: nowrap; }
 .admin-approve { color: #53846a; background: #e5f2e9; }
@@ -211,7 +218,7 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 .admin-history-table td { height: 46px; padding: 8px; border-bottom: 1px solid #e9e9e0; color: #697165; white-space: normal; word-break: keep-all; }
 .admin-history-table tbody td, .admin-history-table tbody .history-status { font-size: 13px; line-height: 1.45; }
 .admin-history-table td:first-child { color: #8c9285; font-variant-numeric: tabular-nums; }
-.admin-history-table td:nth-child(4) { color: #565d4f; font-weight: 600; }
+.admin-history-table td:nth-child(4) { color: #565d4f; font-weight: 400; }
 .history-status { display: inline-flex; padding: 5px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; }
 .history-status.active { background: #e5f2e9; color: #53846a; }
 .history-status.disabled { background: #faeae7; color: #b06e6a; }
@@ -400,6 +407,20 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
 #admin-management-page .admin-search-field { flex: 1; min-width: 180px; }
 #admin-management-page .admin-search input { width: 100%; min-width: 240px; font-size: 12px; }
 #admin-management-page .admin-search-button { min-height: 44px; }
+#admin-management-page .admin-search-field,
+#admin-management-page .admin-search-button {
+  border-color: #d5dfe7;
+}
+#admin-management-page .admin-search-button { color: #526d82; }
+#admin-management-page .admin-search-field:hover,
+#admin-management-page .admin-search-button:hover {
+  border-color: #8ea6b8;
+}
+#admin-management-page .admin-search-field:focus-within,
+#admin-management-page .admin-search-button:focus-visible {
+  border-color: #526d82;
+  box-shadow: none;
+}
 .admin-search-result { margin: 0; color: #647581; font-size: 12px; }
 
 /* 관리 이력과 직원 관리의 검색창 및 버튼을 제목 아래 왼쪽에 배치합니다. */
@@ -517,13 +538,163 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
   color: #36566f;
   font-size: 12px;
 }
+.history-action-popover .history-action-detail-lines {
+  display: grid;
+  gap: 7px;
+}
 .history-action-popover p {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   margin: 0;
   padding: 8px 10px;
   border-radius: 8px;
   background: #eef3f6;
   color: #526d82;
   font-size: 11px;
-  font-weight: 600;
   line-height: 1.5;
+}
+.history-action-popover p span {
+  color: #647581;
+  font-weight: 400;
+}
+.history-action-popover p b {
+  color: #36566f;
+  font-weight: 500;
+  word-break: keep-all;
+}
+/* [2026.10.01 변경] 최종 보정: 목록을 감싸는 흰색 카드를 화면 아래까지 내려 하늘색 여백을 줄입니다. */
+#admin-management-page.is-staff-page > .admin-panel {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: calc(100dvh - var(--admin-topbar-height) - 136px) !important;
+  padding: 22px 24px 16px !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 14px !important;
+  background: var(--admin-surface) !important;
+}
+
+#admin-management-page.is-history-page > .admin-panel {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: calc(100dvh - var(--admin-topbar-height) - 218px) !important;
+  padding: 22px 24px 16px !important;
+  border: 1px solid var(--admin-border) !important;
+  border-radius: 14px !important;
+  background: var(--admin-surface) !important;
+}
+
+#admin-management-page.is-history-page .admin-history-wrap {
+  overflow: visible !important;
+}
+
+#admin-management-page .admin-pagination {
+  display: flex !important;
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  align-self: stretch !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  min-height: 34px !important;
+  width: 100% !important;
+  margin: 12px auto 0 !important;
+  padding: 0 !important;
+}
+
+#admin-management-page .admin-pagination button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 26px !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  padding: 0 !important;
+  border: 1px solid #d5dfe7 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+  color: #586a77 !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+#admin-management-page .admin-pagination button:hover,
+#admin-management-page .admin-pagination button[aria-current="page"] {
+  border-color: #526d82 !important;
+  background: #526d82 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+/* [2026.10.01 변경] 간병인 목록은 데이터가 적어도 페이지 번호가 흰색 카드 하단에 오도록 내립니다. */
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-staff-page > .admin-panel {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-staff-page > .admin-panel > #admin-list {
+  flex: 0 0 auto !important;
+}
+
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-staff-page > .admin-panel > #admin-user-pagination {
+  margin-top: auto !important;
+}
+/* [2026.10.01 변경] 관리 이력 화면에서는 목록용 페이지 번호가 표 위에 겹치지 않게 숨기고, 이력 페이지 번호만 표 아래에 둡니다. */
+#admin-management-page.is-history-page > .admin-panel > #admin-user-pagination {
+  display: none !important;
+}
+
+#admin-management-page.is-history-page #admin-history-pagination {
+  display: flex !important;
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  align-self: stretch !important;
+  margin: 12px auto 0 !important;
+  transform: none !important;
+}
+/* [2026.10.01 변경] 간병인 관리 이력은 페이지 번호가 흰색 카드 하단에 오도록 내립니다. */
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-history-page .admin-history-panel {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-history-page .admin-history-wrap {
+  flex: 0 0 auto !important;
+}
+
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-history-page #admin-history-pagination {
+  margin-top: auto !important;
+}
+/* [2026.10.01 변경] 간병인 관리 이력 페이지 번호를 흰색 카드의 맨 아래로 고정합니다. */
+#admin-management-page[data-page-mode="history-caregivers"] > .admin-panel,
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-history-page > .admin-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: calc(100dvh - var(--admin-topbar-height) - 218px) !important;
+}
+
+#admin-management-page[data-page-mode="history-caregivers"] .admin-history-panel,
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-history-page .admin-history-panel {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+#admin-management-page[data-page-mode="history-caregivers"] .admin-history-wrap,
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-history-page .admin-history-wrap {
+  flex: 0 0 auto !important;
+}
+
+#admin-management-page[data-page-mode="history-caregivers"] #admin-history-pagination,
+body[data-admin-job-type="CAREGIVER"] #admin-management-page.is-history-page #admin-history-pagination {
+  margin-top: auto !important;
+  padding-top: 20px !important;
+  margin-bottom: 0 !important;
 }
