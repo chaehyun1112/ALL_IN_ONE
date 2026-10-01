@@ -8,12 +8,12 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/** 감지 이벤트의 조치 기록(TB_EVENT_ACTION) 조회와 저장 */
+/** 감지 이벤트의 조치 이력(TB_EVENT_ACTION) 조회와 저장 */
 @Mapper
 public interface EventActionMapper {
 
     /**
-     * 확정 낙상과 그 조치 기록을 최신순으로 조회한다(조치기록 화면은 낙상 감지만 보여 준다).
+     * 확정 낙상과 그 조치 이력을 최신순으로 조회한다(조치 이력 화면은 낙상 감지만 보여 준다).
      * wardId 가 null 이면 병원 전체(관리자 화면), 값이 있으면 그 병동만(간호사 화면).
      */
     List<ActionHistoryRow> findActionHistory(

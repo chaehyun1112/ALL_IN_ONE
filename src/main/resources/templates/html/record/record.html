@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- [2026.09.29 변경] 간호사·관리자 공통 화면 제목을 낙상 조치 기록으로 표시합니다. -->
-  <title th:text="${adminRecordPage} ? '관리자 낙상 조치 기록 | 병동 통합 관제' : '낙상 조치 기록 | 병동 통합 관제'">낙상 조치 기록 | 병동 통합 관제</title>
+  <!-- [2026.09.29 변경] 간호사·관리자 공통 화면 제목을 낙상 조치 이력으로 표시합니다. -->
+  <title th:text="${adminRecordPage} ? '관리자 낙상 조치 이력 | 병동 통합 관제' : '낙상 조치 이력 | 병동 통합 관제'">낙상 조치 이력 | 병동 통합 관제</title>
 
   <!-- Excel 파일 생성 라이브러리 -->
   <script
@@ -13,13 +13,13 @@
     defer
   ></script>
 
-  <!-- [2026.09.20] 독립 조치기록 화면에도 공통 로고를 표시합니다. -->
+  <!-- [2026.09.20] 독립 조치 이력 화면에도 공통 로고를 표시합니다. -->
   <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=record-label-20260920" th:href="@{/css/alleyes-brand.css(v='record-label-20260920')}">
   <!-- CSS 연결 -->
   <link
     rel="stylesheet"
-    href="../../../static/css/record/record.css?v=white-rows-merge-20260930"
-    th:href="@{/css/record/record.css(v='white-rows-merge-20260930')}"
+    href="../../../static/css/record/record.css?v=action-history-label-20261001"
+    th:href="@{/css/record/record.css(v='action-history-label-20261001')}"
   >
   <!-- [09.13]추가내용: 기록 필터와 내보내기 스타일을 기능별 CSS로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/record/record-filter.css" th:href="@{/css/record/record-filter.css}">
@@ -37,15 +37,15 @@
     defer
   ></script>
   <script
-    src="../../../static/JS/record/record.js?v=live-reload-20260929"
-    th:src="@{/JS/record/record.js(v='live-reload-20260929')}"
+    src="../../../static/JS/record/record.js?v=action-history-label-20261001"
+    th:src="@{/JS/record/record.js(v='action-history-label-20261001')}"
     defer
   ></script>
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=corridor-merge-20260930" th:href="@{/css/alleyes-theme.css(v='corridor-merge-20260930')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=action-history-label-20261001" th:href="@{/css/alleyes-theme.css(v='action-history-label-20261001')}">
 </head>
 
-<!-- [2026.09.17] 고친 내용: 관리자 내부 조치기록에서는 관리자 공통 상단 바만 보이게 구분합니다. -->
+<!-- [2026.09.17] 고친 내용: 관리자 내부 조치 이력에서는 관리자 공통 상단 바만 보이게 구분합니다. -->
 <body th:classappend="${adminRecordPage} ? ' admin-record-page' : (${embeddedRecordPage} ? ' dashboard-record-page' : '')">
   <!-- 공통 상단 메뉴 -->
   <header class="page-header">
@@ -74,7 +74,7 @@
   <!--
     백엔드 API 주소입니다.
     서버로 연 화면(data-server-mode)은
-    이 주소로 조치 기록을 조회합니다(2026.09.27).
+    이 주소로 조치 이력을 조회합니다(2026.09.27).
   -->
   <main
     class="page-content"
@@ -91,7 +91,7 @@
         class="page-title"
         id="page-title"
       >
-        낙상 조치 기록
+        낙상 조치 이력
       </h1>
 
       <p class="page-description">
@@ -103,7 +103,7 @@
     <form
       class="search-form"
       id="search-form"
-      aria-label="낙상 조치 기록 검색"
+      aria-label="낙상 조치 이력 검색"
     >
       <!-- 기간 필터 -->
       <div
@@ -383,7 +383,7 @@
         class="record-title"
         id="record-title"
       >
-        전체 낙상 조치 기록
+        전체 낙상 조치 이력
       </h2>
 
       <!-- [2026-09-18] 추가 내용: 검색과 별개로 선택을 유지하고 모아보기·선택 해제를 제공합니다. -->
@@ -397,7 +397,7 @@
         class="table-scroll"
         tabindex="0"
         role="region"
-        aria-label="전체 낙상 조치 기록 표"
+        aria-label="전체 낙상 조치 이력 표"
       >
         <table class="record-table">
           <!-- 각 열의 너비는 CSS에서 지정합니다. -->
@@ -438,11 +438,11 @@
         </table>
       </div>
 
-      <!-- [9.15] 추가내용: 조치 기록을 페이지 단위로 이동합니다. -->
+      <!-- [9.15] 추가내용: 조치 이력을 페이지 단위로 이동합니다. -->
       <nav
         class="record-pagination"
         id="record-pagination"
-        aria-label="낙상 조치 기록 페이지"
+        aria-label="낙상 조치 이력 페이지"
       ></nav>
     </section>
 
@@ -456,7 +456,7 @@
 
     <!-- JS가 꺼져 있을 때 표시합니다. -->
     <noscript>
-      낙상 조치 기록을 표시하려면 JavaScript를 활성화해주세요.
+      낙상 조치 이력을 표시하려면 JavaScript를 활성화해주세요.
     </noscript>
   </main>
 
@@ -551,7 +551,7 @@
       <header class="export-header">
         <div>
           <h2 id="export-title">
-            낙상 조치 기록 내보내기
+            낙상 조치 이력 내보내기
           </h2>
 
           <p>
@@ -697,7 +697,3 @@
   </dialog>
 </body>
 </html>
-
-
-
-

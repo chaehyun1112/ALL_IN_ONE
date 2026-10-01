@@ -10,42 +10,42 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <!-- [9.15] 수정내용: 직원 관리와 관리 이력 화면에서 브라우저 제목도 현재 화면에 맞게 표시한다. -->
-    <title th:text="${pageMode == 'accidents'} ? '사고 영상 보관함 | 병동 통합 관제' : (${pageMode == 'records'} ? '관리자 낙상 조치 기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제'))))">간호사 관리 | 병동 통합 관제</title>
+    <title th:text="${pageMode == 'accidents'} ? '사고 영상 보관함 | 병동 통합 관제' : (${pageMode == 'records'} ? '관리자 낙상 조치 이력 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제'))))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/dashboard.css?v=history-detail-20260930"
-          th:href="@{/css/admin/dashboard.css(v='history-detail-20260930')}">
+          href="../../../static/css/admin/dashboard.css?v=action-history-label-20261001"
+          th:href="@{/css/admin/dashboard.css(v='action-history-label-20261001')}">
     <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=staff-room-20260930" th:href="@{/css/admin/account-create.css(v='staff-room-20260930')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=caregiver-room-filter-label-20260922" th:href="@{/css/admin/inactive-users.css(v='caregiver-room-filter-label-20260922')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=history-detail-20260930"
-            th:src="@{/JS/admin/dashboard.js(v='history-detail-20260930')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=action-history-label-20261001"
+        th:src="@{/JS/admin/dashboard.js(v='action-history-label-20261001')}"
             defer></script>
-    <script src="../../../static/JS/admin/admin-history.js?v=history-detail-20260930"
-        th:src="@{/JS/admin/admin-history.js(v='history-detail-20260930')}"
+    <script src="../../../static/JS/admin/admin-history.js?v=action-history-label-20261001"
+        th:src="@{/JS/admin/admin-history.js(v='action-history-label-20261001')}"
         defer></script>
     <script src="../../../static/JS/admin/account-create.js?v=caregiver-spec-20260930"
             th:src="@{/JS/admin/account-create.js(v='caregiver-spec-20260930')}"
             defer></script>
-    <script src="../../../static/JS/admin/inactive-users.js?v=inactive-caregiver-pagination-20260929"
-            th:src="@{/JS/admin/inactive-users.js(v='inactive-caregiver-pagination-20260929')}"
+    <script src="../../../static/JS/admin/inactive-users.js?v=action-history-label-20261001"
+            th:src="@{/JS/admin/inactive-users.js(v='action-history-label-20261001')}"
             defer></script>
-    <!-- [2026.09.27 추가] 관리자 홈 카드(최근 조치기록·실시간 알림·사고 현황)를 서버 기록으로 채웁니다. -->
-    <script src="../../../static/JS/admin/home-records.js?v=merge-20260929"
-            th:src="@{/JS/admin/home-records.js(v='merge-20260929')}"
+    <!-- [2026.09.27 추가] 관리자 홈 카드(최근 조치 이력·실시간 알림·사고 현황)를 서버 기록으로 채웁니다. -->
+    <script src="../../../static/JS/admin/home-records.js?v=action-history-label-20261001"
+            th:src="@{/JS/admin/home-records.js(v='action-history-label-20261001')}"
             defer></script>
     <!-- [2026.09.29 변경] 관리자 사고 영상 보관함의 조회·선택·재생을 처리합니다. -->
-    <script src="../../../static/JS/admin/accident-records.js?v=empty-copy-merge-20260930"
-            th:src="@{/JS/admin/accident-records.js(v='empty-copy-merge-20260930')}"
+    <script src="../../../static/JS/admin/accident-records.js?v=empty-copy-action-history-label-20261001"
+            th:src="@{/JS/admin/accident-records.js(v='empty-copy-action-history-label-20261001')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=admin-brand-align-20260920" th:href="@{/css/alleyes-brand.css(v='admin-brand-align-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=corridor-merge-20260930" th:href="@{/css/alleyes-theme.css(v='corridor-merge-20260930')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=action-history-label-20261001" th:href="@{/css/alleyes-theme.css(v='action-history-label-20261001')}">
     <!-- [2026.09.29 변경] 노트북·PC 공통 상단 메뉴 높이가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/navigation.css?v=desktop-responsive-layout-20260929" th:href="@{/css/admin/navigation.css(v='desktop-responsive-layout-20260929')}">
-    <!-- [2026.09.29 변경] 관리자 홈 실시간 알림의 카드 간격·숨김 스크롤 CSS를 최신 버전으로 불러옵니다. -->
-    <link rel="stylesheet" href="../../../static/css/admin/home.css?v=scrollable-alert-list-20260929" th:href="@{/css/admin/home.css(v='scrollable-alert-list-20260929')}">
+    <!-- [2026.10.01 변경] 관리자 홈 실시간 알림 카드 축소 스타일을 최신 버전으로 불러옵니다. -->
+    <link rel="stylesheet" href="../../../static/css/admin/home.css?v=action-history-label-20261001" th:href="@{/css/admin/home.css(v='action-history-label-20261001')}">
     <!-- [2026.09.29 변경] 사고 영상 보관함의 영상 재생·목록 레이아웃을 제공합니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/accident-records.css?v=video-16x9-empty-copy-20260930" th:href="@{/css/admin/accident-records.css(v='video-16x9-empty-copy-20260930')}">
 </head>
@@ -79,25 +79,15 @@
                     <a href="admin.html?view=inactive-caregivers" th:href="@{/admin/caregivers/inactive}" data-admin-view="inactive-caregivers" th:classappend="${pageMode == 'inactive-caregivers'} ? ' active'">간병인 비활성화</a>
                 </div>
             </div>
-            <!-- [2026.09.17] 추가한 내용: 비활성화 직원관리 옆에서 전체 조치기록을 조회하는 관리자 메뉴를 제공합니다. -->
-            <a href="../record/record.html" th:href="@{/admin/records}" data-admin-view="records" th:classappend="${pageMode == 'records'} ? ' active'">조치기록</a>
-            <!-- [2026.09.29 변경] 조치기록과 구분해 사고 영상을 조회·재생하는 보관함을 엽니다. -->
+            <!-- [2026.09.17] 추가한 내용: 비활성화 직원관리 옆에서 전체 조치 이력을 조회하는 관리자 메뉴를 제공합니다. -->
+            <a href="../record/record.html" th:href="@{/admin/records}" data-admin-view="records" th:classappend="${pageMode == 'records'} ? ' active'">조치 이력</a>
+            <!-- [2026.09.29 변경] 조치 이력과 구분해 사고 영상을 조회·재생하는 보관함을 엽니다. -->
             <a href="admin.html?view=accidents" th:href="@{/admin/accidents}" data-admin-view="accidents" th:classappend="${pageMode == 'accidents'} ? ' active'">사고 기록</a>
         </nav>
     </div>
 
     <div class="admin-topbar-actions">
         <time id="admin-clock"></time>
-        <!-- [2026.09.16] 추가한 내용: 관리자 화면에서도 시간 옆 버튼으로 전체화면을 전환합니다. -->
-        <button type="button" class="admin-fullscreen-toggle" id="admin-fullscreen-toggle"
-                aria-label="전체화면" aria-pressed="false" title="전체화면">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path class="admin-fullscreen-enter" d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>
-                <path class="admin-fullscreen-exit" d="M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3"/>
-            </svg>
-            <span id="admin-fullscreen-label">전체화면</span>
-        </button>
-
         <form action="/logout" th:action="@{/logout}" method="post">
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
         </form>
@@ -106,7 +96,7 @@
     </div>
 </header>
 
-<!-- [2026.09.27] 서버로 연 화면은 아래 주소로 조치기록·병동을 불러와 예시 카드를 채웁니다(home-records.js). -->
+<!-- [2026.09.27] 서버로 연 화면은 아래 주소로 조치 이력·병동을 불러와 예시 카드를 채웁니다(home-records.js). -->
 <main class="admin-page admin-home-page" id="admin-home-page" aria-labelledby="admin-home-title" hidden th:attr="data-records-url=@{/api/action-history},data-wards-url=@{/api/admin/wards}">
     <!-- [2026-09-21] 관리자 홈의 한 카드 안에서 활성 간호사와 간병인 수를 함께 확인합니다. -->
     <div class="admin-home-overview">
@@ -127,12 +117,12 @@
         </article>
     </div>
 
-    <!-- 최근 조치기록·실시간 알림 위에, 병동별 사고 현황·달력을 아래에 배치합니다. -->
+    <!-- 최근 조치 이력·실시간 알림 위에, 병동별 사고 현황·달력을 아래에 배치합니다. -->
     <div class="admin-home-content">
-        <!-- 조치기록 화면과 동일하게 실제 기록 연동 전에는 예시 항목임을 표시합니다. -->
+        <!-- 조치 이력 화면과 동일하게 실제 기록 연동 전에는 예시 항목임을 표시합니다. -->
         <section class="admin-home-recent-records" aria-labelledby="admin-home-records-title">
             <div class="admin-home-section-heading">
-                <h2 id="admin-home-records-title">최근 조치기록</h2>
+                <h2 id="admin-home-records-title">최근 조치 이력</h2>
                 <span class="admin-home-alert-demo">화면 예시</span>
             </div>
             <div class="admin-home-record-list">
@@ -160,7 +150,7 @@
         <!-- [2026-09-21] 관리자 관점에 맞춰 병동별 사고 건수를 세로 막대그래프로 표시합니다. -->
         <section class="admin-home-ward-summary" aria-labelledby="admin-home-ward-title">
             <div class="admin-home-section-heading">
-                <h2 id="admin-home-ward-title">병동별 낙상 현황</h2>
+                <h2 id="admin-home-ward-title">오늘의 병동별 낙상 현황</h2>
                 <div class="admin-home-accident-legend" aria-label="사고 유형 범례">
                     <span><i class="is-fall" aria-hidden="true"></i>낙상</span>
                     <span class="admin-home-alert-demo">화면 예시</span>
@@ -181,7 +171,8 @@
                     <span class="admin-home-alert-demo">화면 예시</span>
                 </div>
             </div>
-            <div class="admin-home-time-chart" role="img" aria-label="예시 집계: 오전 낙상 1건, 오후 낙상 2건, 저녁 낙상 1건">
+            <div class="admin-home-time-chart" role="img" aria-label="예시 집계: 새벽 낙상 0건, 오전 낙상 1건, 오후 낙상 2건, 저녁 낙상 1건">
+                <div class="admin-home-time-row"><span><strong>새벽</strong><small>00–06시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 0%" title="낙상 0건"></i></div><b>0건</b></div>
                 <div class="admin-home-time-row"><span><strong>오전</strong><small>06–12시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 50%" title="낙상 1건"></i></div><b>1건</b></div>
                 <div class="admin-home-time-row"><span><strong>오후</strong><small>12–18시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 100%" title="낙상 2건"></i></div><b>2건</b></div>
                 <div class="admin-home-time-row"><span><strong>저녁</strong><small>18–24시</small></span><div class="admin-home-time-track"><i class="is-fall" style="width: 50%" title="낙상 1건"></i></div><b>1건</b></div>
@@ -351,10 +342,10 @@
     </section>
 </main>
 
-<!-- [2026.09.17] 추가한 내용: 조치기록을 관리자 문서 안에서 열어 전체화면 상태를 유지합니다. -->
-<!-- [2026.09.29 변경] 관리자 계정에서 여는 공용 낙상 조치 기록 화면의 접근성 제목을 통일합니다. -->
-<section class="admin-record-view" id="admin-record-view" aria-label="낙상 조치 기록" hidden th:hidden="${pageMode != 'records'}">
-    <iframe id="admin-record-frame" title="낙상 조치 기록" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/admin/records/content}"></iframe>
+<!-- [2026.09.17] 추가한 내용: 조치 이력을 관리자 문서 안에서 열어 전체화면 상태를 유지합니다. -->
+<!-- [2026.09.29 변경] 관리자 계정에서 여는 공용 낙상 조치 이력 화면의 접근성 제목을 통일합니다. -->
+<section class="admin-record-view" id="admin-record-view" aria-label="낙상 조치 이력" hidden th:hidden="${pageMode != 'records'}">
+    <iframe id="admin-record-frame" title="낙상 조치 이력" src="about:blank" data-src="../record/record.html" th:attr="data-src=@{/admin/records/content}"></iframe>
 </section>
 
 <!-- [2026.09.29 변경] 감지 이벤트에 보관한 영상을 사고별로 선택·재생하는 관리자 전용 보관함입니다. -->
@@ -686,11 +677,3 @@
         th:src="@{/JS/auth/session-history.js}"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-

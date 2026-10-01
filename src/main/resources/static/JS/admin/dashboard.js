@@ -1,45 +1,5 @@
 "use strict";
 
-// [2026.09.16] 추가한 내용: 관리자 상단 버튼으로 전체화면 진입·해제 상태를 동기화합니다.
-(() => {
-    if (window.__adminFullscreenInitialized) return;
-    window.__adminFullscreenInitialized = true;
-    const toggle = document.querySelector("#admin-fullscreen-toggle");
-    const label = document.querySelector("#admin-fullscreen-label");
-    if (!toggle || !label) return;
-
-    const syncFullscreenButton = () => {
-        const isFullscreen = Boolean(document.fullscreenElement);
-        const text = isFullscreen ? "전체화면 해제" : "전체화면";
-        toggle.setAttribute("aria-pressed", String(isFullscreen));
-        toggle.setAttribute("aria-label", text);
-        toggle.title = text;
-        label.textContent = text;
-    };
-
-    document.addEventListener("fullscreenchange", syncFullscreenButton);
-    syncFullscreenButton();
-    if (!document.fullscreenEnabled) {
-        toggle.disabled = true;
-        toggle.title = "이 브라우저에서는 전체화면을 사용할 수 없습니다.";
-    }
-    toggle.addEventListener("click", async () => {
-        toggle.disabled = true;
-        try {
-            if (document.fullscreenElement) {
-                await document.exitFullscreen();
-            } else {
-                await document.documentElement.requestFullscreen();
-            }
-        } catch {
-            window.alert("전체화면 전환에 실패했습니다. 브라우저의 전체화면 권한을 확인해 주세요.");
-        } finally {
-            toggle.disabled = !document.fullscreenEnabled;
-            syncFullscreenButton();
-        }
-    });
-})();
-
 let adminUsers = [];
 let adminJobType = window.location.pathname.startsWith("/admin/caregivers") || new URLSearchParams(window.location.search).get("view")?.includes("caregivers") ? "CAREGIVER" : "GENERAL";
 let adminLoadVersion = 0;
@@ -1629,9 +1589,19 @@ adminHistoryRows?.addEventListener("click", event => {
     const eventTarget = document.querySelector("#event-target");
     eventTarget.textContent = cells[2].textContent;
     eventTarget.dataset.userId = row.dataset.userId ?? "";
-    // [2026.09.30 변경] 처리 내용(변경 전 → 후)이 있으면 작업 이름 뒤에 함께 보여 줍니다.
-    document.querySelector("#event-action").textContent = [row.dataset.actionLabel || cells[4].textContent, row.dataset.actionDetail]
-        .filter(Boolean).join(" · ");
+    // [2026.10.01 변경] 수정한 내용은 작업명과 분리해 별도 줄로 보여 줍니다.
+    const eventAction = document.querySelector("#event-action");
+    const actionName = document.createElement("span");
+    actionName.className = "event-action-name";
+    actionName.textContent = row.dataset.actionLabel || cells[4].textContent;
+    eventAction.replaceChildren(actionName);
+
+    if (row.dataset.actionDetail) {
+        const actionDetail = document.createElement("span");
+        actionDetail.className = "event-action-detail";
+        actionDetail.textContent = row.dataset.actionDetail;
+        eventAction.append(actionDetail);
+    }
     adminHistoryEventDialog.showModal();
 });
 
@@ -1692,7 +1662,7 @@ const adminInactiveView = document.querySelector("#admin-inactive-view");
 const adminHomePage = document.querySelector("#admin-home-page");
 const adminRecordView = document.querySelector("#admin-record-view");
 const adminRecordFrame = document.querySelector("#admin-record-frame");
-// [2026.09.29 변경] 관리자 사고 기록은 조치기록과 별도 내부 화면으로 전환합니다.
+// [2026.09.29 변경] 관리자 사고 기록은 조치 이력과 별도 내부 화면으로 전환합니다.
 const adminAccidentView = document.querySelector("#admin-accident-view");
 const adminViewLinks = Array.from(document.querySelectorAll("[data-admin-view]"));
 // 상단의 두 관리 메뉴는 커서·키보드 포커스와 클릭으로 하위 메뉴를 엽니다.
@@ -1752,12 +1722,12 @@ function setAdminView(view, updateAddress = true) {
     adminRecordView.hidden = !isRecords;
     adminAccidentView.hidden = !isAccidents;
     adminPage.hidden = isHome || isInactive || isRecords || isAccidents;
-    // [2026.09.17] 추가한 내용: 전체화면 중에도 문서를 이동하지 않도록 조치기록을 내부 화면으로 한 번만 불러옵니다.
+    // [2026.09.17] 추가한 내용: 전체화면 중에도 문서를 이동하지 않도록 조치 이력을 내부 화면으로 한 번만 불러옵니다.
     if (isRecords && !adminRecordFrame.dataset.loaded) {
         adminRecordFrame.src = adminRecordFrame.dataset.src;
         adminRecordFrame.dataset.loaded = "true";
     } else if (isRecords) {
-        // [2026.09.27 추가] 이미 연 조치기록을 다시 보여 줄 때는 새 낙상·조치가 보이도록 서버 기록을 다시 불러옵니다.
+        // [2026.09.27 추가] 이미 연 조치 이력을 다시 보여 줄 때는 새 낙상·조치가 보이도록 서버 기록을 다시 불러옵니다.
         adminRecordFrame.contentWindow?.CareGuardRecordPage?.reload();
     }
     // [2026.09.29 변경] 사고 기록 메뉴를 다시 열면 최신 발생 이력을 조회합니다.
@@ -1851,7 +1821,7 @@ function setAdminView(view, updateAddress = true) {
     document.querySelector("#admin-history-submenu")?.previousElementSibling?.classList.toggle("active", isHistory);
     document.title = isHome ? "관리자 홈 | 병동 통합 관제"
         : view === "accidents" ? "사고 영상 보관함 | 병동 통합 관제"
-        : view === "records" ? "관리자 조치기록 | 병동 통합 관제"
+        : view === "records" ? "관리자 조치 이력 | 병동 통합 관제"
         : view === "history-caregivers" ? "간병인 관리 이력 | 병동 통합 관제"
         : view === "history" ? "간호사 관리 이력 | 병동 통합 관제"
         : view === "caregivers" ? "간병인 관리 | 병동 통합 관제"
@@ -1874,11 +1844,10 @@ window.addEventListener("popstate", () => {
     setAdminView(path.endsWith("/accidents") ? "accidents" : path.endsWith("/records") ? "records" : path.endsWith("/caregivers/history") || previewView === "history-caregivers" ? "history-caregivers" : path.endsWith("/history") || previewView === "history" ? "history" : path.endsWith("/caregivers/inactive") || previewView === "inactive-caregivers" ? "inactive-caregivers" : path.endsWith("/caregivers") || previewView === "caregivers" ? "caregivers" : path.endsWith("/admin_de") ? "inactive" : previewView === "staff" ? "staff" : "home", false);
 });
 
-// [2026.09.17] 추가한 내용: /admin/records를 새로고침해도 조치기록을 관리자 공통 화면 안에서 다시 표시합니다.
+// [2026.09.17] 추가한 내용: /admin/records를 새로고침해도 조치 이력을 관리자 공통 화면 안에서 다시 표시합니다.
 const initialAdminPath = window.location.pathname.replace(/\/+$/, "");
 const initialPreviewView = new URLSearchParams(window.location.search).get("view");
 const serverAdminView = adminPage.dataset.pageMode;
 setAdminView(initialAdminPath.endsWith("/accidents") || initialPreviewView === "accidents" || serverAdminView === "accidents" ? "accidents" : initialAdminPath.endsWith("/records") ? "records" : initialAdminPath.endsWith("/caregivers/history") || initialPreviewView === "history-caregivers" || serverAdminView === "history-caregivers" ? "history-caregivers" : initialAdminPath.endsWith("/history") || initialPreviewView === "history" || serverAdminView === "history" ? "history" : initialAdminPath.endsWith("/caregivers/inactive") || initialPreviewView === "inactive-caregivers" || serverAdminView === "inactive-caregivers" ? "inactive-caregivers" : initialAdminPath.endsWith("/caregivers") || initialPreviewView === "caregivers" || serverAdminView === "caregivers" ? "caregivers" : initialAdminPath.endsWith("/admin_de") ? "inactive" : initialPreviewView === "staff" ? "staff" : "home", false);
 loadAdminHomeAccountCounts();
 loadAdminData().catch(() => {});
-

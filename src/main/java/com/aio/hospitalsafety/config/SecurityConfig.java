@@ -314,7 +314,7 @@ public class SecurityConfig {
                 new UserLoginSessionThrottleFilter(),
                 UsernamePasswordAuthenticationFilter.class
         );
-        // [2026.09.17] 추가한 내용: 관리자 문서 안에서 같은 사이트의 조치기록 화면을 표시해도 전체화면이 유지되게 합니다.
+        // [2026.09.17] 추가한 내용: 관리자 문서 안에서 같은 사이트의 조치 이력 화면을 표시해도 전체화면이 유지되게 합니다.
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
 
         http.addFilterAfter(

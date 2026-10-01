@@ -35,7 +35,7 @@ const defaultRoomNumbers = [
  */
 const demoRecords = [
   ["2026-08-25T14:41", "306호", "김OO", "낙상 감지", "", "미확인", ""],
-  /* [2026.09.22] 조치기록에는 낙상 감지 기록만 표시합니다. */
+  /* [2026.09.22] 조치 이력에는 낙상 감지 기록만 표시합니다. */
   ["2026-08-25T14:37", "307호", "박OO", "낙상 감지", "정OO", "완료", "2026-08-25T14:42", "[예시] 조치 등록에서 작성한 내용입니다.\n줄바꿈도 그대로 표시됩니다."],
   ["2026-08-25T14:10", "302호", "정OO", "낙상 감지", "임OO", "완료", "2026-08-25T14:17"],
   ["2026-08-24T18:32", "304호", "윤OO", "낙상 감지", "이OO", "완료", "2026-08-24T18:38"],
@@ -126,6 +126,20 @@ function initializePage() {
   const selectedViewButton = document.querySelector("#record-selected-view");
   const clearSelectionButton = document.querySelector("#record-clear-selection");
   const selectionSummary = document.querySelector("#record-selection-summary");
+
+  // [2026.10.01 변경] 조치 이력은 미확인 기록을 항상 위에 고정하고, 각 그룹 안에서는 최신 발생시각부터 표시합니다.
+  function sortRecordsByStatusAndTime(records) {
+    return [...records].sort((a, b) => {
+      const aPending = a.status === "미확인";
+      const bPending = b.status === "미확인";
+
+      if (aPending !== bPending) {
+        return aPending ? -1 : 1;
+      }
+
+      return b.occurredAt.localeCompare(a.occurredAt);
+    });
+  }
 
   function getVisibleRecords() {
     return selectedOnly ? allRecords.filter(record => selectedRecords.has(record)) : filteredRecords;
@@ -594,7 +608,7 @@ function initializePage() {
   function renderRecords(records) {
     if (records.length === 0) {
       showTableMessage(
-        selectedOnly ? "선택한 조치 기록이 없습니다." : "검색 조건에 맞는 조치 기록이 없습니다."
+        selectedOnly ? "선택한 조치 이력이 없습니다." : "검색 조건에 맞는 조치 이력이 없습니다."
       );
       recordPagination.replaceChildren();
       appendLimitNotice();
@@ -626,7 +640,7 @@ function initializePage() {
       badge.classList.add("fall-badge");
 
       // [2026.09.28 변경] 오경보로 확인한 낙상은 일반 낙상과 구분할 수 있도록
-      // 조치기록의 표시 아이콘을 원형 대신 삼각형으로 보여줍니다.
+      // 조치 이력의 표시 아이콘을 원형 대신 삼각형으로 보여줍니다.
       const isFalseAlarm = record.patient === "오경보" || record.actionContent === "오경보 확인";
       if (isFalseAlarm) {
         badge.classList.add("false-alarm-badge");
@@ -642,6 +656,12 @@ function initializePage() {
         completeLabel.className = "record-complete-label";
         completeLabel.textContent = record.status;
         statusCell.replaceChildren(completeLabel);
+      } else if (record.status === "미확인") {
+        // [2026.10.01 변경] 완료와 미확인을 구분하기 위해 미확인 상태에는 별도 라벨 클래스를 적용합니다.
+        const pendingLabel = document.createElement("span");
+        pendingLabel.className = "record-pending-label";
+        pendingLabel.textContent = record.status;
+        statusCell.replaceChildren(pendingLabel);
       }
 
       row.append(
@@ -666,7 +686,7 @@ function initializePage() {
     updateRecordSelection();
 
     resultMessage.textContent =
-      selectedOnly ? `선택한 조치 기록 ${records.length}건입니다.` : `총 ${records.length}건의 조치 기록이 검색되었습니다.`;
+      selectedOnly ? `선택한 조치 이력 ${records.length}건입니다.` : `총 ${records.length}건의 조치 이력이 검색되었습니다.`;
     appendLimitNotice();
   }
 
@@ -743,7 +763,7 @@ function initializePage() {
       );
     }
 
-    filteredRecords = allRecords.filter(record => {
+    filteredRecords = sortRecordsByStatusAndTime(allRecords.filter(record => {
       const recordDate = record.occurredAt.slice(0, 10);
 
       const matchesPeriod =
@@ -757,7 +777,7 @@ function initializePage() {
         matchesPeriod &&
         matchesConditions(record, conditions)
       );
-    });
+    }));
 
     /* [9.15] 추가내용: 새 검색 결과는 항상 첫 페이지부터 표시합니다. */
     if (!keepPage) currentPage = 1;
@@ -1022,7 +1042,7 @@ function initializePage() {
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = "조치기록.csv";
+    link.download = "조치 이력.csv";
 
     document.body.append(link);
     link.click();
@@ -1062,12 +1082,12 @@ function initializePage() {
     window.XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      "조치 기록"
+      "조치 이력"
     );
 
     window.XLSX.writeFile(
       workbook,
-      "조치기록.xlsx"
+      "조치 이력.xlsx"
     );
   }
 
@@ -1092,7 +1112,7 @@ function initializePage() {
     doc.body.replaceChildren();
 
     const title = doc.createElement("title");
-    title.textContent = "조치기록 보고서";
+    title.textContent = "조치 이력 보고서";
 
     const charset = doc.createElement("meta");
     charset.setAttribute("charset", "UTF-8");
@@ -1180,12 +1200,12 @@ function initializePage() {
     controls.append(printButton);
 
     const heading = doc.createElement("h1");
-    heading.textContent = "안전 조치 기록 보고서";
+    heading.textContent = "안전 조치 이력 보고서";
 
     const count = doc.createElement("p");
     count.textContent =
       // [2026-09-18] 고친 내용: PDF에는 실제 내보낸 선택 대상 건수를 표시합니다.
-      `내보낸 조치 기록 ${records.length}건`;
+      `내보낸 조치 이력 ${records.length}건`;
 
     const table = doc.createElement("table");
     const thead = doc.createElement("thead");
@@ -1261,7 +1281,7 @@ function initializePage() {
 
     if (!silent) {
       showTableMessage(
-        "조치 기록을 불러오는 중입니다."
+        "조치 이력을 불러오는 중입니다."
       );
     }
 
@@ -1314,7 +1334,7 @@ function initializePage() {
         );
       }
 
-      // [2026.09.22] 관리자·간호사 공용 조치기록에는 낙상 감지만 남깁니다.
+      // [2026.09.22] 관리자·간호사 공용 조치 이력에는 낙상 감지만 남깁니다.
       // 서버가 침대 이탈 기록을 함께 반환해도 화면과 내보내기 대상에서 제외합니다.
       // [2026.09.28] 대시보드에서 오경보로 확인한 낙상(서버 dismissed=true)은 환자명을 비우고 알림 유형을 '오경보'로 표시합니다(09-29 사용자 요청으로 '낙상 오경보' → '오경보').
       // (오경보 확인 때 환자명 칸에 저장되는 '오경보'는 환자 이름이 아니기 때문입니다. 표·검색·내보내기 모두 이 값을 씁니다.)
@@ -1324,6 +1344,7 @@ function initializePage() {
           ? { ...record, patient: "", type: "오경보" }
           : record)
         .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+      allRecords = sortRecordsByStatusAndTime(allRecords);
 
       if (!settings.useDemoData) {
         // [2026.09.27 추가] 병실 필터를 실제 기록의 병실·위치로 만듭니다(1·2병동, 관리자 전체 병동도 맞게 나옵니다).
@@ -1526,7 +1547,7 @@ function initializePage() {
 
   loadRecords();
 
-  // [2026.09.27 추가] 대시보드가 조치기록 화면을 다시 열 때 새 기록을 불러오도록 부르는 함수입니다.
+  // [2026.09.27 추가] 대시보드가 조치 이력 화면을 다시 열 때 새 기록을 불러오도록 부르는 함수입니다.
   window.CareGuardRecordPage = {
     reload({ silent = false } = {}) {
       if (!settings.useDemoData && !isLoading) loadRecords({ silent });

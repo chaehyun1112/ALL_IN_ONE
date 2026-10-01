@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * 조치기록 조회와 대응 등록 API.
+ * 조치 이력 조회와 대응 등록 API.
  *
- * GET  /api/action-history          : 조치기록 화면(record.js). 병동 직원은 자기 병동, 관리자는 병원 전체
+ * GET  /api/action-history          : 조치 이력 화면(record.js). 병동 직원은 자기 병동, 관리자는 병원 전체
  * GET  /api/dashboard/events        : 대시보드를 새로 열 때 자기 병동의 오늘 감지 이벤트(+ 24시간 안의 확정 낙상, 2026.09.28 부터 조치가 있어도)
  * POST /api/events/{eventId}/action : 대시보드 대응 등록 창. 병동 직원만(간호사·간병인 계정 모두), 자기 병동 이벤트만
  */
@@ -57,7 +57,7 @@ public class EventActionController {
     @GetMapping("/api/action-history")
     public ResponseEntity<List<ActionHistoryResponse>> findActionHistory(
             @AuthenticationPrincipal HospitalUserDetails loginUser,
-            // [2026.09.28] 관리자 홈 사고 현황이 true 로 부른다. 조치가 등록된 낙상 의심도 함께 받는다(조치기록 화면은 기본값 false).
+            // [2026.09.28] 관리자 홈 사고 현황이 true 로 부른다. 조치가 등록된 낙상 의심도 함께 받는다(조치 이력 화면은 기본값 false).
             @RequestParam(defaultValue = "false") boolean includeSuspected) {
 
         List<ActionHistoryResponse> history;

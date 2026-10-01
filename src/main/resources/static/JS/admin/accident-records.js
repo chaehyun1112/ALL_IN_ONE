@@ -45,7 +45,7 @@
   }
 
   // [2026.09.29] 영상 보관함의 미확인·확인 완료는 관리자가 재생 버튼을 누른 적이 있는지(videoViewed)로 정합니다.
-  // record.status(대응 등록 기준)는 조치기록 화면용이라 여기서는 쓰지 않습니다.
+  // record.status(대응 등록 기준)는 조치 이력 화면용이라 여기서는 쓰지 않습니다.
   function videoStatus(record) {
     return record.videoViewed ? "완료" : "미확인";
   }
