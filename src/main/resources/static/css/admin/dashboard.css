@@ -456,3 +456,11 @@ body.admin-modal-open .admin-page { overflow-y: hidden; }
     max-height: 360px;
   }
 }
+
+/* [2026.09.30 추가] 담당 병동 변경 팝업의 간호사 담당 병실(여러 개 선택). 계정 생성 팝업과 같은 표시입니다. */
+#admin-action-dialog.staff-room-menu-open { overflow: visible; }
+.admin-staff-room-options button[aria-selected="true"]::after { content: "✓"; float: right; font-weight: 700; }
+.admin-staff-room-options .admin-staff-room-owner { color: #8a98a3; font-size: .9em; }
+
+/* [2026.09.30 추가] 관리 이력 처리 내용(변경 전 → 후)을 작업 이름 아래에 작은 글씨로 한 줄 표시합니다. */
+.admin-history-table .history-action-detail { display: block; margin-top: 3px; overflow: hidden; color: #8a98a3; font-size: 10px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }

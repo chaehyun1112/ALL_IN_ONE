@@ -25,6 +25,8 @@ public record AdminHistoryResponse(
         String actionCode,
         Instant createdAt,
         String jobType,
-        String roomNumber
+        String roomNumber,
+        // [2026.09.30 추가] 처리 내용(변경 전 → 후). 이전 이력은 null
+        String actionDetail
 ) {
 }

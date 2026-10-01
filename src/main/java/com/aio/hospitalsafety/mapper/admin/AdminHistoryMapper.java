@@ -18,7 +18,8 @@ public interface AdminHistoryMapper {
             @Param("hospitalDomain") String hospitalDomain,
             @Param("adminId") String adminId,
             @Param("userId") String userId,
-            @Param("actionCode") String actionCode
+            @Param("actionCode") String actionCode,
+            @Param("actionDetail") String actionDetail
     );
 
     /**

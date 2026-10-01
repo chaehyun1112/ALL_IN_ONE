@@ -13,41 +13,41 @@
     <title th:text="${pageMode == 'accidents'} ? '사고 영상 보관함 | 병동 통합 관제' : (${pageMode == 'records'} ? '관리자 낙상 조치 기록 | 병동 통합 관제' : (${pageMode == 'history-caregivers'} ? '간병인 관리 이력 | 병동 통합 관제' : (${pageMode == 'history'} ? '간호사 관리 이력 | 병동 통합 관제' : (${pageMode == 'caregivers'} ? '간병인 관리 | 병동 통합 관제' : '간호사 관리 | 병동 통합 관제'))))">간호사 관리 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/dashboard.css?v=wide-admin-pages-20260929"
-          th:href="@{/css/admin/dashboard.css(v='wide-admin-pages-20260929')}">
-    <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=nurse-phone-20260922" th:href="@{/css/admin/account-create.css(v='nurse-phone-20260922')}">
+          href="../../../static/css/admin/dashboard.css?v=history-detail-20260930"
+          th:href="@{/css/admin/dashboard.css(v='history-detail-20260930')}">
+    <link rel="stylesheet" href="../../../static/css/admin/account-create.css?v=staff-room-20260930" th:href="@{/css/admin/account-create.css(v='staff-room-20260930')}">
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=caregiver-room-filter-label-20260922" th:href="@{/css/admin/inactive-users.css(v='caregiver-room-filter-label-20260922')}">
 
-    <script src="../../../static/JS/admin/dashboard.js?v=admin-user-page-size-20260929"
-            th:src="@{/JS/admin/dashboard.js(v='admin-user-page-size-20260929')}"
+    <script src="../../../static/JS/admin/dashboard.js?v=history-detail-20260930"
+            th:src="@{/JS/admin/dashboard.js(v='history-detail-20260930')}"
             defer></script>
-    <script src="../../../static/JS/admin/admin-history.js?v=history-jobtype-20260927"
-        th:src="@{/JS/admin/admin-history.js(v='history-jobtype-20260927')}"
+    <script src="../../../static/JS/admin/admin-history.js?v=history-detail-20260930"
+        th:src="@{/JS/admin/admin-history.js(v='history-detail-20260930')}"
         defer></script>
-    <script src="../../../static/JS/admin/account-create.js?v=review-fix-20260927"
-            th:src="@{/JS/admin/account-create.js(v='review-fix-20260927')}"
+    <script src="../../../static/JS/admin/account-create.js?v=caregiver-spec-20260930"
+            th:src="@{/JS/admin/account-create.js(v='caregiver-spec-20260930')}"
             defer></script>
     <script src="../../../static/JS/admin/inactive-users.js?v=inactive-caregiver-pagination-20260929"
             th:src="@{/JS/admin/inactive-users.js(v='inactive-caregiver-pagination-20260929')}"
             defer></script>
     <!-- [2026.09.27 추가] 관리자 홈 카드(최근 조치기록·실시간 알림·사고 현황)를 서버 기록으로 채웁니다. -->
-    <script src="../../../static/JS/admin/home-records.js?v=scrollable-alert-list-20260929"
-            th:src="@{/JS/admin/home-records.js(v='scrollable-alert-list-20260929')}"
+    <script src="../../../static/JS/admin/home-records.js?v=merge-20260929"
+            th:src="@{/JS/admin/home-records.js(v='merge-20260929')}"
             defer></script>
     <!-- [2026.09.29 변경] 관리자 사고 영상 보관함의 조회·선택·재생을 처리합니다. -->
-    <script src="../../../static/JS/admin/accident-records.js?v=video-status-count-20260929"
-            th:src="@{/JS/admin/accident-records.js(v='video-status-count-20260929')}"
+    <script src="../../../static/JS/admin/accident-records.js?v=empty-copy-merge-20260930"
+            th:src="@{/JS/admin/accident-records.js(v='empty-copy-merge-20260930')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=admin-brand-align-20260920" th:href="@{/css/alleyes-brand.css(v='admin-brand-align-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=checked-record-20260920" th:href="@{/css/alleyes-theme.css(v='checked-record-20260920')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=corridor-merge-20260930" th:href="@{/css/alleyes-theme.css(v='corridor-merge-20260930')}">
     <!-- [2026.09.29 변경] 노트북·PC 공통 상단 메뉴 높이가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/navigation.css?v=desktop-responsive-layout-20260929" th:href="@{/css/admin/navigation.css(v='desktop-responsive-layout-20260929')}">
     <!-- [2026.09.29 변경] 관리자 홈 실시간 알림의 카드 간격·숨김 스크롤 CSS를 최신 버전으로 불러옵니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/home.css?v=scrollable-alert-list-20260929" th:href="@{/css/admin/home.css(v='scrollable-alert-list-20260929')}">
     <!-- [2026.09.29 변경] 사고 영상 보관함의 영상 재생·목록 레이아웃을 제공합니다. -->
-    <link rel="stylesheet" href="../../../static/css/admin/accident-records.css?v=video-empty-copy-only-20260929" th:href="@{/css/admin/accident-records.css(v='video-empty-copy-only-20260929')}">
+    <link rel="stylesheet" href="../../../static/css/admin/accident-records.css?v=video-16x9-empty-copy-20260930" th:href="@{/css/admin/accident-records.css(v='video-16x9-empty-copy-20260930')}">
 </head>
 
 <body>
@@ -212,14 +212,14 @@
         </article>
 
         <article class="history-filter-card"
-                data-history-filter="병동 변경"
+                data-history-filter="병동·병실 변경"
                 tabindex="0">
             <span class="history-card-icon ward">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 21h16M6 21V7l6-3 6 3v14M9 10h1M14 10h1M9 14h1M14 14h1M10 21v-3h4v3"/>
                 </svg>
             </span>
-            <div><small>병동 변경</small><strong>0건</strong></div>
+            <div><small>병동·병실 변경</small><strong>0건</strong></div>
         </article>
 
         <article class="history-filter-card" id="admin-history-password-card"
@@ -397,7 +397,8 @@
             <section class="admin-accident-player" aria-labelledby="admin-accident-player-title">
                 <header><h3 id="admin-accident-player-title">선택한 사고 영상</h3></header>
                 <video id="admin-accident-video" controls preload="metadata" hidden>브라우저가 영상 재생을 지원하지 않습니다.</video>
-                <div class="admin-accident-video-empty" id="admin-accident-video-empty"><strong>사고 영상을 선택해 주세요.</strong><span>선택한 영상이 이 영역에서 재생됩니다.</span></div>
+                <!-- [2026.09.30 변경] 빈 영상 영역의 안내를 한 문장으로 통합해 중앙에서 명확히 안내합니다. -->
+                <div class="admin-accident-video-empty" id="admin-accident-video-empty">사고 영상을 선택해 주세요.</div>
             </section>
             <!-- [2026.09.29 변경] 목록 전용 카드 아래에 페이징을 배치해 영상 재생 영역과 분리합니다. -->
             <div class="admin-accident-list-column">
@@ -470,7 +471,7 @@
             <!-- [9.15] 수정내용: 병동 변경 기능을 건물 아이콘으로 직관적으로 표시한다. -->
             <span class="admin-management-option-icon admin-approve" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 21V5l8-3 8 3v16M4 21h16M8 9h2m4 0h2M8 13h2m4 0h2M10 21v-4h4v4" /></svg></span>
             <strong id="admin-management-assignment-title">병동 변경</strong>
-            <small id="admin-management-assignment-description">담당 병동을 변경합니다.</small>
+            <small id="admin-management-assignment-description">담당 병동과 병실을 변경합니다.</small>
         </button>
         <!-- [2026-09-22 변경] 간호사와 간병인의 연락처 수정 기능을 전화기 아이콘으로 표시합니다. -->
         <button type="button" class="admin-management-option" data-admin-action="EDIT_PHONE" role="radio" aria-checked="false">
@@ -547,6 +548,18 @@
             </select>
         </div>
 
+        <!-- [2026.09.30 추가] 간호사 담당 병동 변경에서 담당 병실(선택 사항, 여러 개 선택)도 함께 바꿉니다. -->
+        <div id="admin-staff-room-field" hidden>
+            <label for="admin-staff-room-trigger">담당 병실</label>
+            <div class="admin-action-ward-dropdown" id="admin-staff-room-dropdown">
+                <button type="button" id="admin-staff-room-trigger" aria-label="담당 병실 선택" aria-expanded="false" aria-controls="admin-staff-room-options">
+                    <span id="admin-staff-room-value">담당 병실 없음 (선택 사항)</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="admin-staff-room-options" class="admin-action-ward-options admin-staff-room-options" role="listbox" aria-multiselectable="true" hidden></div>
+            </div>
+        </div>
+
         <div class="admin-dialog-actions">
             <button type="button" id="admin-dialog-cancel">취소</button>
             <button type="submit" id="admin-dialog-confirm" class="admin-primary">
@@ -576,6 +589,17 @@
                 </span>
                 <select id="admin-create-ward" hidden><option value="">담당 병동을 선택해주세요</option></select>
                 <small class="admin-field-error" id="admin-create-ward-error"></small>
+            </label>
+            <!-- [2026.09.30 추가] 간호사 담당 병실(선택 사항, 여러 개 선택). 간병인 담당 병실과 같은 필터 디자인을 사용합니다. -->
+            <label class="admin-create-staff-field admin-create-room-field admin-create-staff-room-field">담당 병실
+                <span class="admin-create-ward-dropdown" id="admin-create-staff-room-dropdown">
+                    <button type="button" id="admin-create-staff-room-trigger" aria-label="담당 병실 선택" aria-expanded="false" aria-controls="admin-create-staff-room-options" disabled>
+                        <span id="admin-create-staff-room-label">담당 병동을 먼저 선택해 주세요</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <span class="admin-create-ward-options admin-create-staff-room-options" id="admin-create-staff-room-options" role="listbox" aria-multiselectable="true" hidden></span>
+                </span>
+                <small class="admin-field-error" id="admin-create-staff-room-error"></small>
             </label>
             <label class="admin-create-caregiver-field admin-create-ward-field" hidden>병동
                 <!-- [2026.09.22 변경] 간병인 병동 선택도 담당 병실과 같은 필터 디자인을 사용합니다. -->

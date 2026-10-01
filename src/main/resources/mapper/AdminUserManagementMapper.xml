@@ -16,14 +16,20 @@
             e.ward_id,
             w.ward_nm AS ward_name,
             e.phone_no AS phone_number,
-            e.room_no AS room_number
+            <!-- [2026.09.30] 간병인을 TB_CAREGIVER 로 옮겨 tb_emp 에는 간호사만 남아 job_cd·room_no 칸을 지웠다. 간호사는 병실 칸이 없다(담당 병실은 아래 assigned_rooms) -->
+            CAST(NULL AS VARCHAR) AS room_number,
+            <!-- [2026.09.30 추가] 간호사 담당 병실(tb_emp_location → tb_location), 예: '301,302'. 없으면 NULL -->
+            (SELECT string_agg(REGEXP_REPLACE(l.location_nm, '[^0-9]', '', 'g'), ',' ORDER BY l.location_nm)
+               FROM tb_emp_location el
+               JOIN tb_location l
+                 ON l.location_id = el.location_id
+              WHERE el.emp_id = e.emp_id) AS assigned_rooms
         FROM tb_emp e
         LEFT JOIN tb_ward w
           ON w.ward_id = e.ward_id
          AND w.hosp_div_id = e.hosp_div_id
         WHERE e.hosp_div_id = #{hospitalDomain}
           AND e.role_cd = 'USER'
-          AND e.job_cd = #{jobType}
           AND e.auth_st = 'APPROVED'
 
         <if test="keyword != null and keyword != ''">
@@ -49,14 +55,13 @@
             e.ward_id,
             w.ward_nm AS ward_name,
             e.upd_dt AS deactivated_at,
-            e.room_no AS room_number
+            CAST(NULL AS VARCHAR) AS room_number
         FROM tb_emp e
         LEFT JOIN tb_ward w
           ON w.ward_id = e.ward_id
          AND w.hosp_div_id = e.hosp_div_id
         WHERE e.hosp_div_id = #{hospitalDomain}
           AND e.role_cd = 'USER'
-          AND e.job_cd = #{jobType}
           AND e.auth_st = 'INACTIVE'
         ORDER BY e.upd_dt DESC NULLS LAST, e.emp_id
     </select>
@@ -119,6 +124,14 @@
           AND auth_st = 'APPROVED'
     </update>
 
+    <!-- [2026.09.30 추가] 직원의 지금 병동 ID (병동 변경 시 담당 병실을 지울지 판단) -->
+    <select id="findUserWardId" resultType="java.lang.Long">
+        SELECT ward_id
+        FROM tb_emp
+        WHERE hosp_div_id = #{hospitalDomain}
+          AND emp_id = #{userId}
+    </select>
+
     <!-- [2026.09.27] 병동 번호로 병동 ID 찾기. 대시보드와 같이 이름이 '3병동'(띄어쓰기 무시) 모양인 병동 -->
     <select id="findWardIdByNumber" resultType="java.lang.Long">
         SELECT ward_id
@@ -128,19 +141,6 @@
         ORDER BY ward_id
         LIMIT 1
     </select>
-
-    <!-- [2026.09.27] 간병인 담당 병실 변경. 확정 낙상 SMS 는 이 room_no 로 담당 간병인을 찾는다(SmsMapper). -->
-    <update id="updateCaregiverRoom">
-        UPDATE tb_emp
-        SET ward_id = #{wardId,jdbcType=BIGINT},
-            room_no = #{roomNumber},
-            upd_dt = NOW()
-        WHERE hosp_div_id = #{hospitalDomain}
-          AND emp_id = #{userId}
-          AND role_cd = 'USER'
-          AND job_cd = 'CAREGIVER'
-          AND auth_st = 'APPROVED'
-    </update>
 
     <!-- [2026.09.27] 직원의 지금 전화번호 (재활성화 전 중복 확인용) -->
     <select id="findUserPhone" resultType="string">

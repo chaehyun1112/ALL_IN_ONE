@@ -37,18 +37,16 @@ public interface AdminUserManagementMapper {
             @Param("wardId") Long wardId
     );
 
+    // [2026.09.30 추가] 직원의 지금 병동 ID (병동 변경 시 담당 병실을 지울지 판단)
+    Long findUserWardId(
+            @Param("hospitalDomain") String hospitalDomain,
+            @Param("userId") String userId
+    );
+
     // [2026.09.27] 병동 번호(1·2·3)로 현재 병원의 병동 ID 찾기. 병동 이름이 '3병동' 모양이어야 한다.
     Long findWardIdByNumber(
             @Param("hospitalDomain") String hospitalDomain,
             @Param("wardNumber") int wardNumber
-    );
-
-    // [2026.09.27] 간병인의 담당 병실(과 그 병실의 병동) 변경
-    int updateCaregiverRoom(
-            @Param("hospitalDomain") String hospitalDomain,
-            @Param("userId") String userId,
-            @Param("wardId") Long wardId,
-            @Param("roomNumber") String roomNumber
     );
 
     // [2026.09.27] 직원의 지금 전화번호 (재활성화 전 중복 확인용)

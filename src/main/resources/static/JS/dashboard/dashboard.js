@@ -211,6 +211,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // [09.13]수정내용: 병실 선택 처리를 전용 모듈에 위임하고 현재 화면 상태만 전달합니다.
   function choose(number){corridorSelected=false;window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);}
+  // [2026.09.30 변경] 중앙 복도를 누르거나 키보드로 선택하면 하단 오늘의 기록을 복도 기준으로 갱신합니다.
+  function chooseCorridor(){
+    selected=null;
+    corridorSelected=true;
+    render();
+  }
+  corridorNode.addEventListener("click", event=>{
+    event.stopPropagation();
+    chooseCorridor();
+  });
+  corridorNode.addEventListener("keydown", event=>{
+    if(event.key!=="Enter"&&event.key!==" ")return;
+    event.preventDefault();
+    event.stopPropagation();
+    chooseCorridor();
+  });
   /* [추가] 전체/상태 카드가 아닌 화면을 클릭하면 카드 선택 테두리를 제거합니다. */
   document.addEventListener("click", event => {
     if (event.target.closest(".counts .count")) return;
@@ -236,7 +252,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // [2026.09.16] 고친 내용: 가로형 기록 카드에 병실·건수·최근 발생 시각을 표시하며 미선택 상태는 대시로 구분합니다.
     const now=Date.now();
     const counts=room ? window.CareGuardRoomStatus.todayCounts(room.number,now) : null;
-    const latest=room ? window.CareGuardRoomStatus.latestTodayEvent(room.number,now) : null;
+    // [2026.09.28 변경] 최근 기록은 사고(오경보가 아닌 낙상 감지, 대응 등록한 낙상 의심)만 띄우고, 없으면 비웁니다.
+    const latest=room ? window.CareGuardRoomStatus.latestTodayIncident(room.number,now) : null;
     detail.innerHTML='<div class="history-heading"><strong class="history-room"></strong><span>오늘의 기록</span></div>'+
       '<div class="history-metric"><span class="room-history-urgent">낙상 감지</span><div><strong class="history-fall"></strong><span>건</span></div></div>'+
       '<div class="history-metric"><span class="room-history-suspected">낙상 의심</span><div><strong class="history-suspected"></strong><span>건</span></div></div>'+
@@ -247,17 +264,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const corridorEventType=corridorAlert.eventType || 'urgent';
     // [2026.09.27] 서버로 연 화면은 오늘 받은 공용 공간 이벤트를 실제로 셉니다(전에는 떠 있는 종류만 1건으로 표시).
     const corridorCounts={urgent:0,suspected:0,caution:0};
+    // [2026.09.28] 서버로 연 화면의 복도 최근 기록도 병실과 같은 기준(사고만, 없으면 비움)으로 오늘 받은 이벤트에서 고릅니다.
+    // 테스트 알림(?testAlerts=1)과 Live Server 미리보기는 떠 있는(마지막) 복도 알림으로 같은 기준을 적용합니다:
+    // 오경보로 끄지 않은 낙상 감지, 또는 대응 등록한 낙상 의심만 보이고 그 밖에는 비웁니다.
+    const corridorFromHistory=serverMode&&!corridorAlert.test;
+    const corridorAlertIncident=corridorAlert.dismissedEventId!==corridorAlert.eventId&&
+      (corridorEventType==='urgent'||(corridorEventType==='suspected'&&corridorAlert.handledEventId===corridorAlert.eventId));
+    let corridorLatest=null;
     if(serverMode&&corridorSelected){
       const today=window.CareGuardRoomStatus.dayKey(now);
-      for(const item of corridorHistory.values())if(window.CareGuardRoomStatus.dayKey(item.occurredAt)===today)corridorCounts[item.type]++;
+      for(const item of corridorHistory.values()){
+        if(window.CareGuardRoomStatus.dayKey(item.occurredAt)!==today)continue;
+        // [2026.09.28] 병실과 같이 오경보·'확인'으로 끈 낙상 감지·의심은 세지 않고, 침대 이탈은 셉니다.
+        if(!(item.dismissed&&item.type!=="caution"))corridorCounts[item.type]++;
+        if(window.CareGuardRoomStatus.isIncident(item)&&(!corridorLatest||new Date(item.occurredAt)>new Date(corridorLatest.occurredAt)))corridorLatest=item;
+      }
     }
     const corridorCount=type=>String(serverMode ? corridorCounts[type] : (corridorEventType===type ? 1 : 0));
+    // [2026.09.30 변경] 복도를 선택했을 때 오늘 기록이 없으면 실제 기록이 없는 상태를 안내합니다.
+    const hasCorridorEvent=corridorSelected&&(serverMode
+      ? Object.values(corridorCounts).some(count=>count>0)
+      : corridorAlert.status!=="normal");
     detail.querySelector('.history-fall').textContent=corridorSelected ? corridorCount('urgent') : counts ? counts.urgent : '—';
     detail.querySelector('.history-suspected').textContent=corridorSelected ? corridorCount('suspected') : counts ? counts.suspected : '—';
     detail.querySelector('.history-exit').textContent=corridorSelected ? corridorCount('caution') : counts ? counts.caution : '—';
-    detail.querySelector('.history-event').textContent=corridorSelected ? `${corridorAlert.test ? '테스트 · ' : ''}${labels[corridorEventType]} · ${corridorAlert.location}` : latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 위치의 기록을 표시합니다.';
+    const corridorEventText=corridorFromHistory ? (corridorLatest ? `${labels[corridorLatest.type]} · ${corridorLatest.locationName}` : '') :
+      corridorAlertIncident ? `${corridorAlert.test ? '테스트 · ' : ''}${labels[corridorEventType]} · ${corridorAlert.location}` : '';
+    // [2026.09.30 병합] 복도에 오늘 기록이 하나도 없으면 예진 브랜치의 안내 문구를, 있으면 기존 복도 최근 기록을 표시합니다.
+    detail.querySelector('.history-event').textContent=corridorSelected
+      ? (hasCorridorEvent ? corridorEventText : '오늘 감지된 이벤트가 없습니다.')
+      : latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 위치의 기록을 표시합니다.';
     const time=detail.querySelector('time');
-    const occurredAt=corridorSelected ? corridorAlert.occurredAt : latest?.occurredAt;
+    const occurredAt=corridorSelected ? (!hasCorridorEvent ? null : corridorFromHistory ? corridorLatest?.occurredAt : corridorAlertIncident ? corridorAlert.occurredAt : null) : latest?.occurredAt;
     if(occurredAt){
       time.dateTime=new Date(occurredAt).toISOString();
       time.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(occurredAt));
@@ -361,6 +399,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if(pendingByLocation.get(key)?.has(room.eventId)){confirmServerAlerts(location);return;}
     // 테스트 알림·Live Server 미리보기는 지금처럼 이 화면에서만 끕니다.
     cancelAudio(key);
+    // [2026.09.28] 이 화면의 오늘 기록에서도 '확인'으로 끈 것으로 표시합니다(낙상 의심은 건수에서 빠짐).
+    markHandledEvent(room.eventId,true);
+    if(isCorridor)corridorAlert.dismissedEventId=room.eventId;
     room.status="normal";room.acknowledged=false;
     if(isCorridor)corridorSelected=false;
     else if(selected===Number(location))selected=null;
@@ -368,7 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // [2026.09.28 추가] 낙상 의심·침대 이탈의 확인을 조치 기록에 남깁니다(대응 등록과 같은 API, DB 구조 그대로).
-  // 조치기록 화면과 관리자 홈 통계는 확정 낙상만 보여 주므로 여기에 남긴 '확인'은 그 화면들에 나오지 않습니다.
+  // 조치기록 화면은 확정 낙상만 보여 주므로 여기에 남긴 '확인'은 나오지 않고, 관리자 홈 통계와 이 화면의 오늘 기록은 '확인'을 빼고 셉니다(침대 이탈 건수는 그대로).
   // 지금처럼 같은 위치·같은 종류의 이전 경보까지 한 번에 확인하고, 그 경보들도 한 건씩 기록합니다.
   async function confirmServerAlerts(location){
     const isCorridor=location==="corridor";
@@ -388,13 +429,21 @@ document.addEventListener("DOMContentLoaded", () => {
     cancelAudio(key);
     savingResponse=true;
     let shownSaved=false;
+    let conflict=false;
     try{
       shownSaved=await saveResponse(shownId,body);
+      // [2026.09.28] 이 화면이 저장한 '확인'은 바로 오늘 건수·최근 기록에서 뺍니다. 409(다른 직원이 먼저 등록)는 끝난 뒤 서버 기록을 다시 불러옵니다.
+      if(shownSaved==="created")markHandledEvent(shownId,true);
+      conflict=shownSaved==="conflict";
       for(const [otherId,info] of older){
         // 보이는 경보를 저장하지 못했으면 이전 경보는 건드리지 않고, 이전 경보 저장에 실패하면 그것만 목록에 되돌립니다.
-        if(!shownSaved||!(await saveResponse(otherId,body)))pending.set(otherId,info);
+        const olderSaved=shownSaved?await saveResponse(otherId,body):false;
+        if(!olderSaved)pending.set(otherId,info);
+        else if(olderSaved==="created")markHandledEvent(otherId,true);
+        else conflict=true;
       }
     }finally{savingResponse=false;}
+    if(conflict)reloadAfterConflict();
     if(shownSaved&&pendingByLocation.get(key)?.has(shownId))resolvePending(key,shownId);
     if(isCorridor)corridorSelected=false;
     else if(selected===key)selected=null;
@@ -420,7 +469,19 @@ document.addEventListener("DOMContentLoaded", () => {
      전에는 위치마다 경보 하나만 기억해서, 뒤에 가려진 경보가 처리되지 않은 채 화면에서 사라졌습니다. */
   const rank={normal:0,caution:1,suspected:2,urgent:3};
   const pendingByLocation=new Map();   // 위치 → Map(이벤트ID → {type, occurredAt, locationName})
-  const corridorHistory=new Map();     // 공용 공간 이벤트의 오늘 건수용: 이벤트ID → {type, occurredAt}
+  const corridorHistory=new Map();     // 공용 공간 이벤트의 오늘 건수용: 이벤트ID → {type, occurredAt, locationName, handled, dismissed}
+  // [2026.09.28 추가] 조치가 등록된 이벤트를 오늘 기록에 표시합니다. dismissed=true 는 '확인'(확정 낙상은 오경보)으로 끈 것입니다.
+  // 병실 이벤트는 room-status.js 가, 공용 공간 이벤트는 corridorHistory 가 기억합니다. 모르는 이벤트면 아무것도 하지 않습니다.
+  // 이벤트당 조치는 1건뿐이라 한 번 '확인'·오경보로 표시되면 되돌리지 않습니다(알림과 저장 응답의 도착 순서에 따라 결과가 바뀌지 않게).
+  function markHandledEvent(id,dismissed){
+    const key=String(id);
+    window.CareGuardRoomStatus.markHandled(key,dismissed);
+    const item=corridorHistory.get(key);
+    if(item)Object.assign(item,{handled:true,dismissed:item.dismissed||Boolean(dismissed)});
+  }
+  // [2026.09.28 추가] 409(다른 직원이 먼저 등록)면 이 화면은 그 조치 내용을 모르므로 오늘 이벤트를 다시 불러와 기록을 맞춥니다.
+  // 보통은 서버의 '처리됨' 알림으로 맞춰지지만, 알림 전송이 실패했거나 연결이 반쯤 끊긴 경우를 대비합니다(server-events.js 의 reload).
+  function reloadAfterConflict(){window.CareGuardServerEvents?.reload?.();}
   function addPending(key,id,info){
     if(!pendingByLocation.has(key))pendingByLocation.set(key,new Map());
     pendingByLocation.get(key).set(id,info);
@@ -472,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const id=String(event.id);
     if(!event.locationName||seenEvents.has(id))return false;
     seenEvents.add(id);
-    corridorHistory.set(id,{type,occurredAt:event.occurredAt});
+    corridorHistory.set(id,{type,occurredAt:event.occurredAt,locationName:event.locationName,handled:false,dismissed:false});
     // [2026.09.27] 가려지는 경보도 기억해 두었다가, 지금 경보를 처리하면 다시 띄웁니다.
     addPending("corridor",id,{type,occurredAt:event.occurredAt,locationName:event.locationName});
     const shown=rank[corridorAlert.status]<=rank[type];
@@ -490,7 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // [2026.09.28 추가] 확정 낙상 오경보 처리. 서버 경보는 대응 등록과 같은 API 로 조치 기록에 '오경보'를 남깁니다.
   // 그러면 같은 병동의 모든 화면에서 꺼지고 새로 고쳐도 다시 뜨지 않습니다. DB 구조는 바꾸지 않습니다.
   // 같은 위치의 이전 확정 낙상은 진짜 낙상일 수 있으므로 함께 끄지 않고, 떠 있는 한 건만 끕니다.
-  // 낙상 의심·침대 이탈의 확인은 지금처럼 이 화면에서만 끕니다(DB 에 남기지 않음).
+  // 낙상 의심·침대 이탈의 확인은 위 confirmServerAlerts 가 조치 기록에 '확인'으로 남깁니다.
   const FALSE_ALARM_BODY={patientName:"오경보",actionContent:"오경보 확인"};
   async function confirmFalseAlarm(location){
     const isCorridor=location==="corridor";
@@ -507,10 +568,15 @@ document.addEventListener("DOMContentLoaded", () => {
       let saved=false;
       try{saved=await saveResponse(eventId,FALSE_ALARM_BODY);}finally{savingResponse=false;}
       if(!saved)return;
+      // [2026.09.28] 이 화면이 저장한 오경보는 바로 오늘 건수·최근 기록에서 뺍니다. 409(다른 직원이 먼저 등록)는 서버 기록을 다시 불러와 맞춥니다.
+      if(saved==="created")markHandledEvent(eventId,true);
+      else reloadAfterConflict();
       // '조치 등록됨' 실시간 알림이 먼저 와서 이미 정리했으면 다시 정리하지 않습니다.
       if(pendingByLocation.get(key)?.has(eventId))resolvePending(key,eventId);
     }else{
       // 테스트 알림·Live Server 미리보기는 화면에서만 끕니다.
+      markHandledEvent(eventId,true);   // [2026.09.28] 이 화면의 오늘 기록에서도 오경보로 표시합니다.
+      if(isCorridor)corridorAlert.dismissedEventId=eventId;   // [2026.09.28] 복도 최근 기록에서도 뺍니다(renderRoomHistory).
       Object.assign(room,{status:"normal",acknowledged:false});cancelAudio(key);
     }
     if(isCorridor)corridorSelected=false;
@@ -554,7 +620,11 @@ document.addEventListener("DOMContentLoaded", () => {
   },receiveServerEvent(event){
     // [2026.09.26 추가] 서버 알림 한 건(실시간 알림 또는 오늘 이벤트 조회의 한 줄)을 화면에 반영합니다.
     // [2026.09.27 추가] 감지 종류(eventType) 없이 handled=true 만 오면 "조치 등록됨" 알림입니다.
-    if(event?.handled===true&&!event.eventType&&event.id!=null)return clearHandledAlert(String(event.id));
+    if(event?.handled===true&&!event.eventType&&event.id!=null){
+      // [2026.09.28] '확인'·오경보 조치(dismissed)면 낙상 감지·의심 건수와 최근 기록에서 뺍니다(침대 이탈 건수는 그대로). 화면은 clearHandledAlert 가 다시 그립니다.
+      markHandledEvent(event.id,event.dismissed===true);
+      return clearHandledAlert(String(event.id));
+    }
     const type=serverEventType(event);
     if(!type){console.warn("대시보드가 모르는 감지 종류입니다.",event?.eventType,event?.decisionSt);return false;}
     // handled=true 는 이미 조치가 등록된 이벤트라 오늘 기록(건수)에만 넣습니다.
@@ -562,8 +632,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // [2026.09.27] 다시 불러왔더니 이미 조치된 경보가 이 화면에 떠 있으면(끊긴 동안 다른 화면이 등록) 끕니다.
       const id=String(event.id);
       if(findPendingLocation(id)!==null)clearHandledAlert(id);
-      if(event.room==null){corridorHistory.set(id,{type,occurredAt:event.occurredAt});return true;}
-      return window.CareGuardRoomStatus.addEvent({id:event.id,room:event.room,type,occurredAt:event.occurredAt});
+      // [2026.09.28] 조치 여부와 '확인'·오경보(dismissed)도 함께 기억합니다. 이미 받은 이벤트(처리 전에 받은 것)면 표시만 바꿉니다.
+      const dismissed=event.dismissed===true;
+      if(event.room==null){corridorHistory.set(id,{type,occurredAt:event.occurredAt,locationName:event.locationName,handled:true,dismissed});return true;}
+      const added=window.CareGuardRoomStatus.addEvent({id:event.id,room:event.room,type,occurredAt:event.occurredAt,handled:true,dismissed});
+      if(!added)window.CareGuardRoomStatus.markHandled(id,dismissed);
+      return added;
     }
     if(event.room==null)return receiveCorridorEvent(event,type);
     const receive=type==="urgent"?window.CareGuard.receiveFallEvent:type==="suspected"?window.CareGuard.receiveSuspectedFallEvent:window.CareGuard.receiveBedExitEvent;
@@ -689,8 +763,10 @@ document.addEventListener("DOMContentLoaded", () => {
         body:JSON.stringify(body||{patientName:document.getElementById("response-patient").value.trim(),actionContent:document.getElementById("response-note").value.trim()})
       });
       if(response.redirected||response.status===401){window.alert("로그인이 끝났습니다. 다시 로그인한 뒤 등록해 주세요.");return false;}
-      if(response.status===409){window.alert("다른 직원이 이미 조치를 등록한 경보입니다. 경보를 해제합니다.");return true;}
-      if(response.ok)return true;
+      // [2026.09.28 변경] 저장 결과: "created"(이 화면이 저장), "conflict"(다른 직원이 먼저 등록, 409), false(실패).
+      // 앞의 둘은 지금처럼 '저장됨(참)'으로 쓰고, 오늘 기록 표시는 이 화면이 저장한 "created" 일 때만 바로 바꿉니다.
+      if(response.status===409){window.alert("다른 직원이 이미 조치를 등록한 경보입니다. 경보를 해제합니다.");return "conflict";}
+      if(response.ok)return "created";
       const reason={400:"환자 이름과 조치 내용을 확인해 주세요.",403:"등록 권한이 없거나 로그인 정보가 바뀌었습니다. 화면을 새로 고친 뒤 다시 등록해 주세요.",404:"감지 이벤트를 찾을 수 없습니다."}[response.status];
       window.alert(reason||`조치 기록을 저장하지 못했습니다(${response.status}). 잠시 후 다시 등록해 주세요.`);
       return false;
@@ -714,12 +790,18 @@ document.addEventListener("DOMContentLoaded", () => {
       let saved=false;
       try{saved=await saveResponse(eventId);}finally{savingResponse=false;responseSubmit.disabled=false;}
       if(!saved)return;
+      // [2026.09.28] 이 화면이 저장한 대응 등록은 바로 오늘 기록에 '조치됨'으로 표시합니다(대응 등록한 낙상 의심은 최근 기록에 뜸).
+      // 409(다른 직원이 먼저 등록)는 서버 기록을 다시 불러와 맞춥니다.
+      if(saved==="created")markHandledEvent(eventId,false);
+      else reloadAfterConflict();
       resolvePending(key,eventId);
       dialog.close();render();
       if(room.status!=="normal")detail.textContent="조치 기록을 저장했습니다. 같은 위치에 아직 처리하지 않은 경보가 있습니다.";
       return;
     }
     // 조치 내용 등록은 조치 완료로 처리합니다.
+    markHandledEvent(registrationEvent,false);   // [2026.09.28] 이 화면의 오늘 기록에도 '조치됨'으로 표시합니다.
+    if(registrationRoom==="corridor")corridorAlert.handledEventId=registrationEvent;   // 복도 최근 기록용(renderRoomHistory)
     // [2026.09.29 변경] 로컬 테스트 경보도 실제 대응 등록이 저장된 경우에만 음성과 점멸을 종료합니다.
     room.status="normal";room.acknowledged=false;cancelAudio(registrationRoom==="corridor" ? "corridor" : room.number);
     dialog.close();render();

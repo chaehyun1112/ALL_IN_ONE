@@ -19,8 +19,9 @@ import java.util.Map;
  * 젯슨 API 오류를 {"message": ..., "errors": [...]} JSON 으로 돌려준다.
  * 이벤트 요청이 400 이면 젯슨 전송기는 그 줄을 보류 파일로 빼고 다음 줄을 보낸다.
  * 세션 요청이 400 이면 등록될 때까지 계속 다시 보낸다(그동안 이벤트 전송이 멈춘다).
+ * [2026.09.28] 영상 업로드(EdgeMediaController)도 같은 모양으로 돌려준다. 영상 400 이면 젯슨은 그 영상을 다시 올리지 않는다.
  */
-@RestControllerAdvice(assignableTypes = EdgeController.class)
+@RestControllerAdvice(assignableTypes = {EdgeController.class, EdgeMediaController.class})
 public class EdgeApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
