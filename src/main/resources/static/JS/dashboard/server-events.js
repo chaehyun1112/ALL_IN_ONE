@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return loading;
   }
 
-  // [2026.09.29] 조치기록(대시보드 안의 iframe)은 실시간 알림을 직접 받지 않으므로, 알림이 오면 여기서 다시 불러오게 합니다.
+  // [2026.09.29] 조치 이력(대시보드 안의 iframe)은 실시간 알림을 직접 받지 않으므로, 알림이 오면 여기서 다시 불러오게 합니다.
   // 서버가 이벤트를 저장한 뒤 알리지만 여러 건이 몰릴 수 있어 1초 모아서 한 번만 부릅니다. 닫혀 있으면 다시 열 때 dashboard.js 가 불러옵니다.
   let recordReloadTimer = null;
   function scheduleRecordReload() {
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const event = JSON.parse(body);
         careGuard.receiveServerEvent(event);
-        // [2026.09.29] 조치기록 화면이 열려 있으면 새 낙상·조치 등록 알림 때 목록을 바로 다시 불러옵니다(침대 이탈은 조치기록에 없어서 제외).
+        // [2026.09.29] 조치 이력 화면이 열려 있으면 새 낙상·조치 등록 알림 때 목록을 바로 다시 불러옵니다(침대 이탈은 조치 이력에 없어서 제외).
         if (event?.eventType !== "BED_EXIT") scheduleRecordReload();
       } catch (error) {
         console.warn("감지 알림을 읽지 못했습니다.", error);

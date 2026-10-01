@@ -81,7 +81,7 @@ public class DashboardController {
         if (admin) {
             return "redirect:/admin";
         }
-        // [2026.09.17] 추가한 내용: 새로고침해도 간호사 대시보드 공통 상단 바 안에서 조치기록을 표시합니다.
+        // [2026.09.17] 추가한 내용: 새로고침해도 간호사 대시보드 공통 상단 바 안에서 조치 이력을 표시합니다.
         response.setHeader("Cache-Control", "no-store");
         boolean approved = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("STATUS_APPROVED"));

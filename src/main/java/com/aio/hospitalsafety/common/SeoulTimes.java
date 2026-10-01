@@ -12,7 +12,7 @@ public final class SeoulTimes {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
-    // 조치기록 화면 형식: 2026-09-25T14:30
+    // 조치 이력 화면 형식: 2026-09-25T14:30
     private static final DateTimeFormatter SCREEN_MINUTE = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
     // 낙상 SMS 형식(요구사항 AIO_035): 2026.09.21 14:30
@@ -31,7 +31,7 @@ public final class SeoulTimes {
         return time.atZoneSameInstant(SEOUL).format(SMS_MINUTE);
     }
 
-    /** 조치기록 화면용: 2026-09-25T14:30 (없으면 빈 문자열) */
+    /** 조치 이력 화면용: 2026-09-25T14:30 (없으면 빈 문자열) */
     public static String screenMinute(OffsetDateTime time) {
         return time == null ? "" : time.atZoneSameInstant(SEOUL).format(SCREEN_MINUTE);
     }

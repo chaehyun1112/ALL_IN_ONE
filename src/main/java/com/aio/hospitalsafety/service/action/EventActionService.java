@@ -17,16 +17,16 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 조치기록 조회와 대응 등록.
+ * 조치 이력 조회와 대응 등록.
  * 병원·병동 범위는 브라우저 입력이 아니라 로그인 정보로 정한다.
  */
 @Service
 public class EventActionService {
 
-    // 조치기록 화면이 한 번에 받는 최대 건수
+    // 조치 이력 화면이 한 번에 받는 최대 건수
     private static final int HISTORY_LIMIT = 1000;
 
-    // 조치기록 화면의 종류 이름 (대시보드 상태 이름과 같다)
+    // 조치 이력 화면의 종류 이름 (대시보드 상태 이름과 같다)
     private static final String FALL_CONFIRMED_LABEL = "낙상 감지";
     private static final String FALL_SUSPECTED_LABEL = "낙상 의심";
 
@@ -42,7 +42,7 @@ public class EventActionService {
     }
 
     /**
-     * 조치기록 목록.
+     * 조치 이력 목록.
      * wardId 가 null 이면 병원 전체(관리자), 값이 있으면 그 병동만(간호사).
      */
     @Transactional(readOnly = true)
@@ -52,7 +52,7 @@ public class EventActionService {
 
     /**
      * [2026.09.28] includeSuspected 가 true 면 조치가 등록된 낙상 의심도 함께 돌려준다(관리자 홈 사고 현황용).
-     * 조치기록 화면은 지금처럼 확정 낙상만 받는다(includeSuspected = false).
+     * 조치 이력 화면은 지금처럼 확정 낙상만 받는다(includeSuspected = false).
      */
     @Transactional(readOnly = true)
     public List<ActionHistoryResponse> findActionHistory(String hospitalId, Long wardId, boolean includeSuspected) {
