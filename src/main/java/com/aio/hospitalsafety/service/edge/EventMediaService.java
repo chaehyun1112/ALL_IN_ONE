@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * [2026.09.28] 낙상 이벤트 영상(젯슨이 이벤트 10초 뒤에 올리는 .avi 한 개)을 저장하고 지운다.
@@ -49,12 +51,15 @@ public class EventMediaService {
 
     private final EventMediaMapper eventMediaMapper;
     private final Path storageDir;
+    private final int retentionDays;
 
     public EventMediaService(
             EventMediaMapper eventMediaMapper,
-            @Value("${event-media.storage-dir}") String storageDir) {
+            @Value("${event-media.storage-dir}") String storageDir,
+            @Value("${event-media.retention-days:30}") int retentionDays) {
         this.eventMediaMapper = eventMediaMapper;
         this.storageDir = Path.of(storageDir).toAbsolutePath().normalize();
+        this.retentionDays = retentionDays;
     }
 
     /**
@@ -144,6 +149,48 @@ public class EventMediaService {
         log.info("영상 행과 파일을 지웠습니다. eventId={}", eventId);
     }
 
+    /**
+     * [2026.10.01] 영상 보관 기간(event-media.retention-days, 기본 30일).
+     * 관리자가 보관함에서 확인(재생)한 날로부터 기간이 지난 영상 파일을 지운다. 확인 안 한 영상은 남긴다.
+     * 서버가 켜지고 1분 뒤 한 번, 그 뒤 1시간마다 확인한다(서버를 매일 켜고 끄는 환경에서도 빠지지 않게).
+     */
+    @Scheduled(initialDelay = 60_000, fixedDelay = 3_600_000)
+    public void removeExpiredClips() {
+        List<String> eventIds;
+        try {
+            eventIds = eventMediaMapper.findExpiredViewedEventIds(retentionDays);
+        } catch (RuntimeException exception) {
+            log.warn("보관 기간이 지난 영상을 조회하지 못했습니다: {}", exception.getMessage());
+            return;
+        }
+        for (String eventId : eventIds) {
+            removeExpiredClip(eventId);
+        }
+    }
+
+    /** 행을 FAILED(영상 없음)로 먼저 바꾸고(재생 주소가 더는 나가지 않게) 파일을 지운다. deleteClip 과 같은 순서다. */
+    private void removeExpiredClip(String eventId) {
+        String storageUri = eventMediaMapper.findStorageUri(eventId);
+        try {
+            if (eventMediaMapper.markMediaExpired(eventId) == 0) {
+                return;
+            }
+        } catch (RuntimeException exception) {
+            // DB 오류면 파일은 그대로 두고 다음 확인 때 다시 시도한다.
+            log.warn("보관 기간이 지난 영상의 상태를 바꾸지 못해 파일을 남겼습니다. eventId={} 이유={}", eventId, exception.getMessage());
+            return;
+        }
+        if (storageUri != null) {
+            Path file = resolveInStorage(storageUri);
+            if (file == null) {
+                log.warn("영상 파일 경로가 저장 폴더 밖이라 지우지 않았습니다. eventId={}", eventId);
+            } else {
+                deleteFileQuietly(file, eventId);
+            }
+        }
+        log.info("보관 기간({}일)이 지난 영상을 지웠습니다. eventId={}", retentionDays, eventId);
+    }
+
     private long writeFile(MultipartFile file, Path target, String eventId) {
         Path temp = null;
         try {
@@ -184,6 +231,15 @@ public class EventMediaService {
         }
         Path file = resolveInStorage(storageUri);
         return file != null && Files.isRegularFile(file) ? file : null;
+    }
+
+    /**
+     * [2026.10.01 저녁] 이 서버에서 실제로 재생할 수 있는 영상인지. 공용 DB 라 다른 서버가 올린 영상 기록도 보이지만 파일은 서버마다 따로라,
+     * 여기에 파일이 없으면 재생이 안 된다. 브라우저가 틀 수 없는 예전 avi 도 재생 불가로 본다.
+     */
+    public boolean isPlayableHere(String eventId, String hospitalId) {
+        Path file = findClipFile(eventId, hospitalId);
+        return file != null && file.getFileName().toString().endsWith(".mp4");
     }
 
     /**

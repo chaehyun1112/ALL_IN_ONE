@@ -63,19 +63,15 @@ body[data-dashboard-view] > header .profile-copy small {
   color: #29343d;
 }
 
-.admin-topbar .admin-fullscreen-toggle,
 .admin-topbar .admin-logout,
-.admin-topbar .admin-settings,
-body[data-dashboard-view] > header .fullscreen-toggle {
+.admin-topbar .admin-settings {
   background: #29343d08;
   border-color: #29343d40;
   color: #29343d;
 }
 
-.admin-topbar .admin-fullscreen-toggle:hover,
 .admin-topbar .admin-logout:hover,
-.admin-topbar .admin-settings:hover,
-body[data-dashboard-view] > header .fullscreen-toggle:hover {
+.admin-topbar .admin-settings:hover {
   background: #29343d14;
   border-color: #29343d80;
 }
@@ -88,7 +84,6 @@ body[data-dashboard-view] > header .header-actions a,
 }
 
 .admin-topbar :focus-visible,
-body[data-dashboard-view] > header .fullscreen-toggle:focus-visible,
 body[data-dashboard-view] > header .profile-toggle:focus-visible {
   outline: 2px solid #29343d;
   outline-offset: 3px;
@@ -133,7 +128,7 @@ header > .brand {
 body[data-dashboard-view="records"] > header .record-brand { display: inline-flex; }
 .record-service-label { color: #29343d; font-size: 11px; font-weight: 400; line-height: 1; white-space: nowrap; }
 
-/* 독립 조치기록 상단의 로고와 보조 문구를 대시보드와 동일하게 정렬합니다. */
+/* 독립 조치 이력 상단의 로고와 보조 문구를 대시보드와 동일하게 정렬합니다. */
 .page-header .dashboard-link.alleyes-record-link { padding: 0; font-size: 18px; font-weight: 700; line-height: 1; color: #36566f; }
 .page-header .dashboard-link.alleyes-record-link:hover { color: #36566f; }
 .page-header .hospital-name { margin-left: -8px; font-size: 11px; font-weight: 400; line-height: 1; white-space: nowrap; color: #29343d; }

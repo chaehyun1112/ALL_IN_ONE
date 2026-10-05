@@ -79,14 +79,22 @@
     </select>
 
     <!-- 최근 N분 안에 저장된 확정 낙상 (서버 재시작 뒤 SMS 이어 보내기) -->
+    <!-- [2026.10.01] 서버 시작 시 이어 보내기 대상에서 이미 조치(대응 등록·확인·오경보)가 등록된 낙상은 뺀다.
+         낙상 의심에 대응 등록하면 확정 낙상으로 바뀌는데(promoteSuspectedFall), 문자 기록이 없어
+         재시작 때 문자가 나가던 문제를 막는다. 대응이 끝난 낙상에는 문자를 보내지 않는다. -->
     <select id="findRecentConfirmedFallIds" resultType="string">
-        SELECT CAST(event_id AS VARCHAR)
-        FROM tb_detection_event
-        WHERE event_type = 'FALL'
-          AND decision_st = 'CONFIRMED'
-          AND (event_detail ->> 'duplicate_of') IS NULL
-          AND crt_dt &gt;= NOW() - (#{minutes} * INTERVAL '1 minute')
-        ORDER BY crt_dt
+        SELECT CAST(e.event_id AS VARCHAR)
+        FROM tb_detection_event e
+        WHERE e.event_type = 'FALL'
+          AND e.decision_st = 'CONFIRMED'
+          AND (e.event_detail ->> 'duplicate_of') IS NULL
+          AND e.crt_dt &gt;= NOW() - (#{minutes} * INTERVAL '1 minute')
+          AND NOT EXISTS (
+              SELECT 1
+              FROM tb_event_action a
+              WHERE a.event_id = e.event_id
+          )
+        ORDER BY e.crt_dt
     </select>
 
     <!-- 발송 결과 기록. 성공이면 send_dt 에 지금 시각, 실패면 NULL -->

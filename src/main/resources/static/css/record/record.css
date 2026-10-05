@@ -68,7 +68,7 @@ select:focus-visible,
 
 /* 상단 메뉴 배치 */
 .page-header {
-  /* [2026.09.17] 고친 내용: 간호사 조치기록도 전체화면에서 관리자와 같은 상단 바 비율을 사용합니다. */
+  /* [2026.09.17] 고친 내용: 간호사 조치 이력도 전체화면에서 관리자와 같은 상단 바 비율을 사용합니다. */
   min-height: 88px;
   display: flex;
   align-items: center;
@@ -78,24 +78,32 @@ select:focus-visible,
   color: var(--panel-background);
 }
 
-/* [2026.09.17] 고친 내용: 관리자 화면 안에서는 조치기록의 별도 상단 바를 숨기고 공통 관리자 바를 사용합니다. */
+/* [2026.09.17] 고친 내용: 관리자 화면 안에서는 조치 이력의 별도 상단 바를 숨기고 공통 관리자 바를 사용합니다. */
 .admin-record-page .page-header,
 .dashboard-record-page .page-header {
   display: none;
 }
 
-/* [2026.09.17] 고친 내용: 전체화면 관리자 조치기록은 작은 원본 기준값 대신 읽기 편한 여백과 표 크기를 사용합니다. */
-.admin-record-page .page-content { padding: 24px 28px 28px; }
-.admin-record-page .page-intro { height: 84px; padding: 17px 20px 10px; }
-.admin-record-page .page-title { font-size: 21px; line-height: 26px; }
-.admin-record-page .page-description { margin-top: 9px; font-size: 10.5px; line-height: 16px; }
-.admin-record-page .search-form { min-height: 76px; margin-top: 18px; padding: 16px; }
-.admin-record-page .period-button,
-.admin-record-page .choice-button { height: 32px; min-height: 32px; font-size: 10px; }
-.admin-record-page .record-table { font-size: 10px; border-spacing: 0 6px; }
-.admin-record-page .record-table th { height: 34px; }
-.admin-record-page .record-table td { height: 40px; }
-.admin-record-page .alert-badge { width: 70px; height: 21px; font-size: 9px; }
+/* [2026.10.01 변경] 관리자 조치 이력도 간호사 조치 이력과 같은 공통 UI 크기와 간격을 사용합니다. */
+
+/* [2026.10.01 변경] 간호사 대시보드 안의 조치 이력도 관리자 조치 이력처럼 본문 좌우 여백과 카드 간격을 맞춥니다. */
+.dashboard-record-page .page-content {
+  padding: 20px 18px 18px;
+}
+
+.dashboard-record-page .page-intro,
+.dashboard-record-page .search-form,
+.dashboard-record-page .record-panel {
+  border-radius: 9px;
+}
+
+.dashboard-record-page .search-form {
+  margin-top: 18px;
+}
+
+.dashboard-record-page .record-panel {
+  margin-top: 18px;
+}
 
 /* 대시보드 이동 */
 .dashboard-link {
@@ -143,7 +151,7 @@ select:focus-visible,
   padding: 18.36px 19px 16px;
 }
 
-/* [9.15] 수정내용: 조치 기록은 본문 전용 스크롤을 사용하지 않고 화면 전체 스크롤을 사용합니다. */
+/* [9.15] 수정내용: 조치 이력은 본문 전용 스크롤을 사용하지 않고 화면 전체 스크롤을 사용합니다. */
 
 /* 패널 공통 스타일 */
 .page-intro,
@@ -157,7 +165,7 @@ select:focus-visible,
 /* 제목 영역 */
 .page-intro {
   height: 73.42px;
-  /* [9.15] 수정내용: 조치 기록 제목과 설명이 위쪽에 붙어 보이지 않도록 아래로 내립니다. */
+  /* [9.15] 수정내용: 조치 이력 제목과 설명이 위쪽에 붙어 보이지 않도록 아래로 내립니다. */
   padding: 15px 18.59px 8.4px;
 }
 
@@ -170,12 +178,12 @@ select:focus-visible,
 }
 
 /* 제목 아래 설명 */
-.page-description {
-  /* [2026.09.16] 고친 내용: 조치 기록 제목과 안내 문구 사이의 세로 간격을 넓힙니다. */
-  margin: 8px 0 0;
+.page-intro .page-description {
+  /* 안내 문구를 조금 올려 제목 카드의 아래쪽 여백을 확보합니다. */
+  margin: 4px 0 0;
   color: #586a77;
-  font-size: 8.95px;
-  line-height: 14px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 /* ==================================================
@@ -483,7 +491,7 @@ select:focus-visible,
 }
 
 /* ==================================================
-   6. 조치 기록 표
+   6. 조치 이력 표
    ================================================== */
 
 /* 기록 패널 */
@@ -499,7 +507,7 @@ select:focus-visible,
 
 /* 표 제목 */
 .record-title {
-  /* [9.15] 수정내용: 제목과 조치 기록 목록 사이의 간격을 넓힙니다. */
+  /* [9.15] 수정내용: 제목과 조치 이력 목록 사이의 간격을 넓힙니다. */
   margin: 0 0 10px;
   color: #2d3c34;
   font-size: 11.01px;
@@ -517,17 +525,42 @@ select:focus-visible,
   padding-right: 6px;
 }
 
-/* [9.15] 추가내용: 조치 기록 목록을 스크롤 대신 페이지 버튼으로 이동합니다. */
+/* [2026.10.01 변경] 조치 이력은 스크롤 기능은 유지하되 스크롤바 UI는 화면에 보이지 않게 숨깁니다. */
+html,
+body,
+.page-content,
+.record-panel,
+.record-panel .table-scroll,
+.table-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.page-content::-webkit-scrollbar,
+.record-panel::-webkit-scrollbar,
+.record-panel .table-scroll::-webkit-scrollbar,
+.table-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* [9.15] 추가내용: 조치 이력 목록을 스크롤 대신 페이지 버튼으로 이동합니다. */
 .record-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   min-height: 34px;
-  padding-top: 8px;
+  width: 100%;
+  margin: 12px auto 0;
+  padding: 0;
 }
 
 .record-pagination button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 26px;
   height: 26px;
   padding: 0;
@@ -536,6 +569,8 @@ select:focus-visible,
   background: #fff;
   color: #586a77;
   font-size: 10px;
+  line-height: 1;
+  text-align: center;
 }
 
 .record-pagination button:hover,
@@ -543,6 +578,7 @@ select:focus-visible,
   border-color: #526d82;
   background: #526d82;
   color: #fff;
+  font-weight: 700;
 }
 
 /* 표 */
@@ -627,7 +663,8 @@ select:focus-visible,
 /* 낙상 감지 */
 .fall-badge {
   background: #e8bfb8;
-  color: #7a3434;
+  /* [2026.10.01 변경] 조치 이력의 낙상 감지 글씨는 표의 일반 글씨 색과 동일하게 맞춥니다. */
+  color: var(--text-color);
 }
 
 /* 검색 결과 없음·조회 실패 */
@@ -1069,6 +1106,19 @@ select:focus-visible,
 .record-checkbox:disabled { cursor: default; }
 .record-search-actions > button { flex-shrink: 0; white-space: nowrap; }
 
+/* [2026.10.01 변경] 발생 시각 열은 표 전체와 같은 글꼴을 쓰고, 본문은 부드러운 짙은 회색으로 맞춥니다. */
+.record-table .time-column {
+  font-family: inherit;
+  font-weight: 700;
+  color: #fff;
+}
+
+.record-table td:nth-child(2) {
+  font-family: inherit;
+  font-weight: 400;
+  color: var(--text-color);
+}
+
 /* [2026-09-18] 추가 내용: 검색 조건과 별개로 선택한 기록을 확인하고 해제하는 공통 도구입니다. */
 .record-selection-toolbar {
   display: flex;
@@ -1230,11 +1280,11 @@ select:focus-visible,
 
 /* [2026.09.19] 공통 배경·강조색을 블루 그레이로 통일합니다. 위험 알림의 빨강·주황은 유지합니다. */
 
-/* [2026.09.29 변경] PC·노트북의 세로 해상도 차이에도 조치기록 패널이 남은 높이를 사용하고, 표 영역에서만 스크롤되도록 구성합니다. */
+/* [2026.09.29 변경] PC·노트북의 세로 해상도 차이에도 조치 이력 패널이 남은 높이를 사용하고, 표 영역에서만 스크롤되도록 구성합니다. */
 @media (min-width:1000px) {
   html,
   body { min-height:100%; }
-  /* [2026.09.29 변경] 조치기록은 휠·터치패드 스크롤을 유지하고, 화면 스크롤바는 표시하지 않습니다. */
+  /* [2026.09.29 변경] 조치 이력은 휠·터치패드 스크롤을 유지하고, 화면 스크롤바는 표시하지 않습니다. */
   body { min-height:100dvh; display:flex; flex-direction:column; scrollbar-width:none; -ms-overflow-style:none; }
   body::-webkit-scrollbar { display:none; }
   .page-header { flex:0 0 auto; }

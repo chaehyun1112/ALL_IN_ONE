@@ -8,6 +8,7 @@ import com.aio.hospitalsafety.dto.action.EventActionRequest;
 import com.aio.hospitalsafety.dto.action.EventWard;
 import com.aio.hospitalsafety.dto.action.TodayEventResponse;
 import com.aio.hospitalsafety.mapper.action.EventActionMapper;
+import com.aio.hospitalsafety.service.edge.EventMediaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,16 +18,16 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 조치기록 조회와 대응 등록.
+ * 조치 이력 조회와 대응 등록.
  * 병원·병동 범위는 브라우저 입력이 아니라 로그인 정보로 정한다.
  */
 @Service
 public class EventActionService {
 
-    // 조치기록 화면이 한 번에 받는 최대 건수
+    // 조치 이력 화면이 한 번에 받는 최대 건수
     private static final int HISTORY_LIMIT = 1000;
 
-    // 조치기록 화면의 종류 이름 (대시보드 상태 이름과 같다)
+    // 조치 이력 화면의 종류 이름 (대시보드 상태 이름과 같다)
     private static final String FALL_CONFIRMED_LABEL = "낙상 감지";
     private static final String FALL_SUSPECTED_LABEL = "낙상 의심";
 
@@ -35,14 +36,18 @@ public class EventActionService {
     private static final Set<String> DISMISS_PATIENT_NAMES = Set.of("오경보", "확인");
     private static final Set<String> DISMISS_ACTION_CONTENTS = Set.of("오경보 확인", "낙상 의심 확인", "침대 이탈 확인");
 
-    private final EventActionMapper eventActionMapper;
+    private static final String ADMIN_MEDIA_URL_PREFIX = "/api/admin/events/";
 
-    public EventActionService(EventActionMapper eventActionMapper) {
+    private final EventActionMapper eventActionMapper;
+    private final EventMediaService eventMediaService;
+
+    public EventActionService(EventActionMapper eventActionMapper, EventMediaService eventMediaService) {
         this.eventActionMapper = eventActionMapper;
+        this.eventMediaService = eventMediaService;
     }
 
     /**
-     * 조치기록 목록.
+     * 조치 이력 목록.
      * wardId 가 null 이면 병원 전체(관리자), 값이 있으면 그 병동만(간호사).
      */
     @Transactional(readOnly = true)
@@ -52,13 +57,13 @@ public class EventActionService {
 
     /**
      * [2026.09.28] includeSuspected 가 true 면 조치가 등록된 낙상 의심도 함께 돌려준다(관리자 홈 사고 현황용).
-     * 조치기록 화면은 지금처럼 확정 낙상만 받는다(includeSuspected = false).
+     * 조치 이력 화면은 지금처럼 확정 낙상만 받는다(includeSuspected = false).
      */
     @Transactional(readOnly = true)
     public List<ActionHistoryResponse> findActionHistory(String hospitalId, Long wardId, boolean includeSuspected) {
         return eventActionMapper.findActionHistory(hospitalId, wardId, HISTORY_LIMIT, includeSuspected)
                 .stream()
-                .map(this::toResponse)
+                .map(row -> toResponse(row, hospitalId))
                 .toList();
     }
 
@@ -125,8 +130,14 @@ public class EventActionService {
         }
     }
 
-    private ActionHistoryResponse toResponse(ActionHistoryRow row) {
+    private ActionHistoryResponse toResponse(ActionHistoryRow row, String hospitalId) {
         boolean done = row.actionAt() != null;
+        // [2026.10.01 저녁] DB 는 개발 서버·배포 서버 가 같이 쓰지만 영상 파일은 서버마다 따로 저장된다. 이 서버에서 재생할 수 없는 영상(파일 없음, mp4 아님)은
+        // 영상 없음("")으로 돌려준다. 사고 영상 보관함은 영상 없는 기록을 목록에서 뺀다(accident-records.js).
+        String videoUrl = nullToEmpty(row.videoUrl());
+        if (videoUrl.startsWith(ADMIN_MEDIA_URL_PREFIX) && !eventMediaService.isPlayableHere(row.eventId(), hospitalId)) {
+            videoUrl = "";
+        }
         return new ActionHistoryResponse(
                 row.eventId(),
                 SeoulTimes.screenMinute(row.eventAt()),
@@ -141,7 +152,7 @@ public class EventActionService {
                 nullToEmpty(row.actionContent()),
                 nullToEmpty(row.wardName()),
                 // [2026.09.29 변경] 영상이 없는 기존 사고도 동일한 API로 조회할 수 있도록 빈 값으로 반환합니다.
-                nullToEmpty(row.videoUrl()),
+                videoUrl,
                 Boolean.TRUE.equals(row.videoViewed()),
                 Boolean.TRUE.equals(row.dismissed()));
     }

@@ -2,39 +2,6 @@
 // [2026.09.17] 추가한 내용: 스크립트 위치를 기준으로 서버와 Live Server에서 동일한 호실 WAV 폴더를 사용합니다.
 const roomAlertAudioBase = new URL("../../audio/room-alerts/", document.currentScript.src);
 document.addEventListener("DOMContentLoaded", () => {
-  /* [2026.09.16] 추가한 내용: 버튼으로 전체화면을 전환하고 Esc 해제 시에도 버튼 상태를 동기화합니다. */
-  const fullscreenToggle = document.getElementById("fullscreen-toggle");
-  const fullscreenLabel = document.getElementById("fullscreen-label");
-  function syncFullscreenButton() {
-    const isFullscreen = Boolean(document.fullscreenElement);
-    const label = isFullscreen ? "전체화면 해제" : "전체화면";
-    fullscreenToggle.setAttribute("aria-pressed", String(isFullscreen));
-    fullscreenToggle.setAttribute("aria-label", label);
-    fullscreenToggle.title = label;
-    fullscreenLabel.textContent = label;
-  }
-  document.addEventListener("fullscreenchange", syncFullscreenButton);
-  syncFullscreenButton();
-  if (!document.fullscreenEnabled) {
-    fullscreenToggle.disabled = true;
-    fullscreenToggle.title = "이 브라우저에서는 전체화면을 사용할 수 없습니다.";
-  }
-  fullscreenToggle.addEventListener("click", async () => {
-    fullscreenToggle.disabled = true;
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else {
-        await document.documentElement.requestFullscreen();
-      }
-    } catch {
-      window.alert("전체화면 전환에 실패했습니다. 브라우저의 전체화면 권한을 확인해 주세요.");
-    } finally {
-      fullscreenToggle.disabled = !document.fullscreenEnabled;
-      syncFullscreenButton();
-    }
-  });
-
   /* [수정] 화면 예시 상태입니다. 실제 서버 조회 결과로 교체하세요.
      페이지를 열 때 조회한 이전 경보에는 음성을 재생하지 않습니다. */
   const rooms = window.CareGuardRoomStatus.rooms;
@@ -42,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const labels = window.CareGuardRoomStatus.labels;
   const upper=document.getElementById("upper-rooms"), lower=document.getElementById("lower-rooms");
   const detail=document.getElementById("room-detail");
+  const historyCard=document.querySelector(".dashboard-history-card");
   const dialog=document.getElementById("response-dialog"), form=document.getElementById("response-form");
   const alertPanel=document.querySelector(".alerts-panel");
   const alertList=document.querySelector(".alert-list")||alertPanel;
@@ -113,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const location=notice.key==='corridor'?notice.state.location:`${notice.key}호`;
       title.textContent=`${notice.state.test?'[테스트] ':''}${location} · ${labels[notice.state.status]}`;
       const locate=document.createElement('button');locate.type='button';locate.textContent='위치 보기';
-      // [2026.09.22 변경] 대시보드 외 화면의 감지 알림은 위치 확인만 제공하고 대응 등록 버튼은 표시하지 않습니다.
+      // [2026.09.22 변경] 대시보드 외 화면의 감지 알림은 위치 확인만 제공하고 대응등록 버튼은 표시하지 않습니다.
       row.append(title,locate);crossPageItems.append(row);
     }
     crossPageAlert.classList.toggle('caution',notices[0].state.status==='caution');
@@ -122,8 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // [2026.09.17] 추가한 내용: 읽던 화면을 가리지 않도록 8초 뒤 건수 표시로 접고 미처리 알림은 유지합니다.
     clearTimeout(noticeCollapseTimer);noticeCollapseTimer=setTimeout(()=>setNoticeExpanded(false),8000);
   }
-  /* [추가] 전체 화면 상태와 ‘전체’ 카드의 선택 테두리를 분리해 관리합니다. */
-  let cardSelected=false;
   /* [추가] 클릭 직후에는 커서를 빼기 전까지 버튼 hover 강조를 표시하지 않습니다. */
   let suppressedHoverRoom=null;
   const nodes=new Map();
@@ -145,16 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* [2026.09.16] 고친 내용: 현황 카드를 전체·낙상·침대 이탈·정상 순서로 표시해도 기존 상태 필터와 연결합니다. */
   const cards=[];
-  document.querySelectorAll(".counts .count").forEach(old=>{
-    const button=document.createElement("button");button.type="button";button.className=old.className;
-    button.append(...old.childNodes);old.replaceWith(button);
-    const kind=button.classList.contains("all")?"all":button.classList.contains("urgent")?"urgent":button.classList.contains("suspected")?"suspected":button.classList.contains("caution")?"caution":"normal";
-    button.dataset.filter=kind;button.addEventListener("click",()=>{filter=kind;cardSelected=true;render();});cards.push(button);
+  document.querySelectorAll(".counts .count").forEach(card=>{
+    const kind=card.classList.contains("all")?"all":card.classList.contains("urgent")?"urgent":card.classList.contains("suspected")?"suspected":card.classList.contains("caution")?"caution":"normal";
+    card.dataset.filter=kind;
+    cards.push(card);
   });
-  const filterInfo=document.createElement("div");filterInfo.className="filter-info";
-  /* [수정] 별도 전체 보기 버튼은 제외합니다. 선택한 카드를 다시 누르면 해제됩니다. */
-  filterInfo.innerHTML='<span role="status" aria-live="polite"></span>';
-  /* [수정] 강조 상태 안내는 화면에 추가하지 않습니다. */
 
   /* [2026.09.28 변경] 낙상 감지와 낙상 의심에만 병실별 WAV 또는 중앙 복도 MP3를 사용하며 종료 후 대기 없이 최대 5회 재생합니다.
      대기열은 경보별로 관리하며 한 번에 하나만 재생합니다. */
@@ -209,10 +170,24 @@ document.addEventListener("DOMContentLoaded", () => {
     jobs.set(number,job);queue.push(job);pump();
   }
 
-  // [09.13]수정내용: 병실 선택 처리를 전용 모듈에 위임하고 현재 화면 상태만 전달합니다.
-  function choose(number){corridorSelected=false;window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);}
+  // [2026.10.01 변경] 선택된 병실을 다시 누르면 선택을 해제해 오늘 기록 팝업을 닫습니다.
+  function choose(number){
+    if(selected===number&&!corridorSelected){
+      selected=null;
+      render();
+      return;
+    }
+    corridorSelected=false;
+    window.CareGuardRoomSelection.choose({get selected(){return selected;},set selected(value){selected=value;}}, number, render);
+  }
   // [2026.09.30 변경] 중앙 복도를 누르거나 키보드로 선택하면 하단 오늘의 기록을 복도 기준으로 갱신합니다.
   function chooseCorridor(){
+    if(corridorSelected){
+      corridorSelected=false;
+      selected=null;
+      render();
+      return;
+    }
     selected=null;
     corridorSelected=true;
     render();
@@ -227,14 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
     event.stopPropagation();
     chooseCorridor();
   });
-  /* [추가] 전체/상태 카드가 아닌 화면을 클릭하면 카드 선택 테두리를 제거합니다. */
-  document.addEventListener("click", event => {
-    if (event.target.closest(".counts .count")) return;
-    if (filter === "all" && !cardSelected) return;
-    filter = "all";
-    cardSelected=false;
-    render();
-  });
   /* [추가] 빈 배경 클릭 시 병실 선택을 해제합니다.
      버튼·입력칸·등록 창 조작은 선택을 유지합니다. 경보 상태는 변경하지 않습니다. */
   document.addEventListener("click",event=>{
@@ -244,15 +211,47 @@ document.addEventListener("DOMContentLoaded", () => {
     selected=null;
     corridorSelected=false;
     filter="all";
-    cardSelected=false;
     render();
   });
+  // [2026.10.01 변경] 하단 오늘의 기록 대신 선택한 병실·복도 옆에 작은 기록 팝업을 배치합니다.
+  function positionHistoryPopup(){
+    if(!historyCard)return;
+    if(selected===null&&!corridorSelected){
+      historyCard.hidden=true;
+      return;
+    }
+
+    const target=corridorSelected?corridorNode:nodes.get(selected);
+    if(!target){
+      historyCard.hidden=true;
+      return;
+    }
+
+    historyCard.hidden=false;
+    const targetRect=target.getBoundingClientRect();
+    const popupRect=historyCard.getBoundingClientRect();
+    const gap=10;
+    const viewportGap=12;
+    const canOpenRight=targetRect.right+gap+popupRect.width<=window.innerWidth-viewportGap;
+    const canOpenLeft=targetRect.left-gap-popupRect.width>=viewportGap;
+    let left=canOpenRight?targetRect.right+gap:canOpenLeft?targetRect.left-gap-popupRect.width:Math.min(Math.max(viewportGap,targetRect.left),window.innerWidth-popupRect.width-viewportGap);
+    let top=targetRect.top+targetRect.height/2-popupRect.height/2;
+
+    top=Math.min(Math.max(viewportGap,top),window.innerHeight-popupRect.height-viewportGap);
+    historyCard.style.left=`${left}px`;
+    historyCard.style.top=`${top}px`;
+    historyCard.classList.toggle("is-left",!canOpenRight&&canOpenLeft);
+  }
+
+  window.addEventListener("resize",positionHistoryPopup);
+  window.addEventListener("scroll",positionHistoryPopup,{passive:true});
+
   function renderRoomHistory(){
     const room=rooms.get(selected);
     // [2026.09.16] 고친 내용: 가로형 기록 카드에 병실·건수·최근 발생 시각을 표시하며 미선택 상태는 대시로 구분합니다.
     const now=Date.now();
     const counts=room ? window.CareGuardRoomStatus.todayCounts(room.number,now) : null;
-    // [2026.09.28 변경] 최근 기록은 사고(오경보가 아닌 낙상 감지, 대응 등록한 낙상 의심)만 띄우고, 없으면 비웁니다.
+    // [2026.09.28 변경] 최근 기록은 사고(오경보가 아닌 낙상 감지, 대응등록한 낙상 의심)만 띄우고, 없으면 비웁니다.
     const latest=room ? window.CareGuardRoomStatus.latestTodayIncident(room.number,now) : null;
     detail.innerHTML='<div class="history-heading"><strong class="history-room"></strong><span>오늘의 기록</span></div>'+
       '<div class="history-metric"><span class="room-history-urgent">낙상 감지</span><div><strong class="history-fall"></strong><span>건</span></div></div>'+
@@ -266,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const corridorCounts={urgent:0,suspected:0,caution:0};
     // [2026.09.28] 서버로 연 화면의 복도 최근 기록도 병실과 같은 기준(사고만, 없으면 비움)으로 오늘 받은 이벤트에서 고릅니다.
     // 테스트 알림(?testAlerts=1)과 Live Server 미리보기는 떠 있는(마지막) 복도 알림으로 같은 기준을 적용합니다:
-    // 오경보로 끄지 않은 낙상 감지, 또는 대응 등록한 낙상 의심만 보이고 그 밖에는 비웁니다.
+    // 오경보로 끄지 않은 낙상 감지, 또는 대응등록한 낙상 의심만 보이고 그 밖에는 비웁니다.
     const corridorFromHistory=serverMode&&!corridorAlert.test;
     const corridorAlertIncident=corridorAlert.dismissedEventId!==corridorAlert.eventId&&
       (corridorEventType==='urgent'||(corridorEventType==='suspected'&&corridorAlert.handledEventId===corridorAlert.eventId));
@@ -300,9 +299,32 @@ document.addEventListener("DOMContentLoaded", () => {
       time.dateTime=new Date(occurredAt).toISOString();
       time.textContent=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(occurredAt));
     }else time.hidden=true;
+    positionHistoryPopup();
   }
   function render(){
     const counts={all:rooms.size+1,normal:0,caution:0,suspected:0,urgent:0};
+    // [2026.10.01 변경] 상단 병동 안전 현황은 현재 상태가 아니라 오늘 하루 발생한 감지 이벤트 합계로 표시합니다.
+    const todaySummary={all:0,caution:0,suspected:0,urgent:0};
+    const now=Date.now();
+    for(const room of rooms.values()){
+      // [2026.10.01 변경] 하루 누적: 처리해도 줄지 않고, 오경보로 처리한 낙상 감지만 뺍니다(room-status.js todayDetectedCounts).
+      const roomCounts=window.CareGuardRoomStatus.todayDetectedCounts(room.number,now);
+      todaySummary.urgent+=roomCounts.urgent;
+      todaySummary.suspected+=roomCounts.suspected;
+      todaySummary.caution+=roomCounts.caution;
+    }
+    if(serverMode){
+      const today=window.CareGuardRoomStatus.dayKey(now);
+      for(const item of corridorHistory.values()){
+        if(window.CareGuardRoomStatus.dayKey(item.occurredAt)!==today)continue;
+        if(item.dismissed&&item.type!=="caution")continue;   // [2026.10.01 변경] 복도도 '확인'(오경보)으로 끈 낙상 감지·의심만 뺍니다.
+        todaySummary[item.type]++;
+      }
+    }else if(corridorAlert.status!=="normal"){
+      todaySummary[corridorAlert.eventType||corridorAlert.status]++;
+    }
+    // [2026.10.01 변경] 전체 카드는 오늘 이벤트 합계가 아니라 병실 17개와 중앙 복도 1개를 포함한 전체 위치 수를 표시합니다.
+    todaySummary.all=counts.all;
     // [2026.09.16] 고친 내용: 하단 카드는 renderRoomHistory에서 선택 병실의 오늘 기록만 표시합니다.
     for(const room of rooms.values()){
       counts[room.status]++;const node=nodes.get(room.number);
@@ -322,8 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
     corridorNode.setAttribute("aria-label",`${corridorAlert.location} · ${labels[corridorAlert.status]}`);
     corridorNode.classList.toggle("acknowledged",corridorAlert.acknowledged);
     corridorNode.setAttribute("aria-pressed",String(corridorSelected));
-    cards.forEach(card=>{card.querySelector("b").textContent=counts[card.dataset.filter];card.setAttribute("aria-pressed",String(cardSelected&&filter===card.dataset.filter));});
-    filterInfo.querySelector("span").textContent=filter==="all"?"전체 병실 표시 중":`${{normal:"정상 병실",caution:"침대 이탈",suspected:"낙상 의심",urgent:"낙상"}[filter]} 강조 중 · 낙상 병실은 항상 표시`;
+    cards.forEach(card=>{card.querySelector("b").textContent=todaySummary[card.dataset.filter]??0;});
     renderRoomHistory();
     alertPanel.querySelectorAll(".alert-card").forEach(el=>el.remove());
     for(const room of rooms.values()){
@@ -331,14 +352,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const card=document.createElement("article");card.className=`alert-card ${room.status}`;
       // [2026.09.28 변경] 관제 화면 범례와 같은 명칭으로 낙상 상태를 표시합니다.
       const level=room.status==="urgent"?"낙상":room.status==="suspected"?"의심":"주의";
-      // [2026.09.28 변경] 확정 낙상도 낙상 의심과 같이 확인·대응 등록을 모두 제공합니다(확인 = 오경보 처리).
+      // [2026.09.28 변경] 확정 낙상도 낙상 의심과 같이 확인·대응등록을 모두 제공합니다(확인 = 오경보 처리).
       const actionButtons=(room.status==="suspected"||room.status==="urgent")
-        ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응 등록</button></span>'
-        : `<button type="button" class="locate-room" data-action="${room.status==="urgent"?"respond":"confirm"}">${room.status==="urgent"?"대응 등록":"확인"}</button>`;
+        ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응등록</button></span>'
+        : `<button type="button" class="locate-room" data-action="${room.status==="urgent"?"respond":"confirm"}">${room.status==="urgent"?"대응등록":"확인"}</button>`;
       card.innerHTML=`<div class="alert-top"><strong>● ${level}</strong></div><h3>${room.number}호 <span class="event-label">${labels[room.status]}</span></h3><p>병실을 확인해주세요.</p>${actionButtons}`;
       // [2026.09.17] 추가한 내용: 가상 감지 카드에는 테스트 표시를 붙입니다.
       if(room.test)card.querySelector('.alert-top').insertAdjacentHTML('beforeend','<span class="test-alert-badge">테스트</span>');
-      /* [2026.09.17] 고친 내용: 알림 카드의 대응 등록 버튼은 해당 병실을 선택하고 등록 창을 바로 엽니다. */
+      /* [2026.09.17] 고친 내용: 알림 카드의 대응등록 버튼은 해당 병실을 선택하고 등록 창을 바로 엽니다. */
       card.querySelectorAll("button[data-action]").forEach(button=>{
         button.setAttribute("aria-pressed",String(selected===room.number));
         button.classList.toggle("hover-suppressed",suppressedHoverRoom===room.number);
@@ -346,7 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if(suppressedHoverRoom===room.number)suppressedHoverRoom=null;
           event.currentTarget.classList.remove("hover-suppressed");
         });
-        // [2026.09.22 변경] 낙상 의심은 확인과 대응 등록을 모두 제공하고 침대 이탈은 확인만 제공합니다.
+        // [2026.09.22 변경] 낙상 의심은 확인과 대응등록을 모두 제공하고 침대 이탈은 확인만 제공합니다.
         button.addEventListener("click",()=>{
           suppressedHoverRoom=room.number;
           if(button.dataset.action==="respond")openResponseRegistration(room.number);else acknowledgeAlert(room.number);
@@ -359,8 +380,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // [2026.09.28 변경] 복도 알림도 병실 알림과 같은 상태 명칭을 사용합니다.
       const level=corridorAlert.status==="urgent"?"낙상":corridorAlert.status==="suspected"?"의심":"주의";
       const actionButtons=(corridorAlert.status==="suspected"||corridorAlert.status==="urgent")
-        ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응 등록</button></span>'
-        : `<button type="button" class="locate-room" data-action="${corridorAlert.status==="urgent"?"respond":"confirm"}">${corridorAlert.status==="urgent"?"대응 등록":"확인"}</button>`;
+        ? '<span class="alert-card-actions"><button type="button" class="locate-room" data-action="confirm">확인</button><button type="button" class="locate-room" data-action="respond">대응등록</button></span>'
+        : `<button type="button" class="locate-room" data-action="${corridorAlert.status==="urgent"?"respond":"confirm"}">${corridorAlert.status==="urgent"?"대응등록":"확인"}</button>`;
       card.innerHTML=`<div class="alert-top"><strong>● ${level}</strong>${corridorAlert.test?'<span class="test-alert-badge">테스트</span>':''}</div><h3>${corridorAlert.location} <span class="event-label">${labels[corridorAlert.status]}</span></h3><p>복도 전체 알림</p>${actionButtons}`;
       // [2026.09.27] 복도 표시는 한 칸이라, 가려진 다른 공용 공간의 미처리 경보를 카드에 한 줄로 적어 둡니다.
       const hidden=hiddenCorridorAlerts();
@@ -387,15 +408,15 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCrossPageAlert();
   }
 
-  // [2026.09.22 변경] 낙상 의심과 침대 이탈은 조치기록 대상이 아니므로 별도 등록 창 없이 확인 처리합니다.
+  // [2026.09.22 변경] 낙상 의심과 침대 이탈은 조치 이력 대상이 아니므로 별도 등록 창 없이 확인 처리합니다.
   function acknowledgeAlert(location){
     const isCorridor=location==="corridor";
     const room=isCorridor?corridorAlert:rooms.get(Number(location));
-    // [2026.09.28 추가] 확정 낙상의 확인은 오경보 처리입니다(조치 기록에 남기고 모든 화면에서 끔).
+    // [2026.09.28 추가] 확정 낙상의 확인은 오경보 처리입니다(조치 이력에 남기고 모든 화면에서 끔).
     if(room&&room.status==="urgent"){confirmFalseAlarm(location);return;}
     if(!room||!["suspected","caution"].includes(room.status))return;
     const key=isCorridor?"corridor":Number(location);
-    // [2026.09.28 변경] 서버 경보는 조치 기록에 '확인'으로 남겨 같은 병동의 모든 화면에서 끕니다(아래 confirmServerAlerts).
+    // [2026.09.28 변경] 서버 경보는 조치 이력에 '확인'으로 남겨 같은 병동의 모든 화면에서 끕니다(아래 confirmServerAlerts).
     if(pendingByLocation.get(key)?.has(room.eventId)){confirmServerAlerts(location);return;}
     // 테스트 알림·Live Server 미리보기는 지금처럼 이 화면에서만 끕니다.
     cancelAudio(key);
@@ -408,8 +429,8 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   }
 
-  // [2026.09.28 추가] 낙상 의심·침대 이탈의 확인을 조치 기록에 남깁니다(대응 등록과 같은 API, DB 구조 그대로).
-  // 조치기록 화면은 확정 낙상만 보여 주므로 여기에 남긴 '확인'은 나오지 않고, 관리자 홈 통계와 이 화면의 오늘 기록은 '확인'을 빼고 셉니다(침대 이탈 건수는 그대로).
+  // [2026.09.28 추가] 낙상 의심·침대 이탈의 확인을 조치 이력에 남깁니다(대응등록과 같은 API, DB 구조 그대로).
+  // 조치 이력 화면은 확정 낙상만 보여 주므로 여기에 남긴 '확인'은 나오지 않고, 관리자 홈 통계와 이 화면의 오늘 기록은 '확인'을 빼고 셉니다(침대 이탈 건수는 그대로).
   // 지금처럼 같은 위치·같은 종류의 이전 경보까지 한 번에 확인하고, 그 경보들도 한 건씩 기록합니다.
   async function confirmServerAlerts(location){
     const isCorridor=location==="corridor";
@@ -453,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* [추가] 실제 SSE/WebSocket 수신부에서 아래 함수를 호출하세요.
      window.CareGuard.receiveFallEvent({ id: 서버의_고유_경보ID, room: 308 });
      동일 경보 ID 재수신은 무시합니다.
-     [2026.09.27 정정] 대응 등록 저장(saveResponse, POST /api/events/{id}/action)은 이 파일에 있고, 서버 접속은 server-events.js 에 있습니다.
+     [2026.09.27 정정] 대응등록 저장(saveResponse, POST /api/events/{id}/action)은 이 파일에 있고, 서버 접속은 server-events.js 에 있습니다.
      [2026.09.26 추가] 서버 알림은 receiveServerEvent·receiveServerEvents 가 종류를 나눠 아래 세 함수로 넘깁니다(접속은 server-events.js).
      restoring 동안(페이지를 열 때 불러온 이전 경보)은 상태만 되살리고 음성·상단 배너는 띄우지 않습니다. */
   let restoring=false;
@@ -548,10 +569,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return true;
   }
-  // [2026.09.28 추가] 확정 낙상 오경보 처리. 서버 경보는 대응 등록과 같은 API 로 조치 기록에 '오경보'를 남깁니다.
+  // [2026.09.28 추가] 확정 낙상 오경보 처리. 서버 경보는 대응등록과 같은 API 로 조치 이력에 '오경보'를 남깁니다.
   // 그러면 같은 병동의 모든 화면에서 꺼지고 새로 고쳐도 다시 뜨지 않습니다. DB 구조는 바꾸지 않습니다.
   // 같은 위치의 이전 확정 낙상은 진짜 낙상일 수 있으므로 함께 끄지 않고, 떠 있는 한 건만 끕니다.
-  // 낙상 의심·침대 이탈의 확인은 위 confirmServerAlerts 가 조치 기록에 '확인'으로 남깁니다.
+  // 낙상 의심·침대 이탈의 확인은 위 confirmServerAlerts 가 조치 이력에 '확인'으로 남깁니다.
   const FALSE_ALARM_BODY={patientName:"오경보",actionContent:"오경보 확인"};
   async function confirmFalseAlarm(location){
     const isCorridor=location==="corridor";
@@ -561,7 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const eventId=room.eventId;
     const place=isCorridor?(corridorAlert.location||"복도"):`${key}호`;
     if(!window.confirm(`${place} 낙상 경보를 오경보로 처리할까요?
-조치 기록에 '오경보'로 남고, 같은 병동의 모든 화면에서 알림이 꺼집니다.`))return;
+조치 이력에 '오경보'로 남고, 같은 병동의 모든 화면에서 알림이 꺼집니다.`))return;
     const serverAlert=serverMode&&Boolean(pendingByLocation.get(key)?.has(eventId));
     if(serverAlert){
       savingResponse=true;
@@ -589,7 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 처리된 경보를 목록에서 빼고, 같은 위치에 남은 경보가 있으면 다시 띄웁니다.
     const key=findPendingLocation(id);
     if(key!==null)resolvePending(key,id);
-    // 이 화면에서 같은 경보의 대응 등록 창을 쓰는 중이었다면 닫고 알려 줍니다.
+    // 이 화면에서 같은 경보의 대응등록 창을 쓰는 중이었다면 닫고 알려 줍니다.
     // 이 화면이 바로 그 조치를 저장하는 중(savingResponse)이면 자기 등록 알림이므로 건너뜁니다.
     // window.alert 는 확인을 누를 때까지 이 화면의 새 경보 수신을 멈추므로 쓰지 않고 아래 기록 칸에 문구만 씁니다.
     const closed=dialog.open&&registrationEvent===id&&!savingResponse;
@@ -701,7 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('alert-test-delayed').addEventListener('click',()=>{
       clearTimeout(delayedTestTimer);
       const location=locationSelect.value,type=typeSelect.value;
-      result.textContent='5초 후 테스트 알림이 발생합니다. 사용자 메뉴에서 조치기록으로 이동해 주세요.';
+      result.textContent='5초 후 테스트 알림이 발생합니다. 사용자 메뉴에서 조치 이력으로 이동해 주세요.';
       delayedTestTimer=setTimeout(()=>{delayedTestTimer=null;runTestAlert(location,type);},5000);
     });
     // [2026.09.17] 추가한 내용: 테스트가 바꾼 위치만 원상 복구하고 테스트 기록·반복 타이머를 제거합니다.
@@ -725,16 +746,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     window.addEventListener('pagehide',()=>clearTimeout(delayedTestTimer));
   }
-  // [2026.09.17] 고친 내용: 알림 카드에서만 대응 등록 창을 열어 범례 아래의 중복 버튼을 제거합니다.
+  // [2026.09.17] 고친 내용: 알림 카드에서만 대응등록 창을 열어 범례 아래의 중복 버튼을 제거합니다.
   // [2026.09.17] 고친 내용: 305호·312호와 복도 모두 클릭한 위치를 명시적으로 선택한 뒤 한 번만 화면을 갱신합니다.
   function openResponseRegistration(location){
     corridorSelected=location==='corridor';
     selected=corridorSelected?null:Number(location);
     const room=corridorSelected ? corridorAlert : rooms.get(selected);if(!room||room.status==="normal")return;
     registrationRoom=corridorSelected ? "corridor" : selected;registrationEvent=room.eventId;
-    // [2026.09.29 변경] 대응 등록 창을 여는 행위는 완료 처리가 아니므로 취소·ESC·창 닫기 후에도 음성과 점멸을 유지합니다.
-    soundInfo.textContent=`${corridorSelected ? corridorAlert.location : `${selected}호`} 대응 등록 입력 중 · 등록 완료 전까지 음성과 점멸이 유지됩니다.`;
-    form.reset();document.getElementById("response-title").textContent=`${labels[room.status]} 대응 등록`;
+    // [2026.09.29 변경] 대응등록 창을 여는 행위는 완료 처리가 아니므로 취소·ESC·창 닫기 후에도 음성과 점멸을 유지합니다.
+    soundInfo.textContent=`${corridorSelected ? corridorAlert.location : `${selected}호`} 대응등록 입력 중 · 등록 완료 전까지 음성과 점멸이 유지됩니다.`;
+    form.reset();document.getElementById("response-title").textContent=`${labels[room.status]} 대응등록`;
     const eventBox=document.getElementById("response-event");
     eventBox.textContent=`${room.test?'테스트 · ':''}${corridorSelected ? corridorAlert.location : `${selected}호`} · ${labels[room.status]}`;
     /* [추가] 침대 이탈 등록 창은 주의 색상 클래스를 적용합니다. */
@@ -742,7 +763,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // [2026.09.22 추가] 낙상 의심 대응 창도 보라색 상태로 구분합니다.
     eventBox.classList.toggle("suspected-event",room.status==="suspected");
     eventBox.classList.toggle("urgent-event",room.status==="urgent");
-    // [2026.09.17] 추가한 내용: 낙상 감지 대응 등록 창 전체를 긴급 테두리로 구분합니다.
+    // [2026.09.17] 추가한 내용: 낙상 감지 대응등록 창 전체를 긴급 테두리로 구분합니다.
     dialog.classList.toggle("urgent-response-dialog",room.status==="urgent");
     render();if(!dialog.open)dialog.showModal();
   }
@@ -768,10 +789,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if(response.status===409){window.alert("다른 직원이 이미 조치를 등록한 경보입니다. 경보를 해제합니다.");return "conflict";}
       if(response.ok)return "created";
       const reason={400:"환자 이름과 조치 내용을 확인해 주세요.",403:"등록 권한이 없거나 로그인 정보가 바뀌었습니다. 화면을 새로 고친 뒤 다시 등록해 주세요.",404:"감지 이벤트를 찾을 수 없습니다."}[response.status];
-      window.alert(reason||`조치 기록을 저장하지 못했습니다(${response.status}). 잠시 후 다시 등록해 주세요.`);
+      window.alert(reason||`조치 이력을 저장하지 못했습니다(${response.status}). 잠시 후 다시 등록해 주세요.`);
       return false;
     }catch{
-      window.alert("서버에 연결하지 못해 조치 기록을 저장하지 못했습니다. 연결을 확인한 뒤 다시 등록해 주세요.");
+      window.alert("서버에 연결하지 못해 조치 이력을 저장하지 못했습니다. 연결을 확인한 뒤 다시 등록해 주세요.");
       return false;
     }
   }
@@ -782,7 +803,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const key=registrationRoom==="corridor"?"corridor":registrationRoom;
     const serverAlert=serverMode&&Boolean(pendingByLocation.get(key)?.has(registrationEvent));
     /* [추가] 등록 창을 연 뒤 같은 병실에 새 경보가 오면 이전 등록으로 해제하지 않습니다. (테스트 알림·Live Server 미리보기) */
-    if(!serverAlert&&room.eventId!==registrationEvent){dialog.close();detail.textContent="새 낙상이 발생했습니다. 해당 병실의 대응 등록을 다시 열어주세요.";return;}
+    if(!serverAlert&&room.eventId!==registrationEvent){dialog.close();detail.textContent="새 낙상이 발생했습니다. 해당 병실의 대응등록을 다시 열어주세요.";return;}
     // [2026.09.26 추가] 서버 경보는 저장이 성공한 뒤에만 정상으로 바꿉니다. 테스트 알림과 Live Server 미리보기는 화면에만 반영합니다.
     if(serverAlert){
       const eventId=registrationEvent;
@@ -790,24 +811,24 @@ document.addEventListener("DOMContentLoaded", () => {
       let saved=false;
       try{saved=await saveResponse(eventId);}finally{savingResponse=false;responseSubmit.disabled=false;}
       if(!saved)return;
-      // [2026.09.28] 이 화면이 저장한 대응 등록은 바로 오늘 기록에 '조치됨'으로 표시합니다(대응 등록한 낙상 의심은 최근 기록에 뜸).
+      // [2026.09.28] 이 화면이 저장한 대응등록은 바로 오늘 기록에 '조치됨'으로 표시합니다(대응등록한 낙상 의심은 최근 기록에 뜸).
       // 409(다른 직원이 먼저 등록)는 서버 기록을 다시 불러와 맞춥니다.
       if(saved==="created")markHandledEvent(eventId,false);
       else reloadAfterConflict();
       resolvePending(key,eventId);
       dialog.close();render();
-      if(room.status!=="normal")detail.textContent="조치 기록을 저장했습니다. 같은 위치에 아직 처리하지 않은 경보가 있습니다.";
+      if(room.status!=="normal")detail.textContent="조치 이력을 저장했습니다. 같은 위치에 아직 처리하지 않은 경보가 있습니다.";
       return;
     }
     // 조치 내용 등록은 조치 완료로 처리합니다.
     markHandledEvent(registrationEvent,false);   // [2026.09.28] 이 화면의 오늘 기록에도 '조치됨'으로 표시합니다.
     if(registrationRoom==="corridor")corridorAlert.handledEventId=registrationEvent;   // 복도 최근 기록용(renderRoomHistory)
-    // [2026.09.29 변경] 로컬 테스트 경보도 실제 대응 등록이 저장된 경우에만 음성과 점멸을 종료합니다.
+    // [2026.09.29 변경] 로컬 테스트 경보도 실제 대응등록이 저장된 경우에만 음성과 점멸을 종료합니다.
     room.status="normal";room.acknowledged=false;cancelAudio(registrationRoom==="corridor" ? "corridor" : room.number);
     dialog.close();render();
   });
   const toggle=document.getElementById("profile-toggle"),menu=document.getElementById("header-menu-list");
-  /* [2026.09.17] 고친 내용: 사용자 프로필 메뉴에서 조치기록·비밀번호 변경·로그아웃을 제공합니다. */
+  /* [2026.09.17] 고친 내용: 사용자 프로필 메뉴에서 조치 이력·비밀번호 변경·로그아웃을 제공합니다. */
   function closeMenu(){menu.hidden=true;toggle.setAttribute("aria-expanded","false");}
   // [2026.09.17] 추가한 내용: 비밀번호 변경 링크를 팝업으로 열고 닫을 때 입력 문서를 제거합니다.
   const passwordLink=document.getElementById('password-change-open');
@@ -840,7 +861,7 @@ document.addEventListener("DOMContentLoaded", () => {
   toggle.addEventListener("click",()=>{menu.hidden=!menu.hidden;toggle.setAttribute("aria-expanded",String(!menu.hidden));});
   document.addEventListener("click",e=>{if(!e.target.closest(".header-menu"))closeMenu();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
-  // [2026.09.17] 추가한 내용: 조치기록을 같은 대시보드 문서에서 열어 전체화면을 유지합니다.
+  // [2026.09.17] 추가한 내용: 조치 이력을 같은 대시보드 문서에서 열어 전체화면을 유지합니다.
   const dashboardMain=document.getElementById("dashboard-main"),recordView=document.getElementById("dashboard-record-view"),recordFrame=document.getElementById("dashboard-record-frame"),recordOpen=document.getElementById("record-open");
   const dashboardBack=document.querySelector('.dashboard-back-link');
   function setDashboardView(view,updateAddress=true){
@@ -848,7 +869,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.dataset.dashboardView=view;
     dashboardMain.hidden=isRecords;recordView.hidden=!isRecords;
     if(isRecords&&!recordFrame.dataset.loaded){recordFrame.src=recordFrame.dataset.src;recordFrame.dataset.loaded="true";}
-    // [2026.09.27 추가] 이미 연 조치기록을 다시 보여 줄 때는 방금 등록한 조치가 보이도록 서버 기록을 다시 불러옵니다.
+    // [2026.09.27 추가] 이미 연 조치 이력을 다시 보여 줄 때는 방금 등록한 조치가 보이도록 서버 기록을 다시 불러옵니다.
     else if(isRecords)recordFrame.contentWindow?.CareGuardRecordPage?.reload();
     // [2026.09.17] 고친 내용: 화면 전환과 배너 숨김을 함께 적용하고 테스트 모드 주소를 유지합니다.
     if(updateAddress){
@@ -861,7 +882,7 @@ document.addEventListener("DOMContentLoaded", () => {
   dashboardBack.addEventListener('click',event=>{event.preventDefault();setDashboardView('dashboard');});
   recordOpen.addEventListener("click",event=>{event.preventDefault();event.stopPropagation();closeMenu();setDashboardView("records");});
   window.addEventListener("popstate",()=>setDashboardView(window.location.pathname.endsWith("/Record")?"records":"dashboard",false));
-  // [2026.09.17] 고친 내용: 서버가 전달한 화면 상태를 우선 적용해 조치기록 본문이 대시보드로 되돌아가지 않게 합니다.
+  // [2026.09.17] 고친 내용: 서버가 전달한 화면 상태를 우선 적용해 조치 이력 본문이 대시보드로 되돌아가지 않게 합니다.
   setDashboardView(document.body.dataset.dashboardView==="records"?"records":"dashboard",false);
   // [09.13]수정내용: 날짜 표시 설정에 현재 연도를 추가하여 대시보드에 연도와 날짜, 시간을 함께 표시한다.
   const updateClock=()=>{document.getElementById("clock").textContent=new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",weekday:"short",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());};
@@ -874,4 +895,3 @@ document.addEventListener("DOMContentLoaded", () => {
   },1000);render();
   window.addEventListener("pagehide",()=>{clearTimeout(noticeCollapseTimer);audioAllowed=false;for(const n of [...jobs.keys()])cancelAudio(n);audio.pause();});
 });
-

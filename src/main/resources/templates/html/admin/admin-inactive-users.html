@@ -12,18 +12,18 @@
     <title>간호사 비활성화 | 병동 통합 관제</title>
 
     <link rel="stylesheet"
-          href="../../../static/css/admin/dashboard.css?v=wide-admin-pages-20260929"
-          th:href="@{/css/admin/dashboard.css(v='wide-admin-pages-20260929')}">
+          href="../../../static/css/admin/dashboard.css?v=action-history-label-20261001"
+          th:href="@{/css/admin/dashboard.css(v='action-history-label-20261001')}">
 
     <link rel="stylesheet" href="../../../static/css/admin/inactive-users.css?v=inactive-row-text-20260920" th:href="@{/css/admin/inactive-users.css(v='inactive-row-text-20260920')}">
 
-<script src="../../../static/JS/admin/inactive-users.js?v=inactive-selected-20260920"
-        th:src="@{/JS/admin/inactive-users.js(v='inactive-selected-20260920')}"
+<script src="../../../static/JS/admin/inactive-users.js?v=action-history-label-20261001"
+        th:src="@{/JS/admin/inactive-users.js(v='action-history-label-20261001')}"
             defer></script>
     <!-- [2026.09.19] 추가: ALLEYES 로고와 서비스 이름의 공통 정렬 스타일입니다. -->
     <link rel="stylesheet" href="../../../static/css/alleyes-brand.css?v=admin-brand-align-20260920" th:href="@{/css/alleyes-brand.css(v='admin-brand-align-20260920')}">
     <!-- [2026.09.19] 공통 블루 그레이 테마를 마지막에 적용합니다. -->
-    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=checked-record-20260920" th:href="@{/css/alleyes-theme.css(v='checked-record-20260920')}">
+    <link rel="stylesheet" href="../../../static/css/alleyes-theme.css?v=topbar-font-up-20261001" th:href="@{/css/alleyes-theme.css(v='topbar-font-up-20261001')}">
     <!-- [2026.09.29 변경] 노트북·PC 공통 상단 메뉴 높이가 즉시 반영되도록 캐시 버전을 갱신합니다. -->
     <link rel="stylesheet" href="../../../static/css/admin/navigation.css?v=desktop-responsive-layout-20260929" th:href="@{/css/admin/navigation.css(v='desktop-responsive-layout-20260929')}">
 </head>
@@ -57,23 +57,13 @@
                     </a>
                 </div>
             </div>
-            <!-- [2026.09.17] 추가한 내용: 모든 관리자 화면에서 조치기록 메뉴를 같은 위치로 제공합니다. -->
-            <a href="../record/record.html" th:href="@{/admin/records}">조치기록</a>
+            <!-- [2026.09.17] 추가한 내용: 모든 관리자 화면에서 조치 이력 메뉴를 같은 위치로 제공합니다. -->
+            <a href="../record/record.html" th:href="@{/admin/records}">조치 이력</a>
         </nav>
     </div>
 
     <div class="admin-topbar-actions">
         <time id="admin-clock"></time>
-        <!-- [2026.09.16] 추가한 내용: 비활성화 직원관리에서도 시간 옆 버튼으로 전체화면을 전환합니다. -->
-        <button type="button" class="admin-fullscreen-toggle" id="admin-fullscreen-toggle"
-                aria-label="전체화면" aria-pressed="false" title="전체화면">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path class="admin-fullscreen-enter" d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>
-                <path class="admin-fullscreen-exit" d="M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3"/>
-            </svg>
-            <span id="admin-fullscreen-label">전체화면</span>
-        </button>
-
         <form action="/logout" th:action="@{/logout}" method="post">
             <button class="admin-logout" id="admin-logout" type="submit">로그아웃</button>
         </form>
@@ -201,8 +191,3 @@
         th:src="@{/JS/auth/session-history.js}"></script>
 </body>
 </html>
-
-
-
-
-
