@@ -307,7 +307,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const todaySummary={all:0,caution:0,suspected:0,urgent:0};
     const now=Date.now();
     for(const room of rooms.values()){
-      const roomCounts=window.CareGuardRoomStatus.todayCounts(room.number,now);
+      // [2026.10.01 변경] 하루 누적: 처리해도 줄지 않고, 오경보로 처리한 낙상 감지만 뺍니다(room-status.js todayDetectedCounts).
+      const roomCounts=window.CareGuardRoomStatus.todayDetectedCounts(room.number,now);
       todaySummary.urgent+=roomCounts.urgent;
       todaySummary.suspected+=roomCounts.suspected;
       todaySummary.caution+=roomCounts.caution;
@@ -316,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const today=window.CareGuardRoomStatus.dayKey(now);
       for(const item of corridorHistory.values()){
         if(window.CareGuardRoomStatus.dayKey(item.occurredAt)!==today)continue;
-        if(item.dismissed&&item.type!=="caution")continue;
+        if(item.dismissed&&item.type!=="caution")continue;   // [2026.10.01 변경] 복도도 '확인'(오경보)으로 끈 낙상 감지·의심만 뺍니다.
         todaySummary[item.type]++;
       }
     }else if(corridorAlert.status!=="normal"){

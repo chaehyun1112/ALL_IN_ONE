@@ -61,6 +61,19 @@ window.CareGuardRoomStatus = {
     }
     return counts;
   };
+  // [2026.10.01 추가] 상단 병동 안전 현황용 하루 누적: 오늘 감지된 이벤트를 모두 세고, '확인'(오경보)으로 끈 낙상 감지·낙상 의심만 뺍니다.
+  // [2026.10.01 저녁 변경] 낙상 의심의 '확인'도 오경보로 보고 뺍니다(사용자 요청). 침대 이탈은 대응 등록 버튼이 없어 '확인'이 오경보가 아니므로 계속 셉니다.
+  state.todayDetectedCounts = (number, now = Date.now()) => {
+    const counts = {urgent: 0, suspected: 0, caution: 0};
+    const today = state.dayKey(now);
+    for (const event of events.values()) {
+      if (event.room === Number(number) && state.dayKey(event.occurredAt) === today && event.occurredAt <= now &&
+          !(event.dismissed && event.type !== "caution")) {
+        counts[event.type]++;
+      }
+    }
+    return counts;
+  };
   // [2026.09.28 추가] '최근 기록'에 띄우는 사고: 오경보가 아닌 낙상 감지, 또는 대응 등록한 낙상 의심(관리자 홈 사고 현황과 같은 기준)
   state.isIncident = event => Boolean(event) && !event.dismissed &&
     (event.type === "urgent" || (event.type === "suspected" && event.handled));

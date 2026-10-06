@@ -142,13 +142,14 @@
   }
   /**
    * [2026.10.01 변경] 사고 영상 보관함은 조치 등록이 끝나 환자명이 확인된 영상만 표시합니다.
+   * [2026.10.01 저녁 변경] 이 서버에서 재생할 수 없는 영상(서버가 영상 주소를 비워 보냄)도 목록에서 뺍니다.
    */
   function hasPatientName(record) {
     return Boolean(patientNameText(record.patient));
   }
 
   function visibleAccidentRecords(records) {
-    return records.filter(hasPatientName);
+    return records.filter(record => hasPatientName(record) && hasVideo(record));
   }
 
   // [2026.09.29] 영상 보관함의 미확인·확인 완료는 관리자가 재생 버튼을 누른 적이 있는지(videoViewed)로 정합니다.
@@ -401,7 +402,18 @@
       return sameStatus && sameWard && sameDate && (!query || searchable.includes(query));
     });
     currentPage = 1;
-    clearPlayer();
+    // [2026.10.01 변경] 목록을 다시 불러오거나 필터를 바꿔도, 보던 영상이 새 목록에 있으면 재생 창을 닫지 않습니다.
+    const selected = filteredRecords.find(record => record.eventId === selectedEventId);
+    if (!selected) {
+      clearPlayer();
+    } else {
+      currentPage = Math.floor(filteredRecords.indexOf(selected) / recordsPerPage) + 1;
+      // 그사이 영상이 올라왔거나 보관 기간이 지나 지워졌으면 재생 창을 새 상태에 맞춥니다.
+      if (hasVideo(selected) === video.hidden) {
+        showVideo(selected);
+        return;
+      }
+    }
     renderCards();
   }
   async function reload() {
@@ -536,8 +548,99 @@
     applyFilters();
   });
 
+  // [2026.10.01 추가] 사고 영상 보관함을 열 때마다 현재 로그인한 관리자 비밀번호를 다시 확인합니다.
+  // 서버(AdminEventMediaController)도 확인 없이 영상 주소로 들어오면 403 으로 막고, 확인 뒤 10분이 지나면 다시 묻습니다.
+  const unlockDialog = document.querySelector("#admin-accident-unlock-dialog");
+  const unlockForm = document.querySelector("#admin-accident-unlock-form");
+  const unlockInput = document.querySelector("#admin-accident-unlock-input");
+  const unlockError = document.querySelector("#admin-accident-unlock-error");
+  const unlockCancel = document.querySelector("#admin-accident-unlock-cancel");
+  const isPreview = location.protocol === "file:" || location.port === "5500";
+  let unlockWaiting = null;
+
+  function askPassword() {
+    if (isPreview || !unlockDialog) return Promise.resolve(true);
+    if (unlockWaiting) return unlockWaiting;
+    unlockWaiting = new Promise(resolve => {
+      const finish = result => {
+        unlockForm.removeEventListener("submit", onSubmit);
+        unlockCancel.removeEventListener("click", onCancel);
+        unlockDialog.removeEventListener("cancel", onCancel);
+        if (unlockDialog.open) unlockDialog.close();
+        unlockInput.value = "";
+        unlockWaiting = null;
+        resolve(result);
+      };
+      const onCancel = event => { event.preventDefault(); finish(false); };
+      const onSubmit = async event => {
+        event.preventDefault();
+        if (!unlockInput.value) {
+          unlockError.textContent = "비밀번호를 입력해 주세요.";
+          return;
+        }
+        const headers = { "Content-Type": "application/json", Accept: "application/json" };
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+        try {
+          const response = await fetch("/api/admin/accident-videos/unlock", {
+            method: "POST",
+            credentials: "same-origin",
+            headers,
+            body: JSON.stringify({ password: unlockInput.value })
+          });
+          if (response.status === 204) {
+            finish(true);
+            return;
+          }
+          const body = await response.json().catch(() => ({}));
+          unlockError.textContent = body.message || "비밀번호를 확인하지 못했습니다.";
+          unlockInput.select();
+        } catch (error) {
+          unlockError.textContent = "서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+        }
+      };
+      unlockError.textContent = "";
+      unlockInput.value = "";
+      unlockForm.addEventListener("submit", onSubmit);
+      unlockCancel.addEventListener("click", onCancel);
+      unlockDialog.addEventListener("cancel", onCancel);
+      unlockDialog.showModal();
+      unlockInput.focus();
+    });
+    return unlockWaiting;
+  }
+
+  // 보관함을 열 때: 이전에 보던 목록과 영상을 먼저 비우고, 비밀번호가 맞으면 목록을 불러옵니다. 취소하면 관리자 홈으로 돌아갑니다.
+  async function openArchive() {
+    allRecords = [];
+    filteredRecords = [];
+    clearPlayer();
+    renderCards();
+    if (await askPassword()) {
+      reload();
+    } else {
+      location.href = "/admin";
+    }
+  }
+
+  // 확인 뒤 10분이 지나 영상이 403 으로 막히면 비밀번호를 다시 묻고, 맞으면 보던 영상을 다시 엽니다.
+  video.addEventListener("error", async () => {
+    const source = video.getAttribute("src");
+    if (!source || isPreview) return;
+    const response = await fetch(source, { method: "HEAD", credentials: "same-origin" }).catch(() => null);
+    if (response?.status !== 403) return;
+    const record = allRecords.find(item => item.eventId === selectedEventId);
+    if (await askPassword()) {
+      if (record) showVideo(record);
+    } else {
+      location.href = "/admin";
+    }
+  });
+
   // [2026.09.29 변경] 상단 메뉴의 사고 기록을 다시 선택하면 저장된 영상 목록을 최신 상태로 갱신합니다.
-  window.AdminAccidentRecords = { reload };
+  // [2026.10.01 변경] 열 때마다 비밀번호를 먼저 확인합니다.
+  window.AdminAccidentRecords = { reload: openArchive };
   updateDateLabel();
-  if (!page.hidden) reload();
+  if (!page.hidden) openArchive();
 })();

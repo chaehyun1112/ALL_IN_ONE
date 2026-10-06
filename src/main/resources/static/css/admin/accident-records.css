@@ -394,3 +394,29 @@ html:fullscreen .admin-accident-video-empty { height: auto; max-width: calc(clam
   opacity: .45;
   cursor: not-allowed;
 }
+
+/* [2026.10.01 추가] 화면 비율에 따라 영상이 네모 칸(.admin-accident-player) 아래로 넘치던 문제를 막습니다.
+   - 위 규칙은 폭 기준 16:9 에 최대 높이 440px 만 제한해서, 칸 높이가 그보다 작은 화면에서는 영상 아래가 칸 밖으로 나갔습니다.
+   - "선택한 사고 영상" 제목 줄은 숨기고(요소는 남김: 전체화면 크기 계산이 참조), 칸 안에 들어가는 가장 큰 16:9 크기로 맞춥니다.
+   - 전체화면(fullscreen)에서는 accident-records.js 가 따로 크기를 계산하므로 그대로 둡니다. */
+html:not(:fullscreen) .admin-accident-player {
+  container-type: size;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.admin-accident-player > header {
+  display: none;
+}
+
+html:not(:fullscreen) #admin-accident-video,
+html:not(:fullscreen) .admin-accident-video-empty {
+  width: min(100%, calc(100cqh * 16 / 9));
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  max-height: 100%;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  align-self: center;
+}
