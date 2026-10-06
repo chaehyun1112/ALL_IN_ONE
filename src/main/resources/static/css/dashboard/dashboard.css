@@ -2178,3 +2178,55 @@ body[data-dashboard-view="dashboard"] .alerts-panel .alert-card .locate-room[ari
 body[data-dashboard-view="dashboard"] .alerts-panel .alert-card .alert-card-actions .locate-room {
   font-weight: 400;
 }
+
+/* [2026.10.01 추가] PC 화면에서 대시보드를 화면 크기에 맞춰 한 화면에 담습니다(가로 넘침·세로 스크롤·아래 빈 공간 방지).
+   - 위 블록(10-01)의 의도는 "관제 도면과 알림 패널이 아래 여백 없이 같은 높이로 확장"인데, 나중에 불러오는 alleyes-theme.css 의
+     9/22 규칙(병실 줄 7.6:1·복도 12:1 고정 비율, 평면도 높이 auto, 패널 위쪽 정렬)이 이를 덮어써서
+     폭 1440~1680px 에서는 평면도가 오른쪽 알림 칸과 겹치고, 높이 800px 이하에서는 세로 스크롤이 생기거나 아래가 비었습니다.
+   - 기존 규칙은 그대로 두고, 여기서 #dashboard-main 을 붙여 우선순위를 높여 덮어씁니다.
+   - 병실 줄 : 복도 : 병실 줄 높이 비율은 위 블록과 같은 1 : .58 : 1 입니다. */
+@media (min-width: 1101px) {
+  body[data-dashboard-view="dashboard"] > main#dashboard-main {
+    height: calc(100dvh - var(--dashboard-header-height, 80px));
+    min-height: 0;
+  }
+
+  body[data-dashboard-view="dashboard"] > main#dashboard-main > .layout {
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  body[data-dashboard-view="dashboard"] > main#dashboard-main > .layout > .floor-panel,
+  body[data-dashboard-view="dashboard"] > main#dashboard-main > .layout > .side {
+    align-self: stretch;
+    height: auto;
+    min-height: 0;
+  }
+
+  body[data-dashboard-view="dashboard"] > main#dashboard-main > .layout > .floor-panel > .floor {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, .58fr) minmax(0, 1fr);
+  }
+
+  body[data-dashboard-view="dashboard"] > main#dashboard-main .floor .room-row,
+  body[data-dashboard-view="dashboard"] > main#dashboard-main .floor .corridor {
+    aspect-ratio: auto;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* 알림이 많아도 페이지가 길어지지 않도록, 알림 목록은 오른쪽 칸 안에서 스크롤합니다(alleyes-theme.css 9/22 주석의 의도). */
+  body[data-dashboard-view="dashboard"] > main#dashboard-main > .layout > .side > .alerts-panel {
+    min-height: 0;
+    height: 100%;
+  }
+
+  body[data-dashboard-view="dashboard"] > main#dashboard-main > .layout > .side > .alerts-panel .alert-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}

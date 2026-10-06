@@ -292,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // [2026.09.30 병합] 복도에 오늘 기록이 하나도 없으면 예진 브랜치의 안내 문구를, 있으면 기존 복도 최근 기록을 표시합니다.
     detail.querySelector('.history-event').textContent=corridorSelected
       ? (hasCorridorEvent ? corridorEventText : '오늘 감지된 이벤트가 없습니다.')
-      : latest ? labels[latest.type] : room ? '오늘 감지된 이벤트가 없습니다.' : '선택한 위치의 기록을 표시합니다.';
+      : latest ? labels[latest.type] : room ? '' : '선택한 위치의 기록을 표시합니다.';
     const time=detail.querySelector('time');
     const occurredAt=corridorSelected ? (!hasCorridorEvent ? null : corridorFromHistory ? corridorLatest?.occurredAt : corridorAlertIncident ? corridorAlert.occurredAt : null) : latest?.occurredAt;
     if(occurredAt){
@@ -307,7 +307,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const todaySummary={all:0,caution:0,suspected:0,urgent:0};
     const now=Date.now();
     for(const room of rooms.values()){
-      const roomCounts=window.CareGuardRoomStatus.todayCounts(room.number,now);
+      // [2026.10.01 변경] 하루 누적: 처리해도 줄지 않고, 오경보로 처리한 낙상 감지만 뺍니다(room-status.js todayDetectedCounts).
+      const roomCounts=window.CareGuardRoomStatus.todayDetectedCounts(room.number,now);
       todaySummary.urgent+=roomCounts.urgent;
       todaySummary.suspected+=roomCounts.suspected;
       todaySummary.caution+=roomCounts.caution;
@@ -316,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const today=window.CareGuardRoomStatus.dayKey(now);
       for(const item of corridorHistory.values()){
         if(window.CareGuardRoomStatus.dayKey(item.occurredAt)!==today)continue;
-        if(item.dismissed&&item.type!=="caution")continue;
+        if(item.dismissed&&item.type!=="caution")continue;   // [2026.10.01 변경] 복도도 '확인'(오경보)으로 끈 낙상 감지·의심만 뺍니다.
         todaySummary[item.type]++;
       }
     }else if(corridorAlert.status!=="normal"){

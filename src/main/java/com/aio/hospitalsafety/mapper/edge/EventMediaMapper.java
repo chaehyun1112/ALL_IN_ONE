@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * [2026.09.28] 낙상 이벤트 영상(TB_EVENT_MEDIA) 저장과 삭제에 쓰는 매퍼.
@@ -38,4 +39,10 @@ public interface EventMediaMapper {
 
     /** 영상 행을 지운다. 지운 행 수(0 또는 1) */
     int deleteEventMedia(@Param("eventId") String eventId);
+
+    /** [2026.10.01] 관리자가 확인한 지 retentionDays 일이 지난 READY 영상의 이벤트 ID */
+    List<String> findExpiredViewedEventIds(@Param("retentionDays") int retentionDays);
+
+    /** [2026.10.01] 보관 기간이 지난 영상을 FAILED(영상 없음)로 바꾸고 파일 이름을 비운다(확인 기록은 남긴다). 바꾼 행 수(0 또는 1) */
+    int markMediaExpired(@Param("eventId") String eventId);
 }

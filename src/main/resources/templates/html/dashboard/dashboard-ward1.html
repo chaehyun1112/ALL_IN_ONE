@@ -11,7 +11,7 @@
   <!-- [2026.09.17] 고친 내용: 화면 최상단 알림 배너 위치가 반영되도록 CSS 캐시 버전을 갱신합니다. -->
   <link
     rel="stylesheet"
-          href="../../../static/css/dashboard/dashboard.css?v=dashboard-alert-button-weight-20261001" th:href="@{/css/dashboard/dashboard.css(v='dashboard-alert-button-weight-20261001')}"
+          href="../../../static/css/dashboard/dashboard.css?v=fit-screen3-20261001" th:href="@{/css/dashboard/dashboard.css(v='fit-screen3-20261001')}"
   >
   <!-- [09.13]추가내용: 병실 상태와 선택 표시를 기능별 CSS 파일로 연결합니다. -->
   <link rel="stylesheet" href="../../../static/css/dashboard/room-status.css" th:href="@{/css/dashboard/room-status.css}">
@@ -333,11 +333,11 @@
 
   <!-- JS는 body가 모두 만들어진 후 실행합니다 -->
   <script src="../../../static/JS/dashboard/session.js?v=review-fix-20260927" th:src="@{/JS/dashboard/session.js(v='review-fix-20260927')}"></script>
-  <script src="../../../static/JS/dashboard/room-status.js?v=room-history-20260928" th:src="@{/JS/dashboard/room-status.js(v='room-history-20260928')}"></script>
+  <script src="../../../static/JS/dashboard/room-status.js?v=ward-summary-20261001b" th:src="@{/JS/dashboard/room-status.js(v='ward-summary-20261001b')}"></script>
   <script src="../../../static/JS/dashboard/room-selection.js" th:src="@{/JS/dashboard/room-selection.js}"></script>
   <!-- [2026.09.17] 고친 내용: 대응등록 수정본을 불러오도록 스크립트 캐시 버전을 갱신합니다. -->
   <!-- [2026.09.29 변경] 대응등록 취소·닫기 시 경보 음성과 점멸을 유지하도록 최신 스크립트를 불러옵니다. -->
-  <script src="../../../static/JS/dashboard/dashboard.js?v=action-history-label-20261001" th:src="@{/JS/dashboard/dashboard.js(v='action-history-label-20261001')}"></script>
+  <script src="../../../static/JS/dashboard/dashboard.js?v=ward-summary-20261001b" th:src="@{/JS/dashboard/dashboard.js(v='ward-summary-20261001b')}"></script>
   <!-- [2026.09.26 추가] 서버 감지 알림 연결(오늘 이벤트 불러오기 + 실시간 구독). dashboard.js 다음에 불러옵니다. -->
   <script src="../../../static/JS/dashboard/server-events.js?v=live-reload-20260929" th:src="@{/JS/dashboard/server-events.js(v='live-reload-20260929')}"></script>
 </body>

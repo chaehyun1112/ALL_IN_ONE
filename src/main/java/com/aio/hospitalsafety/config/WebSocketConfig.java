@@ -44,7 +44,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // HttpSessionHandshakeInterceptor: 접속할 때 로그인 세션 ID 를 연결 정보에 넣어 준다.
         var endpoint = registry.addEndpoint("/ws")
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
-        // [2026.09.27] 배포 서버(https://allinone.xos.kr)는 Apache 가 https 를 받아 이 서버로 넘긴다.
+        // [2026.09.27] 배포 서버는 Apache 가 https 를 받아 이 서버로 넘긴다.
         // 그러면 브라우저 주소(https)와 서버가 보는 주소(http)가 달라 '같은 사이트' 검사에서 접속이 거절(403)될 수 있다.
         // 환경변수 WS_ALLOWED_ORIGINS 에 주소를 적으면 그 주소에서 온 접속도 허락한다. 비워 두면 지금처럼 같은 사이트만.
         if (allowedOrigins.length > 0) {
