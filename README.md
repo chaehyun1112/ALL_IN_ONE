@@ -116,7 +116,8 @@ final_presentation/                  최종 발표 자료
 
 ## 📄 프로젝트 상세 자료
 
-- [간호사·관리자 화면 흐름도](<img width="995" height="445" alt="image" src="https://github.com/user-attachments/assets/1e7411cb-f8ee-4433-95dc-d6903ca3d8c2" />)
+- [간호사·관리자 화면 흐름도]
+  <img width="995" height="445" alt="image" src="https://github.com/user-attachments/assets/1e7411cb-f8ee-4433-95dc-d6903ca3d8c2" />
 - [최종 발표 자료](https://www.miricanvas.com/v2/ko/design2/c6253190-c941-4beb-a4f8-5f8550984038)
 - [배포 링크](https://allinone.xos.kr)
 
