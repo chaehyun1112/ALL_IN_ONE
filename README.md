@@ -118,7 +118,7 @@ final_presentation/                  최종 발표 자료
 
 - [간호사·관리자 화면 흐름도](application/miri-canvas-node)
 - [최종 발표 자료](https://www.miricanvas.com/v2/ko/design2/c6253190-c941-4beb-a4f8-5f8550984038)
-- [배포 링크].(https://allinone.xos.kr)
+- [배포 링크](https://allinone.xos.kr)
 
 ## 📊 프로젝트 결과
 
